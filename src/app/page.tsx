@@ -57,7 +57,7 @@ export default function Home() {
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>;
   }
-
+  
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
       <div className="text-center">
@@ -65,19 +65,19 @@ export default function Home() {
         {session ? (
           <div>
             <p className="mb-4">Welcome, {session.user.email}</p>
-
+            
             {isSubscribed && (
                <Link href="/anime" className="inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md font-semibold mb-4">
                  Watch Anime
                </Link>
             )}
-
+            
             {isAdmin && (
               <Link href="/admin" className="inline-block px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold mb-4 ml-2">
                 Admin Dashboard
               </Link>
             )}
-
+            
             <br />
             <button
               onClick={signOut}
@@ -89,14 +89,15 @@ export default function Home() {
         ) : (
           <div>
             <p className="mb-4">Please sign in to continue.</p>
-            <Link href="/api/auth/signin" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
-                onClick={(e) => {
-                    e.preventDefault();
+            {/* This was a Link, now it's a button. This fixes the build error. */}
+            <button 
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
+                onClick={() => {
                     supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
                 }}
             >
               Sign in with Google
-            </Link>
+            </button>
           </div>
         )}
       </div>
