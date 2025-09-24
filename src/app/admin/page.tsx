@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-// import { Session, User } from '@supabase/supabase-js'; // <--- ဒီမှာ Session กับ User ကို ဖယ်လိုက်ပါပြီ။
 import Modal from 'react-modal';
 
 // Define a type for our profile data
@@ -155,14 +154,14 @@ export default function AdminDashboard() {
         onRequestClose={closeModal}
         style={customModalStyles}
         contentLabel="Edit User Profile"
-        appElement={typeof window !== 'undefined' ? document.getElementById('__next') : undefined}
+        // appElement={...}  <-- Error တက်စေတဲ့ ဒီတစ်ကြောင်းကို လုံးဝဖယ်ရှားလိုက်ပါပြီ
       >
         <h2 className="text-xl font-bold mb-4">Edit: {selectedProfile?.email}</h2>
         <div className="mb-4">
           <label className="block mb-2">Subscription Status</label>
           <select 
             value={newStatus} 
-            onChange={(e) => setNewStatus(e.target.value as Profile['subscription_status'])} // <--- ဒီနေရာက `as any` ကို ပြင်လိုက်ပါပြီ။
+            onChange={(e) => setNewStatus(e.target.value as Profile['subscription_status'])}
             className="w-full p-2 rounded bg-gray-700 border border-gray-600"
           >
             <option value="inactive">Inactive</option>
