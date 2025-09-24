@@ -3,42 +3,40 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
+import Link from 'next/link'; // Import Link
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false); // State to check for admin role
 
   useEffect(() => {
-    // Check for an existing session when the component mounts
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      // Check for admin role when session is loaded
+      const userRoles = session?.user?.app_metadata?.roles || [];
+      setIsAdmin(userRoles.includes('admin'));
     });
 
-    // Listen for changes in authentication state (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      // Check for admin role on auth state change
+      const userRoles = session?.user?.app_metadata?.roles || [];
+      setIsAdmin(userRoles.includes('admin'));
     });
 
-    // Cleanup subscription on unmount
     return () => subscription.unsubscribe();
   }, []);
 
   async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin, // Redirect back to the home page after login
-      },
+      options: { redirectTo: window.location.origin },
     });
-    if (error) {
-      console.error('Error logging in:', error.message);
-    }
   }
 
   async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error logging out:', error.message);
-    }
+    await supabase.auth.signOut();
+    setIsAdmin(false); // Reset admin state on logout
   }
 
   return (
@@ -48,6 +46,13 @@ export default function Home() {
         {session ? (
           <div>
             <p className="mb-4">Welcome, {session.user.email}</p>
+            {/* Conditionally render the admin link */}
+            {isAdmin && (
+              <Link href="/admin" className="inline-block px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold mb-4">
+                Go to Admin Dashboard
+              </Link>
+            )}
+            <br />
             <button
               onClick={signOut}
               className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold"
