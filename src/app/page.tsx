@@ -3,40 +3,59 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link';
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false); // State to check for admin role
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false); // New state for subscription
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const setupUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      // Check for admin role when session is loaded
-      const userRoles = session?.user?.app_metadata?.roles || [];
-      setIsAdmin(userRoles.includes('admin'));
-    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      // Check for admin role on auth state change
-      const userRoles = session?.user?.app_metadata?.roles || [];
-      setIsAdmin(userRoles.includes('admin'));
+      if (session) {
+        // Check for admin role
+        const userRoles = session.user.app_metadata?.roles || [];
+        setIsAdmin(userRoles.includes('admin'));
+
+        // Check for active subscription
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('subscription_status, subscription_expires_at')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          const isActive = profile.subscription_status === 'active';
+          const isNotExpired = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
+          setIsSubscribed(isActive && isNotExpired);
+        }
+      }
+      setLoading(false);
+    };
+
+    setupUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      // Re-run setup on auth change
+      setupUser();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
-  }
-
   async function signOut() {
     await supabase.auth.signOut();
-    setIsAdmin(false); // Reset admin state on logout
+    setIsAdmin(false);
+    setIsSubscribed(false);
+    setSession(null);
+  }
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>;
   }
 
   return (
@@ -46,16 +65,23 @@ export default function Home() {
         {session ? (
           <div>
             <p className="mb-4">Welcome, {session.user.email}</p>
-            {/* Conditionally render the admin link */}
+
+            {isSubscribed && (
+               <Link href="/anime" className="inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md font-semibold mb-4">
+                 Watch Anime
+               </Link>
+            )}
+
             {isAdmin && (
-              <Link href="/admin" className="inline-block px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold mb-4">
-                Go to Admin Dashboard
+              <Link href="/admin" className="inline-block px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold mb-4 ml-2">
+                Admin Dashboard
               </Link>
             )}
+
             <br />
             <button
               onClick={signOut}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold"
+              className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold mt-4"
             >
               Sign Out
             </button>
@@ -63,12 +89,14 @@ export default function Home() {
         ) : (
           <div>
             <p className="mb-4">Please sign in to continue.</p>
-            <button
-              onClick={signInWithGoogle}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
+            <Link href="/api/auth/signin" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
+                onClick={(e) => {
+                    e.preventDefault();
+                    supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+                }}
             >
               Sign in with Google
-            </button>
+            </Link>
           </div>
         )}
       </div>
