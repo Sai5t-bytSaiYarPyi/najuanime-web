@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { Session, User } from '@supabase/supabase-js';
+// import { Session, User } from '@supabase/supabase-js'; // <--- ဒီမှာ Session กับ User ကို ဖယ်လိုက်ပါပြီ။
 import Modal from 'react-modal';
 
 // Define a type for our profile data
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   // State for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [newStatus, setNewStatus] = useState<'active' | 'inactive' | 'trialing' | 'expired'>('inactive');
+  const [newStatus, setNewStatus] = useState<Profile['subscription_status']>('inactive');
   const [newExpiryDate, setNewExpiryDate] = useState('');
 
   useEffect(() => {
@@ -88,9 +88,9 @@ export default function AdminDashboard() {
 
     const { error } = await supabase
       .from('profiles')
-      .update({ 
+      .update({
         subscription_status: newStatus,
-        subscription_expires_at: newExpiryDate || null 
+        subscription_expires_at: newExpiryDate || null
       })
       .eq('id', selectedProfile.id);
 
@@ -160,7 +160,11 @@ export default function AdminDashboard() {
         <h2 className="text-xl font-bold mb-4">Edit: {selectedProfile?.email}</h2>
         <div className="mb-4">
           <label className="block mb-2">Subscription Status</label>
-          <select value={newStatus} onChange={(e) => setNewStatus(e.target.value as any)} className="w-full p-2 rounded bg-gray-700 border border-gray-600">
+          <select 
+            value={newStatus} 
+            onChange={(e) => setNewStatus(e.target.value as Profile['subscription_status'])} // <--- ဒီနေရာက `as any` ကို ပြင်လိုက်ပါပြီ။
+            className="w-full p-2 rounded bg-gray-700 border border-gray-600"
+          >
             <option value="inactive">Inactive</option>
             <option value="active">Active</option>
             <option value="trialing">Trialing</option>
