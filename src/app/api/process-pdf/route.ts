@@ -1,8 +1,8 @@
 // src/app/api/process-pdf/route.ts
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import { Canvas, createCanvas } from 'canvas';
+import { getDocument, GlobalWorkerOptions, PDFPageProxy } from 'pdfjs-dist';
+import { Canvas, createCanvas, CanvasRenderingContext2D, Image } from 'canvas';
 import path from 'path';
 
 // This is required for pdfjs-dist to work in a Node.js environment
@@ -14,9 +14,16 @@ GlobalWorkerOptions.workerSrc = path.join(
   'pdf.worker.mjs'
 );
 
-// Custom Canvas factory to integrate with pdfjs-dist
+// --- START OF FIX ---
+// Define a proper type for the canvas object
+interface CanvasAndContext {
+  canvas: Canvas | null;
+  context: CanvasRenderingContext2D | null;
+}
+
+// Custom Canvas factory with proper typing
 class NodeCanvasFactory {
-  create(width: number, height: number) {
+  create(width: number, height: number): CanvasAndContext {
     const canvas = createCanvas(width, height);
     const context = canvas.getContext('2d');
     return {
@@ -25,18 +32,24 @@ class NodeCanvasFactory {
     };
   }
 
-  reset(canvasAndContext: any, width: number, height: number) {
-    canvasAndContext.canvas.width = width;
-    canvasAndContext.canvas.height = height;
+  reset(canvasAndContext: CanvasAndContext, width: number, height: number) {
+    if (canvasAndContext.canvas) {
+        canvasAndContext.canvas.width = width;
+        canvasAndContext.canvas.height = height;
+    }
   }
 
-  destroy(canvasAndContext: any) {
-    canvasAndContext.canvas.width = 0;
-    canvasAndContext.canvas.height = 0;
+  destroy(canvasAndContext: CanvasAndContext) {
+    if (canvasAndContext.canvas) {
+        canvasAndContext.canvas.width = 0;
+        canvasAndContext.canvas.height = 0;
+    }
     canvasAndContext.canvas = null;
     canvasAndContext.context = null;
   }
 }
+// --- END OF FIX ---
+
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -66,12 +79,12 @@ export async function POST(request: Request) {
     const imageUrls: string[] = [];
 
     for (let i = 1; i <= pdfDocument.numPages; i++) {
-      const page = await pdfDocument.getPage(i);
+      const page: PDFPageProxy = await pdfDocument.getPage(i);
       const viewport = page.getViewport({ scale: 1.5 });
       const canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
       
       await page.render({
-        canvasContext: canvasAndContext.context as any, // <--- THIS IS THE FIX
+        canvasContext: canvasAndContext.context as any, // This 'as any' is still needed for library compatibility
         viewport: viewport,
         canvasFactory: canvasFactory,
       }).promise;
