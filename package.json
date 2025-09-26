@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^2.57.4",
     "@types/react-modal": "^3.16.3",
     "next": "15.5.4",
+    "pdf-poppler": "^0.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-modal": "^3.16.3"
