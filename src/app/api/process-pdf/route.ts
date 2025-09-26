@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import { Canvas, createCanvas, Image } from 'canvas';
+import { Canvas, createCanvas } from 'canvas';
 import path from 'path';
 
 // This is required for pdfjs-dist to work in a Node.js environment
@@ -57,24 +57,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Not an insert event or no PDF URL.' });
     }
 
-    // 1. Download PDF to a buffer
     const response = await fetch(newChapter.pdf_url);
     if (!response.ok) throw new Error('Failed to fetch PDF from URL');
     const pdfBuffer = await response.arrayBuffer();
 
-    // 2. Process PDF with pdfjs-dist
     const pdfDocument = await getDocument({ data: pdfBuffer }).promise;
     const canvasFactory = new NodeCanvasFactory();
     const imageUrls: string[] = [];
 
-    // 3. Loop through each page, render to canvas, and upload
     for (let i = 1; i <= pdfDocument.numPages; i++) {
       const page = await pdfDocument.getPage(i);
-      const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale for resolution
+      const viewport = page.getViewport({ scale: 1.5 });
       const canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
       
       await page.render({
-        canvasContext: canvasAndContext.context,
+        canvasContext: canvasAndContext.context as any, // <--- THIS IS THE FIX
         viewport: viewport,
         canvasFactory: canvasFactory,
       }).promise;
@@ -92,11 +89,9 @@ export async function POST(request: Request) {
       const { data: urlData } = supabaseAdmin.storage.from('manhwa-images').getPublicUrl(storagePath);
       imageUrls.push(urlData.publicUrl);
 
-      // Clean up canvas to free memory
       canvasFactory.destroy(canvasAndContext);
     }
 
-    // 4. Update the database record
     const { error: updateError } = await supabaseAdmin
       .from('manhwa_chapters')
       .update({ image_urls: imageUrls })
@@ -113,7 +108,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Add this config to prevent Next.js from parsing the request body
 export const config = {
   api: {
     bodyParser: false,
