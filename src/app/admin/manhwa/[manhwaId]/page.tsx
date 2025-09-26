@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react'; // useCallback ကို import လုပ်ပါ
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -31,25 +31,21 @@ export default function ManageChaptersPage() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // --- THIS IS THE FIX FOR THE WARNING ---
   const fetchData = useCallback(async () => {
-    // Fetch manhwa details
+    if (!manhwaId) return;
+    setLoading(true);
     const { data: manhwaData } = await supabase.from('manhwa').select('id, title').eq('id', manhwaId).single();
     setManhwa(manhwaData);
 
-    // Fetch chapters list
     const { data: chaptersData } = await supabase.from('manhwa_chapters').select('*').eq('manhwa_id', manhwaId).order('display_order', { ascending: true });
     setChapters(chaptersData || []);
     
     setLoading(false);
-  }, [manhwaId]); // Add manhwaId as a dependency for useCallback
+  }, [manhwaId]);
 
   useEffect(() => {
-    if (manhwaId) {
-      fetchData();
-    }
-  }, [manhwaId, fetchData]); // Add fetchData to the dependency array
-  // --- END OF FIX ---
+    fetchData();
+  }, [fetchData]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -69,10 +65,17 @@ export default function ManageChaptersPage() {
     
     setIsUploading(true);
 
-    const fileName = `${Date.now()}-${pdfFile.name.replace(/\s+/g, '-')}`;
+    // --- START OF FIX ---
+    // Sanitize the file name to remove special characters that Supabase Storage dislikes.
+    const sanitizedFileName = pdfFile.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.\-_]/g, '');
+    const fileName = `${Date.now()}-${sanitizedFileName}`;
+    // --- END OF FIX ---
+    
     const filePath = `${manhwaId}/${fileName}`;
     
-    const { error: uploadError } = await supabase.storage.from('manhwa-pdfs').upload(filePath, pdfFile);
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('manhwa-pdfs')
+      .upload(filePath, pdfFile);
 
     if (uploadError) {
       alert('Error uploading file: ' + uploadError.message);
@@ -80,7 +83,9 @@ export default function ManageChaptersPage() {
       return;
     }
 
-    const { data: urlData } = supabase.storage.from('manhwa-pdfs').getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage
+      .from('manhwa-pdfs')
+      .getPublicUrl(uploadData.path);
 
     if (!urlData.publicUrl) {
         alert('Could not get public URL for the uploaded file.');
@@ -105,19 +110,24 @@ export default function ManageChaptersPage() {
       await supabase.storage.from('manhwa-pdfs').remove([filePath]);
     } else {
       alert('Chapter uploaded successfully! Processing will start in the background.');
-      fetchData(); // Refresh the chapter list
+      // We don't call fetchData() immediately, we wait for the webhook to trigger a refresh later
+      // For now, let's clear the form.
       setChapterNumber('');
       setChapterTitle('');
       setPdfFile(null);
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
+      // Let's refetch data after a small delay to give the webhook a chance to start
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
     }
 
     setIsUploading(false);
   };
   
-  // The rest of the JSX remains the same
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
+  
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <Link href="/admin/manhwa" className="text-blue-400 hover:underline mb-6 block">&larr; Back to Manhwa List</Link>
