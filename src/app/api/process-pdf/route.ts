@@ -26,7 +26,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Not an insert event or no PDF URL.' });
     }
 
-    // 1. Download the PDF from storage
     const response = await fetch(newChapter.pdf_url);
     if (!response.ok) throw new Error('Failed to fetch PDF');
     const pdfBuffer = Buffer.from(await response.arrayBuffer());
@@ -35,13 +34,12 @@ export async function POST(request: Request) {
     const pdfPath = path.join(tempDir, 'source.pdf');
     await fs.writeFile(pdfPath, pdfBuffer);
 
-    // 2. Convert PDF to images
     const poppler = new Poppler();
     const options = {
       pngFile: true,
       out_dir: tempDir,
       out_prefix: 'page',
-      scale_to: 1200, // Image width
+      scale_to: 1200,
     };
     await poppler.pdfToImg(pdfPath, options);
 
@@ -52,7 +50,6 @@ export async function POST(request: Request) {
         return numA - numB;
     });
 
-    // 3. Upload images to a new storage bucket
     const imageUrls: string[] = [];
     for (const imageFile of imageFiles) {
         const imagePath = path.join(tempDir, imageFile);
@@ -69,7 +66,6 @@ export async function POST(request: Request) {
         imageUrls.push(urlData.publicUrl);
     }
     
-    // 4. Update the database with the new image URLs
     const { error: updateError } = await supabaseAdmin
       .from('manhwa_chapters')
       .update({ image_urls: imageUrls })
@@ -77,13 +73,13 @@ export async function POST(request: Request) {
 
     if (updateError) throw new Error(`Failed to update chapter with image URLs: ${updateError.message}`);
 
-    // Clean up temporary files
     await fs.rm(tempDir, { recursive: true, force: true });
     
     return NextResponse.json({ message: 'Processing complete', imageUrls });
 
-  } catch (error: any) {
+  } catch (error: unknown) { // <--- THIS IS THE FIX (from 'any' to 'unknown')
     console.error('Error processing PDF:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

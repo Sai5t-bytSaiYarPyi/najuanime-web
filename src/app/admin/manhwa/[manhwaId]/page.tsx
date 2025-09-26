@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // useCallback ကို import လုပ်ပါ
 import { supabase } from '../../../../lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -25,14 +25,14 @@ export default function ManageChaptersPage() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // State for new chapter upload form
+  // Form state
   const [chapterNumber, setChapterNumber] = useState('');
   const [chapterTitle, setChapterTitle] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Re-usable fetch function
-  const fetchData = async () => {
+  // --- THIS IS THE FIX FOR THE WARNING ---
+  const fetchData = useCallback(async () => {
     // Fetch manhwa details
     const { data: manhwaData } = await supabase.from('manhwa').select('id, title').eq('id', manhwaId).single();
     setManhwa(manhwaData);
@@ -42,13 +42,14 @@ export default function ManageChaptersPage() {
     setChapters(chaptersData || []);
     
     setLoading(false);
-  };
+  }, [manhwaId]); // Add manhwaId as a dependency for useCallback
 
   useEffect(() => {
     if (manhwaId) {
       fetchData();
     }
-  }, [manhwaId]);
+  }, [manhwaId, fetchData]); // Add fetchData to the dependency array
+  // --- END OF FIX ---
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -56,7 +57,7 @@ export default function ManageChaptersPage() {
       setPdfFile(file);
     } else {
       alert('Please select a PDF file.');
-      event.target.value = ''; // Clear the input
+      event.target.value = '';
     }
   };
 
@@ -68,7 +69,7 @@ export default function ManageChaptersPage() {
     
     setIsUploading(true);
 
-    const fileName = `${Date.now()}-${pdfFile.name.replace(/\s+/g, '-')}`; // Sanitize file name
+    const fileName = `${Date.now()}-${pdfFile.name.replace(/\s+/g, '-')}`;
     const filePath = `${manhwaId}/${fileName}`;
     
     const { error: uploadError } = await supabase.storage.from('manhwa-pdfs').upload(filePath, pdfFile);
@@ -90,24 +91,21 @@ export default function ManageChaptersPage() {
     const highestOrder = chapters.reduce((max, ch) => ch.display_order > max ? ch.display_order : max, 0);
     const newDisplayOrder = highestOrder + 1;
 
-    // The FIX is here: we add a default empty array for image_urls
-    const { error: insertError } = await supabase
-      .from('manhwa_chapters')
-      .insert({
+    const { error: insertError } = await supabase.from('manhwa_chapters').insert({
         manhwa_id: manhwaId,
         chapter_number: parseFloat(chapterNumber),
         title: chapterTitle || null,
         pdf_url: urlData.publicUrl,
         display_order: newDisplayOrder,
-        image_urls: [], // <--- THIS IS THE FIX
-      });
+        image_urls: [],
+    });
 
     if (insertError) {
       alert('Error saving chapter details: ' + insertError.message);
       await supabase.storage.from('manhwa-pdfs').remove([filePath]);
     } else {
-      alert('Chapter uploaded successfully!');
-      fetchData();
+      alert('Chapter uploaded successfully! Processing will start in the background.');
+      fetchData(); // Refresh the chapter list
       setChapterNumber('');
       setChapterTitle('');
       setPdfFile(null);
@@ -117,19 +115,15 @@ export default function ManageChaptersPage() {
 
     setIsUploading(false);
   };
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
-  }
-
+  
+  // The rest of the JSX remains the same
+  if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <Link href="/admin/manhwa" className="text-blue-400 hover:underline mb-6 block">&larr; Back to Manhwa List</Link>
       <h1 className="text-3xl font-bold mb-2">Manage Chapters for: <span className="text-green-400">{manhwa?.title}</span></h1>
       <p className="text-gray-400 mb-8">Here you can upload, reorder, and delete chapters.</p>
-
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Upload Form */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Chapter</h2>
           <div className="space-y-4">
@@ -139,7 +133,6 @@ export default function ManageChaptersPage() {
             <button onClick={handleUpload} disabled={isUploading || !pdfFile || !chapterNumber} className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-md font-semibold">{isUploading ? 'Uploading...' : 'Upload Chapter'}</button>
           </div>
         </div>
-        {/* Chapter List */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Existing Chapters</h2>
           <div className="space-y-2">
