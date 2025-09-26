@@ -2,10 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getDocument, GlobalWorkerOptions, PDFPageProxy } from 'pdfjs-dist';
-import { Canvas, createCanvas, CanvasRenderingContext2D, Image } from 'canvas';
+import { Canvas, createCanvas, CanvasRenderingContext2D } from 'canvas';
 import path from 'path';
 
-// This is required for pdfjs-dist to work in a Node.js environment
 GlobalWorkerOptions.workerSrc = path.join(
   process.cwd(),
   'node_modules',
@@ -14,18 +13,16 @@ GlobalWorkerOptions.workerSrc = path.join(
   'pdf.worker.mjs'
 );
 
-// --- START OF FIX ---
-// Define a proper type for the canvas object
 interface CanvasAndContext {
   canvas: Canvas | null;
   context: CanvasRenderingContext2D | null;
 }
 
-// Custom Canvas factory with proper typing
 class NodeCanvasFactory {
   create(width: number, height: number): CanvasAndContext {
     const canvas = createCanvas(width, height);
-    const context = canvas.getContext('2d');
+    // THIS IS THE FIX: Changed 'd' to '2d'
+    const context = canvas.getContext('2d'); 
     return {
       canvas,
       context,
@@ -48,8 +45,6 @@ class NodeCanvasFactory {
     canvasAndContext.context = null;
   }
 }
-// --- END OF FIX ---
-
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -67,7 +62,7 @@ export async function POST(request: Request) {
     const newChapter = payload.record;
 
     if (payload.type !== 'INSERT' || !newChapter || !newChapter.pdf_url) {
-      return NextResponse.json({ message: 'Not an insert event or no PDF URL.' });
+      return NextResponse.json({ message: 'Request is not a new chapter insert.' });
     }
 
     const response = await fetch(newChapter.pdf_url);
@@ -84,7 +79,7 @@ export async function POST(request: Request) {
       const canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
       
       await page.render({
-        canvasContext: canvasAndContext.context as any, // This 'as any' is still needed for library compatibility
+        canvasContext: canvasAndContext.context as any,
         viewport: viewport,
         canvasFactory: canvasFactory,
       }).promise;
@@ -120,9 +115,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
