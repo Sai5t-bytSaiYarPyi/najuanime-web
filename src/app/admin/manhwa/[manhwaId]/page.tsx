@@ -68,12 +68,10 @@ export default function ManageChaptersPage() {
     
     setIsUploading(true);
 
-    // 1. Upload PDF file to Supabase Storage
-    const fileName = `${Date.now()}-${pdfFile.name}`;
+    const fileName = `${Date.now()}-${pdfFile.name.replace(/\s+/g, '-')}`; // Sanitize file name
     const filePath = `${manhwaId}/${fileName}`;
-    const { error: uploadError } = await supabase.storage
-      .from('manhwa-pdfs')
-      .upload(filePath, pdfFile);
+    
+    const { error: uploadError } = await supabase.storage.from('manhwa-pdfs').upload(filePath, pdfFile);
 
     if (uploadError) {
       alert('Error uploading file: ' + uploadError.message);
@@ -81,10 +79,7 @@ export default function ManageChaptersPage() {
       return;
     }
 
-    // 2. Get the public URL of the uploaded file
-    const { data: urlData } = supabase.storage
-      .from('manhwa-pdfs')
-      .getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from('manhwa-pdfs').getPublicUrl(filePath);
 
     if (!urlData.publicUrl) {
         alert('Could not get public URL for the uploaded file.');
@@ -92,11 +87,10 @@ export default function ManageChaptersPage() {
         return;
     }
 
-    // 3. Get the next display_order number
     const highestOrder = chapters.reduce((max, ch) => ch.display_order > max ? ch.display_order : max, 0);
     const newDisplayOrder = highestOrder + 1;
 
-    // 4. Insert chapter details into the database
+    // The FIX is here: we add a default empty array for image_urls
     const { error: insertError } = await supabase
       .from('manhwa_chapters')
       .insert({
@@ -105,22 +99,18 @@ export default function ManageChaptersPage() {
         title: chapterTitle || null,
         pdf_url: urlData.publicUrl,
         display_order: newDisplayOrder,
-        // image_urls will be populated by an edge function later
+        image_urls: [], // <--- THIS IS THE FIX
       });
 
     if (insertError) {
       alert('Error saving chapter details: ' + insertError.message);
-      // Clean up by deleting the uploaded file if DB insert fails
       await supabase.storage.from('manhwa-pdfs').remove([filePath]);
     } else {
       alert('Chapter uploaded successfully!');
-      // Refresh the chapter list
       fetchData();
-      // Clear the form
       setChapterNumber('');
       setChapterTitle('');
       setPdfFile(null);
-      // This is a trick to clear the file input visually
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
     }
