@@ -1,5 +1,5 @@
 'use client';
-
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient'; // Adjusted path
 import Modal from 'react-modal';
@@ -134,7 +134,9 @@ export default function ManhwaManagementPage() {
                   <p className="text-sm text-gray-400">{item.author || 'Unknown Author'}</p>
                 </div>
               </div>
-              <button className="text-sm bg-blue-600 px-3 py-1 rounded">Manage Chapters</button>
+              <Link href={`/admin/manhwa/${item.id}`} className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
+                    Manage Chapters
+              </Link>
             </div>
           ))
         ) : (
