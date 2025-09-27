@@ -6,12 +6,12 @@ const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/manhwa', label: 'Manhwa', icon: Flame },
     { href: '/anime', label: 'Anime', icon: Clapperboard },
-    { href: '/dashboard', label: 'My Account', icon: User },
+    // --- THIS IS THE FIX ---
+    { href: '/', label: 'My Account', icon: User },
 ];
 
 export default function Sidebar() {
     return (
-        // Hidden on mobile (screens smaller than md), visible on desktop
         <aside className="hidden md:block w-64 p-6 bg-card-dark/30 backdrop-blur-lg border-r border-border-color">
             <h1 className="text-2xl font-bold mb-8">NajuAnime+</h1>
             <nav className="flex flex-col gap-4">
