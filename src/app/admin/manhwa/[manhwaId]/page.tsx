@@ -65,12 +65,8 @@ export default function ManageChaptersPage() {
     
     setIsUploading(true);
 
-    // --- START OF FIX ---
-    // Sanitize the file name to remove special characters that Supabase Storage dislikes.
     const sanitizedFileName = pdfFile.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.\-_]/g, '');
     const fileName = `${Date.now()}-${sanitizedFileName}`;
-    // --- END OF FIX ---
-    
     const filePath = `${manhwaId}/${fileName}`;
     
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -110,14 +106,11 @@ export default function ManageChaptersPage() {
       await supabase.storage.from('manhwa-pdfs').remove([filePath]);
     } else {
       alert('Chapter uploaded successfully! Processing will start in the background.');
-      // We don't call fetchData() immediately, we wait for the webhook to trigger a refresh later
-      // For now, let's clear the form.
       setChapterNumber('');
       setChapterTitle('');
       setPdfFile(null);
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
-      // Let's refetch data after a small delay to give the webhook a chance to start
       setTimeout(() => {
         fetchData();
       }, 1000);
@@ -125,7 +118,32 @@ export default function ManageChaptersPage() {
 
     setIsUploading(false);
   };
-  
+
+  // --- START OF NEW FUNCTIONS ---
+  const handleReorder = async (chapterId: string, direction: 'up' | 'down') => {
+    setLoading(true);
+    const { error } = await supabase.functions.invoke('reorder-manhwa-chapters', {
+      body: { chapter_id: chapterId, direction: direction },
+    });
+    if (error) alert(`Error reordering: ${error.message}`);
+    await fetchData(); // Refetch to show new order
+    setLoading(false);
+  };
+
+  const handleDelete = async (chapterId: string, chapterNumber: number) => {
+    if (window.confirm(`Are you sure you want to delete Chapter ${chapterNumber}? This will also delete all its images and the PDF.`)) {
+      setLoading(true);
+      const { error } = await supabase.functions.invoke('delete-manhwa-chapter', {
+        body: { chapter_id: chapterId },
+      });
+      if (error) alert(`Error deleting: ${error.message}`);
+      else alert(`Chapter ${chapterNumber} deleted successfully.`);
+      await fetchData();
+      setLoading(false);
+    }
+  };
+  // --- END OF NEW FUNCTIONS ---
+
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   
   return (
@@ -133,7 +151,9 @@ export default function ManageChaptersPage() {
       <Link href="/admin/manhwa" className="text-blue-400 hover:underline mb-6 block">&larr; Back to Manhwa List</Link>
       <h1 className="text-3xl font-bold mb-2">Manage Chapters for: <span className="text-green-400">{manhwa?.title}</span></h1>
       <p className="text-gray-400 mb-8">Here you can upload, reorder, and delete chapters.</p>
+      
       <div className="grid md:grid-cols-2 gap-8">
+        {/* Upload Form Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Chapter</h2>
           <div className="space-y-4">
@@ -143,10 +163,29 @@ export default function ManageChaptersPage() {
             <button onClick={handleUpload} disabled={isUploading || !pdfFile || !chapterNumber} className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-md font-semibold">{isUploading ? 'Uploading...' : 'Upload Chapter'}</button>
           </div>
         </div>
+
+        {/* Existing Chapters List Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Existing Chapters</h2>
           <div className="space-y-2">
-            {chapters.length > 0 ? ( chapters.map(chapter => ( <div key={chapter.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-md"><div><p className="font-bold">Chapter {chapter.chapter_number}</p><p className="text-sm text-gray-400">{chapter.title || 'No Title'}</p></div><div className="flex gap-2"><button className="text-sm">🔼</button><button className="text-sm">🔽</button><button className="text-sm text-red-500">❌</button></div></div> )) ) : ( <p className="text-gray-400">No chapters found for this manhwa yet.</p> )}
+            {chapters.length > 0 ? ( 
+              chapters.map(chapter => ( 
+                <div key={chapter.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-md">
+                  <div>
+                    <p className="font-bold">Chapter {chapter.chapter_number}</p>
+                    <p className="text-sm text-gray-400">{chapter.title || 'No Title'}</p>
+                  </div>
+                  {/* --- UPDATED BUTTONS WITH ACTIONS --- */}
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => handleReorder(chapter.id, 'up')} className="p-1 hover:bg-gray-600 rounded-full" title="Move Up">🔼</button>
+                    <button onClick={() => handleReorder(chapter.id, 'down')} className="p-1 hover:bg-gray-600 rounded-full" title="Move Down">🔽</button>
+                    <button onClick={() => handleDelete(chapter.id, chapter.chapter_number)} className="p-1 text-red-500 hover:bg-gray-600 rounded-full" title="Delete">❌</button>
+                  </div>
+                </div> 
+              )) 
+            ) : ( 
+              <p className="text-gray-400">No chapters found for this manhwa yet.</p> 
+            )}
           </div>
         </div>
       </div>
