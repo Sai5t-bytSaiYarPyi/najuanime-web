@@ -109,6 +109,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteUser = async (profile: Profile) => {
+    const confirmationMessage = `Are you sure you want to permanently delete user "${profile.email}" (${profile.naju_id})?\n\nThis will erase their authentication, profile, and all payment history. This action cannot be undone.`;
+
+    if (window.confirm(confirmationMessage)) {
+      setLoading(true);
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id_to_delete: profile.id },
+      });
+
+      if (error) {
+        alert(`Error deleting user: ${error.message}`);
+        setLoading(false);
+      } else {
+        alert(`User "${profile.email}" has been deleted successfully.`);
+        fetchProfiles(debouncedSearchTerm);
+      }
+    }
+  };
+
   if (!isAdmin && !loading) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
   
   return (
@@ -141,7 +160,10 @@ export default function AdminDashboard() {
                   <td className="p-4">{profile.email}</td>
                   <td className="p-4"><span className={`px-2 py-1 rounded-full text-sm font-semibold ${profile.subscription_status === 'active' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-200'}`}>{profile.subscription_status}</span></td>
                   <td className="p-4">{profile.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'}</td>
-                  <td className="p-4"><button onClick={() => openModal(profile)} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm">Edit</button></td>
+                  <td className="p-4 flex items-center gap-2">
+                    <button onClick={() => openModal(profile)} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm">Edit</button>
+                    <button onClick={() => handleDeleteUser(profile)} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm">Delete</button>
+                  </td>
                 </tr>
               ))
             )}
