@@ -34,7 +34,6 @@ function useDebounce(value: string, delay: number) {
   return debouncedValue;
 }
 
-
 export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -112,6 +111,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleViewReceipt = async (path: string) => {
+    const { data, error } = await supabase.storage
+      .from('receipts')
+      .createSignedUrl(path, 60); // Link is valid for 60 seconds
+
+    if (error) {
+      alert("Could not generate link for receipt: " + error.message);
+      return;
+    }
+    window.open(data.signedUrl, '_blank');
+  };
+
   if (!isAdmin && !loading) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
   
   return (
@@ -161,9 +172,9 @@ export default function AdminDashboard() {
                         <div key={receipt.id} className="p-4 bg-gray-700 rounded-lg">
                             <p>Submitted: {new Date(receipt.created_at).toLocaleString()}</p>
                             <div className="mt-4 flex gap-4">
-                                <a href={supabase.storage.from('receipts').getPublicUrl(receipt.receipt_url).data.publicUrl} target="_blank" rel="noopener noreferrer" className="flex-1 text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">
+                                <button onClick={() => handleViewReceipt(receipt.receipt_url)} className="flex-1 text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">
                                     View Receipt
-                                </a>
+                                </button>
                                 <button onClick={() => handleApproveReceipt(receipt.id, selectedProfile!.id)} className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md">
                                     Approve (30 Days)
                                 </button>
