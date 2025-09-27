@@ -3,16 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export const revalidate = 0; // Ensure this route is always dynamic
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  // 1. Protect this route with a secret token
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  // 2. Initialize Supabase Admin Client
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -21,7 +19,6 @@ export async function GET(request: NextRequest) {
   try {
     const now = new Date().toISOString();
 
-    // 3. Find profiles that are 'active' but their expiry date has passed
     const { data: expiredProfiles, error: selectError } = await supabaseAdmin
       .from('profiles')
       .select('id')
@@ -38,7 +35,6 @@ export async function GET(request: NextRequest) {
 
     const profileIds = expiredProfiles.map(p => p.id);
 
-    // 4. Update these profiles' status to 'expired'
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({ subscription_status: 'expired' })
@@ -50,7 +46,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ message: `Successfully updated ${profileIds.length} profiles to 'expired'.` });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) { // <--- THIS IS THE FIX
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

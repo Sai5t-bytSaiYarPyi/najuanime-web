@@ -1,6 +1,6 @@
 // src/components/withSubscription.tsx
 'use client';
-import { useEffect, useState, ComponentType, useCallback } from 'react';
+import { useEffect, useState, ComponentType } from 'react'; // Removed unused 'useCallback'
 import { supabase } from '../lib/supabaseClient';
 import AccessDenied from './AccessDenied';
 
@@ -20,7 +20,7 @@ const withSubscription = <P extends object>(WrappedComponent: ComponentType<P>) 
 
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('subscription_expires_at') // We only need the expiry date
+          .select('subscription_expires_at')
           .eq('id', session.user.id)
           .single();
 
@@ -29,17 +29,13 @@ const withSubscription = <P extends object>(WrappedComponent: ComponentType<P>) 
           setLoading(false);
           return;
         }
-        
-        // --- START OF FIX ---
-        // The ONLY condition we check now is if the expiry date is in the future.
-        // We no longer check the 'subscription_status' column for access control.
+
         const isNotExpired = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
         if (isNotExpired) {
           setIsSubscribed(true);
         }
-        // --- END OF FIX ---
-        
+
         setLoading(false);
       };
 
