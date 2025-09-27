@@ -11,13 +11,12 @@ type PageProps = {
   };
 };
 
-// This is a simplified version for debugging purposes.
 export default async function ReaderPage({ params }: PageProps) {
   const supabase = createServerComponentClient({ cookies });
 
   const { data: chapter } = await supabase
     .from('manhwa_chapters')
-    .select('image_urls, chapter_number')
+    .select('image_urls, chapter_number, title')
     .eq('id', params.chapterId)
     .single();
 
@@ -26,18 +25,27 @@ export default async function ReaderPage({ params }: PageProps) {
   }
 
   return (
-    <div style={{ color: 'white', backgroundColor: 'black', padding: '20px' }}>
-      <h1>Chapter {chapter.chapter_number}</h1>
-      <p>This chapter has {chapter.image_urls.length} pages.</p>
-      
-      {/* Test the .map function with simple elements */}
-      <ul>
-        {chapter.image_urls.map((url, index) => (
-          <li key={index}>
-            Image URL #{index + 1}: {url}
-          </li>
-        ))}
-      </ul>
+    <div className="bg-black text-white">
+        <div className="max-w-3xl mx-auto">
+            <h1 className="text-2xl font-bold text-center py-4">
+                Chapter {chapter.chapter_number} {chapter.title && `- ${chapter.title}`}
+            </h1>
+            
+            <div className="flex flex-col items-center">
+                {/* --- THIS IS THE FIX (applied to the final design) --- */}
+                {chapter.image_urls.map((url: string, index: number) => (
+                    <div key={index} className="w-full">
+                        <img 
+                            src={url} 
+                            alt={`Page ${index + 1}`}
+                            className="w-full h-auto"
+                        />
+                    </div>
+                ))}
+            </div>
+
+            <p className="text-center py-8">End of Chapter {chapter.chapter_number}.</p>
+        </div>
     </div>
   );
 }
