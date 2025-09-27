@@ -1,0 +1,115 @@
+// src/app/my-account/page.tsx
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { supabase } from '../../lib/supabaseClient';
+import { Session } from '@supabase/supabase-js';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Define types for our data
+type Profile = {
+  naju_id: string;
+  subscription_expires_at: string | null;
+};
+type Receipt = {
+  created_at: string;
+  status: 'pending' | 'approved' | 'rejected';
+};
+
+export default function MyAccountPage() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const setupUser = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setSession(session);
+
+    if (session) {
+      const user = session.user;
+      const userRoles = user.app_metadata?.roles || [];
+      setIsAdmin(userRoles.includes('admin'));
+
+      const [profileResponse, receiptsResponse] = await Promise.all([
+        supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
+        supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false })
+      ]);
+
+      if (profileResponse.data) setProfile(profileResponse.data as Profile);
+      if (receiptsResponse.data) setReceipts(receiptsResponse.data as Receipt[]);
+
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    setupUser();
+  }, [setupUser]);
+
+  const isSubscribed = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center bg-gray-900"></div>;
+  }
+  
+  if (!session || !profile) {
+    return (
+        <div className="flex flex-col items-center justify-center text-center pt-20">
+            <h1 className="text-3xl font-bold mb-4">Please Log In</h1>
+            <p className="text-gray-300 mb-8">You need to be logged in to view your account details.</p>
+            <Link href="/" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg">
+                Go to Homepage
+            </Link>
+        </div>
+    )
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="flex justify-between items-center mb-8">
+            <div>
+                <h1 className="text-3xl font-bold">My Account</h1>
+                <p className="text-gray-400">{session.user.email}</p>
+            </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-card-dark p-6 rounded-lg">
+                <h2 className="text-xl font-bold mb-4">User ID</h2>
+                <p className="text-gray-300 font-mono text-2xl">{profile.naju_id}</p>
+            </div>
+            <div className="bg-card-dark p-6 rounded-lg">
+                <h2 className="text-xl font-bold mb-4">Subscription Status</h2>
+                {isSubscribed ? (
+                    <>
+                        <p className="text-green-400 font-bold text-lg">ACTIVE</p>
+                        <p className="text-gray-400">Expires on: {new Date(profile.subscription_expires_at!).toLocaleDateString()}</p>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-yellow-400 font-bold text-lg">INACTIVE</p>
+                        <Link href="/subscribe" className="mt-2 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">Subscribe Now</Link>
+                    </>
+                )}
+            </div>
+        </div>
+        
+        <div className="mt-8 bg-card-dark p-6 rounded-lg">
+            <h2 className="text-xl font-bold mb-4">My Receipt Submissions</h2>
+            <div className="space-y-3">
+            {receipts.length > 0 ? receipts.map(r => (
+                <div key={r.created_at} className="p-3 bg-gray-700 rounded-md flex justify-between items-center">
+                    <p>Submitted on: {new Date(r.created_at).toLocaleString()}</p>
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${ r.status === 'approved' ? 'bg-green-500' : r.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}>
+                        {r.status.toUpperCase()}
+                    </span>
+                </div>
+            )) : <p className="text-gray-400">You have no submission history.</p>}
+            </div>
+        </div>
+    </motion.div>
+  );
+}
