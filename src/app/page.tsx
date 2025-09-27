@@ -71,7 +71,9 @@ export default function Home() {
                  Watch Anime
                </Link>
             )}
-            
+               <Link href="/manhwa" className="inline-block px-6 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md font-semibold mb-4 ml-2">
+                 Read Manhwa (Free)
+               </Link>
             {isAdmin && (
               <Link href="/admin" className="inline-block px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold mb-4 ml-2">
                 Admin Dashboard
