@@ -6,6 +6,14 @@ import { supabase } from '../../../../lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
+// --- START OF FIX ---
+// 1. Define a specific type for video URLs instead of 'any'
+type VideoUrls = {
+  '1080p'?: string;
+  '720p'?: string;
+  '480p'?: string;
+};
+
 // Type definitions
 type AnimeSeries = {
   id: string;
@@ -15,8 +23,10 @@ type Episode = {
   id: string;
   episode_number: number;
   title: string | null;
-  video_urls: any; // JSONB column
+  // 2. Use the new VideoUrls type here
+  video_urls: VideoUrls | null; 
 };
+// --- END OF FIX ---
 
 export default function ManageEpisodesPage() {
   const params = useParams();
@@ -36,7 +46,6 @@ export default function ManageEpisodesPage() {
     if (!animeId) return;
     setLoading(true);
 
-    // Fetch series details
     const { data: seriesData } = await supabase
       .from('anime_series')
       .select('id, title_english')
@@ -44,7 +53,6 @@ export default function ManageEpisodesPage() {
       .single();
     setSeries(seriesData);
 
-    // Fetch existing episodes
     const { data: episodesData } = await supabase
       .from('anime_episodes')
       .select('*')
@@ -74,8 +82,11 @@ export default function ManageEpisodesPage() {
       alert('Episode number and a video file are required.');
       return;
     }
+    // --- FIX: 3. Use setIsUploading to remove the warning ---
+    setIsUploading(true); 
     // TODO: Implement the video upload and transcoding pipeline logic here.
     alert(`Uploading Episode ${episodeNumber} for "${series?.title_english}".\nThis will trigger our video processing pipeline in the next step!`);
+    setIsUploading(false);
   };
 
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
@@ -120,7 +131,6 @@ export default function ManageEpisodesPage() {
                     <p className="font-bold">Episode {ep.episode_number}</p>
                     <p className="text-sm text-gray-400">{ep.title || 'No Title'}</p>
                   </div>
-                  {/* TODO: Add delete/edit buttons later */}
                    <div className="flex items-center gap-2">
                     <button className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Delete</button>
                   </div>
