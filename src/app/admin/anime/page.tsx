@@ -4,7 +4,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
-import Modal from 'react-modal';
+// --- FIX: Step 1 -> Import Modal AND Styles from react-modal ---
+import Modal, { Styles } from 'react-modal';
 
 // Anime Series အတွက် Type Definition (Database Table)
 type AnimeSeries = {
@@ -37,8 +38,8 @@ type JikanAnimeResult = {
     trailer: { youtube_id: string | null };
 };
 
-
-const customModalStyles = {
+// --- FIX: Step 2 -> Explicitly apply the 'Styles' type ---
+const customModalStyles: Styles = {
   content: {
     top: '50%',
     left: '50%',
@@ -52,9 +53,9 @@ const customModalStyles = {
     borderRadius: '0.5rem',
     width: '90%',
     maxWidth: '600px',
-    maxHeight: '90vh', // Add max height for scrollability
+    maxHeight: '90vh',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)' },
 };
@@ -64,7 +65,6 @@ export default function AnimeManagementPage() {
   const [loading, setLoading] = useState(true);
   const [animeList, setAnimeList] = useState<AnimeSeries[]>([]);
   
-  // State for the "Add New Anime" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -137,7 +137,6 @@ export default function AnimeManagementPage() {
   const handleImportAnime = async () => {
     if (!selectedAnime) return;
 
-    // This is the data we will save to our database.
     const newAnimeData = {
         title_english: selectedAnime.title_english || selectedAnime.title,
         title_japanese: selectedAnime.title_japanese,
@@ -155,11 +154,9 @@ export default function AnimeManagementPage() {
         total_episodes: selectedAnime.episodes
     };
 
-    // TODO: In the next step, we will write the code to actually save this to Supabase.
     console.log("Data to import:", newAnimeData);
     alert(`Importing "${newAnimeData.title_english}".\nNext step is to save this to Supabase!`);
     
-    // For now, let's just close the modal and refresh the list
     closeModal();
     fetchAnimeList();
   };
@@ -178,7 +175,6 @@ export default function AnimeManagementPage() {
       <Link href="/admin" className="text-blue-400 hover:underline mb-6 block">&larr; Back to Admin Dashboard</Link>
 
       <div className="bg-gray-800 rounded-lg p-4">
-        {/* ... existing anime list rendering ... */}
         {animeList.length > 0 ? (
           animeList.map(item => (
             <div key={item.id} className="flex items-center justify-between p-3 border-b border-gray-700 last:border-b-0 hover:bg-gray-700">
@@ -201,7 +197,6 @@ export default function AnimeManagementPage() {
 
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
         {selectedAnime ? (
-            // Confirmation View
             <div className="flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-4">Confirm Import</h2>
                 <div className="flex gap-4 p-4 bg-gray-800 rounded-lg mb-4">
@@ -219,7 +214,6 @@ export default function AnimeManagementPage() {
                 </div>
             </div>
         ) : (
-            // Search View
             <div className="flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-4">Search and Import Anime</h2>
                 <div className="flex gap-2 mb-4">
