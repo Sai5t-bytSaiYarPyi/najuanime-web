@@ -4,7 +4,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
-// --- FIX: Step 1 -> Import Modal AND Styles from react-modal ---
 import Modal, { Styles } from 'react-modal';
 
 // Anime Series အတွက် Type Definition (Database Table)
@@ -38,7 +37,7 @@ type JikanAnimeResult = {
     trailer: { youtube_id: string | null };
 };
 
-// --- FIX: Step 2 -> Explicitly apply the 'Styles' type ---
+
 const customModalStyles: Styles = {
   content: {
     top: '50%',
@@ -72,7 +71,7 @@ export default function AnimeManagementPage() {
   const [selectedAnime, setSelectedAnime] = useState<JikanAnimeResult | null>(null);
 
   const fetchAnimeList = useCallback(async () => {
-    setLoading(true);
+    // setLoading(true); // No need to set loading true on manual refetch
     const { data, error } = await supabase
       .from('anime_series')
       .select('*')
@@ -80,6 +79,7 @@ export default function AnimeManagementPage() {
       
     if (error) {
       console.error('Error fetching anime list:', error);
+      alert('Could not fetch anime list.');
     } else if (data) {
       setAnimeList(data as AnimeSeries[]);
     }
@@ -88,10 +88,11 @@ export default function AnimeManagementPage() {
 
   useEffect(() => {
     const checkAdminAndFetchData = async () => {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.app_metadata?.roles?.includes('admin')) {
         setIsAdmin(true);
-        fetchAnimeList();
+        await fetchAnimeList();
       } else {
         setIsAdmin(false);
         setLoading(false);
@@ -117,9 +118,7 @@ export default function AnimeManagementPage() {
 
     try {
         const response = await fetch(`/api/jikan/search?q=${encodeURIComponent(searchTerm)}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch from Jikan API');
-        }
+        if (!response.ok) throw new Error('Failed to fetch from Jikan API');
         const result = await response.json();
         setSearchResults(result.data || []);
     } catch (error) {
@@ -136,9 +135,8 @@ export default function AnimeManagementPage() {
 
   const handleImportAnime = async () => {
     if (!selectedAnime) return;
-    setLoading(true); // Show loading state
+    setLoading(true);
 
-    // Prepare the data for the edge function
     const animeData = {
       title_english: selectedAnime.title_english || selectedAnime.title,
       title_japanese: selectedAnime.title_japanese,
@@ -155,11 +153,9 @@ export default function AnimeManagementPage() {
       duration_minutes: parseInt(selectedAnime.duration) || 0,
       total_episodes: selectedAnime.episodes,
     };
-
     const genres = selectedAnime.genres.map(g => g.name);
 
-    // Invoke the Edge Function
-    const { data, error } = await supabase.functions.invoke('import-anime-series', {
+    const { error } = await supabase.functions.invoke('import-anime-series', {
       body: { animeData, genres },
     });
 
@@ -167,14 +163,13 @@ export default function AnimeManagementPage() {
       alert('Error importing anime: ' + error.message);
     } else {
       alert(`Successfully imported "${animeData.title_english}"!`);
-      fetchAnimeList(); // Refresh the list on the page
+      await fetchAnimeList(); // Refresh the list on the page
       closeModal();
     }
-    
-    setLoading(false);
+    setLoading(false); // setLoading(false) was missing here
   };
 
-  if (loading) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
+  if (loading && animeList.length === 0) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   if (!isAdmin) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
 
   return (
@@ -199,16 +194,23 @@ export default function AnimeManagementPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Manage Episodes</button>
+                {/* --- START OF FIX --- */}
+                <Link href={`/admin/anime/${item.id}`} className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
+                    Manage Episodes
+                </Link>
+                {/* --- END OF FIX --- */}
                 <button className="text-sm bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Edit</button>
                 <button className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Delete</button>
               </div>
             </div>
           ))
-        ) : ( <p>No anime series found. Add a new one to get started.</p> )}
+        ) : ( 
+          <p>No anime series found. Add a new one to get started.</p> 
+        )}
       </div>
 
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
+        {/* Modal content remains the same */}
         {selectedAnime ? (
             <div className="flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-4">Confirm Import</h2>
@@ -223,7 +225,9 @@ export default function AnimeManagementPage() {
                 <div className="flex-grow"></div>
                 <div className="flex justify-end gap-4 mt-auto">
                     <button onClick={() => setSelectedAnime(null)} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Back to Search</button>
-                    <button onClick={handleImportAnime} className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-md">Confirm & Add to Database</button>
+                    <button onClick={handleImportAnime} disabled={loading} className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-md disabled:bg-gray-500">
+                        {loading ? 'Importing...' : 'Confirm & Add to Database'}
+                    </button>
                 </div>
             </div>
         ) : (
@@ -234,7 +238,7 @@ export default function AnimeManagementPage() {
                     <button onClick={handleSearch} disabled={isSearching} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md disabled:bg-gray-500">{isSearching ? '...' : 'Search'}</button>
                 </div>
                 <div className="flex-grow overflow-y-auto pr-2">
-                    {isSearching && <p>Searching...</p>}
+                    {isSearching && <p className="text-center">Searching...</p>}
                     <div className="space-y-2">
                         {searchResults.map(anime => (
                             <div key={anime.mal_id} className="flex items-center gap-3 p-2 bg-gray-800 rounded-md">
