@@ -1,3 +1,4 @@
+// src/app/admin/page.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -128,9 +129,20 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-gray-800 p-6 rounded-lg"><h2 className="text-xl font-bold mb-2">User Management</h2><p className="text-gray-400">View and manage user subscriptions.</p></div>
-        <Link href="/admin/manhwa" className="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors"><h2 className="text-xl font-bold mb-2">Manhwa Management</h2><p className="text-gray-400">Add, edit, and manage manhwa series and chapters.</p></Link>
+      {/* --- UPDATED GRID --- */}
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-gray-800 p-6 rounded-lg">
+          <h2 className="text-xl font-bold mb-2">User Management</h2>
+          <p className="text-gray-400">View and manage user subscriptions.</p>
+        </div>
+        <Link href="/admin/manhwa" className="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+          <h2 className="text-xl font-bold mb-2">Manhwa Management</h2>
+          <p className="text-gray-400">Add, edit, and manage manhwa series.</p>
+        </Link>
+        <Link href="/admin/anime" className="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+          <h2 className="text-xl font-bold mb-2">Anime Management</h2>
+          <p className="text-gray-400">Add, edit, and manage anime series.</p>
+        </Link>
       </div>
 
       <div className="flex justify-between items-center mb-4">
@@ -152,7 +164,6 @@ export default function AdminDashboard() {
                   <td className="p-4">{profile.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'}</td>
                   <td className="p-4 flex items-center gap-2">
                     <button onClick={() => openModal(profile)} className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm">Review</button>
-                    {/* Delete button can be added back here if needed */}
                   </td>
                 </tr>
               ))
