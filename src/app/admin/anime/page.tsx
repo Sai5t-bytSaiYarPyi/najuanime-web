@@ -136,29 +136,42 @@ export default function AnimeManagementPage() {
 
   const handleImportAnime = async () => {
     if (!selectedAnime) return;
+    setLoading(true); // Show loading state
 
-    const newAnimeData = {
-        title_english: selectedAnime.title_english || selectedAnime.title,
-        title_japanese: selectedAnime.title_japanese,
-        title_romaji: selectedAnime.title,
-        synopsis: selectedAnime.synopsis,
-        poster_url: selectedAnime.images.jpg.image_url,
-        trailer_url: selectedAnime.trailer?.youtube_id ? `https://www.youtube.com/embed/${selectedAnime.trailer.youtube_id}` : null,
-        type: selectedAnime.type,
-        status: selectedAnime.status,
-        season: selectedAnime.season,
-        release_year: selectedAnime.year,
-        source_material: selectedAnime.source,
-        studio: selectedAnime.studios[0]?.name || null,
-        duration_minutes: parseInt(selectedAnime.duration) || 0,
-        total_episodes: selectedAnime.episodes
+    // Prepare the data for the edge function
+    const animeData = {
+      title_english: selectedAnime.title_english || selectedAnime.title,
+      title_japanese: selectedAnime.title_japanese,
+      title_romaji: selectedAnime.title,
+      synopsis: selectedAnime.synopsis,
+      poster_url: selectedAnime.images.jpg.image_url,
+      trailer_url: selectedAnime.trailer?.youtube_id ? `https://www.youtube.com/embed/${selectedAnime.trailer.youtube_id}` : null,
+      type: selectedAnime.type,
+      status: selectedAnime.status,
+      season: selectedAnime.season,
+      release_year: selectedAnime.year,
+      source_material: selectedAnime.source,
+      studio: selectedAnime.studios[0]?.name || null,
+      duration_minutes: parseInt(selectedAnime.duration) || 0,
+      total_episodes: selectedAnime.episodes,
     };
 
-    console.log("Data to import:", newAnimeData);
-    alert(`Importing "${newAnimeData.title_english}".\nNext step is to save this to Supabase!`);
+    const genres = selectedAnime.genres.map(g => g.name);
+
+    // Invoke the Edge Function
+    const { data, error } = await supabase.functions.invoke('import-anime-series', {
+      body: { animeData, genres },
+    });
+
+    if (error) {
+      alert('Error importing anime: ' + error.message);
+    } else {
+      alert(`Successfully imported "${animeData.title_english}"!`);
+      fetchAnimeList(); // Refresh the list on the page
+      closeModal();
+    }
     
-    closeModal();
-    fetchAnimeList();
+    setLoading(false);
   };
 
   if (loading) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
