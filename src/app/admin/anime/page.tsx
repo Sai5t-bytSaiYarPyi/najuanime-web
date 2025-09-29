@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
 import Modal from 'react-modal';
 
-// Anime Series အတွက် Type Definition
+// Anime Series အတွက် Type Definition (Database Table)
 type AnimeSeries = {
   id: string;
   created_at: string;
@@ -16,6 +16,27 @@ type AnimeSeries = {
   status: string | null;
   release_year: number | null;
 };
+
+// Jikan API ကနေပြန်လာမယ့် Anime data အတွက် Type
+type JikanAnimeResult = {
+    mal_id: number;
+    title: string;
+    title_english: string | null;
+    title_japanese: string;
+    images: { jpg: { image_url: string } };
+    synopsis: string | null;
+    type: string;
+    status: string;
+    season: string | null;
+    year: number | null;
+    studios: { name: string }[];
+    duration: string;
+    episodes: number | null;
+    source: string;
+    genres: { name: string }[];
+    trailer: { youtube_id: string | null };
+};
+
 
 const customModalStyles = {
   content: {
@@ -31,19 +52,24 @@ const customModalStyles = {
     borderRadius: '0.5rem',
     width: '90%',
     maxWidth: '600px',
+    maxHeight: '90vh', // Add max height for scrollability
+    display: 'flex',
+    flexDirection: 'column'
   },
   overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)' },
 };
-
-// Modal.setAppElement('#__next'); // In Next.js 13+, this is often not needed if you handle modality correctly.
 
 export default function AnimeManagementPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [animeList, setAnimeList] = useState<AnimeSeries[]>([]);
   
-  // TODO: Add state for the "Add New Anime" modal
+  // State for the "Add New Anime" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<JikanAnimeResult[]>([]);
+  const [selectedAnime, setSelectedAnime] = useState<JikanAnimeResult | null>(null);
 
   const fetchAnimeList = useCallback(async () => {
     setLoading(true);
@@ -75,9 +101,68 @@ export default function AnimeManagementPage() {
   }, [fetchAnimeList]);
 
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSearchTerm('');
+    setSearchResults([]);
+    setSelectedAnime(null);
+  };
 
-  // TODO: Implement search and import logic in the modal
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+    setIsSearching(true);
+    setSelectedAnime(null);
+    setSearchResults([]);
+
+    try {
+        const response = await fetch(`/api/jikan/search?q=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch from Jikan API');
+        }
+        const result = await response.json();
+        setSearchResults(result.data || []);
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred while searching.');
+    } finally {
+        setIsSearching(false);
+    }
+  };
+
+  const handleSelectAnime = (anime: JikanAnimeResult) => {
+    setSelectedAnime(anime);
+  };
+
+  const handleImportAnime = async () => {
+    if (!selectedAnime) return;
+
+    // This is the data we will save to our database.
+    const newAnimeData = {
+        title_english: selectedAnime.title_english || selectedAnime.title,
+        title_japanese: selectedAnime.title_japanese,
+        title_romaji: selectedAnime.title,
+        synopsis: selectedAnime.synopsis,
+        poster_url: selectedAnime.images.jpg.image_url,
+        trailer_url: selectedAnime.trailer?.youtube_id ? `https://www.youtube.com/embed/${selectedAnime.trailer.youtube_id}` : null,
+        type: selectedAnime.type,
+        status: selectedAnime.status,
+        season: selectedAnime.season,
+        release_year: selectedAnime.year,
+        source_material: selectedAnime.source,
+        studio: selectedAnime.studios[0]?.name || null,
+        duration_minutes: parseInt(selectedAnime.duration) || 0,
+        total_episodes: selectedAnime.episodes
+    };
+
+    // TODO: In the next step, we will write the code to actually save this to Supabase.
+    console.log("Data to import:", newAnimeData);
+    alert(`Importing "${newAnimeData.title_english}".\nNext step is to save this to Supabase!`);
+    
+    // For now, let's just close the modal and refresh the list
+    closeModal();
+    fetchAnimeList();
+  };
 
   if (loading) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   if (!isAdmin) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
@@ -92,17 +177,13 @@ export default function AnimeManagementPage() {
       </div>
       <Link href="/admin" className="text-blue-400 hover:underline mb-6 block">&larr; Back to Admin Dashboard</Link>
 
-
       <div className="bg-gray-800 rounded-lg p-4">
+        {/* ... existing anime list rendering ... */}
         {animeList.length > 0 ? (
           animeList.map(item => (
             <div key={item.id} className="flex items-center justify-between p-3 border-b border-gray-700 last:border-b-0 hover:bg-gray-700">
               <div className="flex items-center gap-4">
-                <img 
-                  src={item.poster_url || 'https://via.placeholder.com/50x75'} 
-                  alt={item.title_english || 'Poster'} 
-                  className="w-12 h-auto rounded object-cover"
-                />
+                <img src={item.poster_url || 'https://via.placeholder.com/50x75'} alt={item.title_english || 'Poster'} className="w-12 h-auto rounded object-cover"/>
                 <div>
                   <h2 className="font-bold">{item.title_english || item.title_romaji}</h2>
                   <p className="text-sm text-gray-400">{item.release_year || 'Unknown Year'} - <span className="font-semibold">{item.status || 'N/A'}</span></p>
@@ -115,20 +196,56 @@ export default function AnimeManagementPage() {
               </div>
             </div>
           ))
-        ) : ( 
-          <p>No anime series found. Add a new one to get started.</p> 
-        )}
+        ) : ( <p>No anime series found. Add a new one to get started.</p> )}
       </div>
 
-      {/* Placeholder for the Add New Anime Modal */}
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
-        <h2 className="text-xl font-bold mb-4">Search and Import Anime</h2>
-        <p className="text-gray-400">
-          This is where we will build the search functionality to find anime from Jikan API (MyAnimeList).
-        </p>
-        <div className="flex justify-end gap-4 mt-6">
-          <button onClick={closeModal} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Cancel</button>
-        </div>
+        {selectedAnime ? (
+            // Confirmation View
+            <div className="flex flex-col flex-grow">
+                <h2 className="text-xl font-bold mb-4">Confirm Import</h2>
+                <div className="flex gap-4 p-4 bg-gray-800 rounded-lg mb-4">
+                    <img src={selectedAnime.images.jpg.image_url} alt="poster" className="w-24 h-auto rounded" />
+                    <div>
+                        <h3 className="text-lg font-bold">{selectedAnime.title_english || selectedAnime.title}</h3>
+                        <p className="text-sm text-gray-400">{selectedAnime.year} | {selectedAnime.type} | {selectedAnime.status}</p>
+                        <p className="text-sm text-gray-300 mt-2 line-clamp-3">{selectedAnime.synopsis}</p>
+                    </div>
+                </div>
+                <div className="flex-grow"></div>
+                <div className="flex justify-end gap-4 mt-auto">
+                    <button onClick={() => setSelectedAnime(null)} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Back to Search</button>
+                    <button onClick={handleImportAnime} className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-md">Confirm & Add to Database</button>
+                </div>
+            </div>
+        ) : (
+            // Search View
+            <div className="flex flex-col flex-grow">
+                <h2 className="text-xl font-bold mb-4">Search and Import Anime</h2>
+                <div className="flex gap-2 mb-4">
+                    <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()} placeholder="Enter anime title (e.g., Naruto)" className="flex-grow p-2 rounded bg-gray-700 border border-gray-600" />
+                    <button onClick={handleSearch} disabled={isSearching} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md disabled:bg-gray-500">{isSearching ? '...' : 'Search'}</button>
+                </div>
+                <div className="flex-grow overflow-y-auto pr-2">
+                    {isSearching && <p>Searching...</p>}
+                    <div className="space-y-2">
+                        {searchResults.map(anime => (
+                            <div key={anime.mal_id} className="flex items-center gap-3 p-2 bg-gray-800 rounded-md">
+                                <img src={anime.images.jpg.image_url} alt="poster" className="w-12 h-16 object-cover rounded" />
+                                <div className="flex-grow">
+                                    <p className="font-semibold">{anime.title_english || anime.title}</p>
+                                    <p className="text-xs text-gray-400">{anime.year} | {anime.type}</p>
+                                </div>
+                                <button onClick={() => handleSelectAnime(anime)} className="px-3 py-1 bg-green-600 hover:bg-green-500 text-sm rounded-md">Import</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                 <div className="flex justify-end gap-4 mt-4">
+                    <button onClick={closeModal} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Cancel</button>
+                </div>
+            </div>
+        )}
       </Modal>
     </div>
   );
