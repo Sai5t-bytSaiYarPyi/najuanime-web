@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 
-// Revalidate the page every hour to fetch fresh data
 export const revalidate = 3600;
 
 type PageProps = {
@@ -14,16 +13,13 @@ type PageProps = {
   };
 };
 
-// --- START: NEW TYPE DEFINITION FOR EPISODE ---
 type Episode = {
   id: string;
   episode_number: number;
   title: string | null;
   created_at: string;
 };
-// --- END: NEW TYPE DEFINITION FOR EPISODE ---
 
-// Helper component for displaying info pills
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
   if (!text) return null;
   return (
@@ -56,7 +52,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen text-white">
-      {/* --- Header Section with Poster and Core Info --- */}
       <div className="relative h-[40vh] md:h-[50vh] w-full">
         <div className="absolute inset-0 bg-black/50 z-10" />
         {anime.poster_url && (
@@ -95,9 +90,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* --- Main Content Area --- */}
       <div className="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Synopsis & Details */}
         <div className="lg:col-span-2">
           <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 mb-4">Synopsis</h2>
           <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -120,7 +113,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Right Column: Details & Episodes */}
         <div>
           <div className="bg-card-dark p-4 rounded-lg">
             <h3 className="text-xl font-bold mb-4">Details</h3>
@@ -138,14 +130,12 @@ export default async function AnimeDetailPage({ params }: PageProps) {
             <h3 className="text-xl font-bold mb-4">Episodes</h3>
             <div className="bg-card-dark rounded-lg max-h-96 overflow-y-auto">
               {anime.anime_episodes.length > 0 ? (
-                // --- START: TYPE ANNOTATION FIX ---
                 anime.anime_episodes.map((ep: Episode) => (
                   <div key={ep.id} className="p-4 border-b border-border-color last:border-b-0 hover:bg-gray-700/50 transition-colors">
                     <p className="font-semibold text-gray-200">Episode {ep.episode_number}</p>
                     {ep.title && <p className="text-sm text-gray-400">{ep.title}</p>}
                   </div>
                 ))
-                // --- END: TYPE ANNOTATION FIX ---
               ) : (
                 <p className="p-4 text-gray-400">No episodes available yet.</p>
               )}

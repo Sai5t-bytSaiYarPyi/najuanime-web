@@ -90,46 +90,28 @@ export default function ManageEpisodesPage() {
 
       const pollInterval = setInterval(async () => {
         try {
-          console.log(`Polling for job ID: ${jobId}...`);
           const { data: statusData, error: pollError } = await supabase.functions.invoke('check-job-status', { body: { job_id: jobId } });
-
-          console.log('Poll Response Data:', statusData);
-          if (pollError) {
-              console.error('Polling function invocation failed:', pollError);
-          }
-
           if (pollError) { clearInterval(pollInterval); throw pollError; }
           
           if (statusData && statusData.status === 'finished') {
             clearInterval(pollInterval);
-            console.log('Job finished! Now calling save-video-urls...');
             setUploadStatus('4/4: Saving results...');
-            
             const { error: saveError } = await supabase.functions.invoke('save-video-urls', { body: { job: statusData, episode_id: episodeId } });
-            
-            if (saveError) {
-              console.error('save-video-urls function failed:', saveError);
-              throw new Error(`Saving results failed: ${saveError.message}`);
-            }
+            if (saveError) throw new Error(`Saving results failed: ${saveError.message}`);
             
             alert('Episode is now ready!');
             await fetchData();
             setIsUploading(false);
             setUploadStatus('Upload Episode');
-
           } else if (statusData && statusData.status === 'error') {
             clearInterval(pollInterval);
-            console.error('CloudConvert job failed with status "error". Full data:', statusData);
-            alert(`Video processing failed on CloudConvert. Check the browser console for details. Job ID: ${jobId}`);
             setIsUploading(false);
             setUploadStatus('Upload Episode');
-          } else {
-            console.log(`Current job status: ${statusData?.status || 'unknown'}`);
+            alert(`Video processing failed on CloudConvert. Job ID: ${jobId}`);
           }
-        } catch (error: unknown) { // FIX: Changed from 'any' to 'unknown'
+        } catch (error: unknown) {
           clearInterval(pollInterval);
           const errorMessage = error instanceof Error ? error.message : "An unknown polling error occurred.";
-          console.error(`Polling process caught an error: ${errorMessage}`);
           alert(`An error occurred while checking status: ${errorMessage}`);
           setIsUploading(false);
           setUploadStatus('Upload Episode');
@@ -137,9 +119,8 @@ export default function ManageEpisodesPage() {
         }
       }, 15000);
 
-    } catch (error: unknown) { // FIX: Changed from 'any' to 'unknown'
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown upload error occurred.";
-      console.error('Upload process failed:', errorMessage);
       alert(`Error: ${errorMessage}`);
       setIsUploading(false);
       setUploadStatus('Upload Episode');
