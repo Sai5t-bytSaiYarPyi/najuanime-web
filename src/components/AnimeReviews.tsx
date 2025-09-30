@@ -6,14 +6,17 @@ import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import Modal from 'react-modal';
 
+// --- START: TYPE DEFINITION FIX ---
+// Changed 'profiles' to be an array of objects
 type Review = {
   id: string;
   review_text: string;
   created_at: string;
   profiles: {
     naju_id: string;
-  } | null;
+  }[] | null; // It's an array now
 };
+// --- END: TYPE DEFINITION FIX ---
 
 type Props = {
   animeId: string;
@@ -38,6 +41,13 @@ const customModalStyles = {
   overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)' },
 };
 
+// Set the app element for accessibility
+// You might need to adjust this depending on your root layout element
+if (typeof window !== 'undefined') {
+  Modal.setAppElement('body');
+}
+
+
 export default function AnimeReviews({ animeId, user }: Props) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,12 +64,21 @@ export default function AnimeReviews({ animeId, user }: Props) {
       .eq('anime_id', animeId)
       .order('created_at', { ascending: false });
 
+    // Handle potential error from fetching reviews
+    if (error) {
+        console.error("Error fetching reviews:", error);
+    }
+
     if (data) {
       setReviews(data as Review[]);
       if (user) {
-        // Check if the current user's review is in the list
-        const currentUserReview = await supabase.from('anime_reviews').select('id').eq('anime_id', animeId).eq('user_id', user.id).single();
-        setUserHasReviewed(!!currentUserReview.data);
+        const { data: currentUserReviewData } = await supabase
+          .from('anime_reviews')
+          .select('id')
+          .eq('anime_id', animeId)
+          .eq('user_id', user.id)
+          .single();
+        setUserHasReviewed(!!currentUserReviewData);
       }
     }
     setLoading(false);
@@ -89,7 +108,7 @@ export default function AnimeReviews({ animeId, user }: Props) {
     } else {
       setReviewText('');
       closeModal();
-      await fetchReviews(); // Refresh the reviews list
+      await fetchReviews();
     }
     setIsSubmitting(false);
   };
@@ -115,7 +134,9 @@ export default function AnimeReviews({ animeId, user }: Props) {
           reviews.map((review) => (
             <div key={review.id} className="bg-card-dark p-4 rounded-lg">
               <div className="flex items-center mb-2">
-                <p className="font-bold text-gray-200">{review.profiles?.naju_id || 'A user'}</p>
+                {/* --- START: JSX FIX --- */}
+                <p className="font-bold text-gray-200">{review.profiles?.[0]?.naju_id || 'A user'}</p>
+                {/* --- END: JSX FIX --- */}
                 <p className="text-xs text-gray-400 ml-auto">{new Date(review.created_at).toLocaleDateString()}</p>
               </div>
               <p className="text-gray-300 whitespace-pre-wrap">{review.review_text}</p>
