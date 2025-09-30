@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
-import AnimeStatusUpdater from '@/components/AnimeStatusUpdater'; // Import the new component
+import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
 
 export const revalidate = 3600;
 
@@ -34,12 +34,9 @@ const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number
 export default async function AnimeDetailPage({ params }: PageProps) {
   const supabase = createServerComponentClient({ cookies });
 
-  // Get current user session first
   const { data: { session } } = await supabase.auth.getSession();
 
-  // Fetch all data in parallel for performance
   const [animeRes, userListRes] = await Promise.all([
-    // Fetch anime details
     supabase
       .from('anime_series')
       .select(`*, anime_genres(genres(name)), anime_episodes(id, episode_number, title, created_at)`)
@@ -47,10 +44,11 @@ export default async function AnimeDetailPage({ params }: PageProps) {
       .order('episode_number', { referencedTable: 'anime_episodes', ascending: true })
       .single(),
     
-    // Fetch current user's status for this anime (only if user is logged in)
+    // --- START: MODIFIED QUERY TO INCLUDE RATING ---
     session 
-      ? supabase.from('user_anime_list').select('status').eq('anime_id', params.animeId).eq('user_id', session.user.id).single() 
+      ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single() 
       : Promise.resolve({ data: null, error: null })
+    // --- END: MODIFIED QUERY ---
   ]);
 
   const { data: anime, error: animeError } = animeRes;
@@ -66,7 +64,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
     <div className="min-h-screen text-white">
       {/* Header Section */}
       <div className="relative h-[40vh] md:h-[50vh] w-full">
-        {/* ... (Header code remains the same) ... */}
         <div className="absolute inset-0 bg-black/50 z-10" />
         {anime.poster_url && (
           <Image src={anime.poster_url} alt={`${anime.title_english || 'Anime'} Poster`} fill style={{ objectFit: 'cover' }} className="opacity-30" priority />
@@ -103,15 +100,16 @@ export default async function AnimeDetailPage({ params }: PageProps) {
 
         {/* Right Column */}
         <div>
-          {/* --- START: ADDED STATUS UPDATER --- */}
           <div className="mb-6">
+            {/* --- START: PASS NEW PROP TO UPDATER --- */}
             <AnimeStatusUpdater 
               animeId={anime.id} 
               initialStatus={userListEntry?.status || null}
+              initialRating={userListEntry?.rating || null}
               user={session?.user || null}
             />
+            {/* --- END: PASS NEW PROP --- */}
           </div>
-          {/* --- END: ADDED STATUS UPDATER --- */}
 
           <div className="bg-card-dark p-4 rounded-lg">
             <h3 className="text-xl font-bold mb-4">Details</h3>
