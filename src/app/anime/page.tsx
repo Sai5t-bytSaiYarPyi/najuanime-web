@@ -5,17 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AccessDenied from '@/components/AccessDenied';
 import AnimeSearchBar from '@/components/AnimeSearchBar';
-import AnimeFilters from '@/components/AnimeFilters'; // Import the new filter component
+import AnimeFilters from '@/components/AnimeFilters';
 
 export const revalidate = 600;
 
-export default async function AnimeGridPage({ 
-  searchParams 
-}: { 
-  searchParams?: { 
+export default async function AnimeGridPage({
+  searchParams
+}: {
+  searchParams?: {
     q?: string;
-    genre?: string; 
-  }; 
+    genre?: string;
+    year?: string;
+    status?: string;
+  };
 }) {
   const supabase = createServerComponentClient({ cookies });
 
@@ -28,21 +30,31 @@ export default async function AnimeGridPage({
     .eq('id', session.user.id)
     .single();
 
-  const isSubscribed = profile?.subscription_expires_at 
-    ? new Date(profile.subscription_expires_at) > new Date() 
+  const isSubscribed = profile?.subscription_expires_at
+    ? new Date(profile.subscription_expires_at) > new Date()
     : false;
 
   if (!isSubscribed) return <AccessDenied />;
 
   const query = searchParams?.q || '';
   const genreFilter = searchParams?.genre || '';
+  const yearFilter = searchParams?.year || '';
+  const statusFilter = searchParams?.status || '';
 
-  // --- START: MODIFIED SUPABASE QUERY ---
-  // We need to use an RPC function for many-to-many filtering
-  // Let's create a simpler query for now and create the function later if needed.
-  // First, fetch all genres for the filter dropdown
+  // --- START: FETCH DATA FOR FILTERS ---
+  // Fetch all genres for the filter dropdown
   const { data: genres } = await supabase.from('genres').select('id, name').order('name', { ascending: true });
 
+  // Fetch unique years and statuses for filters
+  const { data: uniqueYearsData } = await supabase.rpc('get_unique_anime_years');
+  const { data: uniqueStatusesData } = await supabase.rpc('get_unique_anime_statuses');
+
+  const uniqueYears = uniqueYearsData?.map((item: { year: number }) => item.year) || [];
+  const uniqueStatuses = uniqueStatusesData?.map((item: { status: string }) => item.status) || [];
+  // --- END: FETCH DATA FOR FILTERS ---
+
+
+  // --- START: MODIFIED SUPABASE QUERY ---
   let animeQuery = supabase
     .from('anime_series')
     .select('id, title_english, title_romaji, poster_url, release_year, anime_genres!inner(genres!inner(name))');
@@ -50,10 +62,14 @@ export default async function AnimeGridPage({
   if (query) {
     animeQuery = animeQuery.or(`title_english.ilike.%${query}%,title_romaji.ilike.%${query}%`);
   }
-
   if (genreFilter) {
-    // This part filters based on the genre name from the joined table
     animeQuery = animeQuery.eq('anime_genres.genres.name', genreFilter);
+  }
+  if (yearFilter) {
+    animeQuery = animeQuery.eq('release_year', yearFilter);
+  }
+  if (statusFilter) {
+    animeQuery = animeQuery.eq('status', statusFilter);
   }
 
   const { data: animeList, error } = await animeQuery.order('created_at', { ascending: false });
@@ -72,10 +88,12 @@ export default async function AnimeGridPage({
         </div>
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <AnimeSearchBar />
-          <AnimeFilters genres={genres || []} />
         </div>
       </div>
-      
+      <div className="mb-8">
+        <AnimeFilters genres={genres || []} years={uniqueYears} statuses={uniqueStatuses} />
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
         {animeList && animeList.length > 0 ? (
           animeList.map((anime) => (
@@ -90,10 +108,10 @@ export default async function AnimeGridPage({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 p-3">
-                    <h2 className="font-bold text-white text-sm drop-shadow-md line-clamp-2">
-                      {anime.title_english || anime.title_romaji}
-                    </h2>
-                    <p className="text-xs text-gray-300">{anime.release_year}</p>
+                  <h2 className="font-bold text-white text-sm drop-shadow-md line-clamp-2">
+                    {anime.title_english || anime.title_romaji}
+                  </h2>
+                  <p className="text-xs text-gray-300">{anime.release_year}</p>
                 </div>
               </div>
             </Link>
