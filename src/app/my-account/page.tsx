@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // Define types for our data
 type Profile = {
@@ -19,7 +19,6 @@ type Receipt = {
 
 export default function MyAccountPage() {
   const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,9 +29,7 @@ export default function MyAccountPage() {
 
     if (session) {
       const user = session.user;
-      const userRoles = user.app_metadata?.roles || [];
-      setIsAdmin(userRoles.includes('admin'));
-
+      
       const [profileResponse, receiptsResponse] = await Promise.all([
         supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
         supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false })
@@ -40,7 +37,6 @@ export default function MyAccountPage() {
 
       if (profileResponse.data) setProfile(profileResponse.data as Profile);
       if (receiptsResponse.data) setReceipts(receiptsResponse.data as Receipt[]);
-
     }
     setLoading(false);
   }, []);

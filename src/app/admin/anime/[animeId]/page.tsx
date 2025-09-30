@@ -93,12 +93,10 @@ export default function ManageEpisodesPage() {
           console.log(`Polling for job ID: ${jobId}...`);
           const { data: statusData, error: pollError } = await supabase.functions.invoke('check-job-status', { body: { job_id: jobId } });
 
-          // --- START: DEBUG LOGGING ---
           console.log('Poll Response Data:', statusData);
           if (pollError) {
               console.error('Polling function invocation failed:', pollError);
           }
-          // --- END: DEBUG LOGGING ---
 
           if (pollError) { clearInterval(pollInterval); throw pollError; }
           
@@ -125,23 +123,24 @@ export default function ManageEpisodesPage() {
             alert(`Video processing failed on CloudConvert. Check the browser console for details. Job ID: ${jobId}`);
             setIsUploading(false);
             setUploadStatus('Upload Episode');
-            // We don't throw an error here to prevent the generic catch block alert
           } else {
             console.log(`Current job status: ${statusData?.status || 'unknown'}`);
           }
-        } catch (pollError: any) {
+        } catch (error: unknown) { // FIX: Changed from 'any' to 'unknown'
           clearInterval(pollInterval);
-          console.error(`Polling process caught an error: ${pollError.message}`);
-          alert(`An error occurred while checking status: ${pollError.message}`);
+          const errorMessage = error instanceof Error ? error.message : "An unknown polling error occurred.";
+          console.error(`Polling process caught an error: ${errorMessage}`);
+          alert(`An error occurred while checking status: ${errorMessage}`);
           setIsUploading(false);
           setUploadStatus('Upload Episode');
           await fetchData();
         }
-      }, 15000); // Poll every 15 seconds
+      }, 15000);
 
-    } catch (error: any) {
-      console.error('Upload process failed:', error);
-      alert(`Error: ${error.message}`);
+    } catch (error: unknown) { // FIX: Changed from 'any' to 'unknown'
+      const errorMessage = error instanceof Error ? error.message : "An unknown upload error occurred.";
+      console.error('Upload process failed:', errorMessage);
+      alert(`Error: ${errorMessage}`);
       setIsUploading(false);
       setUploadStatus('Upload Episode');
     }
