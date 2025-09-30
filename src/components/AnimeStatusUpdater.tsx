@@ -8,6 +8,15 @@ import { useDebouncedCallback } from 'use-debounce';
 
 type Status = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch';
 
+// --- START: NEW TYPE FOR UPSERT PAYLOAD ---
+type UpsertPayload = {
+  user_id: string;
+  anime_id: string;
+  status?: Status | null;
+  rating?: number | null;
+};
+// --- END: NEW TYPE FOR UPSERT PAYLOAD ---
+
 const statusOptions: { value: Status; label: string }[] = [
   { value: 'watching', label: 'Watching' },
   { value: 'completed', label: 'Completed' },
@@ -19,13 +28,13 @@ const statusOptions: { value: Status; label: string }[] = [
 type Props = {
   animeId: string;
   initialStatus: Status | null;
-  initialRating: number | null; // Add initialRating prop
+  initialRating: number | null;
   user: User | null;
 };
 
 export default function AnimeStatusUpdater({ animeId, initialStatus, initialRating, user }: Props) {
   const [currentStatus, setCurrentStatus] = useState<Status | null>(initialStatus);
-  const [currentRating, setCurrentRating] = useState<number | null>(initialRating); // New state for rating
+  const [currentRating, setCurrentRating] = useState<number | null>(initialRating);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -33,15 +42,17 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
     setCurrentRating(initialRating);
   }, [initialStatus, initialRating, user]);
 
-  // Use a single debounced function for any update
   const debouncedUpdate = useDebouncedCallback(async ({ status, rating }: { status?: Status | null, rating?: number | null }) => {
     if (!user) return;
     setIsLoading(true);
 
-    const dataToUpsert: any = {
+    // --- START: TYPE FIX ---
+    const dataToUpsert: UpsertPayload = {
       user_id: user.id,
       anime_id: animeId,
     };
+    // --- END: TYPE FIX ---
+
     if (status !== undefined) dataToUpsert.status = status;
     if (rating !== undefined) dataToUpsert.rating = rating;
 
@@ -51,7 +62,7 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
       alert(`Error updating list: ${error.message}`);
     }
     setIsLoading(false);
-  }, 1000); // Debounce by 1 second
+  }, 1000);
 
   const handleStatusChange = (newStatus: Status) => {
     setCurrentStatus(newStatus);
@@ -59,7 +70,7 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
   };
   
   const handleRatingChange = (newRating: number | null) => {
-    if (currentStatus) { // Can only rate if it's in the list
+    if (currentStatus) {
       setCurrentRating(newRating);
       debouncedUpdate({ rating: newRating });
     } else {
@@ -103,7 +114,6 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
           ))}
         </select>
         
-        {/* Rating Input */}
         {currentStatus && (
           <div className="flex items-center justify-between gap-2">
             <label htmlFor="rating" className="text-sm font-medium text-gray-300">Your Rating:</label>
