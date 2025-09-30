@@ -6,22 +6,19 @@ import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
 import Modal, { Styles } from 'react-modal';
 
-// Anime Series အတွက် Type Definition (Database Table)
+// Anime Series အတွက် Type Definition ကို Edit form အတွက် တိုးချဲ့ပါ
 type AnimeSeries = {
   id: string;
   created_at: string;
   title_english: string | null;
   title_romaji: string | null;
+  synopsis: string | null;
   poster_url: string | null;
   status: string | null;
   release_year: number | null;
-  // Add other fields you might need for the edit form later
-  synopsis: string | null;
-  trailer_url: string | null;
   type: string | null;
 };
 
-// Jikan API ကနေပြန်လာမယ့် Anime data အတွက် Type
 type JikanAnimeResult = {
     mal_id: number;
     title: string;
@@ -40,7 +37,6 @@ type JikanAnimeResult = {
     genres: { name: string }[];
     trailer: { youtube_id: string | null };
 };
-
 
 const customModalStyles: Styles = {
   content: {
@@ -68,14 +64,19 @@ export default function AnimeManagementPage() {
   const [loading, setLoading] = useState(true);
   const [animeList, setAnimeList] = useState<AnimeSeries[]>([]);
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Add Modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<JikanAnimeResult[]>([]);
   const [selectedAnime, setSelectedAnime] = useState<JikanAnimeResult | null>(null);
 
+  // --- START: NEW EDIT MODAL STATE ---
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAnime, setEditingAnime] = useState<AnimeSeries | null>(null);
+  // --- END: NEW EDIT MODAL STATE ---
+
   const fetchAnimeList = useCallback(async () => {
-    // setLoading(true); // No need to set loading true on manual refetch
     const { data, error } = await supabase
       .from('anime_series')
       .select('*')
@@ -105,21 +106,60 @@ export default function AnimeManagementPage() {
     checkAdminAndFetchData();
   }, [fetchAnimeList]);
 
-  const openModal = () => setIsModalOpen(true);
-  
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const openAddModal = () => setIsAddModalOpen(true);
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
     setSearchTerm('');
     setSearchResults([]);
     setSelectedAnime(null);
   };
+  
+  // --- START: NEW EDIT MODAL FUNCTIONS ---
+  const openEditModal = (anime: AnimeSeries) => {
+    setEditingAnime(anime);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingAnime(null);
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!editingAnime) return;
+    setEditingAnime({
+      ...editingAnime,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleUpdateAnime = async () => {
+    if (!editingAnime) return;
+
+    setLoading(true);
+    const { id, created_at, ...updateData } = editingAnime;
+
+    const { error } = await supabase
+      .from('anime_series')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) {
+      alert('Error updating anime: ' + error.message);
+    } else {
+      alert('Anime details updated successfully!');
+      closeEditModal();
+      await fetchAnimeList();
+    }
+    setLoading(false);
+  };
+  // --- END: NEW EDIT MODAL FUNCTIONS ---
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setIsSearching(true);
     setSelectedAnime(null);
     setSearchResults([]);
-
     try {
         const response = await fetch(`/api/jikan/search?q=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) throw new Error('Failed to fetch from Jikan API');
@@ -140,7 +180,6 @@ export default function AnimeManagementPage() {
   const handleImportAnime = async () => {
     if (!selectedAnime) return;
     setLoading(true);
-
     const animeData = {
       title_english: selectedAnime.title_english || selectedAnime.title,
       title_japanese: selectedAnime.title_japanese,
@@ -158,42 +197,35 @@ export default function AnimeManagementPage() {
       total_episodes: selectedAnime.episodes,
     };
     const genres = selectedAnime.genres.map(g => g.name);
-
     const { error } = await supabase.functions.invoke('import-anime-series', {
       body: { animeData, genres },
     });
-
     if (error) {
       alert('Error importing anime: ' + error.message);
     } else {
       alert(`Successfully imported "${animeData.title_english}"!`);
       await fetchAnimeList(); 
-      closeModal();
+      closeAddModal();
     }
     setLoading(false);
   };
 
-  // --- START: NEW DELETE FUNCTION ---
   const handleDeleteAnime = async (animeId: string, animeTitle: string) => {
     const confirmationMessage = `Are you sure you want to permanently delete "${animeTitle}"? This will also delete ALL of its episodes, video files, and cannot be undone.`;
-    
     if (window.confirm(confirmationMessage)) {
       setLoading(true);
       const { error } = await supabase.functions.invoke('delete-anime-series', {
         body: { anime_id: animeId },
       });
-
       if (error) {
         alert(`Error deleting anime: ${error.message}`);
         setLoading(false);
       } else {
         alert(`"${animeTitle}" has been deleted successfully.`);
-        // fetchAnimeList will be called and will set loading to false
         await fetchAnimeList(); 
       }
     }
   };
-  // --- END: NEW DELETE FUNCTION ---
 
   if (loading && animeList.length === 0) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   if (!isAdmin) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
@@ -202,7 +234,7 @@ export default function AnimeManagementPage() {
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Anime Management</h1>
-        <button onClick={openModal} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md font-semibold">
+        <button onClick={openAddModal} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md font-semibold">
           + Add New Anime (from MAL)
         </button>
       </div>
@@ -223,8 +255,15 @@ export default function AnimeManagementPage() {
                 <Link href={`/admin/anime/${item.id}`} className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
                     Manage Episodes
                 </Link>
-                <button className="text-sm bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Edit</button>
-                {/* --- START: UPDATED DELETE BUTTON --- */}
+                {/* --- START: UPDATED EDIT BUTTON --- */}
+                <button 
+                  onClick={() => openEditModal(item)}
+                  disabled={loading}
+                  className="text-sm bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded disabled:bg-gray-500"
+                >
+                  Edit
+                </button>
+                {/* --- END: UPDATED EDIT BUTTON --- */}
                 <button 
                   onClick={() => handleDeleteAnime(item.id, item.title_english || item.title_romaji || 'this anime')}
                   disabled={loading}
@@ -232,7 +271,6 @@ export default function AnimeManagementPage() {
                 >
                   Delete
                 </button>
-                {/* --- END: UPDATED DELETE BUTTON --- */}
               </div>
             </div>
           ))
@@ -241,7 +279,8 @@ export default function AnimeManagementPage() {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
+      {/* Add New Anime Modal */}
+      <Modal isOpen={isAddModalOpen} onRequestClose={closeAddModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
         {selectedAnime ? (
             <div className="flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-4">Confirm Import</h2>
@@ -284,11 +323,57 @@ export default function AnimeManagementPage() {
                     </div>
                 </div>
                  <div className="flex justify-end gap-4 mt-4">
-                    <button onClick={closeModal} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Cancel</button>
+                    <button onClick={closeAddModal} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Cancel</button>
                 </div>
             </div>
         )}
       </Modal>
+
+      {/* --- START: NEW EDIT MODAL --- */}
+      {editingAnime && (
+        <Modal isOpen={isEditModalOpen} onRequestClose={closeEditModal} style={customModalStyles} contentLabel="Edit Anime Details">
+          <div className="flex flex-col flex-grow">
+            <h2 className="text-xl font-bold mb-4">Edit Anime Details</h2>
+            <div className="flex-grow overflow-y-auto pr-2 space-y-4">
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">English Title</label>
+                <input type="text" name="title_english" value={editingAnime.title_english || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Romaji Title</label>
+                <input type="text" name="title_romaji" value={editingAnime.title_romaji || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Synopsis</label>
+                <textarea name="synopsis" value={editingAnime.synopsis || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" rows={5}></textarea>
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Poster URL</label>
+                <input type="text" name="poster_url" value={editingAnime.poster_url || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Release Year</label>
+                <input type="number" name="release_year" value={editingAnime.release_year || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Status</label>
+                <input type="text" name="status" value={editingAnime.status || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+               <div>
+                <label className="block mb-1 text-sm font-medium text-gray-300">Type (e.g., TV, Movie)</label>
+                <input type="text" name="type" value={editingAnime.type || ''} onChange={handleEditFormChange} className="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <button onClick={closeEditModal} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Cancel</button>
+              <button onClick={handleUpdateAnime} disabled={loading} className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-md disabled:bg-gray-500">
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+      {/* --- END: NEW EDIT MODAL --- */}
     </div>
   );
 }
