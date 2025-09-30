@@ -3,9 +3,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-// --- START: ICON IMPORT FIX (Removed unused 'Star') ---
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
-// --- END: ICON IMPORT FIX ---
 
 // Revalidate the page every hour to fetch fresh data
 export const revalidate = 3600;
@@ -15,6 +13,15 @@ type PageProps = {
     animeId: string;
   };
 };
+
+// --- START: NEW TYPE DEFINITION FOR EPISODE ---
+type Episode = {
+  id: string;
+  episode_number: number;
+  title: string | null;
+  created_at: string;
+};
+// --- END: NEW TYPE DEFINITION FOR EPISODE ---
 
 // Helper component for displaying info pills
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
@@ -45,10 +52,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // --- START: TYPE ANNOTATION FIX ---
-  // Extract genres from the nested structure with an explicit type for 'ag'
   const genres = anime.anime_genres.map((ag: { genres: { name: string | null } | null }) => ag.genres?.name).filter(Boolean) as string[];
-  // --- END: TYPE ANNOTATION FIX ---
 
   return (
     <div className="min-h-screen text-white">
@@ -134,12 +138,14 @@ export default async function AnimeDetailPage({ params }: PageProps) {
             <h3 className="text-xl font-bold mb-4">Episodes</h3>
             <div className="bg-card-dark rounded-lg max-h-96 overflow-y-auto">
               {anime.anime_episodes.length > 0 ? (
-                anime.anime_episodes.map(ep => (
+                // --- START: TYPE ANNOTATION FIX ---
+                anime.anime_episodes.map((ep: Episode) => (
                   <div key={ep.id} className="p-4 border-b border-border-color last:border-b-0 hover:bg-gray-700/50 transition-colors">
                     <p className="font-semibold text-gray-200">Episode {ep.episode_number}</p>
                     {ep.title && <p className="text-sm text-gray-400">{ep.title}</p>}
                   </div>
                 ))
+                // --- END: TYPE ANNOTATION FIX ---
               ) : (
                 <p className="p-4 text-gray-400">No episodes available yet.</p>
               )}
