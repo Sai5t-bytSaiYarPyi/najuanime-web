@@ -8,14 +8,12 @@ import { useDebouncedCallback } from 'use-debounce';
 
 type Status = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch';
 
-// --- START: NEW TYPE FOR UPSERT PAYLOAD ---
 type UpsertPayload = {
   user_id: string;
   anime_id: string;
   status?: Status | null;
   rating?: number | null;
 };
-// --- END: NEW TYPE FOR UPSERT PAYLOAD ---
 
 const statusOptions: { value: Status; label: string }[] = [
   { value: 'watching', label: 'Watching' },
@@ -46,15 +44,18 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
     if (!user) return;
     setIsLoading(true);
 
-    // --- START: TYPE FIX ---
     const dataToUpsert: UpsertPayload = {
       user_id: user.id,
       anime_id: animeId,
     };
-    // --- END: TYPE FIX ---
 
     if (status !== undefined) dataToUpsert.status = status;
     if (rating !== undefined) dataToUpsert.rating = rating;
+    
+    // Ensure status is never null if we are just updating the rating of an existing entry
+    if (dataToUpsert.status === undefined && currentStatus) {
+        dataToUpsert.status = currentStatus;
+    }
 
     const { error } = await supabase.from('user_anime_list').upsert(dataToUpsert);
 
@@ -66,13 +67,17 @@ export default function AnimeStatusUpdater({ animeId, initialStatus, initialRati
 
   const handleStatusChange = (newStatus: Status) => {
     setCurrentStatus(newStatus);
-    debouncedUpdate({ status: newStatus, rating: currentRating === undefined ? null : currentRating });
+    debouncedUpdate({ status: newStatus, rating: currentRating });
   };
   
   const handleRatingChange = (newRating: number | null) => {
     if (currentStatus) {
       setCurrentRating(newRating);
-      debouncedUpdate({ rating: newRating });
+      // --- START: THIS IS THE FIX ---
+      // When updating the rating, we must also send the current status
+      // to prevent the database from setting the status column to NULL.
+      debouncedUpdate({ status: currentStatus, rating: newRating });
+      // --- END: THIS IS THE FIX ---
     } else {
       alert("Please add the anime to your list before rating it.");
     }
