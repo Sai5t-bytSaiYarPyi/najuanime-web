@@ -3,7 +3,9 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { FaPlayCircle, FaCalendarAlt, FaClock, FaTag, FaBookOpen, FaFilm, FaStar } from 'lucide-react';
+// --- START: ICON IMPORT FIX ---
+import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film, Star } from 'lucide-react';
+// --- END: ICON IMPORT FIX ---
 
 // Revalidate the page every hour to fetch fresh data
 export const revalidate = 3600;
@@ -117,15 +119,16 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         <div>
           <div className="bg-card-dark p-4 rounded-lg">
             <h3 className="text-xl font-bold mb-4">Details</h3>
+            {/* --- START: ICON USAGE FIX --- */}
             <div className="flex flex-wrap gap-3">
-              <InfoPill icon={<FaFilm size={14} />} text={anime.type} />
-              <InfoPill icon={<FaPlayCircle size={14} />} text={anime.status} />
-              <InfoPill icon={<FaCalendarAlt size={14} />} text={anime.release_year} />
-              <InfoPill icon={<FaClock size={14} />} text={anime.duration_minutes ? `${anime.duration_minutes} min` : null} />
-              <InfoPill icon={<FaTag size={14} />} text={anime.season} />
-              <InfoPill icon={<FaBookOpen size={14} />} text={anime.source_material} />
-              {/* Add more pills as needed */}
+              <InfoPill icon={<Film size={14} />} text={anime.type} />
+              <InfoPill icon={<PlayCircle size={14} />} text={anime.status} />
+              <InfoPill icon={<Calendar size={14} />} text={anime.release_year} />
+              <InfoPill icon={<Clock size={14} />} text={anime.duration_minutes ? `${anime.duration_minutes} min` : null} />
+              <InfoPill icon={<Tag size={14} />} text={anime.season} />
+              <InfoPill icon={<BookOpen size={14} />} text={anime.source_material} />
             </div>
+            {/* --- END: ICON USAGE FIX --- */}
           </div>
 
           <div className="mt-6">
