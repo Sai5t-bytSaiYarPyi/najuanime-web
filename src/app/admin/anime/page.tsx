@@ -15,6 +15,10 @@ type AnimeSeries = {
   poster_url: string | null;
   status: string | null;
   release_year: number | null;
+  // Add other fields you might need for the edit form later
+  synopsis: string | null;
+  trailer_url: string | null;
+  type: string | null;
 };
 
 // Jikan API ကနေပြန်လာမယ့် Anime data အတွက် Type
@@ -163,11 +167,33 @@ export default function AnimeManagementPage() {
       alert('Error importing anime: ' + error.message);
     } else {
       alert(`Successfully imported "${animeData.title_english}"!`);
-      await fetchAnimeList(); // Refresh the list on the page
+      await fetchAnimeList(); 
       closeModal();
     }
-    setLoading(false); // setLoading(false) was missing here
+    setLoading(false);
   };
+
+  // --- START: NEW DELETE FUNCTION ---
+  const handleDeleteAnime = async (animeId: string, animeTitle: string) => {
+    const confirmationMessage = `Are you sure you want to permanently delete "${animeTitle}"? This will also delete ALL of its episodes, video files, and cannot be undone.`;
+    
+    if (window.confirm(confirmationMessage)) {
+      setLoading(true);
+      const { error } = await supabase.functions.invoke('delete-anime-series', {
+        body: { anime_id: animeId },
+      });
+
+      if (error) {
+        alert(`Error deleting anime: ${error.message}`);
+        setLoading(false);
+      } else {
+        alert(`"${animeTitle}" has been deleted successfully.`);
+        // fetchAnimeList will be called and will set loading to false
+        await fetchAnimeList(); 
+      }
+    }
+  };
+  // --- END: NEW DELETE FUNCTION ---
 
   if (loading && animeList.length === 0) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   if (!isAdmin) { return <div className="flex min-h-screen items-center justify-center bg-gray-900 text-red-500">Access Denied.</div>; }
@@ -194,13 +220,19 @@ export default function AnimeManagementPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {/* --- START OF FIX --- */}
                 <Link href={`/admin/anime/${item.id}`} className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
                     Manage Episodes
                 </Link>
-                {/* --- END OF FIX --- */}
                 <button className="text-sm bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Edit</button>
-                <button className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Delete</button>
+                {/* --- START: UPDATED DELETE BUTTON --- */}
+                <button 
+                  onClick={() => handleDeleteAnime(item.id, item.title_english || item.title_romaji || 'this anime')}
+                  disabled={loading}
+                  className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
+                >
+                  Delete
+                </button>
+                {/* --- END: UPDATED DELETE BUTTON --- */}
               </div>
             </div>
           ))
@@ -210,7 +242,6 @@ export default function AnimeManagementPage() {
       </div>
 
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
-        {/* Modal content remains the same */}
         {selectedAnime ? (
             <div className="flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-4">Confirm Import</h2>
