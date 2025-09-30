@@ -3,8 +3,8 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-// --- START: ICON IMPORT FIX ---
-import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film, Star } from 'lucide-react';
+// --- START: ICON IMPORT FIX (Removed unused 'Star') ---
+import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 // --- END: ICON IMPORT FIX ---
 
 // Revalidate the page every hour to fetch fresh data
@@ -30,7 +30,6 @@ const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number
 export default async function AnimeDetailPage({ params }: PageProps) {
   const supabase = createServerComponentClient({ cookies });
 
-  // Fetch anime, its genres (via join table), and its episodes in a single query
   const { data: anime, error } = await supabase
     .from('anime_series')
     .select(`
@@ -46,8 +45,10 @@ export default async function AnimeDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Extract genres from the nested structure
-  const genres = anime.anime_genres.map(ag => ag.genres?.name).filter(Boolean) as string[];
+  // --- START: TYPE ANNOTATION FIX ---
+  // Extract genres from the nested structure with an explicit type for 'ag'
+  const genres = anime.anime_genres.map((ag: { genres: { name: string | null } | null }) => ag.genres?.name).filter(Boolean) as string[];
+  // --- END: TYPE ANNOTATION FIX ---
 
   return (
     <div className="min-h-screen text-white">
@@ -119,7 +120,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         <div>
           <div className="bg-card-dark p-4 rounded-lg">
             <h3 className="text-xl font-bold mb-4">Details</h3>
-            {/* --- START: ICON USAGE FIX --- */}
             <div className="flex flex-wrap gap-3">
               <InfoPill icon={<Film size={14} />} text={anime.type} />
               <InfoPill icon={<PlayCircle size={14} />} text={anime.status} />
@@ -128,7 +128,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               <InfoPill icon={<Tag size={14} />} text={anime.season} />
               <InfoPill icon={<BookOpen size={14} />} text={anime.source_material} />
             </div>
-            {/* --- END: ICON USAGE FIX --- */}
           </div>
 
           <div className="mt-6">
