@@ -80,7 +80,6 @@ export default function ManageEpisodesPage() {
     setIsUploading(true);
 
     try {
-      // Step 1: Upload the file to Storage (without customMetadata)
       const fileName = `${Date.now()}-${videoFile.name.replace(/\s+/g, '-')}`;
       const filePath = `${animeId}/${fileName}`;
 
@@ -96,13 +95,12 @@ export default function ManageEpisodesPage() {
         throw uploadError;
       }
 
-      // Step 2: If upload is successful, invoke the Edge Function with the necessary data
       const { error: functionError } = await supabase.functions.invoke('start-video-processing', {
         body: {
           series_id: animeId,
           episode_number: episodeNumber,
           title: episodeTitle,
-          rawFilePath: uploadData.path, // Pass the path of the uploaded file
+          rawFilePath: uploadData.path,
         },
       });
 
@@ -112,7 +110,6 @@ export default function ManageEpisodesPage() {
 
       alert('Upload successful! Video processing has started in the background. It may take a few minutes for the episode to appear.');
       
-      // Reset form and refetch data
       setEpisodeNumber('');
       setEpisodeTitle('');
       setVideoFile(null);
@@ -123,9 +120,16 @@ export default function ManageEpisodesPage() {
         fetchData();
       }, 5000);
 
-    } catch (error: any) {
+    // --- START OF FIX ---
+    } catch (error) { // Changed from 'error: any' to just 'error'
       console.error('Upload process failed:', error);
-      alert(`Error: ${error.message}`);
+      // Safely get the error message
+      let errorMessage = 'An unknown error occurred.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      alert(`Error: ${errorMessage}`);
+    // --- END OF FIX ---
     } finally {
       setIsUploading(false);
     }
@@ -140,7 +144,6 @@ export default function ManageEpisodesPage() {
       <p className="text-gray-400 mb-8">Upload new episodes and manage existing ones.</p>
       
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Upload Form Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Episode</h2>
           <div className="space-y-4">
@@ -162,7 +165,6 @@ export default function ManageEpisodesPage() {
           </div>
         </div>
 
-        {/* Existing Episodes List Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Existing Episodes</h2>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
