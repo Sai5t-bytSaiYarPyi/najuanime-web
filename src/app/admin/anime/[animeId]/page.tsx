@@ -30,7 +30,6 @@ const animeId = params.animeId as string;
 const [series, setSeries] = useState<AnimeSeries | null>(null);
 const [episodes, setEpisodes] = useState<Episode[]>([]);
 const [loading, setLoading] = useState(true);
-
 const [episodeNumber, setEpisodeNumber] = useState('');
 const [episodeTitle, setEpisodeTitle] = useState('');
 const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -40,16 +39,11 @@ const [uploadStatus, setUploadStatus] = useState('Upload Episode');
 const fetchData = useCallback(async () => {
 if (!animeId) return;
 setLoading(true);
-
 const { data: seriesData } = await supabase.from('anime_series').select('id, title_english').eq('id', animeId).single();
 setSeries(seriesData);
-
 const { data: episodesData } = await supabase.from('anime_episodes').select('*').eq('series_id', animeId).order('episode_number', { ascending: true });
 setEpisodes(episodesData || []);
-
 setLoading(false);
-
-
 }, [animeId]);
 
 useEffect(() => {
@@ -83,10 +77,10 @@ try {
 
   setUploadStatus('2/4: Starting processing job...');
   const { data: startData, error: functionError } = await supabase.functions.invoke('start-video-processing', { body: { series_id: animeId, episode_number: episodeNumber, title: episodeTitle, rawFilePath: uploadData.path } });
-  if (functionError) throw functionError;
+  if (functionError) throw new Error(`Starting job failed: ${functionError.message}`);
 
   const { jobId, episodeId } = startData;
-  if (!jobId) throw new Error("Failed to get Job ID from processing function.");
+  if (!jobId || !episodeId) throw new Error("Failed to get Job ID or Episode ID from processing function.");
   
   setUploadStatus('3/4: Processing video (polling)...');
   setEpisodeNumber(''); setEpisodeTitle(''); setVideoFile(null);
@@ -103,24 +97,27 @@ try {
         clearInterval(pollInterval);
         setUploadStatus('4/4: Saving results...');
         const { error: saveError } = await supabase.functions.invoke('save-video-urls', { body: { job: statusData, episode_id: episodeId } });
-        if (saveError) throw saveError;
+        if (saveError) throw new Error(`Saving results failed: ${saveError.message}`);
         
         alert('Episode is now ready!');
         await fetchData();
+        setIsUploading(false); // Only set to false on full completion
         setUploadStatus('Upload Episode');
       } else if (statusData.status === 'error') {
         clearInterval(pollInterval);
+        setIsUploading(false);
+        setUploadStatus('Upload Episode');
         throw new Error(`Video processing failed on CloudConvert. Job ID: ${jobId}`);
       }
-      // If still 'processing', the interval will continue
     } catch (pollError: any) {
       clearInterval(pollInterval);
       console.error(`Polling failed: ${pollError.message}`);
       alert(`Error checking status: ${pollError.message}`);
+      setIsUploading(false);
       setUploadStatus('Upload Episode');
       await fetchData();
     }
-  }, 15000); // Poll every 15 seconds
+  }, 15000);
 
 } catch (error: any) {
   console.error('Upload process failed:', error);

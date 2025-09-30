@@ -32,7 +32,6 @@ for (const task of exportTasks) {
   if (task.status === 'finished' && task.result?.files?.[0]) {
     const file = task.result.files[0];
     const tempUrl = file.url;
-    
     const resolution = task.name.split('-')[1];
     const newFilename = `${resolution}.mp4`;
     const newFilepath = `${episode_id}/${newFilename}`;

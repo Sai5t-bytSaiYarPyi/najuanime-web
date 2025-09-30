@@ -21,7 +21,7 @@ if (!series_id || !episode_number || !rawFilePath) {
 throw new Error("Request body is missing required fields.")
 }
 
-const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage.from('anime-videos-raw').createSignedUrl(rawFilePath, 3600) // 1 hour validity
+const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage.from('anime-videos-raw').createSignedUrl(rawFilePath, 3600)
 if (signedUrlError) throw signedUrlError
 
 const { data: newEpisode, error: insertError } = await supabaseAdmin.from('anime_episodes').insert({
