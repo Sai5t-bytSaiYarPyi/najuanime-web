@@ -3,13 +3,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Clapperboard, Flame, User, X } from 'lucide-react';
+import { Home, Clapperboard, Flame, User, X, TrendingUp } from 'lucide-react'; // Added TrendingUp icon
 import { motion } from 'framer-motion';
 
 const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/manhwa', label: 'Manhwa', icon: Flame },
     { href: '/anime', label: 'Anime', icon: Clapperboard },
+    // --- START: NEW NAV ITEM ADDED ---
+    { href: '/top-rated', label: 'Top Rated', icon: TrendingUp },
+    // --- END: NEW NAV ITEM ADDED ---
     { href: '/my-account', label: 'My Account', icon: User },
 ];
 
