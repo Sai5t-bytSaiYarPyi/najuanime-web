@@ -71,7 +71,6 @@ export default function ManageEpisodesPage() {
     }
   };
 
-  // --- START OF FINAL UPDATE ---
   const handleUpload = async () => {
     if (!videoFile || !episodeNumber || !animeId) {
       alert('Episode number and a video file are required.');
@@ -81,51 +80,56 @@ export default function ManageEpisodesPage() {
     setIsUploading(true);
 
     try {
+      // Step 1: Upload the file to Storage (without customMetadata)
       const fileName = `${Date.now()}-${videoFile.name.replace(/\s+/g, '-')}`;
       const filePath = `${animeId}/${fileName}`;
 
-      // Upload file to the 'anime-videos-raw' bucket with metadata
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('anime-videos-raw')
         .upload(filePath, videoFile, {
-          // This metadata is crucial for our Edge Function!
           upsert: false,
           contentType: videoFile.type,
           cacheControl: '3600',
-          // Custom metadata to be read by the trigger function
-          customMetadata: {
-            series_id: animeId,
-            episode_number: episodeNumber,
-            title: episodeTitle
-          }
         });
 
       if (uploadError) {
         throw uploadError;
       }
 
+      // Step 2: If upload is successful, invoke the Edge Function with the necessary data
+      const { error: functionError } = await supabase.functions.invoke('start-video-processing', {
+        body: {
+          series_id: animeId,
+          episode_number: episodeNumber,
+          title: episodeTitle,
+          rawFilePath: uploadData.path, // Pass the path of the uploaded file
+        },
+      });
+
+      if (functionError) {
+        throw functionError;
+      }
+
       alert('Upload successful! Video processing has started in the background. It may take a few minutes for the episode to appear.');
       
-      // Reset form
+      // Reset form and refetch data
       setEpisodeNumber('');
       setEpisodeTitle('');
       setVideoFile(null);
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Optionally, refetch data after a short delay
       setTimeout(() => {
         fetchData();
-      }, 5000); // Refetch after 5 seconds to see the initial record
+      }, 5000);
 
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert(`Error uploading file: ${errorMessage}`);
+    } catch (error: any) {
+      console.error('Upload process failed:', error);
+      alert(`Error: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
   };
-  // --- END OF FINAL UPDATE ---
 
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   
@@ -136,6 +140,7 @@ export default function ManageEpisodesPage() {
       <p className="text-gray-400 mb-8">Upload new episodes and manage existing ones.</p>
       
       <div className="grid md:grid-cols-2 gap-8">
+        {/* Upload Form Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Episode</h2>
           <div className="space-y-4">
@@ -157,6 +162,7 @@ export default function ManageEpisodesPage() {
           </div>
         </div>
 
+        {/* Existing Episodes List Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Existing Episodes</h2>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -168,7 +174,6 @@ export default function ManageEpisodesPage() {
                     <p className="text-sm text-gray-400">{ep.title || 'No Title'}</p>
                   </div>
                    <div className="flex items-center gap-2">
-                    {/* Check if processing is complete */}
                     {ep.video_urls ? 
                       <span className="text-xs text-green-400">Ready</span> : 
                       <span className="text-xs text-yellow-400 animate-pulse">Processing...</span>
