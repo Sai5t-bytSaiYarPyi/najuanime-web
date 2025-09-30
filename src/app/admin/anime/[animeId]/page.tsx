@@ -6,15 +6,12 @@ import { supabase } from '../../../../lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
-// --- START OF FIX ---
-// 1. Define a specific type for video URLs instead of 'any'
 type VideoUrls = {
   '1080p'?: string;
   '720p'?: string;
   '480p'?: string;
 };
 
-// Type definitions
 type AnimeSeries = {
   id: string;
   title_english: string;
@@ -23,10 +20,8 @@ type Episode = {
   id: string;
   episode_number: number;
   title: string | null;
-  // 2. Use the new VideoUrls type here
   video_urls: VideoUrls | null; 
 };
-// --- END OF FIX ---
 
 export default function ManageEpisodesPage() {
   const params = useParams();
@@ -36,7 +31,6 @@ export default function ManageEpisodesPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form state for new episode
   const [episodeNumber, setEpisodeNumber] = useState('');
   const [episodeTitle, setEpisodeTitle] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -77,17 +71,61 @@ export default function ManageEpisodesPage() {
     }
   };
 
+  // --- START OF FINAL UPDATE ---
   const handleUpload = async () => {
-    if (!videoFile || !episodeNumber) {
+    if (!videoFile || !episodeNumber || !animeId) {
       alert('Episode number and a video file are required.');
       return;
     }
-    // --- FIX: 3. Use setIsUploading to remove the warning ---
-    setIsUploading(true); 
-    // TODO: Implement the video upload and transcoding pipeline logic here.
-    alert(`Uploading Episode ${episodeNumber} for "${series?.title_english}".\nThis will trigger our video processing pipeline in the next step!`);
-    setIsUploading(false);
+    
+    setIsUploading(true);
+
+    try {
+      const fileName = `${Date.now()}-${videoFile.name.replace(/\s+/g, '-')}`;
+      const filePath = `${animeId}/${fileName}`;
+
+      // Upload file to the 'anime-videos-raw' bucket with metadata
+      const { error: uploadError } = await supabase.storage
+        .from('anime-videos-raw')
+        .upload(filePath, videoFile, {
+          // This metadata is crucial for our Edge Function!
+          upsert: false,
+          contentType: videoFile.type,
+          cacheControl: '3600',
+          // Custom metadata to be read by the trigger function
+          customMetadata: {
+            series_id: animeId,
+            episode_number: episodeNumber,
+            title: episodeTitle
+          }
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      alert('Upload successful! Video processing has started in the background. It may take a few minutes for the episode to appear.');
+      
+      // Reset form
+      setEpisodeNumber('');
+      setEpisodeTitle('');
+      setVideoFile(null);
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      // Optionally, refetch data after a short delay
+      setTimeout(() => {
+        fetchData();
+      }, 5000); // Refetch after 5 seconds to see the initial record
+
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert(`Error uploading file: ${errorMessage}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
+  // --- END OF FINAL UPDATE ---
 
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   
@@ -98,7 +136,6 @@ export default function ManageEpisodesPage() {
       <p className="text-gray-400 mb-8">Upload new episodes and manage existing ones.</p>
       
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Upload Form Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Episode</h2>
           <div className="space-y-4">
@@ -115,12 +152,11 @@ export default function ManageEpisodesPage() {
               <input type="file" onChange={handleFileSelect} accept="video/*" className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"/>
             </div>
             <button onClick={handleUpload} disabled={isUploading || !videoFile || !episodeNumber} className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-md font-semibold">
-              {isUploading ? 'Uploading...' : 'Upload Episode'}
+              {isUploading ? 'Uploading... Please wait.' : 'Upload Episode'}
             </button>
           </div>
         </div>
 
-        {/* Existing Episodes List Section */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Existing Episodes</h2>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -132,6 +168,11 @@ export default function ManageEpisodesPage() {
                     <p className="text-sm text-gray-400">{ep.title || 'No Title'}</p>
                   </div>
                    <div className="flex items-center gap-2">
+                    {/* Check if processing is complete */}
+                    {ep.video_urls ? 
+                      <span className="text-xs text-green-400">Ready</span> : 
+                      <span className="text-xs text-yellow-400 animate-pulse">Processing...</span>
+                    }
                     <button className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Delete</button>
                   </div>
                 </div> 
