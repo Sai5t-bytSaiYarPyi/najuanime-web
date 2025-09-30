@@ -4,18 +4,23 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
 import AccessDenied from '@/components/AccessDenied';
-import AnimeSearchBar from '@/components/AnimeSearchBar'; // Import the new component
+import AnimeSearchBar from '@/components/AnimeSearchBar';
+import AnimeFilters from '@/components/AnimeFilters'; // Import the new filter component
 
 export const revalidate = 600;
 
-// Add searchParams to props
-export default async function AnimeGridPage({ searchParams }: { searchParams?: { q?: string; }; }) {
+export default async function AnimeGridPage({ 
+  searchParams 
+}: { 
+  searchParams?: { 
+    q?: string;
+    genre?: string; 
+  }; 
+}) {
   const supabase = createServerComponentClient({ cookies });
 
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    return <AccessDenied />;
-  }
+  if (!session) return <AccessDenied />;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -27,23 +32,31 @@ export default async function AnimeGridPage({ searchParams }: { searchParams?: {
     ? new Date(profile.subscription_expires_at) > new Date() 
     : false;
 
-  if (!isSubscribed) {
-    return <AccessDenied />;
-  }
+  if (!isSubscribed) return <AccessDenied />;
 
   const query = searchParams?.q || '';
+  const genreFilter = searchParams?.genre || '';
 
   // --- START: MODIFIED SUPABASE QUERY ---
-  let supabaseQuery = supabase
+  // We need to use an RPC function for many-to-many filtering
+  // Let's create a simpler query for now and create the function later if needed.
+  // First, fetch all genres for the filter dropdown
+  const { data: genres } = await supabase.from('genres').select('id, name').order('name', { ascending: true });
+
+  let animeQuery = supabase
     .from('anime_series')
-    .select('id, title_english, title_romaji, poster_url, release_year');
+    .select('id, title_english, title_romaji, poster_url, release_year, anime_genres!inner(genres!inner(name))');
 
   if (query) {
-    // Search in both english and romaji titles
-    supabaseQuery = supabaseQuery.or(`title_english.ilike.%${query}%,title_romaji.ilike.%${query}%`);
+    animeQuery = animeQuery.or(`title_english.ilike.%${query}%,title_romaji.ilike.%${query}%`);
   }
 
-  const { data: animeList, error } = await supabaseQuery.order('created_at', { ascending: false });
+  if (genreFilter) {
+    // This part filters based on the genre name from the joined table
+    animeQuery = animeQuery.eq('anime_genres.genres.name', genreFilter);
+  }
+
+  const { data: animeList, error } = await animeQuery.order('created_at', { ascending: false });
   // --- END: MODIFIED SUPABASE QUERY ---
 
   if (error) {
@@ -57,7 +70,10 @@ export default async function AnimeGridPage({ searchParams }: { searchParams?: {
           <h1 className="text-4xl font-bold mb-2">All Anime</h1>
           <p className="text-gray-400">Browse our collection of high-quality, subtitled anime.</p>
         </div>
-        <AnimeSearchBar />
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <AnimeSearchBar />
+          <AnimeFilters genres={genres || []} />
+        </div>
       </div>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
