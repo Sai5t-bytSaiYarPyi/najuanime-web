@@ -10,7 +10,7 @@ type Review = {
   id: string;
   review_text: string;
   created_at: string;
-  user_id: string; // Add user_id to the type
+  user_id: string;
   profiles: {
     naju_id: string;
   }[] | null;
@@ -45,8 +45,6 @@ export default function AnimeReviews({ animeId, user }: Props) {
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
-    // --- START: MODIFIED QUERY ---
-    // Fetch user_id along with other data in a single call
     const { data, error } = await supabase
       .from('anime_reviews')
       .select('id, review_text, created_at, user_id, profiles(naju_id)')
@@ -56,20 +54,19 @@ export default function AnimeReviews({ animeId, user }: Props) {
     if (error) {
         console.error("Error fetching reviews:", error.message);
     }
-    // --- END: MODIFIED QUERY ---
 
     if (data) {
-      setReviews(data as any); // Temporarily cast as any to avoid intermediate type issues
+      // --- START: TYPE FIX ---
+      // Changed 'as any' to the correct 'as Review[]'
+      setReviews(data as Review[]);
+      // --- END: TYPE FIX ---
       
-      // --- START: SIMPLIFIED CHECK ---
-      // Check if the current user's ID is in the fetched reviews list
       if (user) {
         const hasReviewed = data.some(review => review.user_id === user.id);
         setUserHasReviewed(hasReviewed);
       } else {
         setUserHasReviewed(false);
       }
-      // --- END: SIMPLIFIED CHECK ---
     }
     setLoading(false);
   }, [animeId, user]);
@@ -98,7 +95,7 @@ export default function AnimeReviews({ animeId, user }: Props) {
     } else {
       setReviewText('');
       closeModal();
-      await fetchReviews(); // Refresh the reviews list
+      await fetchReviews();
     }
     setIsSubmitting(false);
   };
