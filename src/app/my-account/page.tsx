@@ -3,9 +3,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { Session } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Image from 'next/image'; // Import Next.js Image component
 
 // Define types for our data
 type Profile = {
@@ -17,32 +18,52 @@ type Receipt = {
   status: 'pending' | 'approved' | 'rejected';
 };
 
+// --- START: NEW TYPE DEFINITION FOR USER'S ANIME LIST ---
+type UserAnimeListItem = {
+  status: string;
+  anime_series: {
+    id: string;
+    poster_url: string | null;
+    title_english: string | null;
+    title_romaji: string | null;
+  } | null;
+};
+// --- END: NEW TYPE DEFINITION ---
+
 export default function MyAccountPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]); // New state for anime list
   const [loading, setLoading] = useState(true);
 
-  const setupUser = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setSession(session);
+  const setupUser = useCallback(async (user: User) => {
+    // Fetch profile, receipts, and anime list in parallel
+    const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
+      supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
+      supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false }),
+      // Fetch user's anime list and join with anime_series to get details
+      supabase.from('user_anime_list').select('status, anime_series(id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
+    ]);
 
-    if (session) {
-      const user = session.user;
-      
-      const [profileResponse, receiptsResponse] = await Promise.all([
-        supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
-        supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false })
-      ]);
-
-      if (profileResponse.data) setProfile(profileResponse.data as Profile);
-      if (receiptsResponse.data) setReceipts(receiptsResponse.data as Receipt[]);
-    }
+    if (profileResponse.data) setProfile(profileResponse.data as Profile);
+    if (receiptsResponse.data) setReceipts(receiptsResponse.data as Receipt[]);
+    if (animeListResponse.data) setAnimeList(animeListResponse.data as UserAnimeListItem[]);
+    
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    setupUser();
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      if (session) {
+        await setupUser(session.user);
+      } else {
+        setLoading(false);
+      }
+    };
+    checkSession();
   }, [setupUser]);
 
   const isSubscribed = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
@@ -93,6 +114,44 @@ export default function MyAccountPage() {
             </div>
         </div>
         
+        {/* --- START: NEW MY ANIME LIST SECTION --- */}
+        <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">My Anime List</h2>
+            {animeList.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {animeList.map(item => {
+                        if (!item.anime_series) return null; // Skip if anime data is missing
+                        return (
+                        <Link href={`/anime/${item.anime_series.id}`} key={item.anime_series.id} className="group relative">
+                            <div className="aspect-[2/3] relative rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-lg">
+                                <Image
+                                    src={item.anime_series.poster_url || '/placeholder.png'}
+                                    alt={item.anime_series.title_english || 'Poster'}
+                                    fill
+                                    style={{ objectFit: 'cover' }}
+                                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                                />
+                                <div className="absolute top-0 right-0 m-2">
+                                    <span className="bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                        {item.status.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                            <h3 className="mt-2 text-sm font-semibold truncate group-hover:text-green-400">
+                                {item.anime_series.title_english || item.anime_series.title_romaji}
+                            </h3>
+                        </Link>
+                        )
+                    })}
+                </div>
+            ) : (
+                <div className="bg-card-dark p-8 rounded-lg text-center">
+                    <p className="text-gray-400">Your anime list is empty. Start by adding some anime!</p>
+                </div>
+            )}
+        </div>
+        {/* --- END: NEW MY ANIME LIST SECTION --- */}
+
         <div className="mt-8 bg-card-dark p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">My Receipt Submissions</h2>
             <div className="space-y-3">
