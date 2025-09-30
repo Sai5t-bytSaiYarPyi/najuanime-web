@@ -10,14 +10,14 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      // You can add more domains here in the future
-      // For example, if you use imgur.com:
-      // {
-      //   protocol: 'https',
-      //   hostname: 'i.imgur.com',
-      //   port: '',
-      //   pathname: '/**',
-      // },
+      // --- START: NEW DOMAIN ADDED ---
+      {
+        protocol: 'https',
+        hostname: 'cdn.myanimelist.net',
+        port: '',
+        pathname: '/**',
+      },
+      // --- END: NEW DOMAIN ADDED ---
     ],
   },
 };
