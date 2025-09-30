@@ -6,9 +6,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Image from 'next/image'; // Import Next.js Image component
+import Image from 'next/image';
 
-// Define types for our data
 type Profile = {
   naju_id: string;
   subscription_expires_at: string | null;
@@ -18,7 +17,8 @@ type Receipt = {
   status: 'pending' | 'approved' | 'rejected';
 };
 
-// --- START: NEW TYPE DEFINITION FOR USER'S ANIME LIST ---
+// --- START: TYPE DEFINITION FIX ---
+// Changed anime_series to be an array of objects to match Supabase's response
 type UserAnimeListItem = {
   status: string;
   anime_series: {
@@ -26,23 +26,21 @@ type UserAnimeListItem = {
     poster_url: string | null;
     title_english: string | null;
     title_romaji: string | null;
-  } | null;
+  }[]; // It's an array now
 };
-// --- END: NEW TYPE DEFINITION ---
+// --- END: TYPE DEFINITION FIX ---
 
 export default function MyAccountPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]); // New state for anime list
+  const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const setupUser = useCallback(async (user: User) => {
-    // Fetch profile, receipts, and anime list in parallel
     const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
       supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
       supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false }),
-      // Fetch user's anime list and join with anime_series to get details
       supabase.from('user_anime_list').select('status, anime_series(id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
     ]);
 
@@ -114,19 +112,23 @@ export default function MyAccountPage() {
             </div>
         </div>
         
-        {/* --- START: NEW MY ANIME LIST SECTION --- */}
         <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">My Anime List</h2>
             {animeList.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {animeList.map(item => {
-                        if (!item.anime_series) return null; // Skip if anime data is missing
+                        // --- START: JSX FIX ---
+                        // Get the first item from the anime_series array
+                        const anime = Array.isArray(item.anime_series) ? item.anime_series[0] : item.anime_series;
+                        if (!anime) return null;
+                        // --- END: JSX FIX ---
+                        
                         return (
-                        <Link href={`/anime/${item.anime_series.id}`} key={item.anime_series.id} className="group relative">
+                        <Link href={`/anime/${anime.id}`} key={anime.id} className="group relative">
                             <div className="aspect-[2/3] relative rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-lg">
                                 <Image
-                                    src={item.anime_series.poster_url || '/placeholder.png'}
-                                    alt={item.anime_series.title_english || 'Poster'}
+                                    src={anime.poster_url || '/placeholder.png'}
+                                    alt={anime.title_english || 'Poster'}
                                     fill
                                     style={{ objectFit: 'cover' }}
                                     sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
@@ -138,7 +140,7 @@ export default function MyAccountPage() {
                                 </div>
                             </div>
                             <h3 className="mt-2 text-sm font-semibold truncate group-hover:text-green-400">
-                                {item.anime_series.title_english || item.anime_series.title_romaji}
+                                {anime.title_english || anime.title_romaji}
                             </h3>
                         </Link>
                         )
@@ -150,7 +152,6 @@ export default function MyAccountPage() {
                 </div>
             )}
         </div>
-        {/* --- END: NEW MY ANIME LIST SECTION --- */}
 
         <div className="mt-8 bg-card-dark p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">My Receipt Submissions</h2>
