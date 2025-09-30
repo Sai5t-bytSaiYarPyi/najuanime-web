@@ -6,17 +6,15 @@ import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import Modal from 'react-modal';
 
-// --- START: TYPE DEFINITION FIX ---
-// Changed 'profiles' to be an array of objects
 type Review = {
   id: string;
   review_text: string;
   created_at: string;
+  user_id: string; // Add user_id to the type
   profiles: {
     naju_id: string;
-  }[] | null; // It's an array now
+  }[] | null;
 };
-// --- END: TYPE DEFINITION FIX ---
 
 type Props = {
   animeId: string;
@@ -25,28 +23,17 @@ type Props = {
 
 const customModalStyles = {
   content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-    backgroundColor: '#1F2937',
-    color: 'white',
-    border: '1px solid #374151',
-    borderRadius: '0.5rem',
-    width: '90%',
-    maxWidth: '600px',
+    top: '50%', left: '50%', right: 'auto', bottom: 'auto',
+    marginRight: '-50%', transform: 'translate(-50%, -50%)',
+    backgroundColor: '#1F2937', color: 'white', border: '1px solid #374151',
+    borderRadius: '0.5rem', width: '90%', maxWidth: '600px',
   },
   overlay: { backgroundColor: 'rgba(0, 0, 0, 0.75)' },
 };
 
-// Set the app element for accessibility
-// You might need to adjust this depending on your root layout element
 if (typeof window !== 'undefined') {
   Modal.setAppElement('body');
 }
-
 
 export default function AnimeReviews({ animeId, user }: Props) {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -58,28 +45,31 @@ export default function AnimeReviews({ animeId, user }: Props) {
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
+    // --- START: MODIFIED QUERY ---
+    // Fetch user_id along with other data in a single call
     const { data, error } = await supabase
       .from('anime_reviews')
-      .select('id, review_text, created_at, profiles(naju_id)')
+      .select('id, review_text, created_at, user_id, profiles(naju_id)')
       .eq('anime_id', animeId)
       .order('created_at', { ascending: false });
 
-    // Handle potential error from fetching reviews
     if (error) {
-        console.error("Error fetching reviews:", error);
+        console.error("Error fetching reviews:", error.message);
     }
+    // --- END: MODIFIED QUERY ---
 
     if (data) {
-      setReviews(data as Review[]);
+      setReviews(data as any); // Temporarily cast as any to avoid intermediate type issues
+      
+      // --- START: SIMPLIFIED CHECK ---
+      // Check if the current user's ID is in the fetched reviews list
       if (user) {
-        const { data: currentUserReviewData } = await supabase
-          .from('anime_reviews')
-          .select('id')
-          .eq('anime_id', animeId)
-          .eq('user_id', user.id)
-          .single();
-        setUserHasReviewed(!!currentUserReviewData);
+        const hasReviewed = data.some(review => review.user_id === user.id);
+        setUserHasReviewed(hasReviewed);
+      } else {
+        setUserHasReviewed(false);
       }
+      // --- END: SIMPLIFIED CHECK ---
     }
     setLoading(false);
   }, [animeId, user]);
@@ -108,7 +98,7 @@ export default function AnimeReviews({ animeId, user }: Props) {
     } else {
       setReviewText('');
       closeModal();
-      await fetchReviews();
+      await fetchReviews(); // Refresh the reviews list
     }
     setIsSubmitting(false);
   };
@@ -134,9 +124,7 @@ export default function AnimeReviews({ animeId, user }: Props) {
           reviews.map((review) => (
             <div key={review.id} className="bg-card-dark p-4 rounded-lg">
               <div className="flex items-center mb-2">
-                {/* --- START: JSX FIX --- */}
                 <p className="font-bold text-gray-200">{review.profiles?.[0]?.naju_id || 'A user'}</p>
-                {/* --- END: JSX FIX --- */}
                 <p className="text-xs text-gray-400 ml-auto">{new Date(review.created_at).toLocaleDateString()}</p>
               </div>
               <p className="text-gray-300 whitespace-pre-wrap">{review.review_text}</p>
