@@ -5,30 +5,16 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
+import AnimeReviews from '@/components/AnimeReviews'; // Import the new component
 
 export const revalidate = 3600;
 
-type PageProps = {
-  params: {
-    animeId: string;
-  };
-};
-
-type Episode = {
-  id: string;
-  episode_number: number;
-  title: string | null;
-  created_at: string;
-};
-
+// ... (PageProps, Episode, InfoPill types remain the same) ...
+type PageProps = { params: { animeId: string; }; };
+type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
   if (!text) return null;
-  return (
-    <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">
-      {icon}
-      <span>{text}</span>
-    </div>
-  );
+  return ( <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">{icon}<span>{text}</span></div> );
 };
 
 export default async function AnimeDetailPage({ params }: PageProps) {
@@ -43,12 +29,9 @@ export default async function AnimeDetailPage({ params }: PageProps) {
       .eq('id', params.animeId)
       .order('episode_number', { referencedTable: 'anime_episodes', ascending: true })
       .single(),
-    
-    // --- START: MODIFIED QUERY TO INCLUDE RATING ---
     session 
       ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single() 
       : Promise.resolve({ data: null, error: null })
-    // --- END: MODIFIED QUERY ---
   ]);
 
   const { data: anime, error: animeError } = animeRes;
@@ -65,9 +48,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
       {/* Header Section */}
       <div className="relative h-[40vh] md:h-[50vh] w-full">
         <div className="absolute inset-0 bg-black/50 z-10" />
-        {anime.poster_url && (
-          <Image src={anime.poster_url} alt={`${anime.title_english || 'Anime'} Poster`} fill style={{ objectFit: 'cover' }} className="opacity-30" priority />
-        )}
+        {anime.poster_url && ( <Image src={anime.poster_url} alt={`${anime.title_english || 'Anime'} Poster`} fill style={{ objectFit: 'cover' }} className="opacity-30" priority /> )}
         <div className="relative z-20 flex flex-col md:flex-row items-end h-full p-4 md:p-8 gap-6 max-w-7xl mx-auto">
           <div className="w-40 md:w-52 aspect-[2/3] relative shrink-0 rounded-lg overflow-hidden shadow-2xl">
             <Image src={anime.poster_url || '/placeholder.png'} alt={`${anime.title_english || 'Anime'} Cover`} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 40vw, 208px" />
@@ -88,6 +69,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         <div className="lg:col-span-2">
           <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 mb-4">Synopsis</h2>
           <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{anime.synopsis || 'No synopsis available.'}</p>
+          
           {anime.trailer_url && (
             <>
               <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 my-6">Trailer</h2>
@@ -96,19 +78,21 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               </div>
             </>
           )}
+
+          {/* --- START: ADDED REVIEWS SECTION --- */}
+          <AnimeReviews animeId={anime.id} user={session?.user || null} />
+          {/* --- END: ADDED REVIEWS SECTION --- */}
         </div>
 
         {/* Right Column */}
         <div>
           <div className="mb-6">
-            {/* --- START: PASS NEW PROP TO UPDATER --- */}
             <AnimeStatusUpdater 
               animeId={anime.id} 
               initialStatus={userListEntry?.status || null}
               initialRating={userListEntry?.rating || null}
               user={session?.user || null}
             />
-            {/* --- END: PASS NEW PROP --- */}
           </div>
 
           <div className="bg-card-dark p-4 rounded-lg">
