@@ -11,11 +11,9 @@ import Link from 'next/link';
 export const runtime = 'nodejs'; // Node.js Runtime ကို အသုံးပြုရန်
 export const revalidate = 3600;
 
-// PageProps Type ကြေညာပုံ ပြင်ဆင်ခြင်း
-type PageProps = { 
-  params: { animeId: string; }; 
-};
-
+// --- START: ပြင်ဆင်ချက် ---
+// PageProps type ကို သီးသန့်ကြေညာမယ့်အစား function မှာ တိုက်ရိုက်ထည့်သွင်းသတ်မှတ်လိုက်ပါတယ်။
+// ဒါက Next.js ရဲ့ internal type နဲ့ conflict ဖြစ်နေတဲ့ ပြဿနာကို ဖြေရှင်းပေးပါတယ်။
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
 
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
@@ -23,7 +21,8 @@ const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number
   return ( <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">{icon}<span>{text}</span></div> );
 };
 
-export default async function AnimeDetailPage({ params }: PageProps) {
+export default async function AnimeDetailPage({ params }: { params: { animeId: string } }) {
+// --- END: ပြင်ဆင်ချက် ---
   const supabase = createServerComponentClient({ cookies });
 
   const { data: { session } } = await supabase.auth.getSession();
@@ -35,8 +34,8 @@ export default async function AnimeDetailPage({ params }: PageProps) {
       .eq('id', params.animeId)
       .order('episode_number', { referencedTable: 'anime_episodes', ascending: true })
       .single(),
-    session 
-      ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single() 
+    session
+      ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single()
       : Promise.resolve({ data: null, error: null })
   ]);
 
@@ -89,8 +88,8 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         {/* Right Column */}
         <div>
           <div className="mb-6">
-            <AnimeStatusUpdater 
-              animeId={anime.id} 
+            <AnimeStatusUpdater
+              animeId={anime.id}
               initialStatus={userListEntry?.status || null}
               initialRating={userListEntry?.rating || null}
               user={session?.user || null}
@@ -112,9 +111,9 @@ export default async function AnimeDetailPage({ params }: PageProps) {
             <div className="bg-card-dark rounded-lg max-h-96 overflow-y-auto">
               {anime.anime_episodes.length > 0 ? (
                 anime.anime_episodes.map((ep: Episode) => (
-                  <Link 
-                    href={`/watch/${ep.id}`} 
-                    key={ep.id} 
+                  <Link
+                    href={`/watch/${ep.id}`}
+                    key={ep.id}
                     className="block p-4 border-b border-border-color last:border-b-0 hover:bg-gray-700/50 transition-colors"
                   >
                     <p className="font-semibold text-gray-200">Episode {ep.episode_number}</p>
