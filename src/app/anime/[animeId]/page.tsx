@@ -5,11 +5,11 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
-import AnimeReviews from '@/components/AnimeReviews'; // Import the new component
+import AnimeReviews from '@/components/AnimeReviews';
+import Link from 'next/link'; // Make sure Link is imported
 
 export const revalidate = 3600;
 
-// ... (PageProps, Episode, InfoPill types remain the same) ...
 type PageProps = { params: { animeId: string; }; };
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
@@ -69,7 +69,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
         <div className="lg:col-span-2">
           <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 mb-4">Synopsis</h2>
           <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{anime.synopsis || 'No synopsis available.'}</p>
-          
           {anime.trailer_url && (
             <>
               <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 my-6">Trailer</h2>
@@ -78,10 +77,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               </div>
             </>
           )}
-
-          {/* --- START: ADDED REVIEWS SECTION --- */}
           <AnimeReviews animeId={anime.id} user={session?.user || null} />
-          {/* --- END: ADDED REVIEWS SECTION --- */}
         </div>
 
         {/* Right Column */}
@@ -94,7 +90,6 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               user={session?.user || null}
             />
           </div>
-
           <div className="bg-card-dark p-4 rounded-lg">
             <h3 className="text-xl font-bold mb-4">Details</h3>
             <div className="flex flex-wrap gap-3">
@@ -106,16 +101,19 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               <InfoPill icon={<BookOpen size={14} />} text={anime.source_material} />
             </div>
           </div>
-
           <div className="mt-6">
             <h3 className="text-xl font-bold mb-4">Episodes</h3>
             <div className="bg-card-dark rounded-lg max-h-96 overflow-y-auto">
               {anime.anime_episodes.length > 0 ? (
                 anime.anime_episodes.map((ep: Episode) => (
-                  <div key={ep.id} className="p-4 border-b border-border-color last:border-b-0 hover:bg-gray-700/50 transition-colors">
+                  <Link 
+                    href={`/watch/${ep.id}`} 
+                    key={ep.id} 
+                    className="block p-4 border-b border-border-color last:border-b-0 hover:bg-gray-700/50 transition-colors"
+                  >
                     <p className="font-semibold text-gray-200">Episode {ep.episode_number}</p>
                     {ep.title && <p className="text-sm text-gray-400">{ep.title}</p>}
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className="p-4 text-gray-400">No episodes available yet.</p>
