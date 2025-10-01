@@ -8,12 +8,16 @@ import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
 import AnimeReviews from '@/components/AnimeReviews';
 import Link from 'next/link';
 
-export const runtime = 'nodejs'; // Node.js Runtime ကို အသုံးပြုရန်
+export const runtime = 'nodejs';
 export const revalidate = 3600;
 
 // --- START: ပြင်ဆင်ချက် ---
-// PageProps type ကို သီးသန့်ကြေညာမယ့်အစား function မှာ တိုက်ရိုက်ထည့်သွင်းသတ်မှတ်လိုက်ပါတယ်။
-// ဒါက Next.js ရဲ့ internal type နဲ့ conflict ဖြစ်နေတဲ့ ပြဿနာကို ဖြေရှင်းပေးပါတယ်။
+// 'PageProps' ဆိုတဲ့ နာမည်အစား conflict မဖြစ်အောင် 'AnimeDetailPageProps' လို့ နာမည်ပြောင်းလိုက်ပါတယ်။
+type AnimeDetailPageProps = {
+  params: { animeId: string; };
+};
+// --- END: ပြင်ဆင်ချက် ---
+
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
 
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
@@ -21,7 +25,9 @@ const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number
   return ( <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">{icon}<span>{text}</span></div> );
 };
 
-export default async function AnimeDetailPage({ params }: { params: { animeId: string } }) {
+// --- START: ပြင်ဆင်ချက် ---
+// Component မှာလည်း နာမည်ပြောင်းထားတဲ့ type အသစ်ကို အသုံးပြုလိုက်ပါတယ်။
+export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
 // --- END: ပြင်ဆင်ချက် ---
   const supabase = createServerComponentClient({ cookies });
 
