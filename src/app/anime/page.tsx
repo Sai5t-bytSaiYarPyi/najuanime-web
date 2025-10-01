@@ -7,6 +7,7 @@ import AccessDenied from '@/components/AccessDenied';
 import AnimeSearchBar from '@/components/AnimeSearchBar';
 import AnimeFilters from '@/components/AnimeFilters';
 
+export const runtime = 'nodejs';
 export const revalidate = 600;
 
 export default async function AnimeGridPage({

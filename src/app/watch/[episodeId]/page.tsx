@@ -2,14 +2,13 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-// --- START: PATH FIX ---
 import AccessDenied from '../../../components/AccessDenied';
 import VideoPlayer from '../../../components/VideoPlayer';
-// --- END: PATH FIX ---
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export const revalidate = 3600; // Revalidate every hour
+export const runtime = 'nodejs';
+export const revalidate = 3600;
 
 type PageProps = {
   params: {

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+export const runtime = 'nodejs';
 export const revalidate = 60;
 
 type PageProps = {

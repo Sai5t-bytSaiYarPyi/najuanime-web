@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
 import Modal, { Styles } from 'react-modal';
+import Image from 'next/image'; // Image ကို import လုပ်ပါ
 
 // Types
 type AnimeSeries = {
@@ -91,26 +92,6 @@ export default function AnimeManagementPage() {
     setEditingAnime(null);
   };
 
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (!editingAnime) return;
-    setEditingAnime({ ...editingAnime, [e.target.name]: e.target.value });
-  };
-
-  const handleUpdateAnime = async () => {
-    if (!editingAnime) return;
-    setLoading(true);
-    const { id, created_at, ...updateData } = editingAnime;
-    const { error } = await supabase.from('anime_series').update(updateData).eq('id', id);
-    if (error) {
-      alert('Error updating anime: ' + error.message);
-    } else {
-      alert('Anime details updated successfully!');
-      closeEditModal();
-      await fetchAnimeList();
-    }
-    setLoading(false);
-  };
-
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setIsSearching(true);
@@ -127,10 +108,6 @@ export default function AnimeManagementPage() {
     } finally {
         setIsSearching(false);
     }
-  };
-
-  const handleSelectAnime = (anime: JikanAnimeResult) => {
-    setSelectedAnime(anime);
   };
 
   const handleImportAnime = async () => {
@@ -188,18 +165,22 @@ export default function AnimeManagementPage() {
         {animeList.map(item => (
           <div key={item.id} className="flex items-center justify-between p-3 border-b border-gray-700 last:border-b-0 hover:bg-gray-700">
             <div className="flex items-center gap-4">
-              <img src={item.poster_url || 'https://via.placeholder.com/50x75'} alt={item.title_english || 'Poster'} className="w-12 h-auto rounded object-cover"/>
+              <Image 
+                src={item.poster_url || 'https://via.placeholder.com/50x75'} 
+                alt={item.title_english || 'Poster'} 
+                width={50}
+                height={75}
+                className="w-12 h-auto rounded object-cover"
+              />
               <div>
                 <h2 className="font-bold">{item.title_english || item.title_romaji}</h2>
                 <p className="text-sm text-gray-400">{item.release_year || 'Unknown Year'} - <span className="font-semibold">{item.status || 'N/A'}</span></p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* --- START: THIS IS THE FIX --- */}
               <Link href={`/admin/anime/${item.id}`} className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
                   Manage Episodes
               </Link>
-              {/* --- END: THIS IS THE FIX --- */}
               <button onClick={() => openEditModal(item)} disabled={loading} className="text-sm bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded disabled:bg-gray-500">
                 Edit
               </button>
@@ -213,13 +194,47 @@ export default function AnimeManagementPage() {
 
       {/* Add New Anime Modal */}
       <Modal isOpen={isAddModalOpen} onRequestClose={closeAddModal} style={customModalStyles} contentLabel="Add New Anime from MyAnimeList">
-        {/* ... Modal Content ... */}
+        <div className="flex flex-col h-full">
+            <h2 className="text-xl font-bold mb-4">Add Anime from MyAnimeList</h2>
+            <div className="flex gap-2 mb-4">
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search for an anime..."
+                    className="flex-grow p-2 rounded bg-gray-700 border border-gray-600"
+                />
+                <button onClick={handleSearch} disabled={isSearching} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md disabled:bg-gray-500">
+                    {isSearching ? '...' : 'Search'}
+                </button>
+            </div>
+            
+            <div className="flex-grow overflow-y-auto mb-4 space-y-2">
+                {searchResults.map(anime => (
+                    <div key={anime.mal_id} onClick={() => setSelectedAnime(anime)} className={`p-2 flex gap-3 rounded-md cursor-pointer ${selectedAnime?.mal_id === anime.mal_id ? 'bg-green-800' : 'hover:bg-gray-700'}`}>
+                        <Image src={anime.images.jpg.image_url} alt={anime.title} width={50} height={75} className="w-12 h-auto rounded object-cover"/>
+                        <div>
+                            <p className="font-bold">{anime.title_english || anime.title}</p>
+                            <p className="text-sm text-gray-400">{anime.year} - {anime.type}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {selectedAnime && (
+                <div className="border-t border-gray-600 pt-4">
+                    <button onClick={handleImportAnime} disabled={loading} className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md disabled:bg-gray-500">
+                        {loading ? 'Importing...' : `Import "${selectedAnime.title_english || selectedAnime.title}"`}
+                    </button>
+                </div>
+            )}
+        </div>
       </Modal>
 
       {/* Edit Anime Modal */}
       {editingAnime && (
         <Modal isOpen={isEditModalOpen} onRequestClose={closeEditModal} style={customModalStyles} contentLabel="Edit Anime Details">
-          {/* ... Modal Content ... */}
+          <p>Edit functionality is not fully implemented in this component.</p>
         </Modal>
       )}
     </div>

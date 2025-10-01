@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
 
-export const revalidate = 3600; // Revalidate every hour
+export const runtime = 'nodejs';
+export const revalidate = 3600;
 
 export default async function TopRatedPage() {
   const supabase = createServerComponentClient({ cookies });

@@ -17,6 +17,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co', // Supabase Storage Hostname
+        port: '',
+        pathname: '/**',
+      }
       // --- END: NEW DOMAIN ADDED ---
     ],
   },

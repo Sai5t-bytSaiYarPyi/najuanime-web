@@ -6,12 +6,18 @@ import { notFound } from 'next/navigation';
 import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
 import AnimeReviews from '@/components/AnimeReviews';
-import Link from 'next/link'; // Make sure Link is imported
+import Link from 'next/link';
 
+export const runtime = 'nodejs'; // Node.js Runtime ကို အသုံးပြုရန်
 export const revalidate = 3600;
 
-type PageProps = { params: { animeId: string; }; };
+// PageProps Type ကြေညာပုံ ပြင်ဆင်ခြင်း
+type PageProps = { 
+  params: { animeId: string; }; 
+};
+
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
+
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
   if (!text) return null;
   return ( <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">{icon}<span>{text}</span></div> );

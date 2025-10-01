@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export const revalidate = 60; // Re-fetch data every 60 seconds
+export const runtime = 'nodejs';
+export const revalidate = 60;
 
 export default async function ManhwaListPage() {
   const supabase = createServerComponentClient({ cookies });

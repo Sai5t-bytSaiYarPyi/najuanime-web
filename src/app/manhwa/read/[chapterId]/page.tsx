@@ -2,7 +2,9 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
+import Image from 'next/image'; // Image ကို import လုပ်ပါ
 
+export const runtime = 'nodejs';
 export const revalidate = 3600;
 
 type PageProps = {
@@ -32,12 +34,14 @@ export default async function ReaderPage({ params }: PageProps) {
             </h1>
             
             <div className="flex flex-col items-center">
-                {/* --- THIS IS THE FIX (applied to the final design) --- */}
                 {chapter.image_urls.map((url: string, index: number) => (
                     <div key={index} className="w-full">
-                        <img 
+                        <Image 
                             src={url} 
                             alt={`Page ${index + 1}`}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
                             className="w-full h-auto"
                         />
                     </div>

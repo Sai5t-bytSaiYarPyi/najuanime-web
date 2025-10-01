@@ -1,9 +1,11 @@
+// src/app/admin/manhwa/page.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import Link from 'next/link';
 import Modal from 'react-modal';
+import Image from 'next/image'; // Image ကို import လုပ်ပါ
 
 type Manhwa = {
   id: string;
@@ -116,7 +118,14 @@ export default function ManhwaManagementPage() {
         {manhwaList.length > 0 ? (
           manhwaList.map(item => (
             <div key={item.id} className="flex items-center justify-between p-3 border-b border-gray-700 hover:bg-gray-700">
-              <div className="flex items-center gap-4"><img src={item.cover_image_url || 'https://via.placeholder.com/50x75'} alt={item.title} className="w-12 h-auto rounded"/>
+              <div className="flex items-center gap-4">
+                <Image 
+                  src={item.cover_image_url || 'https://via.placeholder.com/50x75'} 
+                  alt={item.title} 
+                  width={50}
+                  height={75}
+                  className="w-12 h-auto rounded"
+                />
                 <div><h2 className="font-bold">{item.title}</h2><p className="text-sm text-gray-400">{item.author || 'Unknown Author'}</p></div>
               </div>
               <div className="flex items-center gap-2">
