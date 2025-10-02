@@ -37,9 +37,24 @@ export default function HomePage() {
             </Link>
         </div>
       ) : (
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg" onClick={() => { supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); }}>
+        // --- START: signInWithOAuth ကို ပြင်ဆင်ခြင်း ---
+        <motion.button 
+          whileHover={{ scale: 1.05 }} 
+          whileTap={{ scale: 0.95 }} 
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg" 
+          onClick={() => { 
+            supabase.auth.signInWithOAuth({ 
+              provider: 'google', 
+              options: { 
+                // redirectTo မှာ /auth/callback ကို ထည့်သွင်းပေးရပါမည်။
+                redirectTo: `${window.location.origin}/auth/callback` 
+              } 
+            }); 
+          }}
+        >
           Sign in with Google
         </motion.button>
+        // --- END: signInWithOAuth ကို ပြင်ဆင်ခြင်း ---
       )}
 
       <Link href="/manhwa" className="mt-6 text-yellow-400 hover:text-yellow-300">

@@ -49,6 +49,25 @@ export default function ManageEpisodesPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+  
+  // --- START: Episode ဖျက်ရန် Function အသစ် ---
+  const handleDeleteEpisode = async (episodeId: string, episodeNumber: number) => {
+    if (window.confirm(`Are you sure you want to delete Episode ${episodeNumber}? This will also delete all associated video files.`)) {
+      setLoading(true);
+      const { error } = await supabase.functions.invoke('delete-anime-episode', {
+        body: { episode_id: episodeId },
+      });
+
+      if (error) {
+        alert(`Error deleting episode: ${error.message}`);
+      } else {
+        alert(`Episode ${episodeNumber} deleted successfully.`);
+        fetchData(); // List ကို refresh လုပ်ပါ
+      }
+      setLoading(false);
+    }
+  };
+  // --- END: Episode ဖျက်ရန် Function အသစ် ---
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -167,7 +186,15 @@ export default function ManageEpisodesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {ep.video_urls ? <span className="text-xs text-green-400">Ready</span> : <span className="text-xs text-yellow-400 animate-pulse">Processing...</span>}
-                    <button className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" disabled>Delete</button>
+                    {/* --- START: Delete Button ကို အသက်ဝင်စေခြင်း --- */}
+                    <button 
+                      onClick={() => handleDeleteEpisode(ep.id, ep.episode_number)} 
+                      className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:bg-gray-500" 
+                      disabled={loading}
+                    >
+                      Delete
+                    </button>
+                    {/* --- END: Delete Button ကို အသက်ဝင်စေခြင်း --- */}
                   </div>
                 </div>
               ))

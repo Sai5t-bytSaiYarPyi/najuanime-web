@@ -7,10 +7,7 @@ import AccessDenied from '@/components/AccessDenied';
 import AnimeSearchBar from '@/components/AnimeSearchBar';
 import AnimeFilters from '@/components/AnimeFilters';
 
-// --- START: ပြင်ဆင်ချက် ---
-// Caching ပြဿနာကို ဖြေရှင်းရန် ဤစာမျက်နှာကို dynamic အဖြစ် သတ်မှတ်လိုက်သည်။
 export const dynamic = 'force-dynamic';
-// --- END: ပြင်ဆင်ချက် ---
 
 export default async function AnimeGridPage({
   searchParams
@@ -27,17 +24,24 @@ export default async function AnimeGridPage({
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return <AccessDenied />;
 
+  // --- START: Subscription စစ်ဆေးမှုကို ပိုမိုတိကျအောင် ပြင်ဆင်ခြင်း ---
   const { data: profile } = await supabase
     .from('profiles')
-    .select('subscription_expires_at')
+    .select('subscription_expires_at, subscription_status') // status ကိုပါ တခါတည်း select လုပ်ပါ
     .eq('id', session.user.id)
     .single();
 
-  const isSubscribed = profile?.subscription_expires_at
+  const isDateValid = profile?.subscription_expires_at
     ? new Date(profile.subscription_expires_at) > new Date()
     : false;
+  
+  const isStatusActive = profile?.subscription_status === 'active';
 
-  if (!isSubscribed) return <AccessDenied />;
+  // ရက်မကုန်သေးဘဲ status က 'active' ဖြစ်နေမှသာ ဝင်ခွင့်ပြုမည်။
+  if (!isDateValid || !isStatusActive) {
+    return <AccessDenied />;
+  }
+  // --- END: Subscription စစ်ဆေးမှုကို ပိုမိုတိကျအောင် ပြင်ဆင်ခြင်း ---
 
   const query = searchParams?.q || '';
   const genreFilter = searchParams?.genre || '';
