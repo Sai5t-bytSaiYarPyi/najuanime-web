@@ -1,0 +1,6 @@
+{
+    // Enable Deno ONLY for this specific folder
+    "deno.enable": true,
+    "deno.lint": true,
+    "deno.unstable": true
+}
