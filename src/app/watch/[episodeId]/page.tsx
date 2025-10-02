@@ -1,5 +1,5 @@
 // src/app/watch/[episodeId]/page.tsx
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import AccessDenied from '../../../components/AccessDenied';
@@ -23,7 +23,18 @@ type EpisodeLink = {
 };
 
 export default async function WatchPage({ params }: PageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
 
   // 1. Check for active session and subscription
   const { data: { session } } = await supabase.auth.getSession();
@@ -54,10 +65,8 @@ export default async function WatchPage({ params }: PageProps) {
   const prevEpisode = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
   const nextEpisode = currentIndex < allEpisodes.length - 1 ? allEpisodes[currentIndex + 1] : null;
   
-  // --- START: Anime Title ကို ပြင်ဆင်ခြင်း ---
   // Download filename အတွက် သန့်ရှင်းသော title တစ်ခု ဖန်တီးပါ
   const animeTitleForFile = (series.title_english || series.title_romaji || 'anime').replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
-  // --- END: Anime Title ကို ပြင်ဆင်ခြင်း ---
 
   return (
     <div className="min-h-screen text-white bg-black">
@@ -72,13 +81,11 @@ export default async function WatchPage({ params }: PageProps) {
           </h1>
           
           <div className="mt-4">
-            {/* --- START: VideoPlayer သို့ props အသစ်များ ထည့်သွင်းပေးပို့ခြင်း --- */}
             <VideoPlayer 
               videoUrls={episode.video_urls}
               animeTitle={animeTitleForFile}
               episodeNumber={episode.episode_number}
             />
-            {/* --- END: VideoPlayer သို့ props အသစ်များ ထည့်သွင်းပေးပို့ခြင်း --- */}
           </div>
 
           {/* Prev/Next Episode Navigation */}
