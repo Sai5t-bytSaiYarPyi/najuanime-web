@@ -53,6 +53,11 @@ export default async function WatchPage({ params }: PageProps) {
   const currentIndex = allEpisodes.findIndex((ep: EpisodeLink) => ep.id === episode.id);
   const prevEpisode = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
   const nextEpisode = currentIndex < allEpisodes.length - 1 ? allEpisodes[currentIndex + 1] : null;
+  
+  // --- START: Anime Title ကို ပြင်ဆင်ခြင်း ---
+  // Download filename အတွက် သန့်ရှင်းသော title တစ်ခု ဖန်တီးပါ
+  const animeTitleForFile = (series.title_english || series.title_romaji || 'anime').replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-');
+  // --- END: Anime Title ကို ပြင်ဆင်ခြင်း ---
 
   return (
     <div className="min-h-screen text-white bg-black">
@@ -67,7 +72,13 @@ export default async function WatchPage({ params }: PageProps) {
           </h1>
           
           <div className="mt-4">
-            <VideoPlayer videoUrls={episode.video_urls} />
+            {/* --- START: VideoPlayer သို့ props အသစ်များ ထည့်သွင်းပေးပို့ခြင်း --- */}
+            <VideoPlayer 
+              videoUrls={episode.video_urls}
+              animeTitle={animeTitleForFile}
+              episodeNumber={episode.episode_number}
+            />
+            {/* --- END: VideoPlayer သို့ props အသစ်များ ထည့်သွင်းပေးပို့ခြင်း --- */}
           </div>
 
           {/* Prev/Next Episode Navigation */}

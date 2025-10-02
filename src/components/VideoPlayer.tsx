@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Clapperboard, Loader } from 'lucide-react'; // Added Loader icon
+import { Download, Clapperboard, Loader } from 'lucide-react';
 
 type VideoUrls = {
   '1080p'?: string;
@@ -11,14 +11,19 @@ type VideoUrls = {
   [key: string]: string | undefined;
 };
 
+// --- START: Props Type ကို ပြင်ဆင်ခြင်း ---
+// animeTitle နှင့် episodeNumber ကို props အဖြစ် လက်ခံရန် ထည့်သွင်းလိုက်သည်။
 type Props = {
   videoUrls: VideoUrls | null;
+  animeTitle: string;
+  episodeNumber: number;
 };
+// --- END: Props Type ကို ပြင်ဆင်ခြင်း ---
 
-export default function VideoPlayer({ videoUrls }: Props) {
+export default function VideoPlayer({ videoUrls, animeTitle, episodeNumber }: Props) {
   const [activeUrl, setActiveUrl] = useState<string | null>(null);
   const [availableResolutions, setAvailableResolutions] = useState<string[]>([]);
-  const [downloading, setDownloading] = useState<string | null>(null); // State to track which resolution is downloading
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     if (videoUrls) {
@@ -28,41 +33,35 @@ export default function VideoPlayer({ videoUrls }: Props) {
     }
   }, [videoUrls]);
 
-  // --- START: NEW DOWNLOAD HANDLER FUNCTION ---
   const handleDownload = async (url: string, resolution: string) => {
-    setDownloading(resolution); // Set loading state for this button
+    setDownloading(resolution);
     try {
-      // 1. Fetch the video file as a blob
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const blob = await response.blob();
-
-      // 2. Create a temporary URL for the blob
       const blobUrl = window.URL.createObjectURL(blob);
-
-      // 3. Create a temporary anchor element and trigger download
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = blobUrl;
-      // You can set a custom filename here if you want
-      a.download = `naju-anime-episode-${resolution}.mp4`; 
+
+      // --- START: Download filename ကို ပြင်ဆင်ခြင်း ---
+      // animeTitle နှင့် episodeNumber ကို အသုံးပြုပြီး filename အသစ် သတ်မှတ်လိုက်သည်။
+      a.download = `${animeTitle}-Episode-${episodeNumber}-${resolution}.mp4`; 
+      // --- END: Download filename ကို ပြင်ဆင်ခြင်း ---
+      
       document.body.appendChild(a);
       a.click();
-
-      // 4. Clean up the temporary URL and element
       window.URL.revokeObjectURL(blobUrl);
       a.remove();
     } catch (error) {
       console.error('Download failed:', error);
       alert('Could not download the file. Please try again.');
     } finally {
-      setDownloading(null); // Reset loading state
+      setDownloading(null);
     }
   };
-  // --- END: NEW DOWNLOAD HANDLER FUNCTION ---
-
 
   if (!videoUrls || !activeUrl) {
     return (
@@ -97,7 +96,6 @@ export default function VideoPlayer({ videoUrls }: Props) {
         </div>
         <div className="flex items-center gap-2">
             <span className="text-sm font-bold mr-2">Download:</span>
-            {/* --- START: MODIFIED DOWNLOAD BUTTONS --- */}
             {availableResolutions.map(res => (
                 <button
                     key={`dl-${res}`}
@@ -116,7 +114,6 @@ export default function VideoPlayer({ videoUrls }: Props) {
                     )}
                 </button>
             ))}
-            {/* --- END: MODIFIED DOWNLOAD BUTTONS --- */}
         </div>
       </div>
     </div>

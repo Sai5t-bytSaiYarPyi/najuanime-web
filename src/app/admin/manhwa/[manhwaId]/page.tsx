@@ -1,3 +1,4 @@
+// src/app/admin/manhwa/[manhwaId]/page.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -119,13 +120,15 @@ export default function ManageChaptersPage() {
     setIsUploading(false);
   };
 
-  // --- START OF NEW FUNCTIONS ---
+  // --- START: အသစ်ပြင်ဆင်/ထည့်သွင်းထားသော Functions များ ---
   const handleReorder = async (chapterId: string, direction: 'up' | 'down') => {
     setLoading(true);
     const { error } = await supabase.functions.invoke('reorder-manhwa-chapters', {
       body: { chapter_id: chapterId, direction: direction },
     });
-    if (error) alert(`Error reordering: ${error.message}`);
+    if (error) {
+        alert(`Error reordering: ${error.message}`);
+    }
     await fetchData(); // Refetch to show new order
     setLoading(false);
   };
@@ -136,13 +139,16 @@ export default function ManageChaptersPage() {
       const { error } = await supabase.functions.invoke('delete-manhwa-chapter', {
         body: { chapter_id: chapterId },
       });
-      if (error) alert(`Error deleting: ${error.message}`);
-      else alert(`Chapter ${chapterNumber} deleted successfully.`);
+      if (error) {
+        alert(`Error deleting: ${error.message}`);
+      } else {
+        alert(`Chapter ${chapterNumber} deleted successfully.`);
+      }
       await fetchData();
       setLoading(false);
     }
   };
-  // --- END OF NEW FUNCTIONS ---
+  // --- END: အသစ်ပြင်ဆင်/ထည့်သွင်းထားသော Functions များ ---
 
   if (loading) { return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>; }
   

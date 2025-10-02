@@ -7,8 +7,10 @@ import AccessDenied from '@/components/AccessDenied';
 import AnimeSearchBar from '@/components/AnimeSearchBar';
 import AnimeFilters from '@/components/AnimeFilters';
 
-export const runtime = 'nodejs';
-export const revalidate = 600;
+// --- START: ပြင်ဆင်ချက် ---
+// Caching ပြဿနာကို ဖြေရှင်းရန် ဤစာမျက်နှာကို dynamic အဖြစ် သတ်မှတ်လိုက်သည်။
+export const dynamic = 'force-dynamic';
+// --- END: ပြင်ဆင်ချက် ---
 
 export default async function AnimeGridPage({
   searchParams
@@ -42,20 +44,12 @@ export default async function AnimeGridPage({
   const yearFilter = searchParams?.year || '';
   const statusFilter = searchParams?.status || '';
 
-  // --- START: FETCH DATA FOR FILTERS ---
-  // Fetch all genres for the filter dropdown
   const { data: genres } = await supabase.from('genres').select('id, name').order('name', { ascending: true });
-
-  // Fetch unique years and statuses for filters
   const { data: uniqueYearsData } = await supabase.rpc('get_unique_anime_years');
   const { data: uniqueStatusesData } = await supabase.rpc('get_unique_anime_statuses');
-
   const uniqueYears = uniqueYearsData?.map((item: { year: number }) => item.year) || [];
   const uniqueStatuses = uniqueStatusesData?.map((item: { status: string }) => item.status) || [];
-  // --- END: FETCH DATA FOR FILTERS ---
 
-
-  // --- START: MODIFIED SUPABASE QUERY ---
   let animeQuery = supabase
     .from('anime_series')
     .select('id, title_english, title_romaji, poster_url, release_year, anime_genres!inner(genres!inner(name))');
@@ -74,7 +68,6 @@ export default async function AnimeGridPage({
   }
 
   const { data: animeList, error } = await animeQuery.order('created_at', { ascending: false });
-  // --- END: MODIFIED SUPABASE QUERY ---
 
   if (error) {
     return <p className="p-8 text-red-500">Error loading anime list: {error.message}</p>;

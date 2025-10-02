@@ -45,7 +45,8 @@ export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [pendingReceipts, setPendingReceipts] = useState<Receipt[]>([]);
-  
+  const [daysToAdd, setDaysToAdd] = useState<string>('30'); // --- START: State အသစ် ---
+
   const fetchProfiles = useCallback(async (search: string) => {
     setLoading(true);
     let query = supabase.from('profiles').select('*');
@@ -88,7 +89,10 @@ export default function AdminDashboard() {
     setIsModalOpen(true);
   };
   
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setDaysToAdd('30'); // Modal ပိတ်တိုင်း default value ပြန်ထားပါ
+  }
 
   const handleApproveReceipt = async (receiptId: string, userId: string) => {
     const durationInDays = 30; 
@@ -112,10 +116,36 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- START: Subscription ရက် တိုက်ရိုက်ထည့်ရန် Function အသစ် ---
+  const handleManualSubscription = async () => {
+    if (!selectedProfile || !daysToAdd || parseInt(daysToAdd) <= 0) {
+        alert('Please select a user and enter a valid number of days.');
+        return;
+    }
+    if(window.confirm(`Are you sure you want to add ${daysToAdd} days to ${selectedProfile.email}'s subscription?`)) {
+        setLoading(true);
+        const { error } = await supabase.functions.invoke('set-subscription-expiry', {
+            body: {
+                user_id: selectedProfile.id,
+                days_to_add: parseInt(daysToAdd)
+            }
+        });
+        if (error) {
+            alert(`Error updating subscription: ${error.message}`);
+        } else {
+            alert('Subscription updated successfully!');
+            closeModal();
+            fetchProfiles(debouncedSearchTerm);
+        }
+        setLoading(false);
+    }
+  }
+  // --- END: Subscription ရက် တိုက်ရိုက်ထည့်ရန် Function အသစ် ---
+
   const handleViewReceipt = async (path: string) => {
     const { data, error } = await supabase.storage
       .from('receipts')
-      .createSignedUrl(path, 60); // Link is valid for 60 seconds
+      .createSignedUrl(path, 60);
 
     if (error) {
       alert("Could not generate link for receipt: " + error.message);
@@ -129,7 +159,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      {/* --- UPDATED GRID --- */}
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-2">User Management</h2>
@@ -177,7 +206,7 @@ export default function AdminDashboard() {
             <p className="text-gray-400 mb-6">{selectedProfile?.email}</p>
 
             <h3 className="font-bold text-lg mb-4">Pending Receipts</h3>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-3 max-h-60 overflow-y-auto">
                 {pendingReceipts.length > 0 ? (
                     pendingReceipts.map(receipt => (
                         <div key={receipt.id} className="p-4 bg-gray-700 rounded-lg">
@@ -196,6 +225,22 @@ export default function AdminDashboard() {
                     <p className="text-gray-400">No pending receipts found for this user.</p>
                 )}
             </div>
+            {/* --- START: Manual Subscription UI အသစ် --- */}
+            <hr className="my-6 border-gray-600"/>
+            <h3 className="font-bold text-lg mb-4">Manual Subscription</h3>
+            <div className='flex items-center gap-4'>
+                <input 
+                    type="number" 
+                    value={daysToAdd}
+                    onChange={(e) => setDaysToAdd(e.target.value)}
+                    className="w-full p-2 rounded bg-gray-700 border border-gray-600"
+                    placeholder="Days to add"
+                />
+                <button onClick={handleManualSubscription} className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md whitespace-nowrap">
+                    Add Days
+                </button>
+            </div>
+            {/* --- END: Manual Subscription UI အသစ် --- */}
             <button onClick={closeModal} className="mt-6 w-full px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Close</button>
         </div>
       </Modal>

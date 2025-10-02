@@ -12,13 +12,16 @@ type Profile = {
   naju_id: string;
   subscription_expires_at: string | null;
 };
+
 type Receipt = {
+  id: string;
   created_at: string;
+  receipt_url: string;
   status: 'pending' | 'approved' | 'rejected';
 };
 
-// --- START: TYPE DEFINITION FIX ---
-// Changed anime_series to be an array of objects to match Supabase's response
+// --- START: TYPE DEFINITION အမှန်ပြင်ဆင်ချက် ---
+// anime_series ကို array သို့မဟုတ် null ဖြစ်နိုင်ကြောင်း ပြင်ဆင်သတ်မှတ်လိုက်သည်။
 type UserAnimeListItem = {
   status: string;
   anime_series: {
@@ -26,9 +29,10 @@ type UserAnimeListItem = {
     poster_url: string | null;
     title_english: string | null;
     title_romaji: string | null;
-  }[]; // It's an array now
+  }[] | null; // Supabase မှ join လုပ်ရာတွင် array သို့မဟုတ် null ပြန်လာနိုင်သည်။
 };
-// --- END: TYPE DEFINITION FIX ---
+// --- END: TYPE DEFINITION အမှန်ပြင်ဆင်ချက် ---
+
 
 export default function MyAccountPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -40,13 +44,16 @@ export default function MyAccountPage() {
   const setupUser = useCallback(async (user: User) => {
     const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
       supabase.from('profiles').select('naju_id, subscription_expires_at').eq('id', user.id).single(),
-      supabase.from('payment_receipts').select('created_at, status').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('user_anime_list').select('status, anime_series(id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
     ]);
 
     if (profileResponse.data) setProfile(profileResponse.data as Profile);
     if (receiptsResponse.data) setReceipts(receiptsResponse.data as Receipt[]);
-    if (animeListResponse.data) setAnimeList(animeListResponse.data as UserAnimeListItem[]);
+    if (animeListResponse.data) {
+        // Type အသစ်နဲ့ ကိုက်ညီသွားပြီဖြစ်လို့ error မရှိတော့ပါ။
+        setAnimeList(animeListResponse.data as UserAnimeListItem[]);
+    }
     
     setLoading(false);
   }, []);
@@ -63,6 +70,32 @@ export default function MyAccountPage() {
     };
     checkSession();
   }, [setupUser]);
+  
+  const handleDeleteReceipt = async (receiptId: string, receiptPath: string) => {
+    if (window.confirm('Are you sure you want to delete this receipt submission?')) {
+      const { error: dbError } = await supabase
+        .from('payment_receipts')
+        .delete()
+        .eq('id', receiptId);
+
+      if (dbError) {
+        alert('Failed to delete receipt from database: ' + dbError.message);
+        return;
+      }
+
+      const { error: storageError } = await supabase.storage
+        .from('receipts')
+        .remove([receiptPath]);
+      
+      if (storageError) {
+        alert('Failed to delete receipt file from storage, but record was removed: ' + storageError.message);
+      }
+      
+      setReceipts(receipts.filter(r => r.id !== receiptId));
+      alert('Receipt submission deleted successfully.');
+    }
+  };
+
 
   const isSubscribed = profile?.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
@@ -117,11 +150,14 @@ export default function MyAccountPage() {
             {animeList.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {animeList.map(item => {
-                        // --- START: JSX FIX ---
-                        // Get the first item from the anime_series array
-                        const anime = Array.isArray(item.anime_series) ? item.anime_series[0] : item.anime_series;
-                        if (!anime) return null;
-                        // --- END: JSX FIX ---
+                        // --- START: JSX Logic အမှန်ပြင်ဆင်ချက် ---
+                        // anime_series က array ဖြစ်ပြီး ပထမဆုံးတစ်ခုကိုသာ ယူသုံးမည်
+                        const anime = item.anime_series && item.anime_series.length > 0 ? item.anime_series[0] : null;
+                        if (!anime) {
+                            // anime_series က null (ဒါမှမဟုတ်) empty array [] ဖြစ်နေရင် ဒီ item ကို ကျော်သွားပါ
+                            return null;
+                        }
+                        // --- END: JSX Logic အမှန်ပြင်ဆင်ချက် ---
                         
                         return (
                         <Link href={`/anime/${anime.id}`} key={anime.id} className="group relative">
@@ -157,11 +193,19 @@ export default function MyAccountPage() {
             <h2 className="text-xl font-bold mb-4">My Receipt Submissions</h2>
             <div className="space-y-3">
             {receipts.length > 0 ? receipts.map(r => (
-                <div key={r.created_at} className="p-3 bg-gray-700 rounded-md flex justify-between items-center">
-                    <p>Submitted on: {new Date(r.created_at).toLocaleString()}</p>
-                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${ r.status === 'approved' ? 'bg-green-500' : r.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}>
-                        {r.status.toUpperCase()}
-                    </span>
+                <div key={r.id} className="p-3 bg-gray-700 rounded-md flex justify-between items-center">
+                    <div>
+                        <p>Submitted on: {new Date(r.created_at).toLocaleString()}</p>
+                        <span className={`px-2 py-1 text-xs font-bold rounded-full ${ r.status === 'approved' ? 'bg-green-500' : r.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}>
+                            {r.status.toUpperCase()}
+                        </span>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteReceipt(r.id, r.receipt_url)}
+                      className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                    >
+                        Delete
+                    </button>
                 </div>
             )) : <p className="text-gray-400">You have no submission history.</p>}
             </div>
