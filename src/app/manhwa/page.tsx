@@ -1,5 +1,5 @@
 // src/app/manhwa/page.tsx
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,19 @@ export const runtime = 'nodejs';
 export const revalidate = 60;
 
 export default async function ManhwaListPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
+
   const { data: manhwaList, error } = await supabase
     .from('manhwa')
     .select('*')

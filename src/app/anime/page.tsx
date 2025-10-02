@@ -1,5 +1,5 @@
 // src/app/anime/page.tsx
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -19,15 +19,25 @@ export default async function AnimeGridPage({
     status?: string;
   };
 }) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
 
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return <AccessDenied />;
 
-  // --- START: Subscription စစ်ဆေးမှုကို ပိုမိုတိကျအောင် ပြင်ဆင်ခြင်း ---
   const { data: profile } = await supabase
     .from('profiles')
-    .select('subscription_expires_at, subscription_status') // status ကိုပါ တခါတည်း select လုပ်ပါ
+    .select('subscription_expires_at, subscription_status')
     .eq('id', session.user.id)
     .single();
 
@@ -37,11 +47,9 @@ export default async function AnimeGridPage({
   
   const isStatusActive = profile?.subscription_status === 'active';
 
-  // ရက်မကုန်သေးဘဲ status က 'active' ဖြစ်နေမှသာ ဝင်ခွင့်ပြုမည်။
   if (!isDateValid || !isStatusActive) {
     return <AccessDenied />;
   }
-  // --- END: Subscription စစ်ဆေးမှုကို ပိုမိုတိကျအောင် ပြင်ဆင်ခြင်း ---
 
   const query = searchParams?.q || '';
   const genreFilter = searchParams?.genre || '';

@@ -1,8 +1,8 @@
 // src/app/manhwa/read/[chapterId]/page.tsx
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import Image from 'next/image'; // Image ကို import လုပ်ပါ
+import Image from 'next/image';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -14,7 +14,18 @@ type PageProps = {
 };
 
 export default async function ReaderPage({ params }: PageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
 
   const { data: chapter } = await supabase
     .from('manhwa_chapters')

@@ -1,5 +1,5 @@
 // src/app/anime/[animeId]/page.tsx
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -11,12 +11,9 @@ import Link from 'next/link';
 export const runtime = 'nodejs';
 export const revalidate = 3600;
 
-// --- START: ပြင်ဆင်ချက် ---
-// 'PageProps' ဆိုတဲ့ နာမည်အစား conflict မဖြစ်အောင် 'AnimeDetailPageProps' လို့ နာမည်ပြောင်းလိုက်ပါတယ်။
 type AnimeDetailPageProps = {
   params: { animeId: string; };
 };
-// --- END: ပြင်ဆင်ချက် ---
 
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
 
@@ -25,11 +22,19 @@ const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number
   return ( <div className="bg-gray-700/50 backdrop-blur-sm text-gray-200 text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2">{icon}<span>{text}</span></div> );
 };
 
-// --- START: ပြင်ဆင်ချက် ---
-// Component မှာလည်း နာမည်ပြောင်းထားတဲ့ type အသစ်ကို အသုံးပြုလိုက်ပါတယ်။
 export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) {
-// --- END: ပြင်ဆင်ချက် ---
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
 
   const { data: { session } } = await supabase.auth.getSession();
 
