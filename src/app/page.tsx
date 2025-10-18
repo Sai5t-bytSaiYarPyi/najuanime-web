@@ -1,67 +1,81 @@
 // src/app/page.tsx
 'use client';
+
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
+import Auth from '@/components/Auth'; // Auth component ကို import လုပ်ပါ
 
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Modal state
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
-    supabase.auth.onAuthStateChange((_event, session) => {
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      // Login/Signup အောင်မြင်ရင် modal ကို ပိတ်ပါ
+      if (session) {
+        setIsAuthModalOpen(false);
+      }
     });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-center pt-20">
-      <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-accent-green to-accent-purple text-transparent bg-clip-text">
-        Unlock Your Anime Universe
-      </h1>
-      <p className="text-gray-300 mb-8 max-w-xl">
-        Watch the latest anime with Myanmar subtitles and read popular manhwa for free.
-      </p>
-      
-      {session ? (
-        <div className="flex flex-col items-center gap-4">
-            <p className="text-lg">Welcome back, {session.user.email?.split('@')[0]}</p>
-            <Link href="/my-account">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg">
-                    Go to My Account
-                </motion.div>
-            </Link>
-        </div>
-      ) : (
-        // --- START: ဖယ်ရှားပြီး ပြင်ဆင်ထားသော အပိုင်း ---
-        <div className="flex items-center gap-4">
-          <motion.button 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }} 
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg"
-            // onClick={() => { /* New Login Logic will be here */ }}
-          >
-            Login
-          </motion.button>
-          <motion.button 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }} 
-            className="px-8 py-3 bg-gray-600 hover:bg-gray-500 rounded-md font-semibold text-lg"
-            // onClick={() => { /* New Sign Up Logic will be here */ }}
-          >
-            Sign Up
-          </motion.button>
-        </div>
-        // --- END: ဖယ်ရှားပြီး ပြင်ဆင်ထားသော အပိုင်း ---
-      )}
+    <>
+      {/* Auth Modal Component */}
+      <Auth isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
-      <Link href="/manhwa" className="mt-6 text-yellow-400 hover:text-yellow-300">
-        or browse free Manhwa &rarr;
-      </Link>
-    </motion.div>
+      <motion.div 
+        key="landing" 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        className="flex flex-col items-center justify-center text-center pt-20"
+      >
+        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-accent-green to-accent-purple text-transparent bg-clip-text">
+          Unlock Your Anime Universe
+        </h1>
+        <p className="text-gray-300 mb-8 max-w-xl">
+          Watch the latest anime with Myanmar subtitles and read popular manhwa for free.
+        </p>
+        
+        {session ? (
+          <div className="flex flex-col items-center gap-4">
+              <p className="text-lg">Welcome back, {session.user.email?.split('@')[0]}</p>
+              <Link href="/my-account">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg">
+                      Go to My Account
+                  </motion.div>
+              </Link>
+          </div>
+        ) : (
+          // --- START: ပြင်ဆင်ထားသော အပိုင်း ---
+          <div className="flex items-center gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.95 }} 
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-lg"
+              onClick={() => setIsAuthModalOpen(true)} // Modal ကိုဖွင့်ရန်
+            >
+              Login
+            </motion.button>
+          </div>
+          // --- END: ပြင်ဆင်ထားသော အပိုင်း ---
+        )}
+
+        <Link href="/manhwa" className="mt-6 text-yellow-400 hover:text-yellow-300">
+          or browse free Manhwa &rarr;
+        </Link>
+      </motion.div>
+    </>
   );
 }
