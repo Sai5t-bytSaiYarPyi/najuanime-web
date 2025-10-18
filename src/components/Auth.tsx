@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Phone, Hash } from 'lucide-react'; // Phone, Hash icons ထည့်သွင်းထားသည်
+import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Phone, Hash, Send } from 'lucide-react'; // Send icon ထည့်သွင်းထားသည်
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AuthProps {
@@ -13,7 +13,7 @@ interface AuthProps {
 
 export default function Auth({ isOpen, onClose }: AuthProps) {
   // View Management State
-  const [view, setView] = useState<'email' | 'phone' | 'otp'>('email');
+  const [view, setView] = useState<'email' | 'phone' | 'otp' | 'forgot_password'>('email'); // forgot_password view ထပ်တိုး
   const [isLoginView, setIsLoginView] = useState(true);
 
   // Form States
@@ -27,10 +27,6 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-
-  // --- အရေးကြီးမှတ်ချက် ---
-  // Phone Sign In အလုပ်လုပ်ရန် Supabase Dashboard > Authentication > Providers > Phone ကို enable လုပ်ပြီး
-  // Twilio လိုမျိုး SMS Provider တစ်ခုကို configure လုပ်ထားဖို့ လိုအပ်ပါတယ်။
 
   const resetStates = () => {
     setEmail('');
@@ -79,7 +75,6 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    // နိုင်ငံတကာ format ဖြစ်အောင် phone number ကို ပြင်ဆင်ပါ (ဥပမာ: 09... -> +959...)
     const formattedPhone = `+95${phone.substring(1)}`;
     const { error: otpError } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
@@ -112,6 +107,25 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
     }
     setLoading(false);
   };
+  
+  // --- START: FORGOT PASSWORD FUNCTION အသစ် ---
+  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/`, // Password reset ပြီးရင် ပြန်လာမယ့် page
+    });
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setMessage('Password reset link has been sent to your email.');
+    }
+    setLoading(false);
+  };
+  // --- END: FORGOT PASSWORD FUNCTION အသစ် ---
+
 
   const handleClose = () => {
     resetStates();
@@ -134,6 +148,15 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
         )}
         <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} /><input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-gray-800 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-purple" /></div>
         <div className="relative"><KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} /><input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-gray-800 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-purple" /></div>
+        
+        {/* --- START: FORGOT PASSWORD LINK --- */}
+        {isLoginView && (
+          <div className="text-right">
+            <button type="button" onClick={() => { setView('forgot_password'); resetStates(); }} className="text-sm text-gray-400 hover:text-accent-green">Forgot Password?</button>
+          </div>
+        )}
+        {/* --- END: FORGOT PASSWORD LINK --- */}
+
         <button type="submit" disabled={loading} className="w-full bg-accent-purple hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-600 flex items-center justify-center gap-2">{loading ? 'Processing...' : (isLoginView ? 'Log In' : 'Create Account')} <LogIn size={20} /></button>
       </form>
       <p className="text-center text-sm text-gray-400 mt-4">
@@ -173,6 +196,23 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       </p>
     </motion.div>
   );
+  
+  // --- START: FORGOT PASSWORD VIEW အသစ် ---
+  const renderForgotPasswordView = () => (
+    <motion.div key="forgot_password" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}>
+      <h2 className="text-3xl font-bold text-center text-white mb-2">Reset Password</h2>
+      <p className="text-gray-400 text-center mb-6">Enter your email and we'll send you a link to reset your password.</p>
+      <form onSubmit={handlePasswordReset} className="space-y-4">
+        <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} /><input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-gray-800 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-purple" /></div>
+        <button type="submit" disabled={loading} className="w-full bg-accent-purple hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-600 flex items-center justify-center gap-2">{loading ? 'Sending...' : 'Send Reset Link'} <Send size={20} /></button>
+      </form>
+      <p className="text-center text-sm text-gray-400 mt-4">
+        <button onClick={() => { setView('email'); resetStates(); }} className="font-semibold text-accent-green hover:text-green-400">Back to Login</button>
+      </p>
+    </motion.div>
+  );
+  // --- END: FORGOT PASSWORD VIEW အသစ် ---
+
 
   return (
     <AnimatePresence>
@@ -194,6 +234,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
               {view === 'email' && renderEmailView()}
               {view === 'phone' && renderPhoneView()}
               {view === 'otp' && renderOtpView()}
+              {view === 'forgot_password' && renderForgotPasswordView()}
             </AnimatePresence>
             
             {(error || message) && (
