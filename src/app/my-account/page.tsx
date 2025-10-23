@@ -26,7 +26,7 @@ type UserAnimeListItem = {
         poster_url: string | null;
         title_english: string | null;
         title_romaji: string | null;
-    } | null; // Object တစ်ခု သို့မဟုတ် null ဖြစ်နိုင်သည်
+    } | null;
 };
 type Tab = 'profile' | 'anime_list' | 'settings';
 
@@ -35,7 +35,7 @@ export default function MyAccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
-  const [loading, setLoading] = useState(true); // Component စတင်ချိန်တွင် loading ကို true ထားပါ။
+  const [loading, setLoading] = useState(true); // Initial state should be true
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -47,7 +47,9 @@ export default function MyAccountPage() {
   // --- Data Fetching Logic ---
   const setupUser = useCallback(async (user: User) => {
     console.log("Setting up user data for:", user.id);
+    // Note: Don't set loading true here, let the caller handle it if needed
     setError(null);
+    let success = false; // Track success to ensure loading is set false correctly
     try {
         const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
             supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single(),
@@ -59,74 +61,64 @@ export default function MyAccountPage() {
         console.log("Receipts response:", receiptsResponse);
         console.log("Anime list response:", animeListResponse);
 
-        // --- Error Handling Refinement ---
-        if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
-             console.error("Profile fetch error:", profileResponse.error);
-             throw new Error(`Profile fetch failed: ${profileResponse.error.message}`);
-        }
-        if (receiptsResponse.error) {
-             console.error("Receipts fetch error:", receiptsResponse.error);
-             throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
-        }
-        if (animeListResponse.error) {
-             console.error("Anime list fetch error:", animeListResponse.error);
-             throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
-        }
-        // --- End Error Handling Refinement ---
+        if (profileResponse.error && profileResponse.error.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileResponse.error.message}`);
+        if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
+        if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
 
         setProfile(profileResponse.data ? profileResponse.data as Profile : null);
         setReceipts(receiptsResponse.data as Receipt[] || []);
 
-        // --- FIX: Map over data to ensure type correctness ---
         const fetchedAnimeList = animeListResponse.data;
-        // fetchedAnimeList က null မဟုတ်ဘူး၊ array ဖြစ်တယ် ဆိုမှ map လုပ်ပါမယ်။
         if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
-          // Map လုပ်ပြီး item တစ်ခုချင်းစီကို UserAnimeListItem type နဲ့ ကိုက်အောင် object အသစ်ပြန်ဆောက်ပါ။
-          // item ကို 'any' လို့ ခဏထားတာက Supabase ကနေလာတဲ့ တိကျတဲ့ type ကို မသိနိုင်လို့ပါ။
           const correctlyTypedList: UserAnimeListItem[] = fetchedAnimeList.map((item: any) => {
-             // item ထဲမှာ anime_series object ပါရဲ့လား၊ object အမှန်ဖြစ်ရဲ့လား စစ်ဆေးပါ။
              const animeSeriesData = item.anime_series;
              const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null)
                 ? {
-                    id: animeSeriesData.id, // ဒီ field တွေက query မှာ select လုပ်ထားလို့ ရှိသင့်ပါတယ်။
+                    id: animeSeriesData.id,
                     poster_url: animeSeriesData.poster_url,
                     title_english: animeSeriesData.title_english,
                     title_romaji: animeSeriesData.title_romaji
                   }
-                : null; // anime_series မပါရင် null ထားပါ။
-
-             // UserAnimeListItem structure အတိုင်း object အသစ် return ပြန်ပါ။
+                : null;
              return {
-               status: item.status, // status က user_anime_list table က တိုက်ရိုက်လာတာ။
-               anime_series: typedAnimeSeries // အပေါ်မှာ ပြင်ဆင်ထားတဲ့ anime_series object (သို့) null။
+               status: item.status,
+               anime_series: typedAnimeSeries
              };
            });
-          setAnimeList(correctlyTypedList); // type ကိုက်ညီအောင် ပြင်ပြီးသား list ကို state ထဲ ထည့်ပါ။
+          setAnimeList(correctlyTypedList);
         } else {
-          setAnimeList([]); // null သို့မဟုတ် array မဟုတ်ရင် empty array ထားပါ။
+          setAnimeList([]);
         }
-        // --- END FIX ---
-
-
+        success = true; // Mark as success if all data processing finishes
         console.log("User data setup complete.");
     } catch (err: any) {
         console.error("Error during setupUser:", err);
         setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
+        // Let finally handle loading state
     } finally {
+        // Ensure loading is set to false regardless of success or failure inside setupUser
         console.log("Setting loading to false in setupUser finally block.");
         setLoading(false);
     }
-  }, []);
+    // Return success status if needed by caller
+    return success;
+  }, []); // Empty dependency array means this function reference never changes
 
-  // --- useEffect Hook for Session Check and Data Loading --- (No changes needed here for the type error)
+  // --- useEffect Hook for Session Check and Data Loading ---
   useEffect(() => {
     console.log("MyAccountPage useEffect running.");
     let isMounted = true;
+    // Don't set loading true here initially, useState already did.
+    // setLoading(true); // <-- REMOVE THIS if useState default is true
+    setError(null);
 
     const checkSessionAndSetup = async () => {
       console.log("Checking session...");
-      setError(null);
       try {
+          // Explicitly set loading to true when starting the check
+          // This ensures refresh/direct load shows loading immediately
+          if (isMounted) setLoading(true); // <--- ENSURE Loading starts
+
           const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
           console.log("getSession result:", { currentSession, sessionError });
 
@@ -139,29 +131,36 @@ export default function MyAccountPage() {
             throw new Error(`Session check failed: ${sessionError.message}`);
           }
 
-          setSession(currentSession);
+          setSession(currentSession); // Update session state regardless
 
           if (currentSession && currentSession.user) {
               console.log("Session found, calling setupUser...");
+              // setupUser will set loading to false in its finally block
               await setupUser(currentSession.user);
           } else {
-              console.log("No session found, clearing data and setting loading false.");
+              // NO session found after initial check
+              console.log("No session found initially, clearing data and setting loading false.");
               setProfile(null);
               setReceipts([]);
               setAnimeList([]);
-              setLoading(false);
+              // Explicitly set loading to false if no session
+              if (isMounted) setLoading(false); // <--- Ensure loading stops if no session
           }
       } catch (err: any) {
            console.error("Error in checkSessionAndSetup:", err);
            if (isMounted) {
                setError(err.message || "An error occurred while loading account data.");
-               setLoading(false);
+               // Explicitly set loading to false on error
+               setLoading(false); // <--- Ensure loading stops on error
            }
       }
+      // REMOVED finally block here as loading is handled within try/catch branches
+      // and within setupUser's finally block.
     };
 
     checkSessionAndSetup();
 
+    // Auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         console.log("Auth state changed:", event, newSession);
@@ -171,25 +170,30 @@ export default function MyAccountPage() {
 
         if (event === 'SIGNED_IN' && newSession && newSession.user) {
           console.log("Handling SIGNED_IN event. Refetching user data.");
-          setLoading(true);
+          // Set loading true before starting the fetch
+          setLoading(true); // <--- Add this
           setError(null);
-          await setupUser(newSession.user);
+          await setupUser(newSession.user); // setupUser's finally will set loading false
         } else if (event === 'SIGNED_OUT') {
           console.log("Handling SIGNED_OUT event. Clearing data.");
           setProfile(null);
           setReceipts([]);
           setAnimeList([]);
           setError(null);
-          setLoading(false);
+          // Set loading false when signed out
+          setLoading(false); // <--- Add this
         }
+        // No explicit loading state changes for other events like TOKEN_REFRESHED needed for now
       }
     );
 
+     // Cleanup function
      return () => {
        console.log("MyAccountPage useEffect cleanup.");
        isMounted = false;
        authListener?.subscription.unsubscribe();
      };
+     // setupUser has useCallback with empty [], so it's stable and doesn't cause re-runs
    }, [setupUser]);
 
   // --- Delete Receipt Logic --- (unchanged)
@@ -199,6 +203,8 @@ export default function MyAccountPage() {
            return;
        }
        if (window.confirm('Are you sure you want to delete this submission?')) {
+          // Use a local loading state for the delete button maybe? Or rely on the main one.
+          // Let's use the main one for now.
           setLoading(true);
           try {
               const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
@@ -224,7 +230,7 @@ export default function MyAccountPage() {
   const handleImageUpload = async (
       event: React.ChangeEvent<HTMLInputElement>,
       bucket: 'avatars' | 'banners',
-      setLoadingState: (loading: boolean) => void
+      setLoadingState: (loading: boolean) => void // Use the specific uploader loading state
   ) => {
       if (!session?.user || !profile) {
           setError("User not logged in or profile not loaded.");
@@ -263,17 +269,27 @@ export default function MyAccountPage() {
   };
 
 
-  // --- Loading State --- (unchanged)
-  if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading...</div>); }
+  // --- Loading State ---
+  if (loading) {
+      console.log("Rendering loading state..."); // Debug log for loading state render
+      return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading...</div>);
+  }
 
-  // --- Error State --- (unchanged)
-  if (error) { return (<div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400"><AlertTriangle className="mb-2" size={32} /><p>{error}</p></div>); }
+  // --- Error State ---
+  if (error) {
+      console.log("Rendering error state:", error); // Debug log for error state render
+      return (<div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400"><AlertTriangle className="mb-2" size={32} /><p>{error}</p></div>);
+  }
 
-  // --- Not Logged In State --- (unchanged)
-  if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">Login required.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
+  // --- Not Logged In State ---
+  if (!session || !session.user) {
+      console.log("Rendering not logged in state..."); // Debug log for not logged in state render
+      return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">Login required.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
+  }
 
-  // --- Profile မရသေးတဲ့ State --- (unchanged)
+  // --- Profile Not Ready State ---
   if (!profile) {
+    console.log("Rendering profile not ready state..."); // Debug log for profile not ready state render
     return (
         <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center">
             <AlertTriangle className="mb-2" size={32} />
@@ -289,13 +305,16 @@ export default function MyAccountPage() {
     );
   }
 
+  // --- Main Render Logic ---
+  console.log("Rendering main content..."); // Debug log for main content render
   const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
   const usernameDisplay = profile?.naju_id || session.user.email?.split('@')[0] || 'User';
 
-  // --- Tab Content Components --- (unchanged)
-
+  // --- Tab Content Components --- (No changes needed inside these)
+  // ... (ProfileTabContent, AnimeListTabContent, SettingsTabContent remain the same) ...
   const ProfileTabContent = () => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        {/* Banner */}
         <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
             {profile?.banner_url ? (
                 <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/>
@@ -306,6 +325,7 @@ export default function MyAccountPage() {
              <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
         </div>
 
+        {/* Avatar & Basic Info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                 {profile?.avatar_url ? (
@@ -327,6 +347,7 @@ export default function MyAccountPage() {
             </div>
         </div>
 
+        {/* Bio, Subscription */}
         <div className="px-6 space-y-4">
              <div className="bg-card-dark p-4 rounded-lg shadow-md"><h3 className="font-semibold text-gray-300 mb-1">About Me</h3><p className="text-gray-400 text-sm italic">No bio added yet.</p></div>
              <div className="bg-card-dark p-4 rounded-lg shadow-md">
@@ -441,8 +462,7 @@ export default function MyAccountPage() {
      </motion.div>
   );
 
-
-  // --- Main Return --- (unchanged)
+  // --- Main Return ---
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
         {/* Tab Navigation */}
