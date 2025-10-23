@@ -44,12 +44,11 @@ export default function MyAccountPage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Data Fetching Logic ---
+  // --- Data Fetching Logic --- (No changes here)
   const setupUser = useCallback(async (user: User) => {
     console.log("Setting up user data for:", user.id);
-    // Note: Don't set loading true here, let the caller handle it if needed
     setError(null);
-    let success = false; // Track success to ensure loading is set false correctly
+    let success = false;
     try {
         const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
             supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single(),
@@ -89,73 +88,55 @@ export default function MyAccountPage() {
         } else {
           setAnimeList([]);
         }
-        success = true; // Mark as success if all data processing finishes
+        success = true;
         console.log("User data setup complete.");
     } catch (err: any) {
         console.error("Error during setupUser:", err);
         setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
-        // Let finally handle loading state
     } finally {
-        // Ensure loading is set to false regardless of success or failure inside setupUser
         console.log("Setting loading to false in setupUser finally block.");
-        setLoading(false);
+        setLoading(false); // Make sure loading stops after setupUser
     }
-    // Return success status if needed by caller
     return success;
-  }, []); // Empty dependency array means this function reference never changes
+  }, []);
 
   // --- useEffect Hook for Session Check and Data Loading ---
   useEffect(() => {
     console.log("MyAccountPage useEffect running.");
     let isMounted = true;
-    // Don't set loading true here initially, useState already did.
-    // setLoading(true); // <-- REMOVE THIS if useState default is true
+    setLoading(true); // Start loading on mount
     setError(null);
 
     const checkSessionAndSetup = async () => {
       console.log("Checking session...");
       try {
-          // Explicitly set loading to true when starting the check
-          // This ensures refresh/direct load shows loading immediately
-          if (isMounted) setLoading(true); // <--- ENSURE Loading starts
-
           const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
           console.log("getSession result:", { currentSession, sessionError });
 
-          if (!isMounted) {
-              console.log("Component unmounted during session check.");
-              return;
-          }
+          if (!isMounted) return;
 
-          if (sessionError) {
-            throw new Error(`Session check failed: ${sessionError.message}`);
-          }
+          if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
 
-          setSession(currentSession); // Update session state regardless
+          // --- FIX: Store initial session immediately ---
+          setSession(currentSession); // Set session state right after getting it
 
           if (currentSession && currentSession.user) {
-              console.log("Session found, calling setupUser...");
-              // setupUser will set loading to false in its finally block
-              await setupUser(currentSession.user);
+              console.log("Initial session found, calling setupUser...");
+              await setupUser(currentSession.user); // setupUser sets loading false
           } else {
-              // NO session found after initial check
-              console.log("No session found initially, clearing data and setting loading false.");
+              console.log("No initial session found, clearing data and setting loading false.");
               setProfile(null);
               setReceipts([]);
               setAnimeList([]);
-              // Explicitly set loading to false if no session
-              if (isMounted) setLoading(false); // <--- Ensure loading stops if no session
+              if (isMounted) setLoading(false); // Stop loading if no session
           }
       } catch (err: any) {
            console.error("Error in checkSessionAndSetup:", err);
            if (isMounted) {
                setError(err.message || "An error occurred while loading account data.");
-               // Explicitly set loading to false on error
-               setLoading(false); // <--- Ensure loading stops on error
+               setLoading(false); // Stop loading on error
            }
       }
-      // REMOVED finally block here as loading is handled within try/catch branches
-      // and within setupUser's finally block.
     };
 
     checkSessionAndSetup();
@@ -166,24 +147,46 @@ export default function MyAccountPage() {
         console.log("Auth state changed:", event, newSession);
         if (!isMounted) return;
 
+        // Get the user ID from the *state* (representing the previous state)
+        const previousUserId = session?.user?.id;
+        const newUserId = newSession?.user?.id;
+
+        // Update the session state *after* checking the previous one
         setSession(newSession);
 
-        if (event === 'SIGNED_IN' && newSession && newSession.user) {
-          console.log("Handling SIGNED_IN event. Refetching user data.");
-          // Set loading true before starting the fetch
-          setLoading(true); // <--- Add this
-          setError(null);
-          await setupUser(newSession.user); // setupUser's finally will set loading false
-        } else if (event === 'SIGNED_OUT') {
-          console.log("Handling SIGNED_OUT event. Clearing data.");
-          setProfile(null);
-          setReceipts([]);
-          setAnimeList([]);
-          setError(null);
-          // Set loading false when signed out
-          setLoading(false); // <--- Add this
+        // --- MODIFIED LOGIC ---
+        // Only trigger loading and refetch if the user ID has actually changed
+        if (newUserId !== previousUserId) {
+            console.log(`User changed from ${previousUserId} to ${newUserId}. Event: ${event}`);
+            if (newSession && newSession.user) {
+                // User logged in or switched
+                console.log("User logged in or switched. Refetching data.");
+                setLoading(true);
+                setError(null);
+                await setupUser(newSession.user); // setupUser sets loading false
+            } else {
+                // User logged out
+                console.log("User logged out. Clearing data.");
+                setProfile(null);
+                setReceipts([]);
+                setAnimeList([]);
+                setError(null);
+                setLoading(false); // Stop loading on logout
+            }
+        } else {
+             // User ID is the same (or both are null/undefined)
+             // This covers INITIAL_SESSION, TOKEN_REFRESHED, USER_UPDATED etc.
+             // where we don't need a full loading indicator and refetch.
+             console.log(`Auth event '${event}' occurred, but user ID (${newUserId}) remains the same. No full reload triggered.`);
+             // Optionally handle USER_UPDATED specifically if you need to refresh parts of the profile
+             // without showing the main loading indicator.
+             if (event === 'USER_UPDATED' && newSession && newSession.user){
+                 // Maybe just fetch profile again silently?
+                 // const { data } = await supabase.from('profiles')...
+                 // if (data) setProfile(data);
+             }
         }
-        // No explicit loading state changes for other events like TOKEN_REFRESHED needed for now
+        // --- END MODIFIED LOGIC ---
       }
     );
 
@@ -193,8 +196,8 @@ export default function MyAccountPage() {
        isMounted = false;
        authListener?.subscription.unsubscribe();
      };
-     // setupUser has useCallback with empty [], so it's stable and doesn't cause re-runs
-   }, [setupUser]);
+     // Add `session` to dependency array to correctly compare previous/new user IDs
+   }, [setupUser, session]); // <-- Added session dependency
 
   // --- Delete Receipt Logic --- (unchanged)
   const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
@@ -203,8 +206,6 @@ export default function MyAccountPage() {
            return;
        }
        if (window.confirm('Are you sure you want to delete this submission?')) {
-          // Use a local loading state for the delete button maybe? Or rely on the main one.
-          // Let's use the main one for now.
           setLoading(true);
           try {
               const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
@@ -230,7 +231,7 @@ export default function MyAccountPage() {
   const handleImageUpload = async (
       event: React.ChangeEvent<HTMLInputElement>,
       bucket: 'avatars' | 'banners',
-      setLoadingState: (loading: boolean) => void // Use the specific uploader loading state
+      setLoadingState: (loading: boolean) => void
   ) => {
       if (!session?.user || !profile) {
           setError("User not logged in or profile not loaded.");
@@ -269,27 +270,27 @@ export default function MyAccountPage() {
   };
 
 
-  // --- Loading State ---
+  // --- Loading State --- (unchanged)
   if (loading) {
-      console.log("Rendering loading state..."); // Debug log for loading state render
+      console.log("Rendering loading state...");
       return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading...</div>);
   }
 
-  // --- Error State ---
+  // --- Error State --- (unchanged)
   if (error) {
-      console.log("Rendering error state:", error); // Debug log for error state render
+      console.log("Rendering error state:", error);
       return (<div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400"><AlertTriangle className="mb-2" size={32} /><p>{error}</p></div>);
   }
 
-  // --- Not Logged In State ---
+  // --- Not Logged In State --- (unchanged)
   if (!session || !session.user) {
-      console.log("Rendering not logged in state..."); // Debug log for not logged in state render
+      console.log("Rendering not logged in state...");
       return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">Login required.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
   }
 
-  // --- Profile Not Ready State ---
+  // --- Profile Not Ready State --- (unchanged)
   if (!profile) {
-    console.log("Rendering profile not ready state..."); // Debug log for profile not ready state render
+    console.log("Rendering profile not ready state...");
     return (
         <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center">
             <AlertTriangle className="mb-2" size={32} />
@@ -305,16 +306,15 @@ export default function MyAccountPage() {
     );
   }
 
-  // --- Main Render Logic ---
-  console.log("Rendering main content..."); // Debug log for main content render
+  // --- Main Render Logic --- (unchanged)
+  console.log("Rendering main content...");
   const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
   const usernameDisplay = profile?.naju_id || session.user.email?.split('@')[0] || 'User';
 
-  // --- Tab Content Components --- (No changes needed inside these)
+  // --- Tab Content Components --- (unchanged)
   // ... (ProfileTabContent, AnimeListTabContent, SettingsTabContent remain the same) ...
   const ProfileTabContent = () => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        {/* Banner */}
         <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
             {profile?.banner_url ? (
                 <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/>
@@ -325,7 +325,6 @@ export default function MyAccountPage() {
              <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
         </div>
 
-        {/* Avatar & Basic Info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                 {profile?.avatar_url ? (
@@ -347,7 +346,6 @@ export default function MyAccountPage() {
             </div>
         </div>
 
-        {/* Bio, Subscription */}
         <div className="px-6 space-y-4">
              <div className="bg-card-dark p-4 rounded-lg shadow-md"><h3 className="font-semibold text-gray-300 mb-1">About Me</h3><p className="text-gray-400 text-sm italic">No bio added yet.</p></div>
              <div className="bg-card-dark p-4 rounded-lg shadow-md">
@@ -462,7 +460,7 @@ export default function MyAccountPage() {
      </motion.div>
   );
 
-  // --- Main Return ---
+  // --- Main Return --- (unchanged)
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
         {/* Tab Navigation */}
