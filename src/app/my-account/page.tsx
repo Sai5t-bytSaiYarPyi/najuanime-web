@@ -45,27 +45,30 @@ export default function MyAccountPage() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   // --- Data Fetching Logic ---
+  // --- FIX: Use sequential await instead of Promise.all ---
   const setupUser = useCallback(async (user: User) => {
-    console.log("Setting up user data for:", user.id);
-    //setError(null); // Let the caller reset error before calling setupUser
+    console.log("Setting up user data sequentially for:", user.id);
     let success = false;
     try {
-        const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
-            supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single(),
-            supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
-            supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
-        ]);
-
+        // 1. Fetch Profile
+        console.log("Fetching profile...");
+        const profileResponse = await supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single();
         console.log("Profile response:", profileResponse);
-        console.log("Receipts response:", receiptsResponse);
-        console.log("Anime list response:", animeListResponse);
-
         if (profileResponse.error && profileResponse.error.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileResponse.error.message}`);
-        if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
-        if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
-
         setProfile(profileResponse.data ? profileResponse.data as Profile : null);
+
+        // 2. Fetch Receipts
+        console.log("Fetching receipts...");
+        const receiptsResponse = await supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false });
+        console.log("Receipts response:", receiptsResponse);
+        if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
         setReceipts(receiptsResponse.data as Receipt[] || []);
+
+        // 3. Fetch Anime List
+        console.log("Fetching anime list...");
+        const animeListResponse = await supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false });
+        console.log("Anime list response:", animeListResponse);
+        if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
 
         const fetchedAnimeList = animeListResponse.data;
         if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
@@ -87,30 +90,29 @@ export default function MyAccountPage() {
         console.log("User data setup successful.");
         return true; // Indicate success
     } catch (err: any) {
-        console.error("Error during setupUser:", err);
+        console.error("Error during sequential setupUser:", err);
         setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
+        // Clear potentially partially loaded data on error? Optional.
+        // setProfile(null);
+        // setReceipts([]);
+        // setAnimeList([]);
         return false; // Indicate failure
     }
-    // setLoading(false) is handled by the caller (useEffect)
   }, []); // Keep dependencies empty
+  // --- END FIX ---
 
-  // --- START: Moved checkSessionAndSetup function outside useEffect ---
-  // Wrap with useCallback to memoize the function reference.
-  // Dependencies: setupUser (which is also memoized)
+
+  // --- checkSessionAndSetup function moved outside useEffect ---
   const checkSessionAndSetup = useCallback(async (isInitialLoad = false) => {
       console.log(`Checking session... (Initial Load: ${isInitialLoad})`);
-      setLoading(true); // Always start loading for checks/refreshes
+      setLoading(true);
       setError(null);
-
       try {
           const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
           console.log("getSession result:", { currentSession, sessionError });
-
-          // No need for isMounted check here as it's called from useEffect or onClick
-
           if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
 
-          setSession(currentSession); // Update session state
+          setSession(currentSession);
 
           if (currentSession && currentSession.user) {
               console.log("Session found, calling setupUser...");
@@ -123,26 +125,21 @@ export default function MyAccountPage() {
           }
       } catch (err: any) {
            console.error("Error in checkSessionAndSetup:", err);
-           // Set error state here so the UI can display it
            setError(err.message || "An error occurred while loading account data.");
       } finally {
-          // --- Centralized setLoading(false) ---
           console.log("Setting loading to false in checkSessionAndSetup finally block.");
           setLoading(false);
       }
-  }, [setupUser]); // Dependency on setupUser
-  // --- END: Moved checkSessionAndSetup function ---
+  }, [setupUser]);
 
-  // --- useEffect Hook for Session Check and Data Loading ---
+  // --- useEffect Hook --- (No changes needed inside useEffect itself)
   useEffect(() => {
     console.log("MyAccountPage useEffect running.");
     let isMounted = true;
     let initialLoadHandled = false;
 
-    // Call the check function on initial mount
-    checkSessionAndSetup(true); // Pass true for initial load flag
+    checkSessionAndSetup(true);
 
-    // Auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         console.log("Auth state changed:", event, newSession);
@@ -150,27 +147,22 @@ export default function MyAccountPage() {
 
         const previousUserId = session?.user?.id;
         const newUserId = newSession?.user?.id;
-
-        // Set session first
         setSession(newSession);
 
-        // Avoid reload if it's the initial SIGNED_IN event (already handled by initial checkSessionAndSetup)
         if (event === 'SIGNED_IN' && initialLoadHandled && newUserId === previousUserId) {
             console.log("Ignoring initial duplicate SIGNED_IN event.");
             return;
         }
-        // Mark initial load as handled after the first auth event (or initial check finishes)
         initialLoadHandled = true;
 
-
-        if (newUserId !== previousUserId) { // User actually changed
+        if (newUserId !== previousUserId) {
             console.log(`User change detected (${event}). Previous: ${previousUserId}, New: ${newUserId}`);
             setLoading(true);
             setError(null);
             if (newSession && newSession.user) {
                 console.log("User logged in or switched. Refetching data.");
-                await setupUser(newSession.user); // setupUser now returns success/fail but doesn't handle loading
-                setLoading(false); // Manually set loading false after setupUser finishes
+                await setupUser(newSession.user);
+                setLoading(false); // Manually set loading false
             } else {
                 console.log("User logged out. Clearing data.");
                 setProfile(null);
@@ -180,23 +172,18 @@ export default function MyAccountPage() {
             }
         } else if (event === 'USER_UPDATED' && newSession && newSession.user) {
             console.log("User updated. Silently refreshing profile maybe?");
-            // Silently refresh profile
-            // const { data } = await supabase.from('profiles')...
-            // if (data && isMounted) setProfile(data as Profile);
         } else {
             console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No major reload triggered.`);
         }
       }
     );
 
-     // Cleanup function
      return () => {
        console.log("MyAccountPage useEffect cleanup.");
        isMounted = false;
        authListener?.subscription.unsubscribe();
      };
-     // Add checkSessionAndSetup to dependencies? No, it's memoized. Keep session.
-   }, [setupUser, session, checkSessionAndSetup]); // <-- Added checkSessionAndSetup dependency
+   }, [setupUser, session, checkSessionAndSetup]);
 
   // --- Delete Receipt Logic --- (unchanged)
   const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
@@ -258,7 +245,7 @@ export default function MyAccountPage() {
       return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading...</div>);
   }
 
-  // --- Error State ---
+  // --- Error State --- (unchanged, uses checkSessionAndSetup)
   if (error) {
       console.log("Rendering error state:", error);
       return (
@@ -267,8 +254,7 @@ export default function MyAccountPage() {
               <p className="font-semibold">Failed to Load Account Details</p>
               <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p>
               <button
-                  // --- FIX: Correct function name is used here ---
-                  onClick={() => checkSessionAndSetup()} // Call the memoized function directly
+                  onClick={() => checkSessionAndSetup()}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"
               >
                   Try Again
@@ -458,6 +444,7 @@ export default function MyAccountPage() {
          </div>
      </motion.div>
   );
+
 
   // --- Main Return --- (unchanged)
   return (
