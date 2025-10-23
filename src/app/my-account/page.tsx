@@ -2,14 +2,14 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../../lib/supabaseClient'; // Path မှန်ကန်ကြောင်း သေချာပါစေ။
+import { supabase } from '../../lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud } from 'lucide-react';
 
-// --- Type Definitions ---
+// --- Type Definitions --- (No changes here)
 type Profile = {
   id: string;
   naju_id: string;
@@ -35,7 +35,7 @@ export default function MyAccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
-  const [loading, setLoading] = useState(true); // Initial state should be true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -44,10 +44,10 @@ export default function MyAccountPage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Data Fetching Logic --- (No changes here)
+  // --- Data Fetching Logic ---
   const setupUser = useCallback(async (user: User) => {
     console.log("Setting up user data for:", user.id);
-    setError(null);
+    //setError(null); // Let the caller reset error before calling setupUser
     let success = false;
     try {
         const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
@@ -73,73 +73,74 @@ export default function MyAccountPage() {
              const animeSeriesData = item.anime_series;
              const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null)
                 ? {
-                    id: animeSeriesData.id,
-                    poster_url: animeSeriesData.poster_url,
-                    title_english: animeSeriesData.title_english,
-                    title_romaji: animeSeriesData.title_romaji
-                  }
-                : null;
-             return {
-               status: item.status,
-               anime_series: typedAnimeSeries
-             };
+                    id: animeSeriesData.id, poster_url: animeSeriesData.poster_url,
+                    title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji
+                  } : null;
+             return { status: item.status, anime_series: typedAnimeSeries };
            });
           setAnimeList(correctlyTypedList);
         } else {
           setAnimeList([]);
         }
+
         success = true;
-        console.log("User data setup complete.");
+        console.log("User data setup successful.");
+        return true; // Indicate success
     } catch (err: any) {
         console.error("Error during setupUser:", err);
         setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
-    } finally {
-        console.log("Setting loading to false in setupUser finally block.");
-        setLoading(false); // Make sure loading stops after setupUser
+        return false; // Indicate failure
     }
-    return success;
-  }, []);
+    // setLoading(false) is handled by the caller (useEffect)
+  }, []); // Keep dependencies empty
+
+  // --- START: Moved checkSessionAndSetup function outside useEffect ---
+  // Wrap with useCallback to memoize the function reference.
+  // Dependencies: setupUser (which is also memoized)
+  const checkSessionAndSetup = useCallback(async (isInitialLoad = false) => {
+      console.log(`Checking session... (Initial Load: ${isInitialLoad})`);
+      setLoading(true); // Always start loading for checks/refreshes
+      setError(null);
+
+      try {
+          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+          console.log("getSession result:", { currentSession, sessionError });
+
+          // No need for isMounted check here as it's called from useEffect or onClick
+
+          if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
+
+          setSession(currentSession); // Update session state
+
+          if (currentSession && currentSession.user) {
+              console.log("Session found, calling setupUser...");
+              await setupUser(currentSession.user);
+          } else {
+              console.log("No session found, clearing data.");
+              setProfile(null);
+              setReceipts([]);
+              setAnimeList([]);
+          }
+      } catch (err: any) {
+           console.error("Error in checkSessionAndSetup:", err);
+           // Set error state here so the UI can display it
+           setError(err.message || "An error occurred while loading account data.");
+      } finally {
+          // --- Centralized setLoading(false) ---
+          console.log("Setting loading to false in checkSessionAndSetup finally block.");
+          setLoading(false);
+      }
+  }, [setupUser]); // Dependency on setupUser
+  // --- END: Moved checkSessionAndSetup function ---
 
   // --- useEffect Hook for Session Check and Data Loading ---
   useEffect(() => {
     console.log("MyAccountPage useEffect running.");
     let isMounted = true;
-    setLoading(true); // Start loading on mount
-    setError(null);
+    let initialLoadHandled = false;
 
-    const checkSessionAndSetup = async () => {
-      console.log("Checking session...");
-      try {
-          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-          console.log("getSession result:", { currentSession, sessionError });
-
-          if (!isMounted) return;
-
-          if (sessionError) throw new Error(`Session check failed: ${sessionError.message}`);
-
-          // --- FIX: Store initial session immediately ---
-          setSession(currentSession); // Set session state right after getting it
-
-          if (currentSession && currentSession.user) {
-              console.log("Initial session found, calling setupUser...");
-              await setupUser(currentSession.user); // setupUser sets loading false
-          } else {
-              console.log("No initial session found, clearing data and setting loading false.");
-              setProfile(null);
-              setReceipts([]);
-              setAnimeList([]);
-              if (isMounted) setLoading(false); // Stop loading if no session
-          }
-      } catch (err: any) {
-           console.error("Error in checkSessionAndSetup:", err);
-           if (isMounted) {
-               setError(err.message || "An error occurred while loading account data.");
-               setLoading(false); // Stop loading on error
-           }
-      }
-    };
-
-    checkSessionAndSetup();
+    // Call the check function on initial mount
+    checkSessionAndSetup(true); // Pass true for initial load flag
 
     // Auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -147,46 +148,44 @@ export default function MyAccountPage() {
         console.log("Auth state changed:", event, newSession);
         if (!isMounted) return;
 
-        // Get the user ID from the *state* (representing the previous state)
         const previousUserId = session?.user?.id;
         const newUserId = newSession?.user?.id;
 
-        // Update the session state *after* checking the previous one
+        // Set session first
         setSession(newSession);
 
-        // --- MODIFIED LOGIC ---
-        // Only trigger loading and refetch if the user ID has actually changed
-        if (newUserId !== previousUserId) {
-            console.log(`User changed from ${previousUserId} to ${newUserId}. Event: ${event}`);
+        // Avoid reload if it's the initial SIGNED_IN event (already handled by initial checkSessionAndSetup)
+        if (event === 'SIGNED_IN' && initialLoadHandled && newUserId === previousUserId) {
+            console.log("Ignoring initial duplicate SIGNED_IN event.");
+            return;
+        }
+        // Mark initial load as handled after the first auth event (or initial check finishes)
+        initialLoadHandled = true;
+
+
+        if (newUserId !== previousUserId) { // User actually changed
+            console.log(`User change detected (${event}). Previous: ${previousUserId}, New: ${newUserId}`);
+            setLoading(true);
+            setError(null);
             if (newSession && newSession.user) {
-                // User logged in or switched
                 console.log("User logged in or switched. Refetching data.");
-                setLoading(true);
-                setError(null);
-                await setupUser(newSession.user); // setupUser sets loading false
+                await setupUser(newSession.user); // setupUser now returns success/fail but doesn't handle loading
+                setLoading(false); // Manually set loading false after setupUser finishes
             } else {
-                // User logged out
                 console.log("User logged out. Clearing data.");
                 setProfile(null);
                 setReceipts([]);
                 setAnimeList([]);
-                setError(null);
-                setLoading(false); // Stop loading on logout
+                setLoading(false);
             }
+        } else if (event === 'USER_UPDATED' && newSession && newSession.user) {
+            console.log("User updated. Silently refreshing profile maybe?");
+            // Silently refresh profile
+            // const { data } = await supabase.from('profiles')...
+            // if (data && isMounted) setProfile(data as Profile);
         } else {
-             // User ID is the same (or both are null/undefined)
-             // This covers INITIAL_SESSION, TOKEN_REFRESHED, USER_UPDATED etc.
-             // where we don't need a full loading indicator and refetch.
-             console.log(`Auth event '${event}' occurred, but user ID (${newUserId}) remains the same. No full reload triggered.`);
-             // Optionally handle USER_UPDATED specifically if you need to refresh parts of the profile
-             // without showing the main loading indicator.
-             if (event === 'USER_UPDATED' && newSession && newSession.user){
-                 // Maybe just fetch profile again silently?
-                 // const { data } = await supabase.from('profiles')...
-                 // if (data) setProfile(data);
-             }
+            console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No major reload triggered.`);
         }
-        // --- END MODIFIED LOGIC ---
       }
     );
 
@@ -196,34 +195,25 @@ export default function MyAccountPage() {
        isMounted = false;
        authListener?.subscription.unsubscribe();
      };
-     // Add `session` to dependency array to correctly compare previous/new user IDs
-   }, [setupUser, session]); // <-- Added session dependency
+     // Add checkSessionAndSetup to dependencies? No, it's memoized. Keep session.
+   }, [setupUser, session, checkSessionAndSetup]); // <-- Added checkSessionAndSetup dependency
 
   // --- Delete Receipt Logic --- (unchanged)
   const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
-       if (!receiptPath) {
-           alert('Receipt path is missing, cannot delete from storage.');
-           return;
-       }
-       if (window.confirm('Are you sure you want to delete this submission?')) {
+       if (!receiptPath) { alert('Receipt path missing...'); return; }
+       if (window.confirm('Delete submission?')) {
           setLoading(true);
           try {
               const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
               if (dbError) throw dbError;
-
               const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]);
-              if (storageError) {
-                  console.warn('Storage delete failed (DB record deleted successfully):', storageError.message);
-              }
-
+              if (storageError) console.warn('Storage delete failed:', storageError.message);
               setReceipts(prevReceipts => prevReceipts.filter(r => r.id !== receiptId));
-              alert('Submission deleted successfully.');
+              alert('Deleted.');
           } catch (err: any) {
               console.error("Error deleting receipt:", err);
-              alert('Failed to delete submission: ' + err.message);
-          } finally {
-              setLoading(false);
-          }
+              alert('Failed: ' + err.message);
+          } finally { setLoading(false); }
       }
   };
 
@@ -233,13 +223,8 @@ export default function MyAccountPage() {
       bucket: 'avatars' | 'banners',
       setLoadingState: (loading: boolean) => void
   ) => {
-      if (!session?.user || !profile) {
-          setError("User not logged in or profile not loaded.");
-          return;
-      }
-      if (!event.target.files || event.target.files.length === 0) {
-          setError("No file selected."); return;
-      }
+      if (!session?.user || !profile) { setError("User/profile missing."); return; }
+      if (!event.target.files || event.target.files.length === 0) { setError("No file."); return; }
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
@@ -249,20 +234,17 @@ export default function MyAccountPage() {
       try {
           const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true });
           if (uploadError) throw uploadError;
-
           const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
           const publicUrl = urlData.publicUrl;
-          if (!publicUrl) throw new Error("Could not get public URL. Check bucket permissions.");
-
+          if (!publicUrl) throw new Error("No public URL.");
           const updates = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl };
           const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id);
           if (updateError) throw updateError;
-
           setProfile(prev => prev ? { ...prev, ...updates } : null);
-          alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
+          alert(`${bucket} updated!`);
       } catch (err: any) {
           console.error(`Upload Error (${bucket}):`, err);
-          setError(`Failed to upload ${bucket}. ${err.message || ''}`);
+          setError(`Failed: ${err.message || ''}`);
       } finally {
           setLoadingState(false);
           if (event.target) event.target.value = '';
@@ -276,11 +258,25 @@ export default function MyAccountPage() {
       return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading...</div>);
   }
 
-  // --- Error State --- (unchanged)
+  // --- Error State ---
   if (error) {
       console.log("Rendering error state:", error);
-      return (<div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400"><AlertTriangle className="mb-2" size={32} /><p>{error}</p></div>);
+      return (
+          <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4">
+              <AlertTriangle className="mb-2" size={32} />
+              <p className="font-semibold">Failed to Load Account Details</p>
+              <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p>
+              <button
+                  // --- FIX: Correct function name is used here ---
+                  onClick={() => checkSessionAndSetup()} // Call the memoized function directly
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"
+              >
+                  Try Again
+              </button>
+          </div>
+      );
   }
+
 
   // --- Not Logged In State --- (unchanged)
   if (!session || !session.user) {
@@ -294,8 +290,8 @@ export default function MyAccountPage() {
     return (
         <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center">
             <AlertTriangle className="mb-2" size={32} />
-            <p className="font-semibold">Loading profile data failed or profile not yet created.</p>
-            <p className='text-sm text-gray-400 mt-2'>(This might happen for new accounts. Please try refreshing in a moment.)</p>
+            <p className="font-semibold">Profile data not available.</p>
+            <p className='text-sm text-gray-400 mt-2'>(Please try refreshing.)</p>
             <button
                 onClick={() => window.location.reload()}
                 className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"
@@ -315,6 +311,7 @@ export default function MyAccountPage() {
   // ... (ProfileTabContent, AnimeListTabContent, SettingsTabContent remain the same) ...
   const ProfileTabContent = () => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        {/* Banner */}
         <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
             {profile?.banner_url ? (
                 <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/>
@@ -325,6 +322,7 @@ export default function MyAccountPage() {
              <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
         </div>
 
+        {/* Avatar & Basic Info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                 {profile?.avatar_url ? (
@@ -346,6 +344,7 @@ export default function MyAccountPage() {
             </div>
         </div>
 
+        {/* Bio, Subscription */}
         <div className="px-6 space-y-4">
              <div className="bg-card-dark p-4 rounded-lg shadow-md"><h3 className="font-semibold text-gray-300 mb-1">About Me</h3><p className="text-gray-400 text-sm italic">No bio added yet.</p></div>
              <div className="bg-card-dark p-4 rounded-lg shadow-md">
