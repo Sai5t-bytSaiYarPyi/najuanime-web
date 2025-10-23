@@ -17,6 +17,7 @@ type Profile = {
   subscription_status: string | null;
   avatar_url: string | null;
   banner_url: string | null;
+  bio: string | null; // <-- Bio ကို ထည့်ပါ
 };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
 type UserAnimeListItem = {
@@ -30,8 +31,7 @@ type UserAnimeListItem = {
 };
 type Tab = 'profile' | 'anime_list' | 'settings';
 
-// --- Helper: Tab Content Components ---
-// (ဒီအပိုင်းက Component တွေ မပြောင်းလဲပါ၊ အတိုချုံ့ထားလိုက်ပါတယ်)
+// --- START: ProfileTabContent ကို Bio ပြသရန် ပြင်ဆင် ---
 const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner, uploadingAvatar, avatarInputRef, setUploadingAvatar, usernameDisplay, isSubscribed }: any) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         {/* Banner */}
@@ -60,6 +60,7 @@ const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleIma
                 <h1 className="text-2xl md:text-3xl font-bold">{usernameDisplay}</h1>
                 <p className="text-gray-400 font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
             </div>
+            {/* Edit Profile Button (Placeholder) */}
             <div className="sm:ml-auto">
                  <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled>
                      <Edit3 size={14} /> Edit Profile (Soon)
@@ -69,7 +70,22 @@ const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleIma
 
         {/* Bio, Subscription */}
         <div className="px-6 space-y-4">
-             <div className="bg-card-dark p-4 rounded-lg shadow-md"><h3 className="font-semibold text-gray-300 mb-1">About Me</h3><p className="text-gray-400 text-sm italic">No bio added yet.</p></div>
+             {/* --- Bio Section --- */}
+             <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                <div className="flex justify-between items-center mb-1">
+                    <h3 className="font-semibold text-gray-300">About Me</h3>
+                    {/* Edit Bio Button (Placeholder) */}
+                    <button className="text-xs text-gray-400 hover:text-white disabled:opacity-50" disabled>
+                        <Edit3 size={12} className="inline mr-1"/> Edit Bio (Soon)
+                    </button>
+                </div>
+                {profile?.bio ? (
+                    <p className="text-gray-400 text-sm whitespace-pre-wrap">{profile.bio}</p>
+                ) : (
+                    <p className="text-gray-400 text-sm italic">No bio added yet.</p>
+                )}
+             </div>
+             {/* --- Subscription Section --- */}
              <div className="bg-card-dark p-4 rounded-lg shadow-md">
                  <h3 className="font-semibold text-gray-300 mb-1">Subscription</h3>
                  {isSubscribed ? (
@@ -91,8 +107,10 @@ const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleIma
         </div>
     </motion.div>
   );
+// --- END: ProfileTabContent ကို Bio ပြသရန် ပြင်ဆင် ---
 
-const AnimeListTabContent = ({ animeList }: any) => (
+// --- AnimeListTabContent and SettingsTabContent (အတိုချုံ့ထားပါသည် - မပြောင်းလဲပါ) ---
+const AnimeListTabContent = ({ animeList }: any) => ( /* ... code ... */
    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {animeList.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6">
@@ -135,8 +153,7 @@ const AnimeListTabContent = ({ animeList }: any) => (
       )}
    </motion.div>
 );
-
-const SettingsTabContent = ({ receipts, loading, handleDeleteReceipt }: any) => (
+const SettingsTabContent = ({ receipts, loading, handleDeleteReceipt }: any) => ( /* ... code ... */
    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="text-2xl font-bold">Account Settings</h2>
        <div className="bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3">Edit Profile</h3><p className="text-gray-400 text-sm">(Coming Soon)</p></div>
@@ -198,14 +215,14 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // Data Fetching Logic (Parallel Fetching)
+    // --- START: setupUser တွင် bio ကိုပါ select လုပ်ရန် ပြင်ဆင် ---
     const setupUser = useCallback(async (user: User) => {
         console.log("Setting up user data in parallel for:", user.id);
         setError(null);
 
         try {
             const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
-                supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single(),
+                supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio').eq('id', user.id).single(), // <-- bio ထည့်ဆွဲပါ
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
             ]);
@@ -250,9 +267,10 @@ export default function MyAccountPage() {
             return false;
         }
     }, []);
+    // --- END: setupUser တွင် bio ကိုပါ select လုပ်ရန် ပြင်ဆင် ---
 
-    // Session Check and Initial Load Function
-    const checkSessionAndSetup = useCallback(async (isRetry = false) => {
+    // --- Session Check, useEffect, Delete Receipt, Image Upload (မပြောင်းလဲပါ) ---
+     const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
         setLoading(true); setError(null);
         try {
@@ -278,7 +296,6 @@ export default function MyAccountPage() {
         }
     }, [setupUser]);
 
-    // useEffect Hook for Initial Load and Auth Changes
     useEffect(() => {
         console.log("MyAccountPage useEffect running.");
         let isMounted = true;
@@ -305,7 +322,6 @@ export default function MyAccountPage() {
         };
     }, [checkSessionAndSetup, session?.user?.id]);
 
-    // Delete Receipt Logic (unchanged)
     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
         if (!receiptPath) { alert('Receipt path missing...'); return; }
         if (window.confirm('Are you sure you want to delete this submission?')) {
@@ -324,14 +340,12 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- START: ပြင်ဆင်ထားသော Image Upload Logic ---
     const handleImageUpload = async (
         event: React.ChangeEvent<HTMLInputElement>,
         bucket: 'avatars' | 'banners',
         setLoadingState: (loading: boolean) => void
     ) => {
         if (!session?.user) { setError("You must be logged in to upload images."); return; }
-
         if (!event.target.files || event.target.files.length === 0) { return; }
         const file = event.target.files[0];
         const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
@@ -340,55 +354,39 @@ export default function MyAccountPage() {
             if (event.target) event.target.value = '';
             return;
         }
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
             setError("File is too large. Maximum size is 5MB.");
              if (event.target) event.target.value = '';
             return;
         }
-
         const fileExt = file.name.split('.').pop();
         const baseFileName = bucket === 'avatars' ? `${session.user.id}` : `${session.user.id}_banner`;
         const fileName = `${baseFileName}.${fileExt}`;
         const filePath = `${session.user.id}/${fileName}`;
-
         setLoadingState(true); setError(null);
         try {
             const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true });
             if (uploadError) throw uploadError;
-
             const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}?t=${new Date().getTime()}`;
             if (!publicUrl) throw new Error("Could not construct public URL.");
-
             const updates: Partial<Profile> = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl };
-
-            // Ensure profile exists before updating
             let currentProfile = profile;
             if (!currentProfile) {
-                const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single(); // Fetch full profile
-                if (refetchError || !refetchedProfile) {
-                     throw new Error("Profile not found, cannot update image URL.");
-                }
-                currentProfile = refetchedProfile as Profile; // Assign fetched profile
-                setProfile(currentProfile); // Update state immediately if it was null
+                const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                if (refetchError || !refetchedProfile) throw new Error("Profile not found, cannot update image URL.");
+                currentProfile = refetchedProfile as Profile;
+                setProfile(currentProfile);
             }
-
             const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id);
             if (updateError) throw updateError;
-
-            // Update local profile state correctly using functional update
             setProfile(prev => {
-                // Should always have a profile here due to the check above
                 if (!prev) {
                     console.error("setProfile called in handleImageUpload when profile state was unexpectedly null after refetch attempt.");
-                    // Return the updates merged with a minimal structure, or handle as error
-                    return { id: session.user.id, ...updates } as Profile; // Less safe fallback
+                    return { id: session.user.id, ...updates } as Profile;
                 }
-                // Merge updates into the existing profile
                 return { ...prev, ...updates };
             });
-
-
             alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
         } catch (err: any) {
             console.error(`Upload Error (${bucket}):`, err);
@@ -398,16 +396,12 @@ export default function MyAccountPage() {
             if (event.target) event.target.value = '';
         }
     };
-    // --- END: ပြင်ဆင်ထားသော Image Upload Logic ---
-
 
     // --- RENDER LOGIC --- (unchanged)
     if (loading) {
-        console.log("Rendering loading state...");
         return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>);
     }
      if (error) {
-         console.log("Rendering error state:", error);
          return (
              <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4">
                  <AlertTriangle className="mb-2" size={32} />
@@ -418,11 +412,9 @@ export default function MyAccountPage() {
          );
      }
     if (!session || !session.user) {
-        console.log("Rendering not logged in state...");
         return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
     }
      if (!profile) {
-         console.warn("Rendering profile not found state (session exists but profile is null).");
          return (
              <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4">
                  <AlertTriangle className="mb-2" size={32} />
