@@ -7,9 +7,9 @@ import { Session, User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud } from 'lucide-react';
+import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle } from 'lucide-react'; // Save, XCircle icons ထည့်ပါ
 
-// --- Type Definitions ---
+// --- Type Definitions --- (No change)
 type Profile = {
   id: string;
   naju_id: string;
@@ -17,7 +17,7 @@ type Profile = {
   subscription_status: string | null;
   avatar_url: string | null;
   banner_url: string | null;
-  bio: string | null; // <-- Bio ကို ထည့်ပါ
+  bio: string | null;
 };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
 type UserAnimeListItem = {
@@ -31,83 +31,127 @@ type UserAnimeListItem = {
 };
 type Tab = 'profile' | 'anime_list' | 'settings';
 
-// --- START: ProfileTabContent ကို Bio ပြသရန် ပြင်ဆင် ---
-const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner, uploadingAvatar, avatarInputRef, setUploadingAvatar, usernameDisplay, isSubscribed }: any) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        {/* Banner */}
-        <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
-            {profile?.banner_url ? (
-                <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/>
-            ) : ( <div className="absolute inset-0 flex items-center justify-center text-gray-500">Default Banner Area</div> )}
-             <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10">
-                 {uploadingBanner ? <Loader size={14} className="animate-spin"/> : <UploadCloud size={14} />} {uploadingBanner ? 'Uploading...' : 'Change Banner'}
-             </button>
-             <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
-        </div>
+// --- START: ProfileTabContent ကို Edit Bio အတွက် ပြင်ဆင် ---
+const ProfileTabContent = ({
+    profile,
+    uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
+    uploadingAvatar, avatarInputRef, setUploadingAvatar,
+    usernameDisplay, isSubscribed,
+    // Edit Bio အတွက် props များ
+    isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio
+}: any) => {
 
-        {/* Avatar & Basic Info */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
-            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
-                {profile?.avatar_url ? (
-                    <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/>
-                ) : ( <UserIcon size={64} className="text-gray-400" /> )}
-                 <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10">
-                     {uploadingAvatar ? <Loader size={20} className="animate-spin mb-1"/> : <UploadCloud size={20} className="mb-1"/>} {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}
-                 </button>
-                 <input type="file" ref={avatarInputRef} onChange={(e) => handleImageUpload(e, 'avatars', setUploadingAvatar)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
-            </div>
-            <div className="text-center sm:text-left pb-2">
-                <h1 className="text-2xl md:text-3xl font-bold">{usernameDisplay}</h1>
-                <p className="text-gray-400 font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
-            </div>
-            {/* Edit Profile Button (Placeholder) */}
-            <div className="sm:ml-auto">
-                 <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled>
-                     <Edit3 size={14} /> Edit Profile (Soon)
-                 </button>
-            </div>
-        </div>
+    const startEditingBio = () => {
+        setEditingBioText(profile?.bio || ''); // လက်ရှိ bio ကို textarea ထဲ ထည့်
+        setIsEditingBio(true);
+    };
 
-        {/* Bio, Subscription */}
-        <div className="px-6 space-y-4">
-             {/* --- Bio Section --- */}
-             <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-semibold text-gray-300">About Me</h3>
-                    {/* Edit Bio Button (Placeholder) */}
-                    <button className="text-xs text-gray-400 hover:text-white disabled:opacity-50" disabled>
-                        <Edit3 size={12} className="inline mr-1"/> Edit Bio (Soon)
-                    </button>
+    const cancelEditingBio = () => {
+        setIsEditingBio(false);
+        // editingBioText ကို reset လုပ်စရာမလို၊ startEditingBio မှာ အသစ်ပြန်ထည့်မှာမို့
+    };
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            {/* Banner */}
+            <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
+                {profile?.banner_url ? (
+                    <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/>
+                ) : ( <div className="absolute inset-0 flex items-center justify-center text-gray-500">Default Banner Area</div> )}
+                 <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10">
+                     {uploadingBanner ? <Loader size={14} className="animate-spin"/> : <UploadCloud size={14} />} {uploadingBanner ? 'Uploading...' : 'Change Banner'}
+                 </button>
+                 <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
+            </div>
+
+            {/* Avatar & Basic Info */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
+                    {profile?.avatar_url ? (
+                        <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/>
+                    ) : ( <UserIcon size={64} className="text-gray-400" /> )}
+                     <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10">
+                         {uploadingAvatar ? <Loader size={20} className="animate-spin mb-1"/> : <UploadCloud size={20} className="mb-1"/>} {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}
+                     </button>
+                     <input type="file" ref={avatarInputRef} onChange={(e) => handleImageUpload(e, 'avatars', setUploadingAvatar)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
                 </div>
-                {profile?.bio ? (
-                    <p className="text-gray-400 text-sm whitespace-pre-wrap">{profile.bio}</p>
-                ) : (
-                    <p className="text-gray-400 text-sm italic">No bio added yet.</p>
-                )}
-             </div>
-             {/* --- Subscription Section --- */}
-             <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                 <h3 className="font-semibold text-gray-300 mb-1">Subscription</h3>
-                 {isSubscribed ? (
-                    <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span>
-                        <span className="text-green-400 font-medium">ACTIVE</span>
-                        <span className="text-gray-400 text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span>
-                    </div>
-                 ) : (
-                    <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span>
-                        <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}>
-                            {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'}
-                        </span>
-                        <Link href="/subscribe" className="ml-auto text-blue-400 hover:underline text-sm font-semibold">Subscribe Now</Link>
-                    </div>
-                 )}
+                <div className="text-center sm:text-left pb-2">
+                    <h1 className="text-2xl md:text-3xl font-bold">{usernameDisplay}</h1>
+                    <p className="text-gray-400 font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
+                </div>
+                {/* Edit Profile Button (Placeholder) */}
+                <div className="sm:ml-auto">
+                     <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled>
+                         <Edit3 size={14} /> Edit Profile (Soon)
+                     </button>
+                </div>
             </div>
-        </div>
-    </motion.div>
-  );
-// --- END: ProfileTabContent ကို Bio ပြသရန် ပြင်ဆင် ---
+
+            {/* Bio, Subscription */}
+            <div className="px-6 space-y-4">
+                 {/* --- Bio Section --- */}
+                 <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                    <div className="flex justify-between items-center mb-1">
+                        <h3 className="font-semibold text-gray-300">About Me</h3>
+                        {/* Edit Bio Button */}
+                        {!isEditingBio && (
+                            <button onClick={startEditingBio} className="text-xs text-gray-400 hover:text-white disabled:opacity-50" disabled={savingBio}>
+                                <Edit3 size={12} className="inline mr-1"/> Edit Bio
+                            </button>
+                        )}
+                    </div>
+                    {isEditingBio ? (
+                        <div className="mt-2 space-y-3">
+                            <textarea
+                                value={editingBioText}
+                                onChange={(e) => setEditingBioText(e.target.value)}
+                                placeholder="Tell us about yourself..."
+                                className="w-full p-2 rounded bg-gray-700 border border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green"
+                                rows={4}
+                                maxLength={500} // Optional: Limit length
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50">
+                                    <XCircle size={14} className="inline mr-1"/> Cancel
+                                </button>
+                                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1">
+                                    {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        profile?.bio ? (
+                            <p className="text-gray-400 text-sm whitespace-pre-wrap">{profile.bio}</p>
+                        ) : (
+                            <p className="text-gray-400 text-sm italic">No bio added yet.</p>
+                        )
+                    )}
+                 </div>
+                 {/* --- Subscription Section --- */}
+                 <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                     <h3 className="font-semibold text-gray-300 mb-1">Subscription</h3>
+                     {isSubscribed ? (
+                        <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span>
+                            <span className="text-green-400 font-medium">ACTIVE</span>
+                            <span className="text-gray-400 text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span>
+                        </div>
+                     ) : (
+                        <div className="flex items-center gap-2">
+                            <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span>
+                            <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}>
+                                {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'}
+                            </span>
+                            <Link href="/subscribe" className="ml-auto text-blue-400 hover:underline text-sm font-semibold">Subscribe Now</Link>
+                        </div>
+                     )}
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+// --- END: ProfileTabContent ကို Edit Bio အတွက် ပြင်ဆင် ---
+
 
 // --- AnimeListTabContent and SettingsTabContent (အတိုချုံ့ထားပါသည် - မပြောင်းလဲပါ) ---
 const AnimeListTabContent = ({ animeList }: any) => ( /* ... code ... */
@@ -212,219 +256,130 @@ export default function MyAccountPage() {
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
 
+    // --- START: Edit Bio States ---
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const [editingBioText, setEditingBioText] = useState('');
+    const [savingBio, setSavingBio] = useState(false); // Saving state for bio
+    // --- END: Edit Bio States ---
+
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- START: setupUser တွင် bio ကိုပါ select လုပ်ရန် ပြင်ဆင် ---
+    // --- Data Fetching Logic (unchanged) ---
     const setupUser = useCallback(async (user: User) => {
-        console.log("Setting up user data in parallel for:", user.id);
-        setError(null);
-
+        console.log("Setting up user data in parallel for:", user.id); setError(null);
         try {
             const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
-                supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio').eq('id', user.id).single(), // <-- bio ထည့်ဆွဲပါ
+                supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio').eq('id', user.id).single(),
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false })
             ]);
-
-            console.log("Profile response:", profileResponse);
-            console.log("Receipts response:", receiptsResponse);
-            console.log("Anime list response:", animeListResponse);
-
-            if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
-                throw new Error(`Profile fetch failed: ${profileResponse.error.message} (Code: ${profileResponse.error.code})`);
-            }
-             if (profileResponse.status !== 200 && profileResponse.status !== 406) {
-                 throw new Error(`Profile fetch status error: ${profileResponse.statusText} (Status: ${profileResponse.status})`);
-             }
-             if (profileResponse.data === null && !profileResponse.error) {
-                 console.warn("Profile data is null but no error reported. This might indicate an RLS issue or missing profile row.");
-             }
-
+            console.log("Profile response:", profileResponse); console.log("Receipts response:", receiptsResponse); console.log("Anime list response:", animeListResponse);
+            if (profileResponse.error && profileResponse.error.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileResponse.error.message} (Code: ${profileResponse.error.code})`);
+            if (profileResponse.status !== 200 && profileResponse.status !== 406) throw new Error(`Profile fetch status error: ${profileResponse.statusText} (Status: ${profileResponse.status})`);
+            if (profileResponse.data === null && !profileResponse.error) console.warn("Profile data is null but no error reported.");
             if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
             if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
-
             setProfile(profileResponse.data ? profileResponse.data as Profile : null);
             setReceipts(receiptsResponse.data as Receipt[] || []);
-
             const fetchedAnimeList = animeListResponse.data;
             if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
                  const correctlyTypedList: UserAnimeListItem[] = fetchedAnimeList.map((item: any) => {
                      const animeSeriesData = item.anime_series;
-                     const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null)
-                         ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null;
+                     const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null;
                      return { status: item.status, anime_series: typedAnimeSeries };
-                 });
-                 setAnimeList(correctlyTypedList);
+                 }); setAnimeList(correctlyTypedList);
             } else { setAnimeList([]); }
-
-            console.log("User data setup successful (parallel).");
-            return true;
+            console.log("User data setup successful (parallel)."); return true;
         } catch (err: any) {
-            console.error("Error during parallel setupUser:", err);
-            setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
-            setProfile(null); setReceipts([]); setAnimeList([]);
-            return false;
+            console.error("Error during parallel setupUser:", err); setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
+            setProfile(null); setReceipts([]); setAnimeList([]); return false;
         }
     }, []);
-    // --- END: setupUser တွင် bio ကိုပါ select လုပ်ရန် ပြင်ဆင် ---
 
-    // --- Session Check, useEffect, Delete Receipt, Image Upload (မပြောင်းလဲပါ) ---
-     const checkSessionAndSetup = useCallback(async (isRetry = false) => {
-        console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
-        setLoading(true); setError(null);
+    // --- Session Check, useEffect, Delete Receipt, Image Upload (unchanged) ---
+    const checkSessionAndSetup = useCallback(async (isRetry = false) => {
+        console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`); setLoading(true); setError(null);
         try {
-            const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-            console.log("getSession result:", { currentSession, sessionError });
+            const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession(); console.log("getSession result:", { currentSession, sessionError });
             if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
             setSession(currentSession);
             if (currentSession && currentSession.user) {
-                console.log("Session found, calling setupUser...");
-                const setupSuccess = await setupUser(currentSession.user);
+                console.log("Session found, calling setupUser..."); const setupSuccess = await setupUser(currentSession.user);
                  if (!setupSuccess && !isRetry) console.log("Initial setupUser failed.");
-            } else {
-                console.log("No session found, clearing data.");
-                setProfile(null); setReceipts([]); setAnimeList([]);
-            }
-        } catch (err: any) {
-             console.error("Error in checkSessionAndSetup:", err);
-             setError(err.message || "An unexpected error occurred while loading account data.");
-             setProfile(null); setReceipts([]); setAnimeList([]);
-        } finally {
-            console.log("Setting loading to false in checkSessionAndSetup finally block.");
-            setLoading(false);
-        }
+            } else { console.log("No session found, clearing data."); setProfile(null); setReceipts([]); setAnimeList([]); }
+        } catch (err: any) { console.error("Error in checkSessionAndSetup:", err); setError(err.message || "An unexpected error occurred while loading account data."); setProfile(null); setReceipts([]); setAnimeList([]);
+        } finally { console.log("Setting loading to false in checkSessionAndSetup finally block."); setLoading(false); }
     }, [setupUser]);
-
     useEffect(() => {
-        console.log("MyAccountPage useEffect running.");
-        let isMounted = true;
-        checkSessionAndSetup();
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            (event, newSession) => {
-                if (!isMounted) return;
-                console.log("Auth state changed:", event, newSession);
-                const previousUserId = session?.user?.id;
-                const newUserId = newSession?.user?.id;
-                 setSession(newSession);
-                if (newUserId !== previousUserId) {
-                    console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`);
-                    checkSessionAndSetup();
-                } else {
-                     console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No full reload triggered.`);
-                }
-            }
-        );
-        return () => {
-            console.log("MyAccountPage useEffect cleanup.");
-            isMounted = false;
-            authListener?.subscription.unsubscribe();
-        };
+        console.log("MyAccountPage useEffect running."); let isMounted = true; checkSessionAndSetup();
+        const { data: authListener } = supabase.auth.onAuthStateChange( (event, newSession) => {
+                if (!isMounted) return; console.log("Auth state changed:", event, newSession);
+                const previousUserId = session?.user?.id; const newUserId = newSession?.user?.id; setSession(newSession);
+                if (newUserId !== previousUserId) { console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`); checkSessionAndSetup();
+                } else { console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No full reload triggered.`); } } );
+        return () => { console.log("MyAccountPage useEffect cleanup."); isMounted = false; authListener?.subscription.unsubscribe(); };
     }, [checkSessionAndSetup, session?.user?.id]);
-
     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
-        if (!receiptPath) { alert('Receipt path missing...'); return; }
-        if (window.confirm('Are you sure you want to delete this submission?')) {
-            setLoading(true);
-            try {
-                const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
-                if (dbError) throw dbError;
-                const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]);
-                if (storageError) console.warn('Storage delete failed (DB record deleted successfully):', storageError.message);
-                setReceipts(prevReceipts => prevReceipts.filter(r => r.id !== receiptId));
-                alert('Submission deleted.');
-            } catch (err: any) {
-                console.error("Error deleting receipt:", err);
-                alert('Failed to delete submission: ' + err.message);
-            } finally { setLoading(false); }
-        }
-    };
-
-    const handleImageUpload = async (
-        event: React.ChangeEvent<HTMLInputElement>,
-        bucket: 'avatars' | 'banners',
-        setLoadingState: (loading: boolean) => void
-    ) => {
-        if (!session?.user) { setError("You must be logged in to upload images."); return; }
-        if (!event.target.files || event.target.files.length === 0) { return; }
-        const file = event.target.files[0];
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-        if (!allowedTypes.includes(file.type)) {
-            setError("Invalid file type. Please upload PNG, JPG, WEBP, or GIF.");
-            if (event.target) event.target.value = '';
-            return;
-        }
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            setError("File is too large. Maximum size is 5MB.");
-             if (event.target) event.target.value = '';
-            return;
-        }
-        const fileExt = file.name.split('.').pop();
-        const baseFileName = bucket === 'avatars' ? `${session.user.id}` : `${session.user.id}_banner`;
-        const fileName = `${baseFileName}.${fileExt}`;
-        const filePath = `${session.user.id}/${fileName}`;
-        setLoadingState(true); setError(null);
-        try {
-            const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true });
-            if (uploadError) throw uploadError;
-            const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}?t=${new Date().getTime()}`;
-            if (!publicUrl) throw new Error("Could not construct public URL.");
-            const updates: Partial<Profile> = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl };
-            let currentProfile = profile;
-            if (!currentProfile) {
-                const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                if (refetchError || !refetchedProfile) throw new Error("Profile not found, cannot update image URL.");
-                currentProfile = refetchedProfile as Profile;
-                setProfile(currentProfile);
-            }
-            const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id);
-            if (updateError) throw updateError;
-            setProfile(prev => {
-                if (!prev) {
-                    console.error("setProfile called in handleImageUpload when profile state was unexpectedly null after refetch attempt.");
-                    return { id: session.user.id, ...updates } as Profile;
-                }
-                return { ...prev, ...updates };
-            });
+        if (!receiptPath) { alert('Receipt path missing...'); return; } if (window.confirm('Are you sure you want to delete this submission?')) { setLoading(true); try {
+                const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId); if (dbError) throw dbError;
+                const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]); if (storageError) console.warn('Storage delete failed (DB record deleted successfully):', storageError.message);
+                setReceipts(prevReceipts => prevReceipts.filter(r => r.id !== receiptId)); alert('Submission deleted.');
+            } catch (err: any) { console.error("Error deleting receipt:", err); alert('Failed to delete submission: ' + err.message);
+            } finally { setLoading(false); } } };
+    const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => {
+        if (!session?.user) { setError("You must be logged in to upload images."); return; } if (!event.target.files || event.target.files.length === 0) { return; } const file = event.target.files[0];
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']; if (!allowedTypes.includes(file.type)) { setError("Invalid file type. Please upload PNG, JPG, WEBP, or GIF."); if (event.target) event.target.value = ''; return; }
+        const maxSize = 5 * 1024 * 1024; if (file.size > maxSize) { setError("File is too large. Maximum size is 5MB."); if (event.target) event.target.value = ''; return; }
+        const fileExt = file.name.split('.').pop(); const baseFileName = bucket === 'avatars' ? `${session.user.id}` : `${session.user.id}_banner`; const fileName = `${baseFileName}.${fileExt}`; const filePath = `${session.user.id}/${fileName}`;
+        setLoadingState(true); setError(null); try {
+            const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true }); if (uploadError) throw uploadError;
+            const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}?t=${new Date().getTime()}`; if (!publicUrl) throw new Error("Could not construct public URL.");
+            const updates: Partial<Profile> = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl }; let currentProfile = profile;
+            if (!currentProfile) { const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single(); if (refetchError || !refetchedProfile) throw new Error("Profile not found, cannot update image URL."); currentProfile = refetchedProfile as Profile; setProfile(currentProfile); }
+            const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id); if (updateError) throw updateError;
+            setProfile(prev => { if (!prev) { console.error("setProfile called in handleImageUpload when profile state was unexpectedly null after refetch attempt."); return { id: session.user.id, ...updates } as Profile; } return { ...prev, ...updates }; });
             alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
+        } catch (err: any) { console.error(`Upload Error (${bucket}):`, err); setError(`Failed to update ${bucket === 'avatars' ? 'avatar' : 'banner'}: ${err.message || 'Unknown error'}`);
+        } finally { setLoadingState(false); if (event.target) event.target.value = ''; } };
+
+    // --- START: Save Bio Function ---
+    const handleSaveBio = async (newBio: string) => {
+        if (!session?.user || !profile) {
+            setError("Cannot save bio: User or profile not loaded.");
+            return;
+        }
+        setSavingBio(true);
+        setError(null);
+        try {
+            const trimmedBio = newBio.trim(); // Trim whitespace
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ bio: trimmedBio || null }) // Empty string হলে NULL အဖြစ် သိမ်းမည်
+                .eq('id', session.user.id);
+
+            if (updateError) throw updateError;
+
+            // Update local state
+            setProfile(prev => prev ? { ...prev, bio: trimmedBio || null } : null);
+            setIsEditingBio(false); // Close edit mode
+            // alert('Bio updated successfully!'); // Optional success message
+
         } catch (err: any) {
-            console.error(`Upload Error (${bucket}):`, err);
-            setError(`Failed to update ${bucket === 'avatars' ? 'avatar' : 'banner'}: ${err.message || 'Unknown error'}`);
+            console.error("Error saving bio:", err);
+            setError(`Failed to save bio: ${err.message}`);
         } finally {
-            setLoadingState(false);
-            if (event.target) event.target.value = '';
+            setSavingBio(false);
         }
     };
+    // --- END: Save Bio Function ---
+
 
     // --- RENDER LOGIC --- (unchanged)
-    if (loading) {
-        return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>);
-    }
-     if (error) {
-         return (
-             <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4">
-                 <AlertTriangle className="mb-2" size={32} />
-                 <p className="font-semibold">Failed to Load Account Details</p>
-                 <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p>
-                 <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button>
-             </div>
-         );
-     }
-    if (!session || !session.user) {
-        return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
-    }
-     if (!profile) {
-         return (
-             <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4">
-                 <AlertTriangle className="mb-2" size={32} />
-                 <p className="font-semibold">Account Profile Not Found</p>
-                 <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p>
-                 <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button>
-                  <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button>
-             </div>
-         );
-     }
+    if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
+     if (error) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
+    if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
+     if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
     console.log("Rendering main account content...");
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
@@ -443,7 +398,24 @@ export default function MyAccountPage() {
             {/* Tab Content */}
             <div>
                 <AnimatePresence mode="wait">
-                    {activeTab === 'profile' && <ProfileTabContent key="profile" profile={profile} uploadingBanner={uploadingBanner} bannerInputRef={bannerInputRef} handleImageUpload={handleImageUpload} setUploadingBanner={setUploadingBanner} uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar} usernameDisplay={usernameDisplay} isSubscribed={isSubscribed} />}
+                    {/* --- START: Pass Edit Bio state and functions to ProfileTabContent --- */}
+                    {activeTab === 'profile' &&
+                        <ProfileTabContent
+                            key="profile"
+                            profile={profile}
+                            uploadingBanner={uploadingBanner} bannerInputRef={bannerInputRef} handleImageUpload={handleImageUpload} setUploadingBanner={setUploadingBanner}
+                            uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
+                            usernameDisplay={usernameDisplay} isSubscribed={isSubscribed}
+                            // Edit Bio props
+                            isEditingBio={isEditingBio}
+                            setIsEditingBio={setIsEditingBio}
+                            editingBioText={editingBioText}
+                            setEditingBioText={setEditingBioText}
+                            handleSaveBio={handleSaveBio}
+                            savingBio={savingBio}
+                        />
+                    }
+                    {/* --- END: Pass Edit Bio state and functions --- */}
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
                     {activeTab === 'settings' && <SettingsTabContent key="settings" receipts={receipts} loading={loading} handleDeleteReceipt={handleDeleteReceipt} />}
                 </AnimatePresence>
