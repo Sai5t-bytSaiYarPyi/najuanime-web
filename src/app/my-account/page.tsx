@@ -198,13 +198,12 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- START: Data Fetching Logic ကို Parallel Fetching ဖြင့် ပြင်ဆင် ---
+    // Data Fetching Logic (Parallel Fetching)
     const setupUser = useCallback(async (user: User) => {
         console.log("Setting up user data in parallel for:", user.id);
-        setError(null); // Reset error before fetching
+        setError(null);
 
         try {
-            // Promise.all ကိုသုံးပြီး တစ်ပြိုင်နက်တည်း fetch လုပ်ပါမယ်
             const [profileResponse, receiptsResponse, animeListResponse] = await Promise.all([
                 supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url').eq('id', user.id).single(),
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -215,30 +214,20 @@ export default function MyAccountPage() {
             console.log("Receipts response:", receiptsResponse);
             console.log("Anime list response:", animeListResponse);
 
-            // Error Handling ကို ပိုတိကျအောင် စစ်ဆေးပါ
-            if (profileResponse.error && profileResponse.error.code !== 'PGRST116') { // PGRST116 = 0 rows found
+            if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
                 throw new Error(`Profile fetch failed: ${profileResponse.error.message} (Code: ${profileResponse.error.code})`);
             }
-             if (profileResponse.status !== 200 && profileResponse.status !== 406) { // 406 might happen if 0 rows with .single()
+             if (profileResponse.status !== 200 && profileResponse.status !== 406) {
                  throw new Error(`Profile fetch status error: ${profileResponse.statusText} (Status: ${profileResponse.status})`);
              }
-             // Data null ဖြစ်ပြီး error လည်း null ဖြစ်နေတဲ့ case ကို သတိထားစစ်ဆေးဖို့ Log ထုတ်ကြည့်ပါ
              if (profileResponse.data === null && !profileResponse.error) {
                  console.warn("Profile data is null but no error reported. This might indicate an RLS issue or missing profile row.");
-                 // Decide if this should be treated as an error or just an empty profile
-                 // throw new Error("Profile data not found."); // Option: Treat as error
              }
 
+            if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
+            if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
 
-            if (receiptsResponse.error) {
-                throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
-            }
-            if (animeListResponse.error) {
-                throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
-            }
-
-            // Update State ONLY after all fetches are successful (or handled)
-            setProfile(profileResponse.data ? profileResponse.data as Profile : null); // Handle null case explicitly
+            setProfile(profileResponse.data ? profileResponse.data as Profile : null);
             setReceipts(receiptsResponse.data as Receipt[] || []);
 
             const fetchedAnimeList = animeListResponse.data;
@@ -250,232 +239,173 @@ export default function MyAccountPage() {
                      return { status: item.status, anime_series: typedAnimeSeries };
                  });
                  setAnimeList(correctlyTypedList);
-            } else {
-                setAnimeList([]);
-            }
+            } else { setAnimeList([]); }
 
             console.log("User data setup successful (parallel).");
-            return true; // Indicate success
-
+            return true;
         } catch (err: any) {
             console.error("Error during parallel setupUser:", err);
-            // Error message မှာ ဘာကြောင့် fail ဖြစ်လဲ ပိုပေါ်အောင် ပြင်ဆင်ပါ
             setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
-            setProfile(null); // Clear data on error
-            setReceipts([]);
-            setAnimeList([]);
-            return false; // Indicate failure
+            setProfile(null); setReceipts([]); setAnimeList([]);
+            return false;
         }
-        // Loading state is handled by the caller (checkSessionAndSetup)
-    }, []); // Empty dependencies, memoized once
-    // --- END: Data Fetching Logic ကို Parallel Fetching ဖြင့် ပြင်ဆင် ---
+    }, []);
 
-    // --- Session Check and Initial Load Function ---
+    // Session Check and Initial Load Function
     const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            // Added explicit error check after getSession
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
             console.log("getSession result:", { currentSession, sessionError });
-
-            if (sessionError) {
-                // Throw specific error for session fetching failure
-                throw new Error(`Failed to check authentication session: ${sessionError.message}`);
-            }
-
+            if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
             setSession(currentSession);
-
             if (currentSession && currentSession.user) {
                 console.log("Session found, calling setupUser...");
                 const setupSuccess = await setupUser(currentSession.user);
-                // If setupUser fails, the error state is already set inside it.
-                 if (!setupSuccess && !isRetry) {
-                     // Optionally, you could try one automatic retry here if needed,
-                     // but the current logic lets the user click "Try Again".
-                     console.log("Initial setupUser failed.");
-                 }
+                 if (!setupSuccess && !isRetry) console.log("Initial setupUser failed.");
             } else {
                 console.log("No session found, clearing data.");
-                setProfile(null);
-                setReceipts([]);
-                setAnimeList([]);
-                // No error state needed if user is simply not logged in
+                setProfile(null); setReceipts([]); setAnimeList([]);
             }
         } catch (err: any) {
              console.error("Error in checkSessionAndSetup:", err);
-             // Ensure error state is always set on failure
              setError(err.message || "An unexpected error occurred while loading account data.");
-             // Clear potentially partially loaded data
-             setProfile(null);
-             setReceipts([]);
-             setAnimeList([]);
+             setProfile(null); setReceipts([]); setAnimeList([]);
         } finally {
             console.log("Setting loading to false in checkSessionAndSetup finally block.");
             setLoading(false);
         }
-    }, [setupUser]); // Depends only on the memoized setupUser
+    }, [setupUser]);
 
-    // --- useEffect Hook for Initial Load and Auth Changes ---
-    // (Auth Change handling logic remains similar, relying on checkSessionAndSetup)
+    // useEffect Hook for Initial Load and Auth Changes
     useEffect(() => {
         console.log("MyAccountPage useEffect running.");
         let isMounted = true;
-        // let initialLoadHandled = false; // Removed this, checkSessionAndSetup handles initial load
-
-        checkSessionAndSetup(); // Initial load attempt
-
+        checkSessionAndSetup();
         const { data: authListener } = supabase.auth.onAuthStateChange(
             (event, newSession) => {
                 if (!isMounted) return;
                 console.log("Auth state changed:", event, newSession);
-
                 const previousUserId = session?.user?.id;
                 const newUserId = newSession?.user?.id;
-
-                 // Update session state regardless
                  setSession(newSession);
-
-                // --- Simplified Logic: Reload data if user changes ---
-                // Avoids complex logic for duplicate SIGNED_IN events
                 if (newUserId !== previousUserId) {
                     console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`);
-                    checkSessionAndSetup(); // Reload all data for the new (or logged out) user
+                    checkSessionAndSetup();
                 } else {
                      console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No full reload triggered.`);
-                     // Optionally handle USER_UPDATED: maybe just refetch profile silently?
-                     // if (event === 'USER_UPDATED' && newSession?.user) {
-                     //    console.log("Handling USER_UPDATED silently...");
-                     //    // supabase.from('profiles')... // Example: refetch profile only
-                     // }
                 }
             }
         );
-
         return () => {
             console.log("MyAccountPage useEffect cleanup.");
             isMounted = false;
             authListener?.subscription.unsubscribe();
         };
-        // Use session?.user?.id to re-run effect if the user object *identity* changes
     }, [checkSessionAndSetup, session?.user?.id]);
 
-
-
-    // --- Delete Receipt Logic --- (unchanged)
+    // Delete Receipt Logic (unchanged)
     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
         if (!receiptPath) { alert('Receipt path missing...'); return; }
         if (window.confirm('Are you sure you want to delete this submission?')) {
-            setLoading(true); // Indicate loading
+            setLoading(true);
             try {
-                // First delete the database record
                 const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
                 if (dbError) throw dbError;
-
-                // If database deletion is successful, delete from storage
                 const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]);
-                // Log storage error but don't necessarily throw, as the DB record is gone
                 if (storageError) console.warn('Storage delete failed (DB record deleted successfully):', storageError.message);
-
-                // Update local state
                 setReceipts(prevReceipts => prevReceipts.filter(r => r.id !== receiptId));
                 alert('Submission deleted.');
             } catch (err: any) {
                 console.error("Error deleting receipt:", err);
                 alert('Failed to delete submission: ' + err.message);
-            } finally {
-                setLoading(false); // Stop loading indicator
-            }
+            } finally { setLoading(false); }
         }
     };
 
-    // --- Image Upload Logic --- (unchanged)
-     const handleImageUpload = async (
-         event: React.ChangeEvent<HTMLInputElement>,
-         bucket: 'avatars' | 'banners',
-         setLoadingState: (loading: boolean) => void
-     ) => {
-         if (!session?.user) { setError("You must be logged in to upload images."); return; }
-         // Profile might be initially null, handle this gracefully
-         // if (!profile) { setError("Profile data not loaded yet."); return; }
+    // --- START: ပြင်ဆင်ထားသော Image Upload Logic ---
+    const handleImageUpload = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+        bucket: 'avatars' | 'banners',
+        setLoadingState: (loading: boolean) => void
+    ) => {
+        if (!session?.user) { setError("You must be logged in to upload images."); return; }
 
-         if (!event.target.files || event.target.files.length === 0) { return; } // No error needed if no file selected
-         const file = event.target.files[0];
-         // Basic validation (can be more robust)
-         const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-         if (!allowedTypes.includes(file.type)) {
-             setError("Invalid file type. Please upload PNG, JPG, WEBP, or GIF.");
-             if (event.target) event.target.value = ''; // Clear the input
-             return;
-         }
-         const maxSize = 5 * 1024 * 1024; // 5MB
-         if (file.size > maxSize) {
-             setError("File is too large. Maximum size is 5MB.");
-              if (event.target) event.target.value = ''; // Clear the input
-             return;
-         }
-
-
-         const fileExt = file.name.split('.').pop();
-         // Use a consistent naming convention, like user_id.<ext> for avatar, user_id_banner.<ext> for banner
-         // This simplifies cleanup if needed and ensures only one avatar/banner per user in storage path.
-         const baseFileName = bucket === 'avatars' ? `${session.user.id}` : `${session.user.id}_banner`;
-         const fileName = `${baseFileName}.${fileExt}`;
-         // Group files by user ID in storage
-         const filePath = `${session.user.id}/${fileName}`;
-
-
-         setLoadingState(true); setError(null);
-         try {
-              // Upsert = true allows overwriting the previous avatar/banner
-             const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true });
-             if (uploadError) throw uploadError;
-
-             // Construct the public URL manually - getPublicUrl might include tokens if used incorrectly
-             // Ensure your bucket policies allow public reads for the user's folder path
-             const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}?t=${new Date().getTime()}`; // Add timestamp to break cache
-
-             if (!publicUrl) throw new Error("Could not construct public URL.");
-
-             const updates = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl };
-
-             // Ensure profile exists before updating
-             if (!profile) {
-                 // Attempt to fetch profile again if it was null
-                 const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('id').eq('id', session.user.id).single();
-                 if (refetchError || !refetchedProfile) {
-                      throw new Error("Profile not found, cannot update image URL.");
-                 }
-             }
-
-             const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id);
-             if (updateError) throw updateError;
-
-             // Update local profile state correctly
-             setProfile(prev => prev ? { ...prev, ...updates } : { id: session.user.id, ...updates } as Profile); // Handle case where profile was initially null
-
-             alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
-         } catch (err: any) {
-             console.error(`Upload Error (${bucket}):`, err);
-             setError(`Failed to update ${bucket === 'avatars' ? 'avatar' : 'banner'}: ${err.message || 'Unknown error'}`);
-         } finally {
-             setLoadingState(false);
-             // Clear the file input after upload attempt
+        if (!event.target.files || event.target.files.length === 0) { return; }
+        const file = event.target.files[0];
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            setError("Invalid file type. Please upload PNG, JPG, WEBP, or GIF.");
+            if (event.target) event.target.value = '';
+            return;
+        }
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            setError("File is too large. Maximum size is 5MB.");
              if (event.target) event.target.value = '';
-         }
-     };
+            return;
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const baseFileName = bucket === 'avatars' ? `${session.user.id}` : `${session.user.id}_banner`;
+        const fileName = `${baseFileName}.${fileExt}`;
+        const filePath = `${session.user.id}/${fileName}`;
+
+        setLoadingState(true); setError(null);
+        try {
+            const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true });
+            if (uploadError) throw uploadError;
+
+            const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}?t=${new Date().getTime()}`;
+            if (!publicUrl) throw new Error("Could not construct public URL.");
+
+            const updates: Partial<Profile> = bucket === 'avatars' ? { avatar_url: publicUrl } : { banner_url: publicUrl };
+
+            // Ensure profile exists before updating
+            let currentProfile = profile;
+            if (!currentProfile) {
+                const { data: refetchedProfile, error: refetchError } = await supabase.from('profiles').select('*').eq('id', session.user.id).single(); // Fetch full profile
+                if (refetchError || !refetchedProfile) {
+                     throw new Error("Profile not found, cannot update image URL.");
+                }
+                currentProfile = refetchedProfile as Profile; // Assign fetched profile
+                setProfile(currentProfile); // Update state immediately if it was null
+            }
+
+            const { error: updateError } = await supabase.from('profiles').update(updates).eq('id', session.user.id);
+            if (updateError) throw updateError;
+
+            // Update local profile state correctly using functional update
+            setProfile(prev => {
+                // Should always have a profile here due to the check above
+                if (!prev) {
+                    console.error("setProfile called in handleImageUpload when profile state was unexpectedly null after refetch attempt.");
+                    // Return the updates merged with a minimal structure, or handle as error
+                    return { id: session.user.id, ...updates } as Profile; // Less safe fallback
+                }
+                // Merge updates into the existing profile
+                return { ...prev, ...updates };
+            });
 
 
-    // --- RENDER LOGIC --- (unchanged checks, simplified profile check)
+            alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
+        } catch (err: any) {
+            console.error(`Upload Error (${bucket}):`, err);
+            setError(`Failed to update ${bucket === 'avatars' ? 'avatar' : 'banner'}: ${err.message || 'Unknown error'}`);
+        } finally {
+            setLoadingState(false);
+            if (event.target) event.target.value = '';
+        }
+    };
+    // --- END: ပြင်ဆင်ထားသော Image Upload Logic ---
 
+
+    // --- RENDER LOGIC --- (unchanged)
     if (loading) {
         console.log("Rendering loading state...");
         return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>);
     }
-
-     // If there's an error state, show it
      if (error) {
          console.log("Rendering error state:", error);
          return (
@@ -483,24 +413,14 @@ export default function MyAccountPage() {
                  <AlertTriangle className="mb-2" size={32} />
                  <p className="font-semibold">Failed to Load Account Details</p>
                  <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p>
-                 <button
-                     onClick={() => checkSessionAndSetup(true)} // Pass true for retry
-                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"
-                 >
-                     Try Again
-                 </button>
+                 <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button>
              </div>
          );
      }
-
-    // If no session after loading/retries, show login prompt
     if (!session || !session.user) {
         console.log("Rendering not logged in state...");
         return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
     }
-
-    // If session exists but profile data is still null after loading (and no error was thrown)
-    // This indicates a potential issue like missing profile row or RLS problem
      if (!profile) {
          console.warn("Rendering profile not found state (session exists but profile is null).");
          return (
@@ -508,26 +428,14 @@ export default function MyAccountPage() {
                  <AlertTriangle className="mb-2" size={32} />
                  <p className="font-semibold">Account Profile Not Found</p>
                  <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p>
-                 <button
-                     onClick={() => checkSessionAndSetup(true)} // Retry fetching
-                     className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"
-                 >
-                     Retry Loading
-                 </button>
-                  <button
-                     onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} // Log out and refresh
-                     className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"
-                 >
-                     Log Out
-                 </button>
+                 <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button>
+                  <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button>
              </div>
          );
      }
 
-    // --- Main Render (if loading is false, no error, session exists, profile exists) ---
     console.log("Rendering main account content...");
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
-    // Use naju_id if available, otherwise fallback to username part of email
     const usernameDisplay = profile?.naju_id || session.user.email?.split('@')[0] || 'User';
 
     return (
