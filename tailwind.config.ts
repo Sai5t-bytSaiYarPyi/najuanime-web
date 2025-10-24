@@ -2,7 +2,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: 'class', // <--- ဒါရှိနေရပါမယ်
+  // darkMode: 'class', // ဒီလိုင်းကို ဖယ်ထားပြီးသား
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -11,23 +11,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // --- Dark Mode Colors ---
-        'background-dark': '#0D1117', // Main background color (မှောင်သော)
-        'card-dark': '#161B22',       // Card background color (မှောင်သော)
-        'border-color': '#30363D',    // Border color (မှောင်သော)
-        'text-dark-primary': '#E5E7EB', // Primary text color (ဖြူသော - Gray 200)
-        'text-dark-secondary': '#9CA3AF',// Secondary text color (မီးခိုးသော - Gray 400)
+        // --- အရောင် Palette အသစ် ---
+        'background': '#0B0C10',       // အရမ်းနက်တဲ့ အပြာနက်ရောင်
+        'card': '#1F2833',             // မီးခိုးပြာရောင်အမှိန်
+        'border': '#45A29E',           // အနည်းငယ်တောက်သော Cyan (Border အတွက်)
+        'text-primary': '#C5C6C7',     // အဖြူရောင်မှိန်
+        'text-secondary': '#66FCF1',    // တောက်ပသော Cyan (Secondary Text အတွက်)
 
-        // --- Light Mode Colors ---
-        'background-light': '#F9FAFB', // Main background color (အဖြူနီးပါး - Gray 50)
-        'card-light': '#FFFFFF',       // Card background color (အဖြူ)
-        'border-light': '#E5E7EB',    // Border color (အဖြူရောင်မှိန် - Gray 200)
-        'text-light-primary': '#1F2937', // Primary text color (အနက်နီးပါး - Gray 800)
-        'text-light-secondary': '#6B7280',// Secondary text color (မီးခိုးရင့် - Gray 500)
+        // --- Accent Colors အသစ် ---
+        'accent-1': '#66FCF1',         // တောက်ပသော Cyan (Primary Accent)
+        'accent-2': '#C4146F',         // တောက်ပသော Magenta/Pink (Secondary Accent)
 
-        // --- Accent Colors (မပြောင်းလဲ) ---
-        'accent-green': '#39FF14',    // Neon green for highlights
-        'accent-purple': '#8A2BE2',   // Purple for buttons
+        // --- Compatibility အတွက် အရင် Accent Name တွေကိုလည်း ထားပေးနိုင်ပါတယ် ---
+        'accent-green': '#66FCF1',     // Cyan ကိုသုံးမယ်
+        'accent-purple': '#66FCF1',    // Cyan ကိုသုံးမယ် (Primary Button အတွက်)
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

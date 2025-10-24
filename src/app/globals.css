@@ -1,12 +1,16 @@
 /* src/app/globals.css */
-/* Tailwind directives တွေကို import လုပ်ပါ */
 @import "tailwindcss";
 
-/* အရင်က CSS variable တွေနဲ့ media query တွေကို ဖယ်ထုတ်လိုက်ပါပြီ */
-
 body {
-  /* Tailwind class တွေကို layout.tsx မှာ သုံးထားပြီးသားမို့ */
-  /* ဒီမှာ သီးသန့် style တွေ ထပ်ထည့်စရာ မလိုပါ */
-  /* Font smoothing အတွက် antialiased ကိုတော့ ထားခဲ့နိုင်ပါတယ် */
   @apply antialiased;
 }
+
+/* Optional: Default link color ကို accent color အသစ်နဲ့ သတ်မှတ် */
+a {
+  @apply text-accent-1 hover:brightness-110 transition-all; /* Cyan နဲ့ hover effect */
+}
+
+/* Optional: Headings တွေကို ပိုထင်ရှားတဲ့ အရောင်ပေးချင်ရင် */
+/* h1, h2, h3, h4, h5, h6 {
+  @apply text-text-primary;
+} */

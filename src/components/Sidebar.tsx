@@ -49,13 +49,13 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
         await supabase.auth.signOut();
     };
 
-    // --- START: Update Link Styles ---
+    // --- START: Update Link Styles (dark: prefix တွေ ဖယ်ထုတ်) ---
     const getLinkClasses = (href: string) => {
         const isActive = pathname === href;
         return `flex items-center gap-3 p-3 rounded-lg transition-colors relative ${
             isActive
-                ? 'text-text-light-primary dark:text-white' // Active text color
-                : 'text-text-light-secondary dark:text-gray-300 hover:text-text-light-primary dark:hover:text-white' // Default text colors
+                ? 'text-white' // Active text color
+                : 'text-gray-300 hover:text-white' // Default text colors
         }`;
     };
 
@@ -64,15 +64,15 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
          return `flex items-center gap-3 p-3 rounded-lg transition-colors relative ${
             isActive
                 ? 'text-white bg-accent-purple' // Active mobile link
-                : 'text-text-light-secondary dark:text-gray-300 hover:bg-accent-purple/10 dark:hover:bg-accent-purple/50 hover:text-text-light-primary dark:hover:text-white' // Default mobile link colors
+                : 'text-gray-300 hover:bg-accent-purple/50 hover:text-white' // Default mobile link colors
         }`;
     }
 
      const getActionButtonClasses = () => {
-        return "flex items-center gap-3 p-3 rounded-lg w-full transition-colors text-text-light-secondary dark:text-gray-300 hover:text-text-light-primary dark:hover:text-white";
+        return "flex items-center gap-3 p-3 rounded-lg w-full transition-colors text-gray-300 hover:text-white";
      }
-     const getLogoutButtonClasses = () => `${getActionButtonClasses()} hover:bg-red-500/10 dark:hover:bg-red-500/50`;
-     const getLoginButtonClasses = () => `${getActionButtonClasses()} hover:bg-green-500/10 dark:hover:bg-green-500/50`;
+     const getLogoutButtonClasses = () => `${getActionButtonClasses()} hover:bg-red-500/50`;
+     const getLoginButtonClasses = () => `${getActionButtonClasses()} hover:bg-green-500/50`;
     // --- END: Update Link Styles ---
 
 
@@ -111,15 +111,15 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
                 initial={{ x: '-100%' }}
                 animate={{ x: isMenuOpen ? 0 : '-100%' }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                // --- START: Update Mobile Sidebar Styles ---
-                className="md:hidden fixed top-0 left-0 h-full w-64 p-6 bg-card-light/90 dark:bg-card-dark/80 backdrop-blur-lg border-r border-border-light dark:border-border-color z-50 flex flex-col"
+                // --- START: Update Mobile Sidebar Styles (dark: prefix ဖယ်ထုတ်) ---
+                className="md:hidden fixed top-0 left-0 h-full w-64 p-6 bg-card/80 backdrop-blur-lg border-r border-border z-50 flex flex-col"
                 // --- END: Update Mobile Sidebar Styles ---
             >
                 <div>
                     <div className="flex justify-between items-center mb-8">
-                         {/* --- Updated Heading Color --- */}
-                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-white">NajuAnime+</h1>
-                        <button onClick={() => setIsMenuOpen(false)} className="text-text-light-secondary dark:text-gray-300 hover:text-text-light-primary dark:hover:text-white"><X /></button>
+                         {/* --- Updated Heading Color (dark: prefix ဖယ်ထုတ်) --- */}
+                        <h1 className="text-2xl font-bold text-white">NajuAnime+</h1>
+                        <button onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white"><X /></button>
                     </div>
                     <nav className="flex flex-col gap-4">
                         {mobileNavLinks}
@@ -141,12 +141,12 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
             </motion.aside>
 
             {/* Desktop Sidebar (Static) */}
-             {/* --- START: Update Desktop Sidebar Styles --- */}
-            <aside className="hidden md:block w-64 p-6 bg-card-light dark:bg-card-dark/30 backdrop-blur-lg border-r border-border-light dark:border-border-color shrink-0 h-screen sticky top-0 flex-col justify-between">
+             {/* --- START: Update Desktop Sidebar Styles (dark: prefix ဖယ်ထုတ်) --- */}
+            <aside className="hidden md:block w-64 p-6 bg-card/30 backdrop-blur-lg border-r border-border shrink-0 h-screen sticky top-0 flex-col justify-between">
             {/* --- END: Update Desktop Sidebar Styles --- */}
                 <div>
-                     {/* --- Updated Heading Color --- */}
-                    <h1 className="text-2xl font-bold mb-8 text-text-light-primary dark:text-white">NajuAnime+</h1>
+                     {/* --- Updated Heading Color (dark: prefix ဖယ်ထုတ်) --- */}
+                    <h1 className="text-2xl font-bold mb-8 text-white">NajuAnime+</h1>
                     <nav className="flex flex-col gap-4">
                        {navLinks}
                     </nav>
