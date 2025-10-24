@@ -8,9 +8,9 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext'; // <-- useTheme hook ကို import လုပ်ပါ
+import { useTheme } from '@/context/ThemeContext';
 
-export const dynamic = 'force-dynamic'; // <-- ဒီမှာ ထည့်ပါ: Static generation ကို disable လုပ်ရန်
+export const dynamic = 'force-dynamic'; // <-- ဒီ flag ရှိနေတာ သေချာပါစေ
 
 // --- Type Definitions (ယခင်အတိုင်း) ---
 type Profile = {
@@ -22,26 +22,14 @@ type Profile = {
   banner_url: string | null;
   bio: string | null;
 };
-
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-type UserAnimeListItem = {
-    status: string;
-    anime_series: {
-        id: string;
-        poster_url: string | null;
-        title_english: string | null;
-        title_romaji: string | null;
-    } | null;
-};
+type UserAnimeListItem = { status: string; anime_series: { id: string; poster_url: string | null; title_english: string | null; title_romaji: string | null; } | null; };
 type Tab = 'profile' | 'anime_list' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
 
 
 // --- Components (ယခင်အတိုင်း) ---
-
-// ProfileStatsDisplay (ယခင်အတိုင်း)
-const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
-    // ... (ယခင် code အတိုင်း) ...
+const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => { /* ... ယခင် code ... */
     if (!stats) {
         return <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md text-text-light-secondary dark:text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -61,18 +49,7 @@ const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
         </div>
     );
 };
-
-// ProfileTabContent (ယခင်အတိုင်း)
-const ProfileTabContent = ({
-    profile,
-    uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
-    uploadingAvatar, avatarInputRef, setUploadingAvatar,
-    isSubscribed,
-    isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
-    isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-    profileStats
-}: any) => {
-    // ... (ယခင် code အတိုင်း) ...
+const ProfileTabContent = ({ profile, uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner, uploadingAvatar, avatarInputRef, setUploadingAvatar, isSubscribed, isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio, isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername, profileStats }: any) => { /* ... ယခင် code ... */
     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
@@ -156,64 +133,57 @@ const ProfileTabContent = ({
         </motion.div>
     );
 };
-
-// AnimeListTabContent (ယခင်အတိုင်း)
-const AnimeListTabContent = ({ animeList }: any) => (
-   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      {animeList.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6">
-              {animeList.map((item: UserAnimeListItem) => {
-                  const anime = item.anime_series;
-                  if (!anime) return null;
-                  return (
-                      <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
-                          <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-200 dark:bg-gray-800">
-                              <Image
-                                  src={anime.poster_url || '/placeholder.png'}
-                                  alt={anime.title_english || anime.title_romaji || 'Poster'}
-                                  fill
-                                  style={{ objectFit: 'cover' }}
-                                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                              <div className="absolute top-1 right-1 m-1">
-                                  <span className="bg-black/70 text-white text-xs font-bold px-2 py-0.5 rounded">
-                                      {item.status.replace('_', ' ').toUpperCase()}
-                                  </span>
+const AnimeListTabContent = ({ animeList }: any) => { /* ... ယခင် code ... */
+    return (
+       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {animeList.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6">
+                  {animeList.map((item: UserAnimeListItem) => {
+                      const anime = item.anime_series;
+                      if (!anime) return null;
+                      return (
+                          <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
+                              <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-200 dark:bg-gray-800">
+                                  <Image
+                                      src={anime.poster_url || '/placeholder.png'}
+                                      alt={anime.title_english || anime.title_romaji || 'Poster'}
+                                      fill
+                                      style={{ objectFit: 'cover' }}
+                                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                                  <div className="absolute top-1 right-1 m-1">
+                                      <span className="bg-black/70 text-white text-xs font-bold px-2 py-0.5 rounded">
+                                          {item.status.replace('_', ' ').toUpperCase()}
+                                      </span>
+                                  </div>
+                                  <div className="absolute bottom-0 left-0 p-2 w-full">
+                                      <h3 className="text-sm font-semibold text-white truncate group-hover:text-accent-green">
+                                          {anime.title_english || anime.title_romaji}
+                                      </h3>
+                                  </div>
                               </div>
-                              <div className="absolute bottom-0 left-0 p-2 w-full">
-                                  <h3 className="text-sm font-semibold text-white truncate group-hover:text-accent-green">
-                                      {anime.title_english || anime.title_romaji}
-                                  </h3>
-                              </div>
-                          </div>
-                      </Link>
-                   );
-              })}
-          </div>
-      ) : (
-          <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
-              <p className="text-text-light-secondary dark:text-text-dark-secondary">Your anime list is empty.</p>
-              <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
-                  Browse Anime
-              </Link>
-          </div>
-      )}
-   </motion.div>
-);
-
-// SettingsTabContent (ယခင်အတိုင်း)
-const SettingsTabContent = ({
-    receipts,
-    handleDeleteReceipt,
-}: any) => {
-    // Theme context ကနေ theme state နဲ့ setTheme function ကို ရယူပါ
+                          </Link>
+                       );
+                  })}
+              </div>
+          ) : (
+              <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
+                  <p className="text-text-light-secondary dark:text-text-dark-secondary">Your anime list is empty.</p>
+                  <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
+                      Browse Anime
+                  </Link>
+              </div>
+          )}
+       </motion.div>
+    );
+};
+const SettingsTabContent = ({ receipts, handleDeleteReceipt }: any) => { /* ... ယခင် code ... */
     const { theme, setTheme, isLoading: isThemeLoading } = useTheme();
 
     const ThemeToggle = () => (
         <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            // isThemeLoading ကို disabled state ထဲ ထည့်ပါ
             disabled={isThemeLoading}
             className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green ${theme === 'dark' ? 'bg-gray-600' : 'bg-accent-green'} disabled:opacity-50`}
         >
@@ -233,12 +203,10 @@ const SettingsTabContent = ({
                    <div className="flex items-center gap-2">
                         <ThemeToggle />
                         <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary capitalize">{theme} Mode</span>
-                        {/* isThemeLoading ကို သုံးပြီး loading state ပြပါ */}
                         {isThemeLoading && <Loader size={16} className="animate-spin text-gray-400"/>}
                    </div>
                </div>
            </div>
-           {/* --- ကျန်တဲ့ Setting sections တွေက ယခင်အတိုင်း --- */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Edit Profile</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Change Password</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
@@ -265,7 +233,6 @@ const SettingsTabContent = ({
     );
 };
 
-
 // --- Main Component ---
 export default function MyAccountPage() {
     // States (ယခင်အတိုင်း)
@@ -289,47 +256,36 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // Theme context ကို သုံးပါ (Optional: တကယ်လို့ theme တန်ဖိုးကို ဒီ component မှာ တိုက်ရိုက်သုံးချင်မှ)
+    // Theme context ကို သုံးပါ (Optional)
     const { theme, isLoading: isThemeLoading } = useTheme();
 
-    // --- setupUser --- (ယခင်အတိုင်း)
-    const setupUser = useCallback(async (user: User) => {
-        // ... (ယခင် code အတိုင်း) ...
+    // --- setupUser, checkSessionAndSetup, Auth Listener, Other Handlers (ယခင်အတိုင်း) ---
+    const setupUser = useCallback(async (user: User) => { /* ... ယခင် code ... */
         console.log("Setting up user data in parallel for:", user.id);
         setError(null);
         try {
-            // Fetch profile data (preferences မလိုတော့)
             const { data: fetchedProfile, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio') // preferences ကို ဖယ်ထုတ်
+                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio')
                 .eq('id', user.id)
                 .single();
-
              if (profileError && profileError.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileError.message} (Code: ${profileError.code})`);
              if (!fetchedProfile && !profileError) console.warn("Profile data is null but no error reported.");
-
              setProfile(fetchedProfile);
-
-            // Fetch other data in parallel (ယခင်အတိုင်း)
             const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
             ]);
-
-            // Handle errors for other fetches (ယခင်အတိုင်း)
             if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
             if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
             if (statsResponse.error) throw new Error(`Stats fetch failed: ${statsResponse.error.message}`);
-
-            // Update other states (ယခင်အတိုင်း)
             setReceipts(receiptsResponse.data as Receipt[] || []);
             const fetchedAnimeList = animeListResponse.data;
              if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
                  const correctlyTypedList: UserAnimeListItem[] = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, anime_series: typedAnimeSeries }; }); setAnimeList(correctlyTypedList);
             } else { setAnimeList([]); }
             setProfileStats(statsResponse.data as ProfileStatsData);
-
             console.log("User data setup successful (parallel).");
             return true;
         } catch (err: any) {
@@ -340,21 +296,15 @@ export default function MyAccountPage() {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-
-    // --- checkSessionAndSetup --- (ယခင်အတိုင်း)
-     const checkSessionAndSetup = useCallback(async (isRetry = false) => {
-        // ... (ယခင် code အတိုင်း) ...
+     const checkSessionAndSetup = useCallback(async (isRetry = false) => { /* ... ယခင် code ... */
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
-        setLoading(true); // Data loading စတင်
+        setLoading(true);
         setError(null);
         try {
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
             console.log("getSession result:", { currentSession, sessionError });
             if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
-
-            setSession(currentSession); // Session state ကို အရင် သတ်မှတ်
-
+            setSession(currentSession);
             if (currentSession && currentSession.user) {
                 console.log("Session found, calling setupUser...");
                 await setupUser(currentSession.user);
@@ -368,20 +318,13 @@ export default function MyAccountPage() {
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
         } finally {
             console.log("Setting loading to false in checkSessionAndSetup finally block.");
-            setLoading(false); // Data loading ပြီးဆုံး
+            setLoading(false);
         }
     }, [setupUser]);
-
-
-    // --- Auth State Change Listener --- (ယခင်အတိုင်း)
-    useEffect(() => {
-        // ... (ယခင် code အတိုင်း) ...
+    useEffect(() => { /* ... ယခင် code ... */
         console.log("Auth listener useEffect running.");
         let isMounted = true;
-
-        // Initial check on mount
         checkSessionAndSetup();
-
         const { data: authListener } = supabase.auth.onAuthStateChange( (event, newSession) => {
             if (!isMounted) return;
             console.log("Auth state changed:", event, newSession);
@@ -390,7 +333,7 @@ export default function MyAccountPage() {
             setSession(newSession);
             if (newUserId !== previousUserId) {
                 console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`);
-                checkSessionAndSetup(); // User ပြောင်းမှ ခေါ်ပါ
+                checkSessionAndSetup();
             } else {
                  console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No full reload triggered.`);
             }
@@ -401,38 +344,24 @@ export default function MyAccountPage() {
             authListener?.subscription.unsubscribe();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Initial mount မှာပဲ run ပါ
+    }, []);
+     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => { /* ... ယခင် code ... */ };
+     const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => { /* ... ယခင် code ... */ };
+     const handleSaveBio = async (newBio: string) => { /* ... ယခင် code ... */ };
+     const handleSaveUsername = async (newUsername: string) => { /* ... ယခင် code ... */ };
 
-
-    // --- Other Handlers (unchanged) ---
-     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
-         // ... (ယခင်အတိုင်း)
-     };
-     const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => {
-         // ... (ယခင်အတိုင်း)
-     };
-     const handleSaveBio = async (newBio: string) => {
-         // ... (ယခင်အတိုင်း)
-     };
-     const handleSaveUsername = async (newUsername: string) => {
-         // ... (ယခင်အတိုင်း)
-     };
-
-    // --- RENDER LOGIC ---
+    // --- RENDER LOGIC (ယခင်အတိုင်း) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account Data...</div>); }
-
-     // ... (Error, No Session, No Profile checks - ယခင်အတိုင်း) ...
      if (error && !profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-500 dark:text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-text-light-primary dark:text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-text-light-secondary dark:text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-text-light-secondary dark:text-gray-400">Use the Login button in the sidebar.</p></div>); }
      if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-500 dark:text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
-
 
     console.log("Rendering main account content with theme from context:", theme);
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
     return (
-        // --- Outer div and Tab Navigation (ယခင်အတိုင်း) ---
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-light-primary dark:text-text-dark-primary">
+            {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-light dark:border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                      <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary hover:border-gray-400 dark:hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
@@ -460,12 +389,11 @@ export default function MyAccountPage() {
                             key="settings"
                             receipts={receipts}
                             handleDeleteReceipt={handleDeleteReceipt}
-                            // theme props မလိုတော့
                         />
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display (ယခင်အတိုင်း) */}
+            {/* Global Error Display */}
             {error && profile && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
