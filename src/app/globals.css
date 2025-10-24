@@ -1,41 +1,21 @@
 /* src/app/globals.css */
-/* @import "tailwindcss"; ကို ဖယ်ထုတ်ပြီး directives တွေကို သီးသန့်ခွဲရေးပါ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Define custom properties (CSS Variables) *after* @tailwind base */
 @layer base {
-  :root {
-    /* Colors from tailwind.config.ts */
-    --color-background: theme('colors.background');
-    --color-card: theme('colors.card');
-    --color-border: theme('colors.border');
-    --color-text-primary: theme('colors.text-primary');
-    --color-text-secondary: theme('colors.text-secondary');
-    --color-accent-1: theme('colors.accent-1');
-    --color-accent-2: theme('colors.accent-2');
-  }
-
   body {
-    /* Apply base background and text colors using variables */
-    /* @apply directive ကို ဒီနေရာမှာ သုံးလို့ အဆင်မပြေနိုင်တော့ပါ */
-    /* CSS variables တွေကို တိုက်ရိုက်သုံးပါ */
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    @apply antialiased transition-colors duration-200; /* ကျန်တာတွေကတော့ @apply သုံးနိုင် */
+    /* CSS variable တွေကို တိုက်ရိုက် မသုံးတော့ဘဲ @apply နဲ့ tailwind config က color တွေကို သုံးပါ */
+    @apply bg-background text-text-primary antialiased transition-colors duration-200;
   }
 
   a {
-    /* Apply accent color using variable */
-    color: var(--color-accent-1);
-    @apply hover:brightness-110 transition-all;
+    /* CSS variable မဟုတ်တော့ဘဲ config က color ကို တိုက်ရိုက်သုံးပါ */
+    @apply text-accent-1 hover:brightness-110 transition-all;
   }
 
   /* Add other base styles if needed */
   /* h1, h2, h3, h4, h5, h6 {
-    color: var(--color-text-primary);
+     @apply text-text-primary;
   } */
 }
-
-/* @tailwind components နှင့် @tailwind utilities က အပေါ်မှာ ရှိပြီးသား */
