@@ -9,36 +9,54 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Moon, Sun } from 'lucide-react';
 
-// --- Type Definitions (ယခင်အတိုင်း) ---
-type ProfilePreferences = { theme?: 'light' | 'dark'; };
-type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
+// --- Type Definitions ---
+type ProfilePreferences = {
+  theme?: 'light' | 'dark';
+};
+
+type Profile = {
+  id: string;
+  naju_id: string;
+  subscription_expires_at: string | null;
+  subscription_status: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  bio: string | null;
+  preferences: ProfilePreferences | null;
+};
+
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-type UserAnimeListItem = { status: string; anime_series: { id: string; poster_url: string | null; title_english: string | null; title_romaji: string | null; } | null; };
+// --- UserAnimeListItem Type (အပြည့်အစုံ) ---
+type UserAnimeListItem = {
+    status: string;
+    anime_series: {
+        id: string;
+        poster_url: string | null;
+        title_english: string | null;
+        title_romaji: string | null;
+    } | null;
+};
 type Tab = 'profile' | 'anime_list' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
 
 
-// --- START: Component များတွင် Light/Dark Style များ ပိုမိုတိကျစွာ သတ်မှတ် ---
+// --- Components (Updated Styles) ---
 
 // ProfileStatsDisplay Component Code (Updated Styles)
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
     if (!stats) {
-        // Updated text colors for visibility in both modes
         return <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md text-text-light-secondary dark:text-text-dark-secondary text-sm">Loading stats...</div>;
     }
     return (
         <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md">
-             {/* Updated text colors */}
             <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary mb-3 flex items-center gap-2"><BarChart2 size={16}/> Statistics</h3>
             <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                     <p className="text-2xl font-bold text-accent-green">{stats.completed_count ?? 0}</p>
-                    {/* Updated text colors */}
                     <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary uppercase flex items-center justify-center gap-1"><CheckCircle size={12}/> Anime Completed</p>
                 </div>
                 <div>
                     <p className="text-2xl font-bold text-yellow-400">{stats.mean_score?.toFixed(2) ?? 'N/A'}</p>
-                     {/* Updated text colors */}
                     <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary uppercase flex items-center justify-center gap-1"><Star size={12}/> Mean Score</p>
                 </div>
             </div>
@@ -74,7 +92,6 @@ const ProfileTabContent = ({
 
             {/* Avatar & Basic Info */}
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
-                 {/* Updated border and background colors */}
                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-light dark:border-background-dark bg-gray-300 dark:bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                     {profile?.avatar_url ? ( <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/> ) : ( <UserIcon size={64} className="text-gray-500 dark:text-gray-400" /> )}
                      <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar || savingUsername || savingBio} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -86,22 +103,17 @@ const ProfileTabContent = ({
                      {isEditingUsername ? (
                         <div className="space-y-2">
                              <div className="relative">
-                                 {/* Updated icon color */}
                                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400" size={16} />
-                                 {/* Updated input background and border */}
-                                 <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color text-lg font-bold focus:outline-none focus:ring-1 focus:ring-accent-green" maxLength={20} />
+                                 <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color text-lg font-bold focus:outline-none focus:ring-1 focus:ring-accent-green text-text-light-primary dark:text-text-dark-primary" maxLength={20} />
                              </div>
                              <div className="flex gap-2 justify-center sm:justify-start">
-                                 {/* Updated cancel button style */}
                                  <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50 text-text-light-primary dark:text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                                 <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
+                                 <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
                              </div>
                         </div>
                      ) : (
                         <div>
-                            {/* Ensured text color applies */}
                             <h1 className="text-2xl md:text-3xl font-bold text-text-light-primary dark:text-text-dark-primary">{displayUsername}</h1>
-                            {/* Updated secondary text color */}
                             <p className="text-text-light-secondary dark:text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
                         </div>
                     )}
@@ -109,7 +121,6 @@ const ProfileTabContent = ({
                 {/* Edit Username Button */}
                 {!isEditingUsername && (
                     <div className="sm:ml-auto">
-                        {/* Updated button style */}
                         <button onClick={startEditingUsername} className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-text-light-primary dark:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled={savingBio || savingUsername}> <Edit3 size={14} /> Edit Username </button>
                     </div>
                 )}
@@ -120,29 +131,22 @@ const ProfileTabContent = ({
                  {/* Column 1: Stats & Subscription */}
                  <div className="space-y-4">
                      <ProfileStatsDisplay stats={profileStats} />
-                      {/* Updated card background */}
                      <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md">
-                          {/* Updated heading color */}
                          <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary mb-1">Subscription</h3>
                          {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-blue-400 hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )}
                     </div>
                  </div>
 
                  {/* Column 2: Bio */}
-                  {/* Updated card background */}
                  <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md">
                     <div className="flex justify-between items-center mb-1">
-                         {/* Updated heading color */}
                         <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary">About Me</h3>
-                         {/* Updated button text color */}
                         {!isEditingBio && ( <button onClick={startEditingBio} className="text-xs text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-white disabled:opacity-50" disabled={savingBio || savingUsername}> <Edit3 size={12} className="inline mr-1"/> Edit Bio </button> )}
                     </div>
                     {isEditingBio ? (
                         <div className="mt-2 space-y-3">
-                             {/* Updated textarea style */}
-                            <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green" rows={4} maxLength={500} />
+                            <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-light-primary dark:text-text-dark-primary" rows={4} maxLength={500} />
                             <div className="flex justify-end gap-2">
-                                {/* Updated cancel button style */}
                                 <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-md text-text-light-primary dark:text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
                                 <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
                             </div>
@@ -164,7 +168,6 @@ const AnimeListTabContent = ({ animeList }: any) => (
                   if (!anime) return null;
                   return (
                       <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
-                          {/* Updated card background */}
                           <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-200 dark:bg-gray-800">
                               <Image
                                   src={anime.poster_url || '/placeholder.png'}
@@ -190,7 +193,6 @@ const AnimeListTabContent = ({ animeList }: any) => (
               })}
           </div>
       ) : (
-           /* Updated card background and text color */
           <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
               <p className="text-text-light-secondary dark:text-text-dark-secondary">Your anime list is empty.</p>
               <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
@@ -210,7 +212,7 @@ const SettingsTabContent = ({
     handleThemeChange,
     savingPreferences
 }: any) => {
-    const ThemeToggle = () => ( /* ... Theme Toggle UI ... */
+    const ThemeToggle = () => (
         <button
             onClick={() => handleThemeChange(currentTheme === 'dark' ? 'light' : 'dark')}
             disabled={savingPreferences}
@@ -224,34 +226,26 @@ const SettingsTabContent = ({
     );
     return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-           {/* Updated heading color */}
           <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">Account Settings</h2>
-           {/* Updated card background */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
-                {/* Updated heading color */}
                <h3 className="text-xl font-semibold mb-4 text-text-light-primary dark:text-text-dark-primary">Site Preferences</h3>
                <div className="flex items-center justify-between">
-                    {/* Updated label color */}
                    <label htmlFor="theme-toggle" className="text-text-light-secondary dark:text-text-dark-secondary"> Theme </label>
                    <div className="flex items-center gap-2">
                         <ThemeToggle />
-                        {/* Updated text color */}
                         <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary capitalize">{currentTheme} Mode</span>
                         {savingPreferences && <Loader size={16} className="animate-spin text-gray-400"/>}
                    </div>
                </div>
            </div>
-           {/* Updated other cards */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Edit Profile</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Change Password</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-light-primary dark:text-text-dark-primary">My Receipt Submissions</h3>
                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                    {receipts.length > 0 ? receipts.map((r: Receipt) => (
-                       /* Updated receipt item background */
                       <div key={r.id} className="p-3 bg-gray-100 dark:bg-gray-700 rounded-md flex justify-between items-center gap-4">
                           <div>
-                              {/* Updated text color */}
                               <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">Submitted: {new Date(r.created_at).toLocaleString()}</p>
                               <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-bold rounded-full ${ r.status === 'approved' ? 'bg-green-500 text-green-950' : r.status === 'rejected' ? 'bg-red-500 text-red-950' : 'bg-yellow-500 text-yellow-950' }`}> {r.status.toUpperCase()} </span>
                           </div>
@@ -261,7 +255,6 @@ const SettingsTabContent = ({
                </div>
               <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link>
            </div>
-           {/* Updated Danger Zone style */}
            <div className="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-3 text-red-700 dark:text-red-300">Danger Zone</h3>
                <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50" disabled> Delete Account (Soon) </button>
@@ -271,12 +264,10 @@ const SettingsTabContent = ({
     );
 };
 
-// --- END: Component Style Updates ---
-
 
 // --- Main Component ---
 export default function MyAccountPage() {
-    // ... (States - ယခင်အတိုင်း) ...
+    // States
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -293,56 +284,76 @@ export default function MyAccountPage() {
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
-    const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('dark');
+    // Theme State - Default ကို browser/OS ကနေ ယူဖို့ ကြိုးစားပါမယ်
+    const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>(() => {
+         if (typeof window !== 'undefined') {
+            const storedTheme = localStorage.getItem('theme');
+            if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return 'dark'; // Server-side or initial render မှာ default dark
+    });
     const [savingPreferences, setSavingPreferences] = useState(false);
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser (ယခင်အတိုင်း) ---
+    // --- setupUser ---
     const setupUser = useCallback(async (user: User) => {
-        // ... (function body - ယခင်အတိုင်း) ...
-        console.log("Setting up user data in parallel for:", user.id); setError(null);
+        console.log("Setting up user data in parallel for:", user.id);
+        setError(null);
         try {
-            const [profileResponse, receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
-                supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences').eq('id', user.id).single(),
+            // Fetch profile data including preferences
+            const { data: fetchedProfile, error: profileError } = await supabase
+                .from('profiles')
+                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                .eq('id', user.id)
+                .single();
+
+             if (profileError && profileError.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileError.message} (Code: ${profileError.code})`);
+             if (!fetchedProfile && !profileError) console.warn("Profile data is null but no error reported.");
+
+             setProfile(fetchedProfile);
+
+             // Set theme based on fetched profile or fallback
+             const userTheme = fetchedProfile?.preferences?.theme || currentTheme; // DB က မရရင် လက်ရှိ state ကို သုံး
+             console.log("Theme from DB or current state:", userTheme);
+             if (currentTheme !== userTheme) { // state နဲ့ မတူမှ update လုပ်
+                setCurrentTheme(userTheme);
+                if (typeof document !== 'undefined') {
+                    document.documentElement.classList.remove('light', 'dark');
+                    document.documentElement.classList.add(userTheme);
+                    console.log("Applied theme to HTML from DB (different from initial):", userTheme);
+                }
+             }
+
+            // Fetch other data in parallel
+            const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
             ]);
 
-            if (profileResponse.error && profileResponse.error.code !== 'PGRST116') throw new Error(`Profile fetch failed: ${profileResponse.error.message} (Code: ${profileResponse.error.code})`);
-            if (profileResponse.status !== 200 && profileResponse.status !== 406) throw new Error(`Profile fetch status error: ${profileResponse.statusText} (Status: ${profileResponse.status})`);
-            if (profileResponse.data === null && !profileResponse.error) console.warn("Profile data is null but no error reported.");
+            // Handle errors for other fetches
             if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
             if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
             if (statsResponse.error) throw new Error(`Stats fetch failed: ${statsResponse.error.message}`);
 
-            const fetchedProfile = profileResponse.data ? profileResponse.data as Profile : null;
-            setProfile(fetchedProfile);
+            // Update other states
             setReceipts(receiptsResponse.data as Receipt[] || []);
             const fetchedAnimeList = animeListResponse.data;
-            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
+             if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
                  const correctlyTypedList: UserAnimeListItem[] = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, anime_series: typedAnimeSeries }; }); setAnimeList(correctlyTypedList);
             } else { setAnimeList([]); }
             setProfileStats(statsResponse.data as ProfileStatsData);
 
-            // Theme ကို state ထဲ ထည့်သွင်းပြီး HTML class ကို update လုပ်ပါ
-            const userTheme = fetchedProfile?.preferences?.theme || 'dark';
-            console.log("User theme from profile:", userTheme);
-            setCurrentTheme(userTheme);
-            if (typeof document !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark'); // အရင် class တွေကို ဖယ်ရှား
-                document.documentElement.classList.add(userTheme); // class အသစ်ထည့်
-                console.log("Applied theme to HTML from DB:", userTheme);
-            }
-
-
-            console.log("User data setup successful (parallel)."); return true;
+            console.log("User data setup successful (parallel).");
+            return true;
         } catch (err: any) {
-            console.error("Error during parallel setupUser:", err); setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
+            console.error("Error during parallel setupUser:", err);
+            setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-            // Error ဖြစ်ရင် Dark mode ကို default ထားပါ
+            // Error မှာ default theme (dark) ကို သုံး
             const fallbackTheme = 'dark';
             setCurrentTheme(fallbackTheme);
             if (typeof document !== 'undefined') {
@@ -351,22 +362,49 @@ export default function MyAccountPage() {
             }
             return false;
         }
-    }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentTheme]); // currentTheme ကို dependency ထည့်ပါ
 
-    // --- handleThemeChange (ယခင်အတိုင်း) ---
+    // --- handleThemeChange ---
     const handleThemeChange = async (newTheme: 'light' | 'dark') => {
-        // ... (function body - ယခင်အတိုင်း) ...
-        if (!session?.user || !profile) return;
+        if (!session?.user) {
+            console.warn("User not logged in, changing theme locally only.");
+             setCurrentTheme(newTheme);
+             if (typeof window !== 'undefined') {
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(newTheme);
+                try { localStorage.setItem('theme', newTheme); } catch (e) {}
+             }
+            return;
+        };
+        if (!profile) {
+             console.warn("Profile not loaded, changing theme locally only.");
+             setCurrentTheme(newTheme);
+             if (typeof window !== 'undefined') {
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(newTheme);
+                try { localStorage.setItem('theme', newTheme); } catch (e) {}
+             }
+            return;
+        }
 
-        setSavingPreferences(true);
+
+        // ၁။ UI နှင့် Local Storage ကို ချက်ချင်း Update လုပ်ပါ
         setCurrentTheme(newTheme);
-        // HTML class ကို update လုပ်ပါ
-        if (typeof document !== 'undefined') {
+        if (typeof window !== 'undefined') {
             document.documentElement.classList.remove('light', 'dark');
             document.documentElement.classList.add(newTheme);
             console.log("Toggled theme to:", newTheme);
+            try {
+                localStorage.setItem('theme', newTheme);
+                console.log("Saved theme to localStorage immediately:", newTheme);
+            } catch (e) {
+                console.error("Error saving theme to localStorage", e);
+            }
         }
 
+        // ၂။ Database ကို နောက်ကွယ်မှာ Update လုပ်ပါ
+        setSavingPreferences(true);
         const currentPreferences = profile.preferences || {};
         const updatedPreferences = { ...currentPreferences, theme: newTheme };
 
@@ -376,88 +414,73 @@ export default function MyAccountPage() {
             .eq('id', session.user.id);
 
         if (updateError) {
-            console.error("Error saving theme preference:", updateError);
-            setError("Could not save theme preference.");
-            const oldTheme = newTheme === 'dark' ? 'light' : 'dark';
-            setCurrentTheme(oldTheme);
-            if (typeof document !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(oldTheme);
-            }
+            console.error("Error saving theme preference to DB:", updateError);
+            setError("Could not save theme preference to database.");
+            // Error ဖြစ်ရင် UI ကို မပြောင်းတော့ပါ၊ Local Storage ကို အခြေခံပါမယ်
         } else {
-             setProfile(prev => prev ? { ...prev, preferences: updatedPreferences } : null);
+            console.log("Theme preference saved to DB successfully.");
+            setProfile(prev => prev ? { ...prev, preferences: updatedPreferences } : null);
+             setError(null);
         }
         setSavingPreferences(false);
     };
 
-    // --- Initial Theme Setup useEffect (ပိုမိုသေချာအောင် ပြင်ဆင်) ---
+    // --- Initial Theme Setup useEffect ---
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            let initialTheme: 'light' | 'dark' = 'dark'; // Default to dark
-            try {
-                const storedTheme = localStorage.getItem('theme');
-                if (storedTheme === 'light' || storedTheme === 'dark') {
-                    initialTheme = storedTheme;
-                } else {
-                    // Local storage မရှိရင် OS preference ကို စစ်ဆေး
-                    initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
-                console.log("Initial theme check (before setupUser):", initialTheme);
-                document.documentElement.classList.remove('light', 'dark'); // အရင် class ရှင်း
-                document.documentElement.classList.add(initialTheme);     // class အသစ်ထည့်
-                // setCurrentTheme(initialTheme); // ဒီနေရာမှာ state ကို မပြောင်းသေးဘူး၊ setupUser က DB data နဲ့ override လုပ်မှာမို့
-            } catch (e) {
-                console.error("Error reading theme from localStorage or media query", e);
-                // Error ဖြစ်ရင် dark ကို default ထား
-                 document.documentElement.classList.add('dark');
+        // Client-side မှာပဲ run ပါ
+        let initialTheme: 'light' | 'dark' = 'dark'; // Default dark
+        try {
+            const storedTheme = localStorage.getItem('theme');
+            if (storedTheme === 'light' || storedTheme === 'dark') {
+                initialTheme = storedTheme;
+            } else {
+                initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            console.log("Initial theme from storage/OS:", initialTheme);
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(initialTheme);
+            // State ကိုပါ update လုပ်ပါ၊ ဒါမှ setupUser မတိုင်ခင် UI မှန်နေမယ်
+            if (currentTheme !== initialTheme) {
+                 setCurrentTheme(initialTheme);
+            }
+        } catch (e) {
+            console.error("Error applying initial theme", e);
+            document.documentElement.classList.add('dark'); // Fallback to dark
+             if (currentTheme !== 'dark') {
+                 setCurrentTheme('dark');
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Component mount မှာ တစ်ခါပဲ run ပါ
 
-    // Theme state ပြောင်းတိုင်း localStorage မှာ မှတ်ထားပါ (ယခင်အတိုင်း)
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                localStorage.setItem('theme', currentTheme);
-                console.log("Saved theme to localStorage:", currentTheme); // Log ထုတ်ကြည့်ရန်
-            } catch (e) {
-                console.error("Error saving theme to localStorage", e);
-            }
-        }
-    }, [currentTheme]);
 
-
-    // --- Other Hooks and Functions (checkSessionAndSetup, useEffect for Auth, etc.) - ယခင်အတိုင်း ---
+    // --- checkSessionAndSetup ---
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
-        setLoading(true);
+        setLoading(true); // Loading စတင်
         setError(null);
         try {
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
             console.log("getSession result:", { currentSession, sessionError });
             if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
-            setSession(currentSession);
+
+            setSession(currentSession); // Session state ကို အရင် သတ်မှတ်
+
             if (currentSession && currentSession.user) {
                 console.log("Session found, calling setupUser...");
-                const setupSuccess = await setupUser(currentSession.user);
-                if (!setupSuccess && !isRetry) console.log("Initial setupUser failed.");
+                await setupUser(currentSession.user); // setupUser ကို ခေါ် (await လုပ်ပါ)
             } else {
-                console.log("No session found, clearing data and setting default theme.");
+                console.log("No session found, clearing data.");
                 setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-                // Session မရှိရင် default (or localStorage/OS preference) theme ကို သုံး
-                const fallbackTheme = typeof window !== 'undefined' ? (localStorage.getItem('theme') as 'light'|'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) : 'dark';
-                setCurrentTheme(fallbackTheme);
-                if (typeof document !== 'undefined') {
-                    document.documentElement.classList.remove('light', 'dark');
-                    document.documentElement.classList.add(fallbackTheme);
-                }
+                // Session မရှိရင် initial theme (localStorage/OS က ယူထားတဲ့) အတိုင်း ထားပါ
+                // setLoading(false); // No session မှာ loading false လုပ်ဖို့ မလိုသေးဘူး၊ အောက်မှာ လုပ်မယ်
             }
         } catch (err: any) {
             console.error("Error in checkSessionAndSetup:", err);
             setError(err.message || "An unexpected error occurred while loading account data.");
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-            // Error မှာလဲ default theme ကို သုံး
-             const fallbackTheme = 'dark';
+            // Error မှာ default theme (dark) ကို သုံး
+            const fallbackTheme = 'dark';
             setCurrentTheme(fallbackTheme);
             if (typeof document !== 'undefined') {
                 document.documentElement.classList.remove('light', 'dark');
@@ -465,59 +488,65 @@ export default function MyAccountPage() {
             }
         } finally {
             console.log("Setting loading to false in checkSessionAndSetup finally block.");
-            setLoading(false);
+            setLoading(false); // အားလုံးပြီးမှ Loading false လုပ်ပါ
         }
     }, [setupUser]); // setupUser dependency ရှိနေရပါမယ်
 
-     useEffect(() => {
-        console.log("MyAccountPage useEffect running.");
+
+    // --- Auth State Change Listener ---
+    useEffect(() => {
+        console.log("Auth listener useEffect running.");
         let isMounted = true;
+
+        // Initial check on mount
         checkSessionAndSetup();
+
         const { data: authListener } = supabase.auth.onAuthStateChange( (event, newSession) => {
             if (!isMounted) return;
             console.log("Auth state changed:", event, newSession);
             const previousUserId = session?.user?.id;
             const newUserId = newSession?.user?.id;
-            // Session state ကို အရင် update လုပ်ပါ
+
+            // Session state ကို အမြဲ update လုပ်ပါ
             setSession(newSession);
+
             // User ID ပြောင်းသွားမှသာ data အကုန် reload လုပ်ပါ
             if (newUserId !== previousUserId) {
                 console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`);
                 checkSessionAndSetup(); // User ပြောင်းမှ ခေါ်ပါ
             } else {
                  console.log(`Auth event '${event}' occurred, user ID (${newUserId}) unchanged. No full reload triggered.`);
-                 // User မပြောင်းရင်တောင် session update ဖြစ်နိုင်လို့ session state ကိုတော့ update လုပ်ပြီးသား
             }
         } );
         return () => {
-            console.log("MyAccountPage useEffect cleanup.");
+            console.log("Auth listener useEffect cleanup.");
             isMounted = false;
             authListener?.subscription.unsubscribe();
         };
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // <- checkSessionAndSetup ကို ဒီကနေ ဖယ်ရှားပြီး အပေါ်က useCallback ထဲမှာပဲ ထားပါမယ်။
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Initial mount မှာပဲ run ပါ (checkSessionAndSetup ကို dependency မထည့်ပါ)
 
+
+    // --- Other Handlers (unchanged) ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => { /* ... */ };
      const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => { /* ... */ };
      const handleSaveBio = async (newBio: string) => { /* ... */ };
      const handleSaveUsername = async (newUsername: string) => { /* ... */ };
 
-
-    // --- RENDER LOGIC (ယခင်အတိုင်း) ---
-    // ... (Loading, Error, No Session, No Profile checks) ...
+    // --- RENDER LOGIC ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-     if (error && !profile) { /* Only show full page error if profile hasn't loaded at all */ return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 dark:text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
+    // ... (Error, No Session, No Profile checks - ယခင်အတိုင်း style များ သုံးနိုင်သည်) ...
+     if (error && !profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-500 dark:text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-text-light-primary dark:text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-text-light-secondary dark:text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-text-light-secondary dark:text-gray-400">Use the Login button in the sidebar.</p></div>); }
-     if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 dark:text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
+     if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-500 dark:text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
 
-    console.log("Rendering main account content with theme:", currentTheme); // Log ထုတ်ကြည့်ရန်
+    console.log("Rendering main account content with theme:", currentTheme);
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
     return (
-        // Updated text color for the main container
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-light-primary dark:text-text-dark-primary">
-            {/* Tab Navigation - Updated border and text colors */}
+            {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-light dark:border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                      <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary hover:border-gray-400 dark:hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
@@ -544,7 +573,7 @@ export default function MyAccountPage() {
                         <SettingsTabContent
                             key="settings"
                             receipts={receipts}
-                            loading={loading}
+                            loading={loading || savingPreferences} // Added savingPreferences to loading state
                             handleDeleteReceipt={handleDeleteReceipt}
                             currentTheme={currentTheme}
                             handleThemeChange={handleThemeChange}
@@ -553,9 +582,8 @@ export default function MyAccountPage() {
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display (unchanged) */}
-            {/* ... error display code ... */}
-            {error && profile /* Show error popup only if profile is loaded */ && (
+            {/* Global Error Display */}
+            {error && profile && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
                      <div>
