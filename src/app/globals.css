@@ -1,9 +1,12 @@
 /* src/app/globals.css */
+/* Tailwind directives တွေကို import လုပ်ပါ */
 @import "tailwindcss";
 
-body {
-  @apply antialiased; /* Optional: ပိုချောမွေ့တဲ့ font အတွက် */
-}
+/* အရင်က CSS variable တွေနဲ့ media query တွေကို ဖယ်ထုတ်လိုက်ပါပြီ */
 
-/* ဒီနေရာမှာ ရှိခဲ့တဲ့ @theme inline block နဲ့ တခြား custom theme variable တွေကို ဖယ်ရှားလိုက်ပါ */
-/* ဥပမာ - :root {...} block တွေ၊ @media (prefers-color-scheme: dark) {...} block တွေကို ဖယ်ရှားပါ */
+body {
+  /* Tailwind class တွေကို layout.tsx မှာ သုံးထားပြီးသားမို့ */
+  /* ဒီမှာ သီးသန့် style တွေ ထပ်ထည့်စရာ မလိုပါ */
+  /* Font smoothing အတွက် antialiased ကိုတော့ ထားခဲ့နိုင်ပါတယ် */
+  @apply antialiased;
+}

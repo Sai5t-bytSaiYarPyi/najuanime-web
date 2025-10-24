@@ -1,187 +1,155 @@
 // src/context/ThemeContext.tsx
 'use client';
 
-import React, { createContext, useState, useEffect, useContext, useCallback, ReactNode, useMemo } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 
-// Theme type ကို သတ်မှတ်ခြင်း
 type Theme = 'light' | 'dark';
 
-// Context ကနေ ပေးမယ့် value တွေရဲ့ type
 interface ThemeContextProps {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  isThemeLoading: boolean; // Theme ကို စ load နေချိန် true ဖြစ်မယ့် state
+  isLoading: boolean; // Theme loading state
 }
 
-// Context ကို ဖန်တီးခြင်း
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-// Provider component အတွက် props type
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
-// Theme class ကို <html> element မှာ ထည့်/ဖြုတ် လုပ်မယ့် helper function
-const applyThemeToDocument = (theme: Theme) => {
+// Helper function to apply theme class
+const applyTheme = (theme: Theme) => {
   if (typeof document !== 'undefined') {
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    // console.log(`Applied theme to HTML: ${theme}`);
+    console.log(`Theme applied to HTML: ${theme}`);
   }
 };
 
-// Component စဖွင့်ချိန်မှာ ဘယ် theme ကို အရင်သုံးမလဲ ဆုံးဖြတ်တဲ့ helper function
-// (localStorage -> OS preference -> default 'dark')
+// Helper function to get initial theme
 const getInitialTheme = (): Theme => {
   if (typeof window !== 'undefined') {
-    try {
-      const storedTheme = localStorage.getItem('theme');
-      if (storedTheme === 'light' || storedTheme === 'dark') {
-        // console.log("Initial theme from localStorage:", storedTheme);
-        return storedTheme;
-      }
-      const osPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      // console.log("Initial theme from OS preference:", osPreference);
-      return osPreference;
-    } catch (e) {
-      console.error("Error accessing localStorage or matchMedia", e);
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme;
     }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-  // console.log("Initial theme defaulting to dark");
-  return 'dark'; // Server-side or error condition မှာ default 'dark'
+  return 'dark'; // Default server-side or non-browser environment
 };
 
-// Theme Provider Component
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme); // လက်ရှိ theme state
-  const [session, setSession] = useState<Session | null>(null); // Supabase session state
-  const [isThemeLoading, setIsThemeLoading] = useState(true); // Loading state
-  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false); // Initial load ပြီးပြီလား
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [session, setSession] = useState<Session | null>(null);
+  const [dbTheme, setDbTheme] = useState<Theme | null>(null); // Theme from DB
+  const [isLoading, setIsLoading] = useState(true); // Loading state for initial theme setup
 
-  // 1. Component mount ဖြစ်ချိန်မှာ အလုပ်လုပ်မယ့် effect (initial theme သတ်မှတ်၊ session စစ်ဆေး)
+  // --- 1. Initial Setup: Set session and apply initial theme ---
   useEffect(() => {
-    // console.log("ThemeProvider Mount: Setting initial theme and checking session.");
-    setIsThemeLoading(true);
+    console.log("ThemeProvider: Initializing...");
+    setIsLoading(true);
 
-    // အရင်ဆုံး client-side မှာ localStorage/OS preference အရ theme ကို သတ်မှတ်ပါ
+    // Apply initial theme based on localStorage/OS preference first
     const initialClientTheme = getInitialTheme();
     setThemeState(initialClientTheme);
-    applyThemeToDocument(initialClientTheme);
+    applyTheme(initialClientTheme);
+    console.log("ThemeProvider: Applied initial client theme:", initialClientTheme);
 
-    // လက်ရှိ session ကို ယူပါ
+    // Get current session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
-      // console.log("ThemeProvider Mount: Initial session fetched:", !!currentSession);
+      console.log("ThemeProvider: Initial session fetched:", !!currentSession);
+      // Fetch DB theme only if session exists
       if (currentSession?.user) {
-        // User ရှိရင် Database က theme preference ကို ဆွဲပါ
         fetchUserThemePreference(currentSession.user);
       } else {
-        // User မရှိရင် loading ပြီးပါပြီ
-        setIsThemeLoading(false);
-        setIsInitialLoadComplete(true);
-        // console.log("ThemeProvider Mount: No initial session, loading finished.");
+        setIsLoading(false); // No user, finish loading
+        console.log("ThemeProvider: No initial session, loading finished.");
       }
     });
 
-    // Auth state အပြောင်းအလဲကို စောင့်ကြည့်ပါ (login/logout)
+    // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
-        // console.log("ThemeProvider AuthChange: New session:", !!newSession);
-        const userChanged = session?.user?.id !== newSession?.user?.id;
+        console.log("ThemeProvider: Auth state changed. New session:", !!newSession);
         setSession(newSession);
-
-        if (userChanged) { // User ပြောင်းသွားမှသာ (login/logout) theme ကို ပြန်စစ်ပါ
-            setIsThemeLoading(true); // Loading စတင်ပါ
-            if (newSession?.user) {
-              // Login ဖြစ်သွားရင် DB က preference ကို ဆွဲပါ
-              // console.log("ThemeProvider AuthChange: User logged in, fetching DB theme.");
-              fetchUserThemePreference(newSession.user);
-            } else {
-              // Logout ဖြစ်သွားရင် localStorage/OS preference ကို ပြန်သုံးပါ
-              // console.log("ThemeProvider AuthChange: User logged out, reverting to client theme.");
-              const clientTheme = getInitialTheme();
-              setThemeState(clientTheme);
-              applyThemeToDocument(clientTheme);
-              try {
-                  localStorage.setItem('theme', clientTheme); // localStorage ကိုပါ update လုပ်ပါ
-              } catch (e) {
-                   console.error("Error updating localStorage on logout", e);
-              }
-              setIsThemeLoading(false); // Loading ပြီးပါပြီ
-              setIsInitialLoadComplete(true);
-            }
-        } else if (!newSession?.user && !isInitialLoadComplete) {
-            // Edge case: Initial load မှာ session မရှိတာ သေချာသွားရင် loading ကို false လုပ်ပါ
-            setIsThemeLoading(false);
-            setIsInitialLoadComplete(true);
+        if (newSession?.user) {
+           setIsLoading(true); // Start loading when user logs in
+           fetchUserThemePreference(newSession.user);
+        } else {
+           // User logged out, revert to localStorage/OS preference
+           const clientTheme = getInitialTheme();
+           setThemeState(clientTheme);
+           applyTheme(clientTheme);
+           setDbTheme(null); // Clear DB theme state
+           setIsLoading(false); // Finish loading after logout
+           console.log("ThemeProvider: User logged out, reverted to client theme:", clientTheme);
         }
       }
     );
 
-    // Cleanup function
     return () => {
       authListener.subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Mount မှာ တစ်ခါပဲ run ပါ
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-
-  // 2. User ရဲ့ theme preference ကို Database ကနေ ဆွဲထုတ်မယ့် function
+  // --- 2. Fetch User Theme Preference ---
   const fetchUserThemePreference = async (user: User) => {
-    // console.log("ThemeProvider: Fetching DB theme preference for user:", user.id);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('preferences')
-      .eq('id', user.id)
-      .single();
+      console.log("ThemeProvider: Fetching theme preference for user:", user.id);
+      const { data, error } = await supabase
+          .from('profiles')
+          .select('preferences')
+          .eq('id', user.id)
+          .single();
 
-    if (error && error.code !== 'PGRST116') { // 'PGRST116' (No rows found) error ကို လျစ်လျူရှုပါ
-      console.error("ThemeProvider: Error fetching profile preferences:", error);
-      setIsThemeLoading(false); // Error ဖြစ်ရင် loading ကို ရပ်ပါ
-      setIsInitialLoadComplete(true);
-      return;
-    }
+      if (error && error.code !== 'PGRST116') { // Ignore 'not found' error temporarily
+          console.error("ThemeProvider: Error fetching profile preferences:", error);
+      }
 
-    const dbTheme = data?.preferences?.theme as Theme | undefined;
-    // console.log("ThemeProvider: Fetched DB theme:", dbTheme);
+      const fetchedTheme = data?.preferences?.theme;
+      console.log("ThemeProvider: Theme preference from DB:", fetchedTheme);
+      setDbTheme(fetchedTheme || null);
 
-    // DB က preference ရှိရင် အဲ့ဒါကို သုံး၊ မရှိရင် လက်ရှိ client theme (localStorage/OS) ကိုပဲ ဆက်သုံး
-    const themeToApply = dbTheme || getInitialTheme();
+      // Apply DB theme if it exists and differs from current (localStorage/OS)
+      const currentClientTheme = getInitialTheme();
+      const themeToApply = fetchedTheme || currentClientTheme;
 
-    setThemeState(themeToApply);
-    applyThemeToDocument(themeToApply);
-    try {
-        localStorage.setItem('theme', themeToApply); // localStorage ကိုပါ update လုပ်ပါ
-        // console.log(`ThemeProvider: Applied theme (${dbTheme ? 'from DB' : 'fallback to client'}): ${themeToApply}`);
-    } catch (e) {
-        console.error("Error updating localStorage after DB fetch", e);
-    }
-    setIsThemeLoading(false); // Loading ပြီးပါပြီ
-    setIsInitialLoadComplete(true);
+      if (theme !== themeToApply) {
+          setThemeState(themeToApply);
+          applyTheme(themeToApply);
+          console.log("ThemeProvider: Applied theme from DB:", themeToApply);
+           try {
+               localStorage.setItem('theme', themeToApply); // Sync localStorage
+           } catch (e) {
+               console.error("Error updating localStorage after fetching DB theme", e);
+           }
+      }
+      setIsLoading(false); // Finish loading after fetching/applying DB theme
+      console.log("ThemeProvider: Finished loading DB theme preference.");
   };
 
-  // 3. Theme ပြောင်းလဲရန် function (State, localStorage, DB ကို update လုပ်မည်)
-  const setTheme = useCallback(async (newTheme: Theme) => {
-    // console.log("ThemeProvider: setTheme called with:", newTheme);
-    // Optimistic Update: UI ကို ချက်ချင်း update လုပ်ပါ
-    setThemeState(newTheme);
-    applyThemeToDocument(newTheme);
 
-    // localStorage ကို update လုပ်ပါ
+  // --- 3. setTheme Function: Update state, localStorage, and DB ---
+  const setTheme = useCallback(async (newTheme: Theme) => {
+    console.log("ThemeProvider: setTheme called with:", newTheme);
+    // Optimistic UI update
+    setThemeState(newTheme);
+    applyTheme(newTheme);
+
     try {
       localStorage.setItem('theme', newTheme);
-      // console.log("ThemeProvider: Saved theme to localStorage:", newTheme);
+      console.log("ThemeProvider: Saved theme to localStorage:", newTheme);
     } catch (e) {
       console.error("Error saving theme to localStorage", e);
     }
 
-    // User login ဝင်ထားရင် DB ကိုပါ update လုပ်ပါ
+    // Update DB if user is logged in
     if (session?.user) {
-      // console.log("ThemeProvider: Saving theme preference to DB for user:", session.user.id);
-      // လက်ရှိ preferences ကို အရင်ဖတ်ပြီးမှ update လုပ်တာ ပိုစိတ်ချရပါတယ်
+      console.log("ThemeProvider: Saving theme preference to DB for user:", session.user.id);
       const { data: profileData, error: fetchError } = await supabase
         .from('profiles')
         .select('preferences')
@@ -189,8 +157,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error("ThemeProvider: Error fetching current preferences before saving:", fetchError);
-        return; // Error ဖြစ်ရင် DB update မလုပ်တော့ပါ
+        console.error("ThemeProvider: Error fetching preferences before saving:", fetchError);
+        // Optional: revert optimistic UI update?
+        return;
       }
 
       const currentPreferences = profileData?.preferences || {};
@@ -203,30 +172,29 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
       if (updateError) {
         console.error("ThemeProvider: Error saving theme preference to DB:", updateError);
-        // ဒီနေရာမှာ UI ကို အရင်အတိုင်း ပြန်ပြောင်းချင်ရင် ပြောင်းနိုင်ပါတယ် (Rollback)
+        // Optional: revert optimistic UI update?
       } else {
-        // console.log("ThemeProvider: Theme preference saved to DB successfully.");
+        console.log("ThemeProvider: Theme preference saved to DB successfully.");
+        setDbTheme(newTheme); // Update local DB theme state
       }
     }
-  }, [session]); // session ပြောင်းလဲမှသာ DB update logic ကို အသစ်ပြန်ဖန်တီးပါ
+  }, [session, theme]); // Add theme to dependencies to ensure comparison works correctly
 
-  // Context value ကို useMemo သုံးပြီး optimize လုပ်ပါ
-  const value = useMemo(() => ({ theme, setTheme, isThemeLoading }), [theme, setTheme, isThemeLoading]);
-
-  // Loading state မှာ ဘာမှမပြသေးဘဲနေရင် Flickering ဖြစ်နိုင်လို့ children ကို render လုပ်ခိုင်းလိုက်ပါမယ်။
-  // CSS transition နဲ့ smooth ဖြစ်အောင်လုပ်ထားတာ ပိုကောင်းပါတယ်။
-  // if (isThemeLoading && !isInitialLoadComplete) {
-  //   return null; // Initial load မပြီးသေးရင် ဘာမှမပြပါ (Flickering ကာကွယ်ရန်)
+  // Prevent rendering children until initial theme is determined and applied
+  // This helps prevent theme flickering on initial load or after login/logout
+  // if (isLoading) {
+  //    return null; // or a loading spinner maybe? Returning null might cause hydration issues.
+  //                 // Let's allow rendering but the theme class might switch quickly.
   // }
 
+
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider value={{ theme, setTheme, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-// Theme context ကို အလွယ်တကူသုံးနိုင်မယ့် custom hook
 export const useTheme = (): ThemeContextProps => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
