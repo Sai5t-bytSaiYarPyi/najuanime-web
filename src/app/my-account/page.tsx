@@ -8,11 +8,12 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext'; // <-- useTheme hook ကို import လုပ်ပါ
 
-// --- Type Definitions ---
-type ProfilePreferences = {
-  theme?: 'light' | 'dark';
-};
+// --- Type Definitions (ယခင်အတိုင်း) ---
+// type ProfilePreferences = {
+//   theme?: 'light' | 'dark'; // <- ThemeContext က ဒါကို သုံးသွားမှာပါ
+// };
 
 type Profile = {
   id: string;
@@ -22,11 +23,10 @@ type Profile = {
   avatar_url: string | null;
   banner_url: string | null;
   bio: string | null;
-  preferences: ProfilePreferences | null;
+  // preferences: ProfilePreferences | null; // <-- Context ကနေ theme ကို ယူသုံးမှာမို့ ဒီမှာ မလိုတော့ပါ
 };
 
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-// --- UserAnimeListItem Type (အပြည့်အစုံ) ---
 type UserAnimeListItem = {
     status: string;
     anime_series: {
@@ -40,10 +40,11 @@ type Tab = 'profile' | 'anime_list' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
 
 
-// --- Components (Updated Styles) ---
+// --- Components (ယခင်အတိုင်း၊ SettingsTabContent ကို ပြင်ပါမယ်) ---
 
-// ProfileStatsDisplay Component Code (Updated Styles)
+// ProfileStatsDisplay (ယခင်အတိုင်း)
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
+    // ... (ယခင် code အတိုင်း) ...
     if (!stats) {
         return <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md text-text-light-secondary dark:text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -64,7 +65,7 @@ const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
     );
 };
 
-// ProfileTabContent Component Code (Updated Styles)
+// ProfileTabContent (ယခင်အတိုင်း)
 const ProfileTabContent = ({
     profile,
     uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
@@ -74,6 +75,7 @@ const ProfileTabContent = ({
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
     profileStats
 }: any) => {
+    // ... (ယခင် code အတိုင်း) ...
     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
@@ -158,7 +160,7 @@ const ProfileTabContent = ({
     );
 };
 
-// AnimeListTabContent component code (Updated Styles)
+// AnimeListTabContent (ယခင်အတိုင်း)
 const AnimeListTabContent = ({ animeList }: any) => (
    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {animeList.length > 0 ? (
@@ -203,25 +205,25 @@ const AnimeListTabContent = ({ animeList }: any) => (
    </motion.div>
 );
 
-// SettingsTabContent component code (Updated Styles)
+// --- SettingsTabContent component ကို useTheme hook သုံးရန် ပြင်ဆင် ---
 const SettingsTabContent = ({
     receipts,
-    loading,
     handleDeleteReceipt,
-    currentTheme,
-    handleThemeChange,
-    savingPreferences
 }: any) => {
+    // Theme context ကနေ theme state နဲ့ setTheme function ကို ရယူပါ
+    const { theme, setTheme, isLoading: isThemeLoading } = useTheme();
+
     const ThemeToggle = () => (
         <button
-            onClick={() => handleThemeChange(currentTheme === 'dark' ? 'light' : 'dark')}
-            disabled={savingPreferences}
-            className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green ${currentTheme === 'dark' ? 'bg-gray-600' : 'bg-accent-green'}`}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            // isThemeLoading ကို disabled state ထဲ ထည့်ပါ
+            disabled={isThemeLoading}
+            className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-green ${theme === 'dark' ? 'bg-gray-600' : 'bg-accent-green'} disabled:opacity-50`}
         >
             <span className="sr-only">Toggle theme</span>
-            <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ease-in-out ${currentTheme === 'dark' ? 'translate-x-1' : 'translate-x-6'}`} />
-            <span className={`absolute inset-y-0 left-0 flex items-center pl-1.5 transition-opacity ${currentTheme === 'dark' ? 'opacity-100' : 'opacity-0'}`}> <Moon size={12} className="text-gray-300" /> </span>
-            <span className={`absolute inset-y-0 right-0 flex items-center pr-1.5 transition-opacity ${currentTheme === 'light' ? 'opacity-100' : 'opacity-0'}`}> <Sun size={12} className="text-yellow-900" /> </span>
+            <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ease-in-out ${theme === 'dark' ? 'translate-x-1' : 'translate-x-6'}`} />
+            <span className={`absolute inset-y-0 left-0 flex items-center pl-1.5 transition-opacity ${theme === 'dark' ? 'opacity-100' : 'opacity-0'}`}> <Moon size={12} className="text-gray-300" /> </span>
+            <span className={`absolute inset-y-0 right-0 flex items-center pr-1.5 transition-opacity ${theme === 'light' ? 'opacity-100' : 'opacity-0'}`}> <Sun size={12} className="text-yellow-900" /> </span>
         </button>
     );
     return (
@@ -233,11 +235,13 @@ const SettingsTabContent = ({
                    <label htmlFor="theme-toggle" className="text-text-light-secondary dark:text-text-dark-secondary"> Theme </label>
                    <div className="flex items-center gap-2">
                         <ThemeToggle />
-                        <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary capitalize">{currentTheme} Mode</span>
-                        {savingPreferences && <Loader size={16} className="animate-spin text-gray-400"/>}
+                        <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary capitalize">{theme} Mode</span>
+                        {/* isThemeLoading ကို သုံးပြီး loading state ပြပါ */}
+                        {isThemeLoading && <Loader size={16} className="animate-spin text-gray-400"/>}
                    </div>
                </div>
            </div>
+           {/* --- ကျန်တဲ့ Setting sections တွေက ယခင်အတိုင်း --- */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Edit Profile</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Change Password</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
@@ -249,7 +253,7 @@ const SettingsTabContent = ({
                               <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">Submitted: {new Date(r.created_at).toLocaleString()}</p>
                               <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-bold rounded-full ${ r.status === 'approved' ? 'bg-green-500 text-green-950' : r.status === 'rejected' ? 'bg-red-500 text-red-950' : 'bg-yellow-500 text-yellow-950' }`}> {r.status.toUpperCase()} </span>
                           </div>
-                          {(r.status === 'pending' || r.status === 'rejected') && ( <button onClick={() => handleDeleteReceipt(r.id, r.receipt_url)} disabled={loading} className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white font-medium transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"> {loading ? 'Deleting...' : 'Delete'} </button> )}
+                          {(r.status === 'pending' || r.status === 'rejected') && ( <button onClick={() => handleDeleteReceipt(r.id, r.receipt_url)} disabled={isThemeLoading} className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white font-medium transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"> {isThemeLoading ? 'Deleting...' : 'Delete'} </button> )}
                       </div>
                   )) : <p className="text-text-light-secondary dark:text-text-dark-secondary">No submission history.</p>}
                </div>
@@ -267,12 +271,12 @@ const SettingsTabContent = ({
 
 // --- Main Component ---
 export default function MyAccountPage() {
-    // States
+    // States (Theme state တွေကို ဖယ်ထုတ်ပါ)
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // Data loading state (theme loading က context ထဲမှာ)
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -284,29 +288,23 @@ export default function MyAccountPage() {
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
-    // Theme State - Default ကို browser/OS ကနေ ယူဖို့ ကြိုးစားပါမယ်
-    const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>(() => {
-         if (typeof window !== 'undefined') {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        return 'dark'; // Server-side or initial render မှာ default dark
-    });
-    const [savingPreferences, setSavingPreferences] = useState(false);
+    // const [savingPreferences, setSavingPreferences] = useState(false); // <-- ThemeContext က ထိန်းချုပ်သွားပြီ
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser ---
+    // Theme context ကို သုံးပါ (Optional: တကယ်လို့ theme တန်ဖိုးကို ဒီ component မှာ တိုက်ရိုက်သုံးချင်မှ)
+    const { theme, isLoading: isThemeLoading } = useTheme();
+
+    // --- setupUser --- (profile ထဲက preferences ကို ဖတ်စရာမလိုတော့ပါ)
     const setupUser = useCallback(async (user: User) => {
         console.log("Setting up user data in parallel for:", user.id);
         setError(null);
         try {
-            // Fetch profile data including preferences
+            // Fetch profile data (preferences မလိုတော့)
             const { data: fetchedProfile, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio') // preferences ကို ဖယ်ထုတ်
                 .eq('id', user.id)
                 .single();
 
@@ -314,32 +312,21 @@ export default function MyAccountPage() {
              if (!fetchedProfile && !profileError) console.warn("Profile data is null but no error reported.");
 
              setProfile(fetchedProfile);
+             // Theme ကို ThemeProvider က auto fetch လုပ်ပြီး apply လုပ်သွားမှာပါ
 
-             // Set theme based on fetched profile or fallback
-             const userTheme = fetchedProfile?.preferences?.theme || currentTheme; // DB က မရရင် လက်ရှိ state ကို သုံး
-             console.log("Theme from DB or current state:", userTheme);
-             if (currentTheme !== userTheme) { // state နဲ့ မတူမှ update လုပ်
-                setCurrentTheme(userTheme);
-                if (typeof document !== 'undefined') {
-                    document.documentElement.classList.remove('light', 'dark');
-                    document.documentElement.classList.add(userTheme);
-                    console.log("Applied theme to HTML from DB (different from initial):", userTheme);
-                }
-             }
-
-            // Fetch other data in parallel
+            // Fetch other data in parallel (ယခင်အတိုင်း)
             const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
             ]);
 
-            // Handle errors for other fetches
+            // Handle errors for other fetches (ယခင်အတိုင်း)
             if (receiptsResponse.error) throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`);
             if (animeListResponse.error) throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`);
             if (statsResponse.error) throw new Error(`Stats fetch failed: ${statsResponse.error.message}`);
 
-            // Update other states
+            // Update other states (ယခင်အတိုင်း)
             setReceipts(receiptsResponse.data as Receipt[] || []);
             const fetchedAnimeList = animeListResponse.data;
              if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
@@ -353,111 +340,24 @@ export default function MyAccountPage() {
             console.error("Error during parallel setupUser:", err);
             setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-            // Error မှာ default theme (dark) ကို သုံး
-            const fallbackTheme = 'dark';
-            setCurrentTheme(fallbackTheme);
-            if (typeof document !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(fallbackTheme);
-            }
+            // Error handling for theme is now managed by ThemeProvider
             return false;
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentTheme]); // currentTheme ကို dependency ထည့်ပါ
-
-    // --- handleThemeChange ---
-    const handleThemeChange = async (newTheme: 'light' | 'dark') => {
-        if (!session?.user) {
-            console.warn("User not logged in, changing theme locally only.");
-             setCurrentTheme(newTheme);
-             if (typeof window !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(newTheme);
-                try { localStorage.setItem('theme', newTheme); } catch (e) {}
-             }
-            return;
-        };
-        if (!profile) {
-             console.warn("Profile not loaded, changing theme locally only.");
-             setCurrentTheme(newTheme);
-             if (typeof window !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(newTheme);
-                try { localStorage.setItem('theme', newTheme); } catch (e) {}
-             }
-            return;
-        }
+    }, []); // theme ကို dependency က ဖယ်ထုတ်
 
 
-        // ၁။ UI နှင့် Local Storage ကို ချက်ချင်း Update လုပ်ပါ
-        setCurrentTheme(newTheme);
-        if (typeof window !== 'undefined') {
-            document.documentElement.classList.remove('light', 'dark');
-            document.documentElement.classList.add(newTheme);
-            console.log("Toggled theme to:", newTheme);
-            try {
-                localStorage.setItem('theme', newTheme);
-                console.log("Saved theme to localStorage immediately:", newTheme);
-            } catch (e) {
-                console.error("Error saving theme to localStorage", e);
-            }
-        }
+    // --- handleThemeChange function ကို ဖယ်ထုတ်ပါ ---
+    // const handleThemeChange = async (newTheme: 'light' | 'dark') => { ... }; // <-- ဖယ်ထုတ်ရန်
 
-        // ၂။ Database ကို နောက်ကွယ်မှာ Update လုပ်ပါ
-        setSavingPreferences(true);
-        const currentPreferences = profile.preferences || {};
-        const updatedPreferences = { ...currentPreferences, theme: newTheme };
-
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ preferences: updatedPreferences })
-            .eq('id', session.user.id);
-
-        if (updateError) {
-            console.error("Error saving theme preference to DB:", updateError);
-            setError("Could not save theme preference to database.");
-            // Error ဖြစ်ရင် UI ကို မပြောင်းတော့ပါ၊ Local Storage ကို အခြေခံပါမယ်
-        } else {
-            console.log("Theme preference saved to DB successfully.");
-            setProfile(prev => prev ? { ...prev, preferences: updatedPreferences } : null);
-             setError(null);
-        }
-        setSavingPreferences(false);
-    };
-
-    // --- Initial Theme Setup useEffect ---
-    useEffect(() => {
-        // Client-side မှာပဲ run ပါ
-        let initialTheme: 'light' | 'dark' = 'dark'; // Default dark
-        try {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme === 'light' || storedTheme === 'dark') {
-                initialTheme = storedTheme;
-            } else {
-                initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-            console.log("Initial theme from storage/OS:", initialTheme);
-            document.documentElement.classList.remove('light', 'dark');
-            document.documentElement.classList.add(initialTheme);
-            // State ကိုပါ update လုပ်ပါ၊ ဒါမှ setupUser မတိုင်ခင် UI မှန်နေမယ်
-            if (currentTheme !== initialTheme) {
-                 setCurrentTheme(initialTheme);
-            }
-        } catch (e) {
-            console.error("Error applying initial theme", e);
-            document.documentElement.classList.add('dark'); // Fallback to dark
-             if (currentTheme !== 'dark') {
-                 setCurrentTheme('dark');
-            }
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Component mount မှာ တစ်ခါပဲ run ပါ
+    // --- Initial Theme Setup useEffect ကို ဖယ်ထုတ်ပါ ---
+    // useEffect(() => { ... }, []); // <-- ဖယ်ထုတ်ရန်
 
 
-    // --- checkSessionAndSetup ---
+    // --- checkSessionAndSetup --- (Theme ပိုင်းဆိုင်ရာ error handling ဖယ်ထုတ်)
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
-        setLoading(true); // Loading စတင်
+        setLoading(true); // Data loading စတင်
         setError(null);
         try {
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
@@ -468,32 +368,24 @@ export default function MyAccountPage() {
 
             if (currentSession && currentSession.user) {
                 console.log("Session found, calling setupUser...");
-                await setupUser(currentSession.user); // setupUser ကို ခေါ် (await လုပ်ပါ)
+                await setupUser(currentSession.user);
             } else {
                 console.log("No session found, clearing data.");
                 setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-                // Session မရှိရင် initial theme (localStorage/OS က ယူထားတဲ့) အတိုင်း ထားပါ
-                // setLoading(false); // No session မှာ loading false လုပ်ဖို့ မလိုသေးဘူး၊ အောက်မှာ လုပ်မယ်
             }
         } catch (err: any) {
             console.error("Error in checkSessionAndSetup:", err);
             setError(err.message || "An unexpected error occurred while loading account data.");
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-            // Error မှာ default theme (dark) ကို သုံး
-            const fallbackTheme = 'dark';
-            setCurrentTheme(fallbackTheme);
-            if (typeof document !== 'undefined') {
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(fallbackTheme);
-            }
+             // Theme error handling is done by ThemeProvider
         } finally {
             console.log("Setting loading to false in checkSessionAndSetup finally block.");
-            setLoading(false); // အားလုံးပြီးမှ Loading false လုပ်ပါ
+            setLoading(false); // Data loading ပြီးဆုံး
         }
-    }, [setupUser]); // setupUser dependency ရှိနေရပါမယ်
+    }, [setupUser]);
 
 
-    // --- Auth State Change Listener ---
+    // --- Auth State Change Listener --- (ယခင်အတိုင်း)
     useEffect(() => {
         console.log("Auth listener useEffect running.");
         let isMounted = true;
@@ -508,6 +400,7 @@ export default function MyAccountPage() {
             const newUserId = newSession?.user?.id;
 
             // Session state ကို အမြဲ update လုပ်ပါ
+            // (ThemeProvider ထဲမှာလည်း လုပ်ထားပြီးသား၊ ဒီမှာ ထပ်လုပ်လည်း အကြောင်းမထူး)
             setSession(newSession);
 
             // User ID ပြောင်းသွားမှသာ data အကုန် reload လုပ်ပါ
@@ -524,29 +417,40 @@ export default function MyAccountPage() {
             authListener?.subscription.unsubscribe();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Initial mount မှာပဲ run ပါ (checkSessionAndSetup ကို dependency မထည့်ပါ)
+    }, []); // Initial mount မှာပဲ run ပါ
 
 
     // --- Other Handlers (unchanged) ---
-     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => { /* ... */ };
-     const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => { /* ... */ };
-     const handleSaveBio = async (newBio: string) => { /* ... */ };
-     const handleSaveUsername = async (newUsername: string) => { /* ... */ };
+     const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
+         // ... (ယခင်အတိုင်း)
+     };
+     const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => {
+         // ... (ယခင်အတိုင်း)
+     };
+     const handleSaveBio = async (newBio: string) => {
+         // ... (ယခင်အတိုင်း)
+     };
+     const handleSaveUsername = async (newUsername: string) => {
+         // ... (ယခင်အတိုင်း)
+     };
 
     // --- RENDER LOGIC ---
-    if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-    // ... (Error, No Session, No Profile checks - ယခင်အတိုင်း style များ သုံးနိုင်သည်) ...
+    // Theme loading state ကို context က ယူသုံးနိုင်ပေမယ့်၊ data loading ကိုပဲ အဓိကထားပါမယ်
+    if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account Data...</div>); }
+
+     // ... (Error, No Session, No Profile checks - ယခင်အတိုင်း) ...
      if (error && !profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-500 dark:text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-text-light-primary dark:text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-text-light-secondary dark:text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-text-light-secondary dark:text-gray-400">Use the Login button in the sidebar.</p></div>); }
      if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-500 dark:text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
 
-    console.log("Rendering main account content with theme:", currentTheme);
+    console.log("Rendering main account content with theme from context:", theme);
+    // isSubscribed ကို profile ကနေ တွက်ချက်တာ မှန်ပါတယ်
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
     return (
+        // --- Outer div and Tab Navigation (ယခင်အတိုင်း) ---
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-light-primary dark:text-text-dark-primary">
-            {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-light dark:border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                      <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary hover:border-gray-400 dark:hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
@@ -570,19 +474,19 @@ export default function MyAccountPage() {
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
                     {activeTab === 'settings' &&
+                        // SettingsTabContent မှာ theme props တွေ ပေးစရာမလိုတော့ပါ
                         <SettingsTabContent
                             key="settings"
                             receipts={receipts}
-                            loading={loading || savingPreferences} // Added savingPreferences to loading state
+                            // loading state ကို data loading နဲ့ theme loading နှစ်ခုပေါင်းပေးနိုင်ပါတယ်
+                            // ဒါမှမဟုတ် UI မှာ သီးခြားစီပြလည်းရပါတယ်
+                            // ဒီမှာတော့ receipt delete အတွက် data loading ကိုပဲ သုံးပါမယ်
                             handleDeleteReceipt={handleDeleteReceipt}
-                            currentTheme={currentTheme}
-                            handleThemeChange={handleThemeChange}
-                            savingPreferences={savingPreferences}
                         />
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display */}
+            {/* Global Error Display (ယခင်အတိုင်း) */}
             {error && profile && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
