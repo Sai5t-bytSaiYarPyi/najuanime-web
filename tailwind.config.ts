@@ -1,9 +1,8 @@
 // tailwind.config.ts
-
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: 'class', // <--- ဒီလိုင်းကို ထည့်ပါ သို့မဟုတ် ပြင်ပါ
+  darkMode: 'class', // <--- ဒါရှိနေရပါမယ်
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -12,18 +11,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'background-dark': '#0D1117',
-        'card-dark': '#161B22',
-        'accent-green': '#39FF14',
-        'accent-purple': '#8A2BE2',
-        'border-color': '#30363D',
-        // --- START: Light Mode အရောင်များ (ဥပမာ) ---
-        'background-light': '#F3F4F6', // Example light background
-        'card-light': '#FFFFFF',       // Example light card
-        'text-light-primary': '#1F2937', // Example light text primary
-        'text-light-secondary': '#6B7280', // Example light text secondary
-        'border-light': '#D1D5DB'       // Example light border
-        // --- END: Light Mode အရောင်များ ---
+        // --- Dark Mode Colors ---
+        'background-dark': '#0D1117', // Main background color (မှောင်သော)
+        'card-dark': '#161B22',       // Card background color (မှောင်သော)
+        'border-color': '#30363D',    // Border color (မှောင်သော)
+        'text-dark-primary': '#E5E7EB', // Primary text color (ဖြူသော - Gray 200)
+        'text-dark-secondary': '#9CA3AF',// Secondary text color (မီးခိုးသော - Gray 400)
+
+        // --- Light Mode Colors ---
+        'background-light': '#F9FAFB', // Main background color (အဖြူနီးပါး - Gray 50)
+        'card-light': '#FFFFFF',       // Card background color (အဖြူ)
+        'border-light': '#E5E7EB',    // Border color (အဖြူရောင်မှိန် - Gray 200)
+        'text-light-primary': '#1F2937', // Primary text color (အနက်နီးပါး - Gray 800)
+        'text-light-secondary': '#6B7280',// Secondary text color (မီးခိုးရင့် - Gray 500)
+
+        // --- Accent Colors (မပြောင်းလဲ) ---
+        'accent-green': '#39FF14',    // Neon green for highlights
+        'accent-purple': '#8A2BE2',   // Purple for buttons
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -33,5 +37,5 @@ const config: Config = {
     },
   },
   plugins: [],
-}
-export default config
+};
+export default config;
