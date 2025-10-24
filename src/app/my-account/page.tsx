@@ -10,11 +10,9 @@ import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext'; // <-- useTheme hook ကို import လုပ်ပါ
 
-// --- Type Definitions (ယခင်အတိုင်း) ---
-// type ProfilePreferences = {
-//   theme?: 'light' | 'dark'; // <- ThemeContext က ဒါကို သုံးသွားမှာပါ
-// };
+export const dynamic = 'force-dynamic'; // <-- ဒီမှာ ထည့်ပါ: Static generation ကို disable လုပ်ရန်
 
+// --- Type Definitions (ယခင်အတိုင်း) ---
 type Profile = {
   id: string;
   naju_id: string;
@@ -23,7 +21,6 @@ type Profile = {
   avatar_url: string | null;
   banner_url: string | null;
   bio: string | null;
-  // preferences: ProfilePreferences | null; // <-- Context ကနေ theme ကို ယူသုံးမှာမို့ ဒီမှာ မလိုတော့ပါ
 };
 
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
@@ -40,7 +37,7 @@ type Tab = 'profile' | 'anime_list' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
 
 
-// --- Components (ယခင်အတိုင်း၊ SettingsTabContent ကို ပြင်ပါမယ်) ---
+// --- Components (ယခင်အတိုင်း) ---
 
 // ProfileStatsDisplay (ယခင်အတိုင်း)
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
@@ -205,7 +202,7 @@ const AnimeListTabContent = ({ animeList }: any) => (
    </motion.div>
 );
 
-// --- SettingsTabContent component ကို useTheme hook သုံးရန် ပြင်ဆင် ---
+// SettingsTabContent (ယခင်အတိုင်း)
 const SettingsTabContent = ({
     receipts,
     handleDeleteReceipt,
@@ -271,12 +268,12 @@ const SettingsTabContent = ({
 
 // --- Main Component ---
 export default function MyAccountPage() {
-    // States (Theme state တွေကို ဖယ်ထုတ်ပါ)
+    // States (ယခင်အတိုင်း)
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
-    const [loading, setLoading] = useState(true); // Data loading state (theme loading က context ထဲမှာ)
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -288,7 +285,6 @@ export default function MyAccountPage() {
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
-    // const [savingPreferences, setSavingPreferences] = useState(false); // <-- ThemeContext က ထိန်းချုပ်သွားပြီ
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -296,8 +292,9 @@ export default function MyAccountPage() {
     // Theme context ကို သုံးပါ (Optional: တကယ်လို့ theme တန်ဖိုးကို ဒီ component မှာ တိုက်ရိုက်သုံးချင်မှ)
     const { theme, isLoading: isThemeLoading } = useTheme();
 
-    // --- setupUser --- (profile ထဲက preferences ကို ဖတ်စရာမလိုတော့ပါ)
+    // --- setupUser --- (ယခင်အတိုင်း)
     const setupUser = useCallback(async (user: User) => {
+        // ... (ယခင် code အတိုင်း) ...
         console.log("Setting up user data in parallel for:", user.id);
         setError(null);
         try {
@@ -312,7 +309,6 @@ export default function MyAccountPage() {
              if (!fetchedProfile && !profileError) console.warn("Profile data is null but no error reported.");
 
              setProfile(fetchedProfile);
-             // Theme ကို ThemeProvider က auto fetch လုပ်ပြီး apply လုပ်သွားမှာပါ
 
             // Fetch other data in parallel (ယခင်အတိုင်း)
             const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
@@ -340,22 +336,15 @@ export default function MyAccountPage() {
             console.error("Error during parallel setupUser:", err);
             setError(`Could not load account details: ${err.message}. Please try refreshing the page.`);
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-            // Error handling for theme is now managed by ThemeProvider
             return false;
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // theme ကို dependency က ဖယ်ထုတ်
+    }, []);
 
 
-    // --- handleThemeChange function ကို ဖယ်ထုတ်ပါ ---
-    // const handleThemeChange = async (newTheme: 'light' | 'dark') => { ... }; // <-- ဖယ်ထုတ်ရန်
-
-    // --- Initial Theme Setup useEffect ကို ဖယ်ထုတ်ပါ ---
-    // useEffect(() => { ... }, []); // <-- ဖယ်ထုတ်ရန်
-
-
-    // --- checkSessionAndSetup --- (Theme ပိုင်းဆိုင်ရာ error handling ဖယ်ထုတ်)
+    // --- checkSessionAndSetup --- (ယခင်အတိုင်း)
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
+        // ... (ယခင် code အတိုင်း) ...
         console.log(`checkSessionAndSetup called. Is Retry: ${isRetry}`);
         setLoading(true); // Data loading စတင်
         setError(null);
@@ -377,7 +366,6 @@ export default function MyAccountPage() {
             console.error("Error in checkSessionAndSetup:", err);
             setError(err.message || "An unexpected error occurred while loading account data.");
             setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
-             // Theme error handling is done by ThemeProvider
         } finally {
             console.log("Setting loading to false in checkSessionAndSetup finally block.");
             setLoading(false); // Data loading ပြီးဆုံး
@@ -387,6 +375,7 @@ export default function MyAccountPage() {
 
     // --- Auth State Change Listener --- (ယခင်အတိုင်း)
     useEffect(() => {
+        // ... (ယခင် code အတိုင်း) ...
         console.log("Auth listener useEffect running.");
         let isMounted = true;
 
@@ -398,12 +387,7 @@ export default function MyAccountPage() {
             console.log("Auth state changed:", event, newSession);
             const previousUserId = session?.user?.id;
             const newUserId = newSession?.user?.id;
-
-            // Session state ကို အမြဲ update လုပ်ပါ
-            // (ThemeProvider ထဲမှာလည်း လုပ်ထားပြီးသား၊ ဒီမှာ ထပ်လုပ်လည်း အကြောင်းမထူး)
             setSession(newSession);
-
-            // User ID ပြောင်းသွားမှသာ data အကုန် reload လုပ်ပါ
             if (newUserId !== previousUserId) {
                 console.log(`User change detected (Event: ${event}, Prev: ${previousUserId}, New: ${newUserId}). Triggering data reload.`);
                 checkSessionAndSetup(); // User ပြောင်းမှ ခေါ်ပါ
@@ -435,7 +419,6 @@ export default function MyAccountPage() {
      };
 
     // --- RENDER LOGIC ---
-    // Theme loading state ကို context က ယူသုံးနိုင်ပေမယ့်၊ data loading ကိုပဲ အဓိကထားပါမယ်
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-white"><Loader className="animate-spin mr-2" size={24} /> Loading Account Data...</div>); }
 
      // ... (Error, No Session, No Profile checks - ယခင်အတိုင်း) ...
@@ -445,7 +428,6 @@ export default function MyAccountPage() {
 
 
     console.log("Rendering main account content with theme from context:", theme);
-    // isSubscribed ကို profile ကနေ တွက်ချက်တာ မှန်ပါတယ်
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
     return (
@@ -474,14 +456,11 @@ export default function MyAccountPage() {
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
                     {activeTab === 'settings' &&
-                        // SettingsTabContent မှာ theme props တွေ ပေးစရာမလိုတော့ပါ
                         <SettingsTabContent
                             key="settings"
                             receipts={receipts}
-                            // loading state ကို data loading နဲ့ theme loading နှစ်ခုပေါင်းပေးနိုင်ပါတယ်
-                            // ဒါမှမဟုတ် UI မှာ သီးခြားစီပြလည်းရပါတယ်
-                            // ဒီမှာတော့ receipt delete အတွက် data loading ကိုပဲ သုံးပါမယ်
                             handleDeleteReceipt={handleDeleteReceipt}
+                            // theme props မလိုတော့
                         />
                     }
                 </AnimatePresence>
