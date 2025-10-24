@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
-import Auth from './Auth';
+import Auth from './Auth'; // Auth component ရှိပြီးသားလို့ ယူဆပါတယ်
 
 const navItems = [
     { href: '/', label: 'Home', icon: Home },
@@ -36,58 +36,64 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             if (session) {
-                setIsAuthModalOpen(false);
+                setIsAuthModalOpen(false); // Login အောင်မြင်ရင် modal ပိတ်
             }
         });
 
         return () => {
-            authListener.subscription.unsubscribe();
+            authListener?.subscription.unsubscribe();
         };
     }, []);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
+        // Logout ပြီးရင် Home page ကို ပြန်သွားနိုင်သည် (optional)
+        // window.location.href = '/';
     };
 
-    // --- START: Update Link Styles (dark: prefix တွေ ဖယ်ထုတ်) ---
+    // --- START: Link Styles ကို Theme အရောင်များဖြင့် ပြင်ဆင် ---
+    // Desktop Sidebar Link Styles
     const getLinkClasses = (href: string) => {
         const isActive = pathname === href;
-        return `flex items-center gap-3 p-3 rounded-lg transition-colors relative ${
+        return `flex items-center gap-3 p-3 rounded-lg transition-colors relative group ${
             isActive
-                ? 'text-white' // Active text color
-                : 'text-gray-300 hover:text-white' // Default text colors
+                ? 'text-accent-green bg-accent-green/10' // Active link: Neon green text, faint green background
+                : 'text-text-dark-secondary hover:text-text-dark-primary hover:bg-white/5 dark:text-text-dark-secondary dark:hover:text-text-dark-primary dark:hover:bg-white/5' // Default & Hover
         }`;
     };
 
+    // Mobile Sidebar Link Styles
     const getMobileLinkClasses = (href: string) => {
         const isActive = pathname === href;
-         return `flex items-center gap-3 p-3 rounded-lg transition-colors relative ${
+         return `flex items-center gap-3 p-3 rounded-lg transition-colors relative group ${
             isActive
-                ? 'text-white bg-accent-purple' // Active mobile link
-                : 'text-gray-300 hover:bg-accent-purple/50 hover:text-white' // Default mobile link colors
+                ? 'text-accent-green bg-accent-green/10' // Active mobile link (desktop နဲ့ တူအောင်ထား)
+                : 'text-text-dark-secondary hover:text-text-dark-primary hover:bg-white/10 dark:text-text-dark-secondary dark:hover:text-text-dark-primary dark:hover:bg-white/10' // Default mobile link
         }`;
     }
 
+    // Login/Logout Button Styles (Light/Dark မခွဲတော့ပါ၊ Dark ကိုပဲ အခြေခံ)
      const getActionButtonClasses = () => {
-        return "flex items-center gap-3 p-3 rounded-lg w-full transition-colors text-gray-300 hover:text-white";
+        return "flex items-center w-full gap-3 p-3 rounded-lg transition-colors text-text-dark-secondary hover:text-text-dark-primary";
      }
-     const getLogoutButtonClasses = () => `${getActionButtonClasses()} hover:bg-red-500/50`;
-     const getLoginButtonClasses = () => `${getActionButtonClasses()} hover:bg-green-500/50`;
-    // --- END: Update Link Styles ---
+     const getLogoutButtonClasses = () => `${getActionButtonClasses()} hover:bg-red-500/10 hover:text-red-400`;
+     const getLoginButtonClasses = () => `${getActionButtonClasses()} hover:bg-green-500/10 hover:text-green-400`;
+    // --- END: Link Styles ကို Theme အရောင်များဖြင့် ပြင်ဆင် ---
 
-
+    // Navigation Links (Logic မပြောင်း)
     const navLinks = navItems
         .filter(item => !item.requiresAuth || (item.requiresAuth && session))
         .map((item) => (
             <Link href={item.href} key={item.label} onClick={() => setIsMenuOpen(false)}>
                 <motion.div
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                    className={getLinkClasses(item.href)} // Use function for classes
+                    whileHover={{ x: 3 }} // နည်းနည်းပဲ ရွှေ့မယ်
+                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className={getLinkClasses(item.href)}
                 >
-                    {pathname === item.href && <motion.div layoutId={`active-pill-desktop-${item.href}`} className="absolute left-0 top-0 h-full w-1 bg-accent-green rounded-r-full" />}
-                    <item.icon size={20} />
-                    <span>{item.label}</span>
+                    {/* Active Indicator ကို ဘယ်ဘက်မှာ ထားမယ် */}
+                    {pathname === item.href && <motion.div layoutId={`active-indicator-desktop`} className="absolute left-0 top-0 h-full w-1 bg-accent-green rounded-r-full" />}
+                    <item.icon size={20} className={`transition-colors ${pathname === item.href ? 'text-accent-green' : 'text-text-dark-secondary group-hover:text-text-dark-primary'}`} />
+                    <span className="font-medium">{item.label}</span>
                 </motion.div>
             </Link>
         ));
@@ -96,71 +102,76 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
         .filter(item => !item.requiresAuth || (item.requiresAuth && session))
         .map((item) => (
             <Link href={item.href} key={item.label} onClick={() => setIsMenuOpen(false)} className={getMobileLinkClasses(item.href)}>
-                {pathname === item.href && <motion.div layoutId={`active-pill-mobile-${item.href}`} className="absolute left-0 top-0 h-full w-1 bg-accent-green rounded-r-full" />}
-                <item.icon size={20} />
-                <span>{item.label}</span>
+                 {pathname === item.href && <motion.div layoutId={`active-indicator-mobile`} className="absolute left-0 top-0 h-full w-1 bg-accent-green rounded-r-full" />}
+                 <item.icon size={20} className={`transition-colors ${pathname === item.href ? 'text-accent-green' : 'text-text-dark-secondary group-hover:text-text-dark-primary'}`} />
+                 <span className="font-medium">{item.label}</span>
             </Link>
         ));
 
     return (
         <>
+            {/* Auth Modal (onClose ကို သေချာထည့်ပေးပါ) */}
             <Auth isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
             {/* Mobile Sidebar (Slide in/out) */}
             <motion.aside
                 initial={{ x: '-100%' }}
                 animate={{ x: isMenuOpen ? 0 : '-100%' }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                // --- START: Update Mobile Sidebar Styles (dark: prefix ဖယ်ထုတ်) ---
-                className="md:hidden fixed top-0 left-0 h-full w-64 p-6 bg-card/80 backdrop-blur-lg border-r border-border z-50 flex flex-col"
-                // --- END: Update Mobile Sidebar Styles ---
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                // --- START: Mobile Sidebar Styles ကို Dark Theme အတွက် ပြင်ဆင် ---
+                className="md:hidden fixed top-0 left-0 h-full w-64 p-5 bg-background-dark/95 backdrop-blur-md border-r border-border-color z-50 flex flex-col shadow-xl"
+                // --- END: Mobile Sidebar Styles ကို Dark Theme အတွက် ပြင်ဆင် ---
             >
-                <div>
+                {/* Sidebar Content */}
+                <div className="flex-grow">
                     <div className="flex justify-between items-center mb-8">
-                         {/* --- Updated Heading Color (dark: prefix ဖယ်ထုတ်) --- */}
-                        <h1 className="text-2xl font-bold text-white">NajuAnime+</h1>
-                        <button onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white"><X /></button>
+                         {/* --- Heading Color (Dark Theme) --- */}
+                        <h1 className="text-2xl font-bold text-text-dark-primary">NajuAnime+</h1>
+                        <button onClick={() => setIsMenuOpen(false)} className="text-text-dark-secondary hover:text-text-dark-primary p-1 rounded-md hover:bg-white/10"><X size={22} /></button>
                     </div>
-                    <nav className="flex flex-col gap-4">
+                    <nav className="flex flex-col gap-2.5"> {/* Gap နည်းနည်းကျဉ်း */}
                         {mobileNavLinks}
                     </nav>
                 </div>
-                <div className="mt-auto">
+                {/* Bottom Action Button */}
+                <div className="mt-auto pt-4 border-t border-border-color">
                     {session ? (
                          <button onClick={handleLogout} className={getLogoutButtonClasses()}>
                             <LogOut size={20} />
-                            <span>Logout</span>
+                            <span className="font-medium">Logout</span>
                         </button>
                     ) : (
-                        <button onClick={() => setIsAuthModalOpen(true)} className={getLoginButtonClasses()}>
+                        <button onClick={() => { setIsAuthModalOpen(true); setIsMenuOpen(false); }} className={getLoginButtonClasses()}>
                             <LogIn size={20} />
-                            <span>Login / Sign Up</span>
+                            <span className="font-medium">Login / Sign Up</span>
                         </button>
                     )}
                 </div>
             </motion.aside>
 
             {/* Desktop Sidebar (Static) */}
-             {/* --- START: Update Desktop Sidebar Styles (dark: prefix ဖယ်ထုတ်) --- */}
-            <aside className="hidden md:block w-64 p-6 bg-card/30 backdrop-blur-lg border-r border-border shrink-0 h-screen sticky top-0 flex-col justify-between">
-            {/* --- END: Update Desktop Sidebar Styles --- */}
-                <div>
-                     {/* --- Updated Heading Color (dark: prefix ဖယ်ထုတ်) --- */}
-                    <h1 className="text-2xl font-bold mb-8 text-white">NajuAnime+</h1>
-                    <nav className="flex flex-col gap-4">
+             {/* --- START: Desktop Sidebar Styles ကို Dark Theme အတွက် ပြင်ဆင် --- */}
+            <aside className="hidden md:flex w-60 p-5 bg-card-dark border-r border-border-color shrink-0 h-screen sticky top-0 flex-col">
+            {/* --- END: Desktop Sidebar Styles ကို Dark Theme အတွက် ပြင်ဆင် --- */}
+                {/* Sidebar Content */}
+                <div className="flex-grow">
+                     {/* --- Heading Color (Dark Theme) --- */}
+                    <h1 className="text-2xl font-bold mb-8 text-text-dark-primary">NajuAnime+</h1>
+                    <nav className="flex flex-col gap-2.5"> {/* Gap နည်းနည်းကျဉ်း */}
                        {navLinks}
                     </nav>
                 </div>
-                 <div className="mt-auto absolute bottom-6 w-[calc(100%-3rem)]"> {/* Added width to prevent overflow */}
+                 {/* Bottom Action Button */}
+                 <div className="mt-auto pt-4 border-t border-border-color">
                     {session ? (
                         <button onClick={handleLogout} className={getLogoutButtonClasses()}>
                             <LogOut size={20} />
-                            <span>Logout</span>
+                            <span className="font-medium">Logout</span>
                         </button>
                     ) : (
                         <button onClick={() => setIsAuthModalOpen(true)} className={getLoginButtonClasses()}>
                             <LogIn size={20} />
-                            <span>Login / Sign Up</span>
+                            <span className="font-medium">Login / Sign Up</span>
                         </button>
                     )}
                 </div>
