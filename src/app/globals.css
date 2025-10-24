@@ -1,9 +1,13 @@
 /* src/app/globals.css */
-@import "tailwindcss";
+/* @import "tailwindcss"; ကို ဖယ်ထုတ်ပြီး directives တွေကို သီးသန့်ခွဲရေးပါ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Define custom properties (CSS Variables) based on Tailwind theme */
+/* Define custom properties (CSS Variables) *after* @tailwind base */
 @layer base {
   :root {
+    /* Colors from tailwind.config.ts */
     --color-background: theme('colors.background');
     --color-card: theme('colors.card');
     --color-border: theme('colors.border');
@@ -15,7 +19,11 @@
 
   body {
     /* Apply base background and text colors using variables */
-    @apply bg-background text-text-primary antialiased transition-colors duration-200;
+    /* @apply directive ကို ဒီနေရာမှာ သုံးလို့ အဆင်မပြေနိုင်တော့ပါ */
+    /* CSS variables တွေကို တိုက်ရိုက်သုံးပါ */
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    @apply antialiased transition-colors duration-200; /* ကျန်တာတွေကတော့ @apply သုံးနိုင် */
   }
 
   a {
@@ -26,11 +34,8 @@
 
   /* Add other base styles if needed */
   /* h1, h2, h3, h4, h5, h6 {
-    @apply text-text-primary;
+    color: var(--color-text-primary);
   } */
 }
 
-/* Ensure @tailwind utilities is loaded after base styles */
-/* @tailwind base; is implicitly included by @import "tailwindcss" */
-@tailwind components;
-@tailwind utilities;
+/* @tailwind components နှင့် @tailwind utilities က အပေါ်မှာ ရှိပြီးသား */
