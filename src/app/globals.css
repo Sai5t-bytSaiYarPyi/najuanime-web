@@ -1,23 +1,36 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
-body {
-  @apply antialiased;
+/* Define custom properties (CSS Variables) based on Tailwind theme */
+@layer base {
+  :root {
+    --color-background: theme('colors.background');
+    --color-card: theme('colors.card');
+    --color-border: theme('colors.border');
+    --color-text-primary: theme('colors.text-primary');
+    --color-text-secondary: theme('colors.text-secondary');
+    --color-accent-1: theme('colors.accent-1');
+    --color-accent-2: theme('colors.accent-2');
+  }
+
+  body {
+    /* Apply base background and text colors using variables */
+    @apply bg-background text-text-primary antialiased transition-colors duration-200;
+  }
+
+  a {
+    /* Apply accent color using variable */
+    color: var(--color-accent-1);
+    @apply hover:brightness-110 transition-all;
+  }
+
+  /* Add other base styles if needed */
+  /* h1, h2, h3, h4, h5, h6 {
+    @apply text-text-primary;
+  } */
 }
 
-/* Default link color ကို theme() function နဲ့ သတ်မှတ် */
-a {
-  color: theme('colors.accent-1'); /* text-accent-1 အစား theme() ကိုသုံးပါ */
-  transition-property: all; /* transition-all */
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* Tailwind default easing */
-  transition-duration: 150ms; /* Tailwind default duration */
-}
-
-a:hover {
-  filter: brightness(1.1); /* hover:brightness-110 */
-}
-
-/* Optional: Headings တွေကို ပိုထင်ရှားတဲ့ အရောင်ပေးချင်ရင် */
-/* h1, h2, h3, h4, h5, h6 {
-  @apply text-text-primary;
-} */
+/* Ensure @tailwind utilities is loaded after base styles */
+/* @tailwind base; is implicitly included by @import "tailwindcss" */
+@tailwind components;
+@tailwind utilities;
