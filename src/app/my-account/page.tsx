@@ -19,11 +19,8 @@ type Tab = 'profile' | 'anime_list' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
 
 
-// --- Components (Updated Styles) ---
-
-// ProfileStatsDisplay Component Code (Updated Styles)
+// --- Components (ယခင်အတိုင်း) ---
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
-    // --- START: Card Background & Text Color ကို Theme အရောင်သုံးရန် ပြင်ဆင် ---
     if (!stats) {
         return <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md text-text-light-secondary dark:text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -42,10 +39,8 @@ const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
             </div>
         </div>
     );
-    // --- END: Card Background & Text Color ကို Theme အရောင်သုံးရန် ပြင်ဆင် ---
 };
 
-// ProfileTabContent Component Code (Updated Styles)
 const ProfileTabContent = ({
     profile,
     uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
@@ -73,7 +68,6 @@ const ProfileTabContent = ({
 
             {/* Avatar & Basic Info */}
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
-                 {/* --- Avatar Border ကို background-light/dark နှင့် ချိတ် --- */}
                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-light dark:border-background-dark bg-gray-300 dark:bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                     {profile?.avatar_url ? ( <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/> ) : ( <UserIcon size={64} className="text-gray-500 dark:text-gray-400" /> )}
                      <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar || savingUsername || savingBio} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -86,18 +80,15 @@ const ProfileTabContent = ({
                         <div className="space-y-2">
                              <div className="relative">
                                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400" size={16} />
-                                 {/* --- Input Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                                  <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color text-lg font-bold focus:outline-none focus:ring-1 focus:ring-accent-green text-text-light-primary dark:text-text-dark-primary" maxLength={20} />
                              </div>
                              <div className="flex gap-2 justify-center sm:justify-start">
-                                 {/* --- Button Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                                  <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50 text-text-light-primary dark:text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
                                  <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
                              </div>
                         </div>
                      ) : (
                         <div>
-                            {/* --- Text Color ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                             <h1 className="text-2xl md:text-3xl font-bold text-text-light-primary dark:text-text-dark-primary">{displayUsername}</h1>
                             <p className="text-text-light-secondary dark:text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
                         </div>
@@ -106,7 +97,6 @@ const ProfileTabContent = ({
                 {/* Edit Username Button */}
                 {!isEditingUsername && (
                     <div className="sm:ml-auto">
-                        {/* --- Button Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                         <button onClick={startEditingUsername} className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-text-light-primary dark:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled={savingBio || savingUsername}> <Edit3 size={14} /> Edit Username </button>
                     </div>
                 )}
@@ -117,7 +107,6 @@ const ProfileTabContent = ({
                  {/* Column 1: Stats & Subscription */}
                  <div className="space-y-4">
                      <ProfileStatsDisplay stats={profileStats} />
-                     {/* --- Subscription Card Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                      <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md">
                          <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary mb-1">Subscription</h3>
                          {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-accent-blue hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )}
@@ -125,7 +114,6 @@ const ProfileTabContent = ({
                  </div>
 
                  {/* Column 2: Bio */}
-                 {/* --- Bio Card Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                  <div className="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md">
                     <div className="flex justify-between items-center mb-1">
                         <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary">About Me</h3>
@@ -133,10 +121,8 @@ const ProfileTabContent = ({
                     </div>
                     {isEditingBio ? (
                         <div className="mt-2 space-y-3">
-                            {/* --- Textarea Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                             <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 border border-border-light dark:border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-light-primary dark:text-text-dark-primary" rows={4} maxLength={500} />
                             <div className="flex justify-end gap-2">
-                                {/* --- Button Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                                 <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-md text-text-light-primary dark:text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
                                 <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
                             </div>
@@ -148,8 +134,6 @@ const ProfileTabContent = ({
     );
 };
 
-
-// AnimeListTabContent component code (Updated Styles)
 const AnimeListTabContent = ({ animeList }: any) => (
    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {animeList.length > 0 ? (
@@ -159,7 +143,6 @@ const AnimeListTabContent = ({ animeList }: any) => (
                   if (!anime) return null;
                   return (
                       <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
-                          {/* --- Card Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
                           <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-200 dark:bg-gray-800">
                               <Image
                                   src={anime.poster_url || '/placeholder.png'}
@@ -185,10 +168,8 @@ const AnimeListTabContent = ({ animeList }: any) => (
               })}
           </div>
       ) : (
-          /* --- Empty State Card Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */
           <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
               <p className="text-text-light-secondary dark:text-text-dark-secondary">Your anime list is empty.</p>
-              {/* --- Button Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
               <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
                   Browse Anime
               </Link>
@@ -197,7 +178,6 @@ const AnimeListTabContent = ({ animeList }: any) => (
    </motion.div>
 );
 
-// SettingsTabContent component code (Updated Styles)
 const SettingsTabContent = ({
     receipts,
     deletingReceipt,
@@ -224,7 +204,6 @@ const SettingsTabContent = ({
     return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
           <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">Account Settings</h2>
-           {/* --- Card Style ကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-light-primary dark:text-text-dark-primary">Site Preferences</h3>
                <div className="flex items-center justify-between">
@@ -236,7 +215,6 @@ const SettingsTabContent = ({
                    </div>
                </div>
            </div>
-           {/* --- အခြား Card Style များကို Theme အရောင်များဖြင့် ပြင်ဆင် --- */}
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Edit Profile</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-light-primary dark:text-text-dark-primary">Change Password</h3><p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">(Coming Soon)</p></div>
            <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-md">
@@ -264,8 +242,10 @@ const SettingsTabContent = ({
 };
 
 
-// --- Main Component (ယခင်အတိုင်း) ---
+// --- Main Component ---
 export default function MyAccountPage() {
+    console.log("[MyAccountPage] Component rendering...");
+
     // States
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -290,41 +270,142 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser --- (ယခင်အတိုင်း)
-    const setupUser = useCallback(async (user: User) => { /* ... ယခင် code ... */ }, []);
+    // --- setupUser with logging ---
+    const setupUser = useCallback(async (user: User) => {
+        console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
+        setError(null);
+        let profileData: Profile | null = null;
+        let receiptsData: Receipt[] = [];
+        let animeListData: UserAnimeListItem[] = [];
+        let statsData: ProfileStatsData = null;
+        try {
+            console.log("[MyAccountPage] setupUser: Fetching profile...");
+            const { data: fetchedProfile, error: profileError } = await supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences').eq('id', user.id).single();
+             if (profileError && profileError.code !== 'PGRST116') { console.error("[MyAccountPage] setupUser: Profile fetch failed!", profileError); throw new Error(`Profile fetch failed: ${profileError.message}`); }
+             console.log("[MyAccountPage] setupUser: Profile fetch successful.", fetchedProfile);
+             profileData = fetchedProfile; // Assign fetched profile
 
-    // --- checkSessionAndSetup --- (ယခင်အတိုင်း)
-     const checkSessionAndSetup = useCallback(async (isRetry = false) => { /* ... ယခင် code ... */ }, [setupUser]);
+            console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
+            const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
+                supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
+                supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
+                supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
+            ]);
 
-    // --- Auth State Change Listener --- (ယခင်အတိုင်း)
-    useEffect(() => { /* ... ယခင် code ... */ }, [checkSessionAndSetup]);
+            if (receiptsResponse.error) { console.error("[MyAccountPage] setupUser: Receipts fetch failed!", receiptsResponse.error); throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
+            console.log("[MyAccountPage] setupUser: Receipts fetch successful.");
+            receiptsData = receiptsResponse.data as Receipt[] || []; // Assign fetched receipts
 
-    // --- Other Handlers ---
+            if (animeListResponse.error) { console.error("[MyAccountPage] setupUser: Anime list fetch failed!", animeListResponse.error); throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
+            console.log("[MyAccountPage] setupUser: Anime list fetch successful.");
+            const fetchedAnimeList = animeListResponse.data;
+            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) { animeListData = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, anime_series: typedAnimeSeries }; }); }
+             else { animeListData = []; } // Assign fetched anime list
+
+            if (statsResponse.error) { console.error("[MyAccountPage] setupUser: Stats fetch failed!", statsResponse.error); throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
+            console.log("[MyAccountPage] setupUser: Stats fetch successful.");
+            statsData = statsResponse.data as ProfileStatsData; // Assign fetched stats
+
+            // Update state after all fetches
+            setProfile(profileData);
+            setReceipts(receiptsData);
+            setAnimeList(animeListData);
+            setProfileStats(statsData);
+
+            console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
+            return true;
+        } catch (err: any) {
+            console.error("[MyAccountPage] setupUser: Catch block error:", err);
+            setError(`Could not load account details: ${err.message}.`);
+            setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+            return false;
+        }
+    }, []);
+
+    // --- checkSessionAndSetup with logging ---
+     const checkSessionAndSetup = useCallback(async (isRetry = false) => {
+        console.log(`[MyAccountPage] checkSessionAndSetup: Called. Is Retry: ${isRetry}. Setting loading=true`);
+        setLoading(true);
+        setError(null);
+        try {
+            const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+            console.log("[MyAccountPage] checkSessionAndSetup: getSession result:", { sessionExists: !!currentSession, sessionError });
+            if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
+            setSession(currentSession);
+            if (currentSession && currentSession.user) {
+                console.log("[MyAccountPage] checkSessionAndSetup: Session found, calling setupUser...");
+                await setupUser(currentSession.user);
+            } else {
+                console.log("[MyAccountPage] checkSessionAndSetup: No session found.");
+                setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+            }
+        } catch (err: any) {
+            console.error("[MyAccountPage] checkSessionAndSetup: Catch block Error:", err);
+            setError(err.message || "An unexpected error occurred.");
+            setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+        } finally {
+            console.log("[MyAccountPage] checkSessionAndSetup: Finally block executed. Setting loading=false");
+            setLoading(false);
+        }
+    }, [setupUser]);
+
+
+    // --- Auth State Change Listener ---
+    useEffect(() => {
+        console.log("[MyAccountPage] Auth Listener useEffect executing.");
+        let isMounted = true;
+        checkSessionAndSetup(); // Initial check
+        const { data: authListener } = supabase.auth.onAuthStateChange( (event, newSession) => {
+            if (!isMounted) return;
+            console.log("[MyAccountPage] AuthChange event:", event);
+            const previousUserId = session?.user?.id;
+            const newUserId = newSession?.user?.id;
+            setSession(newSession);
+            if (newUserId !== previousUserId) {
+                 console.log("[MyAccountPage] AuthChange detected user change, calling checkSessionAndSetup.");
+                 checkSessionAndSetup();
+            } else {
+                 console.log("[MyAccountPage] AuthChange user unchanged, skipping setup.");
+            }
+        } );
+        return () => { isMounted = false; console.log("[MyAccountPage] Auth Listener useEffect cleanup."); authListener?.subscription.unsubscribe(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
+    // --- Other Handlers (ယခင်အတိုင်း) ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => { /* ... ယခင် code ... */ };
      const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => { /* ... ယခင် code ... */ };
      const handleSaveBio = async (newBio: string) => { /* ... ယခင် code ... */ };
      const handleSaveUsername = async (newUsername: string) => { /* ... ယခင် code ... */ };
 
     // --- RENDER LOGIC ---
+    console.log("[MyAccountPage] Render: page loading=", loading, "theme loading=", isThemeLoading);
     if (loading || isThemeLoading) {
         return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-light-primary dark:text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>);
     }
-    if (error && !profile) {
+    // --- START: Error, No Session, No Profile checks ကို ပြင်ဆင် ---
+    // Error state ကို Profile မရှိတဲ့ အခြေအနေမှာပါ ပြပါမယ်
+    if (error) { // Error ရှိရင် အရင်ပြပါ
         return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-500 dark:text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> );
     }
+    // Session မရှိရင် Login လုပ်ခိုင်းပါ
     if (!session || !session.user) {
         return (<div className="flex flex-col items-center justify-center text-center pt-20 text-text-light-primary dark:text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-text-light-secondary dark:text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-text-light-secondary dark:text-gray-400">Use the Login button in the sidebar.</p></div>);
     }
+    // Session ရှိပေမယ့် Profile data မရခဲ့ရင် (Network error မဟုတ်ဘဲ data null ဖြစ်နေရင်)
      if (!profile) {
          return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-500 dark:text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> );
      }
+    // --- END: Error, No Session, No Profile checks ကို ပြင်ဆင် ---
+
 
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
+    // --- Main Return JSX (ယခင်အတိုင်း) ---
     return (
-        // --- Main container (ယခင်အတိုင်း) ---
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-light-primary dark:text-text-dark-primary">
-            {/* Tab Navigation (ယခင်အတိုင်း) */}
+            {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-light dark:border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                      <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary hover:border-gray-400 dark:hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
@@ -332,7 +413,7 @@ export default function MyAccountPage() {
                      <button onClick={() => setActiveTab('settings')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'settings' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary hover:border-gray-400 dark:hover:border-gray-500' }`}><Settings size={16} /> Settings</button>
                  </nav>
             </div>
-            {/* Tab Content (ယခင်အတိုင်း) */}
+            {/* Tab Content */}
             <div>
                 <AnimatePresence mode="wait">
                     {activeTab === 'profile' &&
@@ -357,8 +438,8 @@ export default function MyAccountPage() {
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display (ယခင်အတိုင်း) */}
-            {error && profile && (
+            {/* Global Error Display (Profile မရှိရင် error မပြတော့ပါ) */}
+            {error && ( // Error ရှိမှသာ ပြပါ
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
                      <div>
