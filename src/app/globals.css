@@ -5,9 +5,16 @@ body {
   @apply antialiased;
 }
 
-/* Optional: Default link color ကို accent color အသစ်နဲ့ သတ်မှတ် */
+/* Default link color ကို theme() function နဲ့ သတ်မှတ် */
 a {
-  @apply text-accent-1 hover:brightness-110 transition-all; /* Cyan နဲ့ hover effect */
+  color: theme('colors.accent-1'); /* text-accent-1 အစား theme() ကိုသုံးပါ */
+  transition-property: all; /* transition-all */
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* Tailwind default easing */
+  transition-duration: 150ms; /* Tailwind default duration */
+}
+
+a:hover {
+  filter: brightness(1.1); /* hover:brightness-110 */
 }
 
 /* Optional: Headings တွေကို ပိုထင်ရှားတဲ့ အရောင်ပေးချင်ရင် */
