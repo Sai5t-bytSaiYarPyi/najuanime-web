@@ -13,30 +13,49 @@ import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, Up
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-// --- Anime Series Data Structure ---
 type AnimeSeriesData = {
     id: string;
     poster_url: string | null;
     title_english: string | null;
     title_romaji: string | null;
 } | null;
-// --- Favorite Item Type ---
 type FavoriteAnimeItem = {
-    anime_series: AnimeSeriesData; // Use AnimeSeriesData type
+    anime_series: AnimeSeriesData;
 };
-// --- User List Item Type ---
 type UserAnimeListItem = {
     status: string;
     rating: number | null;
-    anime_series: AnimeSeriesData; // Use AnimeSeriesData type
+    anime_series: AnimeSeriesData;
 };
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
 
+// --- START: SettingsTabContent Props Type အသစ် ---
+type SettingsTabContentProps = {
+    profile: Profile | null;
+    userEmail: string | undefined | null;
+    receipts: Receipt[];
+    deletingReceipt: boolean;
+    handleDeleteReceipt: (receiptId: string, receiptPath: string | null) => void;
+    isEditingBio: boolean;
+    setIsEditingBio: (isEditing: boolean) => void;
+    editingBioText: string;
+    setEditingBioText: (text: string) => void;
+    handleSaveBio: (newBio: string) => void;
+    savingBio: boolean;
+    isEditingUsername: boolean;
+    setIsEditingUsername: (isEditing: boolean) => void;
+    editingUsernameText: string;
+    setEditingUsernameText: (text: string) => void;
+    handleSaveUsername: (newUsername: string) => void;
+    savingUsername: boolean;
+};
+// --- END: SettingsTabContent Props Type အသစ် ---
+
 
 // --- Components ---
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
-    // ... (No changes) ...
+    // ... (ယခင်အတိုင်း) ...
     if (!stats) {
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -78,8 +97,8 @@ const ProfileTabContent = ({
     uploadingAvatar, avatarInputRef, setUploadingAvatar,
     isSubscribed,
     profileStats
-}: any) => {
-    // ... (No changes) ...
+}: any) => { // ဒီ component ရဲ့ props type ကိုလည်း သတ်မှတ်သင့်ပေမယ့် လောလောဆယ် any ထားထားပါတယ်
+    // ... (ယခင်အတိုင်း) ...
      const displayUsername = profile?.naju_id || 'User';
 
     return (
@@ -141,7 +160,7 @@ const ProfileTabContent = ({
 };
 
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
-    // ... (No changes in this component) ...
+    // ... (ယခင်အတိုင်း) ...
     const [filterStatus, setFilterStatus] = useState('All');
     const statusMap: { [key: string]: string } = { All: 'All', Watching: 'watching', Completed: 'completed', 'Plan to Watch': 'plan_to_watch', 'On Hold': 'on_hold', Dropped: 'dropped' };
     const displayStatuses = Object.keys(statusMap);
@@ -190,13 +209,11 @@ const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) 
    );
 };
 
-// --- START: FavoritesTabContent Props Type ပြင်ဆင် ---
 type FavoritesTabContentProps = {
-    favoriteList: FavoriteAnimeItem[]; // Use FavoriteAnimeItem[] type
+    favoriteList: FavoriteAnimeItem[];
 };
 
-const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => ( // Use the defined props type
-// --- END: FavoritesTabContent Props Type ပြင်ဆင် ---
+const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <h2 className="text-2xl font-bold text-text-dark-primary mb-6">Favorite Anime</h2>
 
@@ -237,12 +254,15 @@ const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => ( //
     </motion.div>
 );
 
+// --- START: SettingsTabContent component တွင် Props Type အသစ်ကို အသုံးပြုခြင်း ---
 const SettingsTabContent = ({
     profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-}: { /* ... props ... */ }) => {
-    // ... (No changes in this component's internal logic) ...
+}: SettingsTabContentProps) => { // Props type ကို ဒီနေရာမှာ သတ်မှတ်ပါ
+// --- END: SettingsTabContent component တွင် Props Type အသစ်ကို အသုံးပြုခြင်း ---
+
+    // ... (component ၏ အတွင်းပိုင်း logic ယခင်အတိုင်း) ...
      const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
@@ -397,21 +417,16 @@ export default function MyAccountPage() {
                 setAnimeList(fetchedAnimeList.map((item: any) => ({
                     status: item.status,
                     rating: item.rating,
-                    anime_series: item.anime_series as AnimeSeriesData // Cast here
+                    anime_series: item.anime_series as AnimeSeriesData
                 })));
             } else { setAnimeList([]); }
 
             setProfileStats(statsResponse.data);
 
             const fetchedFavorites = favoritesResponse.data;
-            // --- START: Correct mapping for favorites ---
             if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
-                 // The fetched data is already in the format { anime_series: { ... } }[]
-                 // So direct casting should work if the type definition is correct.
-                 // Let's ensure anime_series is not null before adding.
                 setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
-            // --- END: Correct mapping for favorites ---
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
             return true;
