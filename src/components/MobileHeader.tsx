@@ -9,9 +9,8 @@ interface MobileHeaderProps {
 
 export default function MobileHeader({ setIsMenuOpen }: MobileHeaderProps) {
     return (
-        // --- START: Mobile Header Styles ကို Dark Theme အတွက် ပြင်ဆင် ---
+        // --- Mobile Header Styles (Dark Theme) ---
         <header className="md:hidden flex items-center justify-between p-4 bg-card-dark/80 backdrop-blur-sm border-b border-border-color sticky top-0 z-40 text-text-dark-primary shadow-md">
-        {/* --- END: Mobile Header Styles ကို Dark Theme အတွက် ပြင်ဆင် --- */}
             <Link href="/" className="text-xl font-bold">
                 NajuAnime+
             </Link>

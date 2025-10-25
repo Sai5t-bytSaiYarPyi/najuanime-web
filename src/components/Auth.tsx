@@ -35,6 +35,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       setError(null); setMessage(null); setLoading(false);
   };
 
+  // --- handleEmailAuth, handleEmailOtpVerify, etc. (Logic မပြောင်းပါ) ---
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setLoading(true); setError(null); setMessage(null);
     if (isLoginView) {
@@ -61,7 +62,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
                throw signUpError;
           }
           if (signUpData.user) {
-              const { data: otpData, error: otpFuncError } = await supabase.functions.invoke('send-signup-otp', { body: { email } });
+              const { data: otpData, error: otpFuncError } = await supabase.functions.invoke('send-signup-otp', { body: { email } }); //
               if (otpFuncError) {
                    if (otpFuncError.context?.status === 409) { setError("This email is already confirmed. Please log in."); setIsLoginView(true); }
                    else { throw otpFuncError; }
@@ -75,7 +76,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
     const handleEmailOtpVerify = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); setLoading(true); setError(null); setMessage(null);
         try {
-            const { data, error: funcError } = await supabase.functions.invoke('verify-signup-otp', { body: { email, otp }, });
+            const { data, error: funcError } = await supabase.functions.invoke('verify-signup-otp', { body: { email, otp }, }); //
             if (funcError) throw funcError;
             setMessage(data.message || 'Email verified successfully! You can now log in.');
             setTimeout(() => { handleAutoLoginAfterVerification(); }, 1500);
@@ -92,7 +93,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
     const handleRequestPasswordOtp = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault(); setLoading(true); setError(null); setMessage(null);
       try {
-          const { data, error: funcError } = await supabase.functions.invoke('request-password-reset-otp', { body: { email } });
+          const { data, error: funcError } = await supabase.functions.invoke('request-password-reset-otp', { body: { email } }); //
           if (funcError) throw funcError;
           setMessage(data.message || 'OTP request sent.'); setView('reset_otp_verify');
       } catch (err: any) { console.error("Error invoking request-password-reset-otp:", err); setError(err.message || 'Failed to request OTP. Please try again.'); if (err.message && err.message.includes('Function not found')) { setError('Password reset service is currently unavailable.'); }
@@ -103,7 +104,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       e.preventDefault(); setLoading(true); setError(null); setMessage(null);
       if (newPassword.length < 6) { setError('Password must be at least 6 characters long.'); setLoading(false); return; }
       try {
-          const { data, error: funcError } = await supabase.functions.invoke('verify-password-reset-otp', { body: { email: email, otp: otp, newPassword: newPassword } });
+          const { data, error: funcError } = await supabase.functions.invoke('verify-password-reset-otp', { body: { email: email, otp: otp, newPassword: newPassword } }); //
           if (funcError) throw funcError;
           setMessage(data.message || 'Password updated successfully! You can now log in.'); setTimeout(() => { setView('email'); setIsLoginView(true); resetStates(true); }, 2500);
       } catch (err: any) { console.error('Error invoking verify-password-reset-otp:', err); setError(err.message || 'Failed to verify OTP or update password.');
@@ -112,13 +113,14 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
 
     const handleClose = () => { resetStates(); setView('email'); setIsLoginView(true); onClose(); };
 
-    // --- START: Input & Button Styles ကို Dark Theme အတွက် ပြင်ဆင် ---
+    // --- START: Input & Button Styles (Dark Theme) ---
     const inputClasses = "w-full bg-gray-700 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-text-dark-primary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-purple";
     const otpInputClasses = "w-full bg-gray-700 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-text-dark-primary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-purple tracking-[0.3em] text-center";
     const buttonClasses = "w-full bg-accent-purple hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-600 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2";
-    // --- END: Input & Button Styles ကို Dark Theme အတွက် ပြင်ဆင် ---
+    // --- END: Input & Button Styles (Dark Theme) ---
 
-  const renderEmailView = () => (
+    // --- START: Render functions များအတွင်းမှ text color class များကို တိုက်ရိုက်သတ်မှတ် ---
+    const renderEmailView = () => (
        <motion.div key="email" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}>
          <h2 className="text-3xl font-bold text-center text-text-dark-primary mb-2">{isLoginView ? 'Welcome Back!' : 'Join the Universe'}</h2>
          <p className="text-text-dark-secondary text-center mb-6">{isLoginView ? 'Log in to continue your journey.' : 'Create an account to get started.'}</p>
@@ -135,11 +137,11 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
              </div>
              <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={`${inputClasses} pr-10`} /> {/* Added pr-10 */}
+                <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={`${inputClasses} pr-10`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
              </div>
              {isLoginView && (<div className="flex items-center justify-between"><label className="flex items-center gap-2 text-sm text-text-dark-secondary cursor-pointer hover:text-text-dark-primary"><input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="hidden" />{rememberMe ? <CheckSquare size={16} className="text-accent-green"/> : <Square size={16} />} Remember Me</label><button type="button" onClick={() => { setView('forgot_request_otp'); resetStates(true); }} className="text-sm text-text-dark-secondary hover:text-accent-green">Forgot Password?</button></div>)}
-             {!isLoginView && (<div className="flex items-start gap-2"><label htmlFor="terms" className="flex items-center gap-2 text-sm text-text-dark-secondary cursor-pointer mt-1 hover:text-text-dark-primary"><input id="terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="hidden" />{agreedToTerms ? <CheckSquare size={16} className="text-accent-green"/> : <Square size={16} />}</label><label htmlFor="terms" className="text-xs text-text-dark-secondary cursor-pointer">I agree to the{' '} <Link href="/terms" target="_blank" className="text-accent-green hover:underline">Terms of Service</Link> and{' '} <Link href="/privacy" target="_blank" className="text-accent-green hover:underline">Privacy Policy</Link>.</label></div>)}
+             {!isLoginView && (<div className="flex items-start gap-2"><label htmlFor="terms" className="flex items-center gap-2 text-sm text-text-dark-secondary cursor-pointer mt-1 hover:text-text-dark-primary"><input id="terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="hidden" />{agreedToTerms ? <CheckSquare size={16} className="text-accent-green"/> : <Square size={16} />}</label><label htmlFor="terms" className="text-xs text-text-dark-secondary cursor-pointer">I agree to the{' '} <Link href="/terms" target="_blank" className="text-accent-green hover:underline">Terms of Service</Link> and{' '} <Link href="/privacy" target="_blank" className="text-accent-green hover:underline">Privacy Policy</Link>.</label></div>)} {/* */}
              <button type="submit" disabled={loading || (!isLoginView && !agreedToTerms)} className={buttonClasses}>{loading ? 'Processing...' : (isLoginView ? 'Log In' : 'Create Account')} <LogIn size={20} /></button>
          </form>
          <p className="text-center text-sm text-text-dark-secondary mt-6">{isLoginView ? "Don't have an account?" : "Already have an account?"}<button onClick={() => { setIsLoginView(!isLoginView); resetStates(true); }} className="font-semibold text-accent-green hover:text-green-400 ml-1">{isLoginView ? 'Sign Up' : 'Log In'}</button></p>
@@ -189,8 +191,10 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
          <p className="text-center text-sm text-text-dark-secondary mt-4"><button onClick={() => { setView('email'); resetStates(); }} className="font-semibold text-accent-green hover:text-green-400">Back to Login</button></p>
     </motion.div>
     );
+    // --- END: Render functions များအတွင်းမှ text color class များကို တိုက်ရိုက်သတ်မှတ် ---
 
-  // --- START: Modal Background & Text Color ကို Dark Theme အတွက် ပြင်ဆင် ---
+
+  // --- START: Modal Background & Text Color (Dark Theme) ---
   return (
        <AnimatePresence>
       {isOpen && (
@@ -205,7 +209,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
               {view === 'new_password' && renderNewPasswordView()}
               {view === 'email_otp_verify' && renderEmailOtpVerifyView()}
             </AnimatePresence>
-            {/* Error/Message styling (Dark theme အတွက်) */}
+            {/* Error/Message styling (Dark theme) */}
             {(error || message) && (
               <div className="mt-4"><AnimatePresence>
                   {error && (<motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-red-400 bg-red-900/30 border border-red-500/50 p-3 rounded-md"><AlertCircle size={16} /><span>{error}</span></motion.div>)}
@@ -217,5 +221,5 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       )}
     </AnimatePresence>
   );
-  // --- END: Modal Background & Text Color ကို Dark Theme အတွက် ပြင်ဆင် ---
+  // --- END: Modal Background & Text Color (Dark Theme) ---
 }
