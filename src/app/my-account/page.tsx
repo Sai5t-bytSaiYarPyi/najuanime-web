@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
 
 // --- Type Definitions ---
+// ... (ယခင် Type Definitions များ အားလုံးကို ဒီနေရာမှာ ထားပါ) ...
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
@@ -29,8 +30,6 @@ type UserAnimeListItem = {
 };
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
-
-// --- START: SettingsTabContent Props Type အသစ် ---
 type SettingsTabContentProps = {
     profile: Profile | null;
     userEmail: string | undefined | null;
@@ -50,12 +49,10 @@ type SettingsTabContentProps = {
     handleSaveUsername: (newUsername: string) => void;
     savingUsername: boolean;
 };
-// --- END: SettingsTabContent Props Type အသစ် ---
-
 
 // --- Components ---
+// ... (ProfileStatsDisplay, ProfileTabContent, AnimeListTabContent, FavoritesTabContent, SettingsTabContent component များ ယခင်အတိုင်း) ...
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
-    // ... (ယခင်အတိုင်း) ...
     if (!stats) {
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -97,8 +94,7 @@ const ProfileTabContent = ({
     uploadingAvatar, avatarInputRef, setUploadingAvatar,
     isSubscribed,
     profileStats
-}: any) => { // ဒီ component ရဲ့ props type ကိုလည်း သတ်မှတ်သင့်ပေမယ့် လောလောဆယ် any ထားထားပါတယ်
-    // ... (ယခင်အတိုင်း) ...
+}: any) => {
      const displayUsername = profile?.naju_id || 'User';
 
     return (
@@ -160,7 +156,6 @@ const ProfileTabContent = ({
 };
 
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
-    // ... (ယခင်အတိုင်း) ...
     const [filterStatus, setFilterStatus] = useState('All');
     const statusMap: { [key: string]: string } = { All: 'All', Watching: 'watching', Completed: 'completed', 'Plan to Watch': 'plan_to_watch', 'On Hold': 'on_hold', Dropped: 'dropped' };
     const displayStatuses = Object.keys(statusMap);
@@ -254,15 +249,11 @@ const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => (
     </motion.div>
 );
 
-// --- START: SettingsTabContent component တွင် Props Type အသစ်ကို အသုံးပြုခြင်း ---
 const SettingsTabContent = ({
     profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-}: SettingsTabContentProps) => { // Props type ကို ဒီနေရာမှာ သတ်မှတ်ပါ
-// --- END: SettingsTabContent component တွင် Props Type အသစ်ကို အသုံးပြုခြင်း ---
-
-    // ... (component ၏ အတွင်းပိုင်း logic ယခင်အတိုင်း) ...
+}: SettingsTabContentProps) => {
      const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
@@ -424,9 +415,13 @@ export default function MyAccountPage() {
             setProfileStats(statsResponse.data);
 
             const fetchedFavorites = favoritesResponse.data;
+            // --- START: ပြင်ဆင်ထားသော အပိုင်း ---
             if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
-                setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as FavoriteAnimeItem[]);
+                // Filter လုပ်ပြီးသား data ကို unknown အဖြစ် အရင် cast လုပ်၊ ပြီးမှ FavoriteAnimeItem[] အဖြစ် cast ပါ
+                setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
+            // --- END: ပြင်ဆင်ထားသော အပိုင်း ---
+
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
             return true;
@@ -438,7 +433,7 @@ export default function MyAccountPage() {
         }
     }, []);
 
-    // --- checkSessionAndSetup, Auth Listener (No changes) ---
+    // ... (ကျန် Function များ နှင့် JSX အားလုံး ယခင်အတိုင်း) ...
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`[MyAccountPage] checkSessionAndSetup: Called. Is Retry: ${isRetry}. Setting loading=true`);
         setLoading(true);
@@ -487,7 +482,6 @@ export default function MyAccountPage() {
     }, []);
 
 
-    // --- Other Handlers (No changes) ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
          if (!receiptPath) { alert("Cannot delete receipt: Path is missing."); return; }
         if (window.confirm("Are you sure you want to delete this receipt submission?")) {
@@ -571,7 +565,6 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- RENDER LOGIC ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
     if (error && !(savingUsername && error.includes('already taken'))) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
@@ -579,7 +572,6 @@ export default function MyAccountPage() {
 
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
-    // --- Main Return JSX ---
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-dark-primary">
             {/* Tab Navigation */}
