@@ -7,27 +7,23 @@ import { Session, User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star } from 'lucide-react';
-// --- useTheme import ကို ဖယ်ရှားပါ ---
-// import { useTheme } from '@/context/ThemeContext';
+import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
 
-// --- Type Definitions (မပြောင်းပါ) ---
-type ProfilePreferences = { theme?: 'light' | 'dark'; }; // ဒါကို ဖယ်ရှားလို့ရနိုင်ပေမယ့်၊ DB မှာ ရှိနေသေးရင် ထားထားပါ
+// --- Type Definitions ---
+type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-type UserAnimeListItem = { status: string; anime_series: { id: string; poster_url: string | null; title_english: string | null; title_romaji: string | null; } | null; };
-type Tab = 'profile' | 'anime_list' | 'settings';
-type ProfileStatsData = { completed_count: number; mean_score: number; } | null;
+type UserAnimeListItem = { status: string; rating: number | null; anime_series: { id: string; poster_url: string | null; title_english: string | null; title_romaji: string | null; } | null; };
+type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
+type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
 
 
 // --- Components ---
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
     if (!stats) {
-        // --- dark: prefix များ ဖယ်ရှား ---
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
     }
     return (
-        // --- dark: prefix များ ဖယ်ရှား ---
         <div className="bg-card-dark p-4 rounded-lg shadow-md">
             <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2"><BarChart2 size={16}/> Statistics</h3>
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -39,33 +35,52 @@ const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
                     <p className="text-2xl font-bold text-yellow-400">{stats.mean_score?.toFixed(2) ?? 'N/A'}</p>
                     <p className="text-xs text-text-dark-secondary uppercase flex items-center justify-center gap-1"><Star size={12}/> Mean Score</p>
                 </div>
+                {stats.total_episodes !== undefined && (
+                     <div>
+                        <p className="text-2xl font-bold text-accent-blue">{stats.total_episodes ?? 0}</p>
+                        <p className="text-xs text-text-dark-secondary uppercase">Episodes Watched</p>
+                    </div>
+                )}
+                 {stats.days_watched !== undefined && (
+                     <div>
+                        <p className="text-2xl font-bold text-accent-purple">{stats.days_watched?.toFixed(1) ?? 0}</p>
+                        <p className="text-xs text-text-dark-secondary uppercase">Days Watched</p>
+                    </div>
+                 )}
+            </div>
+             <div className="mt-4 text-center text-xs text-text-dark-secondary italic">
+                (Genre Chart & Rating Chart Coming Soon)
             </div>
         </div>
     );
 };
 
-// --- ProfileTabContent (dark: prefix များ ဖယ်ရှား) ---
 const ProfileTabContent = ({
     profile,
     uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
     uploadingAvatar, avatarInputRef, setUploadingAvatar,
     isSubscribed,
-    isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
-    isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
+    // --- Edit Bio/Username states တွေကို ဒီ component ကနေ ဖယ်ရှားလိုက်ပါ ---
+    // isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
+    // isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
     profileStats
 }: any) => {
-    const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
-    const cancelEditingBio = () => { setIsEditingBio(false); };
-    const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
-    const cancelEditingUsername = () => { setIsEditingUsername(false); };
+    // --- Edit Bio/Username functions တွေကို ဒီ component ကနေ ဖယ်ရှားလိုက်ပါ ---
+    // const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
+    // const cancelEditingBio = () => { setIsEditingBio(false); };
+    // const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
+    // const cancelEditingUsername = () => { setIsEditingUsername(false); };
     const displayUsername = profile?.naju_id || 'User';
+
+    // --- Loading states တွေကို အပေါ်ကနေ ယူသုံးပါ (props အဖြစ် pass လုပ်ရန်) ---
+    // ဒီ component ထဲမှာ savingBio, savingUsername မသုံးတော့ပါ
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             {/* Banner */}
             <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
                 {profile?.banner_url ? ( <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/> ) : ( <div className="absolute inset-0 flex items-center justify-center text-gray-500">Default Banner Area</div> )}
-                 <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner || savingUsername || savingBio} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed">
+                 <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner || uploadingAvatar} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed">
                      {uploadingBanner ? <Loader size={14} className="animate-spin"/> : <UploadCloud size={14} />} {uploadingBanner ? 'Uploading...' : 'Change Banner'} </button>
                  <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
             </div>
@@ -74,135 +89,258 @@ const ProfileTabContent = ({
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
                     {profile?.avatar_url ? ( <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/> ) : ( <UserIcon size={64} className="text-gray-400" /> )}
-                     <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar || savingUsername || savingBio} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed">
+                     <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar || uploadingBanner} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed">
                          {uploadingAvatar ? <Loader size={20} className="animate-spin mb-1"/> : <UploadCloud size={20} className="mb-1"/>} {uploadingAvatar ? 'Uploading...' : 'Change Avatar'} </button>
                      <input type="file" ref={avatarInputRef} onChange={(e) => handleImageUpload(e, 'avatars', setUploadingAvatar)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
                 </div>
-                {/* Username Display/Edit Section */}
+                {/* --- Username ကို Display သာလုပ်ပါ --- */}
                 <div className="text-center sm:text-left pb-2 flex-grow">
-                     {isEditingUsername ? (
-                        <div className="space-y-2">
-                             <div className="relative">
-                                 <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                 <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-700 border border-border-color text-lg font-bold focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
-                             </div>
-                             <div className="flex gap-2 justify-center sm:justify-start">
-                                 <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                                 <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
-                             </div>
-                        </div>
-                     ) : (
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">{displayUsername}</h1>
-                            <p className="text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
-                        </div>
-                    )}
-                </div>
-                {/* Edit Username Button */}
-                {!isEditingUsername && (
-                    <div className="sm:ml-auto">
-                        <button onClick={startEditingUsername} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50" disabled={savingBio || savingUsername}> <Edit3 size={14} /> Edit Username </button>
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">{displayUsername}</h1>
+                        <p className="text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
                     </div>
-                )}
+                </div>
+                {/* --- Edit Button ကို ဖယ်ရှားပြီး Link အဖြစ် ပြောင်းထား --- */}
+                <div className="sm:ml-auto">
+                    <Link href="#settings-edit-profile" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5" >
+                        <Edit3 size={14} /> Edit Profile
+                    </Link>
+                </div>
             </div>
 
-            {/* Stats, Bio, Subscription */}
+            {/* Stats, Bio, Subscription, Recent Activity */}
             <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {/* Column 1: Stats & Subscription */}
                  <div className="space-y-4">
                      <ProfileStatsDisplay stats={profileStats} />
                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
                          <h3 className="font-semibold text-text-dark-primary mb-1">Subscription</h3>
-                         {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-accent-blue hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )} {/* */}
+                         {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-accent-blue hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )}
                     </div>
                  </div>
-
-                 {/* Column 2: Bio */}
-                 <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                    <div className="flex justify-between items-center mb-1">
-                        <h3 className="font-semibold text-text-dark-primary">About Me</h3>
-                        {!isEditingBio && ( <button onClick={startEditingBio} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50" disabled={savingBio || savingUsername}> <Edit3 size={12} className="inline mr-1"/> Edit Bio </button> )}
-                    </div>
-                    {isEditingBio ? (
-                        <div className="mt-2 space-y-3">
-                            <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-700 border border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" rows={4} maxLength={500} />
-                            <div className="flex justify-end gap-2">
-                                <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
-                            </div>
+                 <div className="space-y-4">
+                     <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="font-semibold text-text-dark-primary">About Me</h3>
+                            {/* --- Edit Button ဖယ်ရှား --- */}
+                            <Link href="#settings-edit-profile" className="text-xs text-text-dark-secondary hover:text-white"> <Edit3 size={12} className="inline mr-1"/> Edit Bio </Link>
                         </div>
-                    ) : ( profile?.bio ? ( <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">{profile.bio}</p> ) : ( <p className="text-text-dark-secondary text-sm italic">No bio added yet.</p> ) )}
+                        {/* --- Bio ကို Display သာလုပ်ပါ --- */}
+                        { profile?.bio ? ( <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">{profile.bio}</p> ) : ( <p className="text-text-dark-secondary text-sm italic">No bio added yet.</p> ) }
+                     </div>
+                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                         <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2"><Activity size={16}/> Recent Activity</h3>
+                         <p className="text-text-dark-secondary text-sm italic">(Coming Soon)</p>
+                     </div>
                  </div>
             </div>
         </motion.div>
     );
 };
 
-// --- AnimeListTabContent (dark: prefix များ ဖယ်ရှား) ---
-const AnimeListTabContent = ({ animeList }: any) => (
-   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      {animeList.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6">
-              {animeList.map((item: UserAnimeListItem) => {
-                  const anime = item.anime_series;
-                  if (!anime) return null;
-                  return (
-                      <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1"> {/*/page.tsx] */}
-                          <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
-                              <Image
-                                  src={anime.poster_url || '/placeholder.png'}
-                                  alt={anime.title_english || anime.title_romaji || 'Poster'}
-                                  fill
-                                  style={{ objectFit: 'cover' }}
-                                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                              <div className="absolute top-1 right-1 m-1">
-                                  <span className="bg-black/70 text-white text-xs font-bold px-2 py-0.5 rounded">
-                                      {item.status.replace('_', ' ').toUpperCase()}
-                                  </span>
-                              </div>
-                              <div className="absolute bottom-0 left-0 p-2 w-full">
-                                  <h3 className="text-sm font-semibold text-white truncate group-hover:text-accent-green">
-                                      {anime.title_english || anime.title_romaji}
-                                  </h3>
-                              </div>
-                          </div>
-                      </Link>
-                   );
-              })}
+const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
+    // TODO: Implement Status Filtering Logic
+    const [filterStatus, setFilterStatus] = useState('All'); // Example state
+    const filteredList = filterStatus === 'All'
+        ? animeList
+        : animeList.filter(item => item.status === filterStatus.toLowerCase().replace(' ', '_'));
+
+   return (
+       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="mb-6 border-b border-border-color">
+              <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Anime Status Tabs">
+                  {['All', 'Watching', 'Completed', 'Plan to Watch', 'On Hold', 'Dropped'].map(status => (
+                     <button
+                        key={status}
+                        onClick={() => setFilterStatus(status)} // Set filter on click
+                        className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-xs transition-colors duration-150 ${
+                            filterStatus === status ? 'border-accent-blue text-accent-blue' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500'
+                        }`}
+                     >
+                         {status} {/* TODO: Add counts? */}
+                     </button>
+                  ))}
+              </nav>
           </div>
-      ) : (
-          <div className="bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
-              <p className="text-text-dark-secondary">Your anime list is empty.</p>
-              <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> {/* */}
-                  Browse Anime
-              </Link>
-          </div>
-      )}
-   </motion.div>
+
+          {filteredList.length > 0 ? (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
+                  {filteredList.map((item: UserAnimeListItem) => {
+                      const anime = item.anime_series;
+                      if (!anime) return null;
+                      return (
+                          <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
+                              <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
+                                  <Image
+                                      src={anime.poster_url || '/placeholder.png'}
+                                      alt={anime.title_english || anime.title_romaji || 'Poster'}
+                                      fill
+                                      style={{ objectFit: 'cover' }}
+                                      sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
+                                  />
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2 text-center">
+                                      <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded self-end">
+                                          {item.status.replace('_', ' ').toUpperCase()}
+                                      </span>
+                                       {item.rating && (
+                                           <div className="flex items-center justify-center gap-1 text-yellow-400 bg-black/70 rounded-full px-1.5 py-0.5 self-center mb-1">
+                                                <Star size={10} fill="currentColor"/>
+                                                <span className="text-xs font-bold">{item.rating}</span>
+                                           </div>
+                                       )}
+                                  </div>
+                              </div>
+                               <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate">
+                                   {anime.title_english || anime.title_romaji}
+                               </h3>
+                          </Link>
+                       );
+                  })}
+              </div>
+          ) : (
+              <div className="bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
+                  <p className="text-text-dark-secondary">No anime found for "{filterStatus}" status.</p>
+                  {filterStatus !== 'All' && (
+                     <button onClick={() => setFilterStatus('All')} className="mt-2 text-accent-blue hover:underline text-sm">Show All</button>
+                  )}
+                  {animeList.length === 0 && ( // Only show browse link if the entire list is empty
+                    <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
+                        Browse Anime
+                    </Link>
+                  )}
+              </div>
+          )}
+       </motion.div>
+   );
+};
+
+const FavoritesTabContent = () => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <h2 className="text-2xl font-bold text-text-dark-primary mb-4">Favorites</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                <h3 className="font-semibold text-text-dark-primary mb-3">Favorite Anime</h3>
+                <p className="text-text-dark-secondary text-sm italic">(Coming Soon - Grid View)</p>
+            </div>
+             <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                <h3 className="font-semibold text-text-dark-primary mb-3">Favorite Characters</h3>
+                <p className="text-text-dark-secondary text-sm italic">(Coming Soon - Grid View)</p>
+            </div>
+        </div>
+    </motion.div>
 );
 
-// --- SettingsTabContent (Theme Toggle ဖယ်ရှား၊ dark: prefix များ ဖယ်ရှား) ---
+// --- SettingsTabContent (Email ကို prop အနေနဲ့ လက်ခံရန်ပြင်) ---
 const SettingsTabContent = ({
+    profile,
+    userEmail, // User email ကို prop အဖြစ် လက်ခံ
     receipts,
     deletingReceipt,
     handleDeleteReceipt,
+    // --- Edit Profile states & handlers ကို ဒီကိုရွှေ့ ---
+    isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
+    isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
+    // --- Other handlers ---
+    // handleEmailChange, savingEmail,
+    // handlePasswordChange, savingPassword,
+    // handleDeleteAccount, deletingAccount,
+    // handleAccentColorChange, savingAccentColor,
 }: {
+    profile: Profile | null;
+    userEmail: string | undefined; // User email prop type
     receipts: Receipt[];
     deletingReceipt: boolean;
     handleDeleteReceipt: (receiptId: string, receiptPath: string | null) => void;
+    // --- Edit Profile props ---
+    isEditingBio: boolean; setIsEditingBio: (val: boolean) => void; editingBioText: string; setEditingBioText: (val: string) => void; handleSaveBio: (bio: string) => void; savingBio: boolean;
+    isEditingUsername: boolean; setIsEditingUsername: (val: boolean) => void; editingUsernameText: string; setEditingUsernameText: (val: string) => void; handleSaveUsername: (username: string) => void; savingUsername: boolean;
+    // --- Other props ---
+    // handleEmailChange: (newEmail: string) => void; savingEmail: boolean;
+    // handlePasswordChange: (currentPassword: string, newPassword: string) => void; savingPassword: boolean;
+    // handleDeleteAccount: () => void; deletingAccount: boolean;
+    // handleAccentColorChange: (color: string) => void; savingAccentColor: boolean;
 }) => {
-    // --- ThemeToggle နှင့် သက်ဆိုင်ရာ logic များ ဖယ်ရှား ---
+
+    const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
+    const cancelEditingBio = () => { setIsEditingBio(false); };
+    const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
+    const cancelEditingUsername = () => { setIsEditingUsername(false); };
 
     return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
           <h2 className="text-2xl font-bold text-text-dark-primary">Account Settings</h2>
-           {/* --- Site Preferences Section ကို ဖယ်ရှား --- */}
-           {/* <div className="bg-card-dark p-6 rounded-lg shadow-md"> ... </div> */}
-           <div className="bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-dark-primary">Edit Profile</h3><p className="text-text-dark-secondary text-sm">(Coming Soon)</p></div>
-           <div className="bg-card-dark p-6 rounded-lg shadow-md"><h3 className="text-xl font-semibold mb-3 text-text-dark-primary">Change Password</h3><p className="text-text-dark-secondary text-sm">(Coming Soon)</p></div>
-           <div className="bg-card-dark p-6 rounded-lg shadow-md">
+
+           {/* Edit Profile Section */}
+           <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
+               <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
+               {/* Username Edit Form */}
+               <div className="mb-6">
+                  <label className="block text-sm font-medium text-text-dark-secondary mb-1">Username</label>
+                  {isEditingUsername ? (
+                      <div className="space-y-2">
+                           <div className="relative">
+                               <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                               <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
+                           </div>
+                           <div className="flex gap-2">
+                               <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                               <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
+                           </div>
+                      </div>
+                   ) : (
+                      <div className="flex items-center gap-4">
+                        <p className="text-text-dark-primary font-mono">@{profile?.naju_id || 'N/A'}</p>
+                        <button onClick={startEditingUsername} disabled={savingBio} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
+                      </div>
+                   )}
+               </div>
+                {/* Bio Edit Form */}
+               <div>
+                  <label className="block text-sm font-medium text-text-dark-secondary mb-1">About Me / Bio</label>
+                   {isEditingBio ? (
+                      <div className="space-y-3">
+                            <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-700 border border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" rows={4} maxLength={500} />
+                            <div className="flex justify-end gap-2">
+                                <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
+                            </div>
+                        </div>
+                   ) : (
+                        <div className="flex items-start gap-4">
+                            <p className="text-text-dark-secondary text-sm whitespace-pre-wrap flex-grow">{profile?.bio || <span className="italic">No bio added yet.</span>}</p>
+                            <button onClick={startEditingBio} disabled={savingUsername} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50 shrink-0"> <Edit3 size={12} className="inline mr-0.5"/> Edit </button>
+                        </div>
+                   )}
+               </div>
+           </div>
+
+           {/* Account Management Section */}
+            <div className="bg-card-dark p-6 rounded-lg shadow-md">
+               <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><UserIcon size={18}/> Account Management</h3>
+               <div className="space-y-4">
+                  <div>
+                     <label className="block text-sm font-medium text-text-dark-secondary mb-1">Email Address</label>
+                     {/* --- Email ကို prop ကနေ ပြပါ --- */}
+                     <p className="text-text-dark-primary">{userEmail || 'Loading...'}</p>
+                     <button className="mt-1 text-xs text-accent-blue hover:underline disabled:opacity-50" disabled>Change Email (Soon)</button>
+                  </div>
+                   <div>
+                     <label className="block text-sm font-medium text-text-dark-secondary mb-1">Password</label>
+                      <button className="mt-1 text-xs text-accent-blue hover:underline disabled:opacity-50" disabled>Change Password (Soon)</button>
+                  </div>
+               </div>
+           </div>
+
+           {/* Site Preferences Section */}
+            <div className="bg-card-dark p-6 rounded-lg shadow-md">
+               <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Palette size={18}/> Site Preferences</h3>
+               <div>
+                  <label className="block text-sm font-medium text-text-dark-secondary mb-1">Accent Color</label>
+                  <p className="text-xs text-text-dark-secondary italic">(Coming Soon)</p>
+               </div>
+           </div>
+
+            {/* My Receipt Submissions */}
+            <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary">My Receipt Submissions</h3>
                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                    {receipts.length > 0 ? receipts.map((r: Receipt) => (
@@ -215,10 +353,12 @@ const SettingsTabContent = ({
                       </div>
                   )) : <p className="text-text-dark-secondary">No submission history.</p>}
                </div>
-              <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link> {/* */}
+              <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link>
            </div>
+
+           {/* Danger Zone */}
            <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
-               <h3 className="text-xl font-semibold mb-3 text-red-300">Danger Zone</h3>
+               <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
                <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50" disabled> Delete Account (Soon) </button>
                <p className="text-red-300 text-xs mt-2">This action is permanent and cannot be undone.</p>
            </div>
@@ -227,11 +367,11 @@ const SettingsTabContent = ({
 };
 
 
-// --- Main Component (useTheme ဖယ်ရှား၊ dark: prefix များ ဖယ်ရှား) ---
+// --- Main Component ---
 export default function MyAccountPage() {
     console.log("[MyAccountPage] Component rendering...");
 
-    // States (မပြောင်းပါ)
+    // States
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -241,17 +381,16 @@ export default function MyAccountPage() {
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
+    // --- Edit states တွေကို Settings tab အတွက် ဒီမှာ ထိန်းသိမ်း ---
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editingBioText, setEditingBioText] = useState('');
     const [savingBio, setSavingBio] = useState(false);
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
+    // --- End Edit states ---
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
     const [deletingReceipt, setDeletingReceipt] = useState(false);
-
-    // --- isThemeLoading ကို ဖယ်ရှား ---
-    // const { isThemeLoading } = useTheme();
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -274,7 +413,7 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
             const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
-                supabase.from('user_anime_list').select('status, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
+                supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
             ]);
 
@@ -285,7 +424,7 @@ export default function MyAccountPage() {
             if (animeListResponse.error) { console.error("[MyAccountPage] setupUser: Anime list fetch failed!", animeListResponse.error); throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
             console.log("[MyAccountPage] setupUser: Anime list fetch successful.");
             const fetchedAnimeList = animeListResponse.data;
-            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) { animeListData = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, anime_series: typedAnimeSeries }; }); }
+            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) { animeListData = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, rating: item.rating, anime_series: typedAnimeSeries }; }); }
              else { animeListData = []; }
 
             if (statsResponse.error) { console.error("[MyAccountPage] setupUser: Stats fetch failed!", statsResponse.error); throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
@@ -315,7 +454,7 @@ export default function MyAccountPage() {
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
             console.log("[MyAccountPage] checkSessionAndSetup: getSession result:", { sessionExists: !!currentSession, sessionError });
             if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
-            setSession(currentSession);
+            setSession(currentSession); // Session state ကို အရင် set လုပ်ပါ
             if (currentSession && currentSession.user) {
                 console.log("[MyAccountPage] checkSessionAndSetup: Session found, calling setupUser...");
                 await setupUser(currentSession.user);
@@ -342,7 +481,9 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] AuthChange event:", event);
             const previousUserId = session?.user?.id;
             const newUserId = newSession?.user?.id;
-            setSession(newSession);
+            // --- Session state ကို ဒီမှာ update လုပ်ပါ ---
+            setSession(newSession); // Update the session state here
+            // ---
             if (newUserId !== previousUserId) {
                  console.log("[MyAccountPage] AuthChange detected user change, calling checkSessionAndSetup.");
                  checkSessionAndSetup();
@@ -355,72 +496,46 @@ export default function MyAccountPage() {
     }, []);
 
 
-    // --- Other Handlers (မပြောင်းပါ) ---
+    // --- Other Handlers ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
-        if (!receiptPath) {
-             alert("Cannot delete receipt: Path is missing.");
-             return;
-        }
+         if (!receiptPath) { alert("Cannot delete receipt: Path is missing."); return; }
         if (window.confirm("Are you sure you want to delete this receipt submission?")) {
              setDeletingReceipt(true);
              try {
-                // Delete from storage first
                 const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]);
                 if (storageError) { throw new Error(`Storage deletion failed: ${storageError.message}`); }
-
-                // Delete from database
                 const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
                 if (dbError) { throw new Error(`Database deletion failed: ${dbError.message}`); }
-
                  alert("Receipt deleted successfully.");
-                 setReceipts(receipts.filter(r => r.id !== receiptId)); // Update local state
+                 setReceipts(receipts.filter(r => r.id !== receiptId));
              } catch (err: any) {
                  console.error("Error deleting receipt:", err);
                  alert(`Error deleting receipt: ${err.message}`);
-             } finally {
-                 setDeletingReceipt(false);
-             }
+             } finally { setDeletingReceipt(false); }
          }
      };
      const handleImageUpload = async ( event: React.ChangeEvent<HTMLInputElement>, bucket: 'avatars' | 'banners', setLoadingState: (loading: boolean) => void ) => {
          if (!event.target.files || event.target.files.length === 0 || !session?.user) { return; }
          const file = event.target.files[0];
          const fileExt = file.name.split('.').pop();
-         const fileName = `${session.user.id}.${fileExt}`; // Use user ID as filename
-         const filePath = `${session.user.id}/${fileName}`; // Store in folder named after user ID
-
+         const fileName = `${session.user.id}.${fileExt}`;
+         const filePath = `${session.user.id}/${fileName}`;
          setLoadingState(true);
          try {
-             // Upsert allows replacing existing avatar/banner
              const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true, cacheControl: '3600' });
              if (uploadError) { throw uploadError; }
-
-             // Get public URL (add timestamp to prevent caching issues)
-             const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath, {
-                // download: false, // Ensure it's not a download link
-                // transform: { // Example transform if needed, remove if not
-                //    width: bucket === 'avatars' ? 200 : 1200,
-                //    height: bucket === 'avatars' ? 200 : undefined,
-                //    resize: 'cover',
-                // },
-             });
-             const publicURL = `${urlData.publicUrl}?t=${new Date().getTime()}`; // Add timestamp query param
-
-             // Update profile table
+             const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+             const publicURL = `${urlData.publicUrl}?t=${new Date().getTime()}`;
              const updateField = bucket === 'avatars' ? 'avatar_url' : 'banner_url';
              const { error: updateError } = await supabase.from('profiles').update({ [updateField]: publicURL }).eq('id', session.user.id);
              if (updateError) { throw updateError; }
-
-             // Update local profile state to reflect change immediately
              setProfile(prev => prev ? { ...prev, [updateField]: publicURL } : null);
              alert(`${bucket === 'avatars' ? 'Avatar' : 'Banner'} updated successfully!`);
-
          } catch (err: any) {
              console.error(`Error uploading ${bucket}:`, err);
              alert(`Failed to update ${bucket}: ${err.message}`);
          } finally {
              setLoadingState(false);
-             // Clear file input
              if (event.target) event.target.value = '';
          }
      };
@@ -432,7 +547,7 @@ export default function MyAccountPage() {
              const { error } = await supabase.from('profiles').update({ bio: trimmedBio || null }).eq('id', session.user.id);
              if (error) throw error;
              setProfile(prev => prev ? { ...prev, bio: trimmedBio || null } : null);
-             setIsEditingBio(false);
+             setIsEditingBio(false); // Close editing mode in Settings tab
          } catch (err: any) {
              console.error("Error saving bio:", err);
              alert(`Failed to save bio: ${err.message}`);
@@ -443,71 +558,42 @@ export default function MyAccountPage() {
     const handleSaveUsername = async (newUsername: string) => {
         if (!session?.user || !profile) return;
         const trimmedUsername = newUsername.trim();
-        // Basic validation
-        if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
-            alert('Username must be between 3 and 20 characters.'); return;
-        }
+        if (trimmedUsername.length < 3 || trimmedUsername.length > 20) { alert('Username must be between 3 and 20 characters.'); return; }
         const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-        if (!usernameRegex.test(trimmedUsername)) {
-            alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return;
-        }
-        if (trimmedUsername === profile.naju_id) {
-            setIsEditingUsername(false); // No change, just close edit mode
-            return;
-        }
+        if (!usernameRegex.test(trimmedUsername)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
+        if (trimmedUsername === profile.naju_id) { setIsEditingUsername(false); return; }
 
         setSavingUsername(true);
         setError(null);
         try {
-            // Check if username already exists using an RPC function (assuming you have one called 'is_username_taken')
-            // If you don't have this RPC, you'd need to handle potential unique constraint errors from the update itself.
-            // const { data: exists, error: checkError } = await supabase.rpc('is_username_taken', { username_to_check: trimmedUsername });
-            // if (checkError) throw checkError;
-            // if (exists) throw new Error(`Username "${trimmedUsername}" is already taken.`);
-
-            // Update the username in the profiles table
             const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedUsername }).eq('id', session.user.id).single();
-
-            // Handle potential unique constraint violation if RPC check wasn't done or possible
             if (updateError) {
                  if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { throw new Error(`Username "${trimmedUsername}" is already taken.`); }
-                 throw updateError; // Throw other errors
+                 throw updateError;
             }
-
-            // Update local profile state
             setProfile(prev => prev ? { ...prev, naju_id: trimmedUsername } : null);
-            setIsEditingUsername(false);
-            alert("Username updated successfully!");
-
+            setIsEditingUsername(false); // Close editing mode in Settings tab
+            // alert("Username updated successfully!"); // Error state မှာ ပြမှာဖြစ်လို့ alert မလိုတော့ပါ
         } catch (err: any) {
             console.error("Error saving username:", err);
-            setError(`Failed to save username: ${err.message}`); // Show error to user via state
-            // Keep editing mode open if there was an error
+            setError(`Failed to save username: ${err.message}`); // Show error via state
         } finally {
             setSavingUsername(false);
         }
     };
 
 
-    // --- RENDER LOGIC (isThemeLoading ဖယ်ရှား) ---
-    console.log("[MyAccountPage] Render: page loading=", loading);
-    if (loading) { // isThemeLoading ဖယ်ရှား
-        return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>);
-    }
-    if (error) {
+    // --- RENDER LOGIC ---
+    if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
+    if (error && !(savingUsername && error.includes('already taken'))) { // Username taken error ကလွဲရင် ပြပါ
         return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> );
     }
-    if (!session || !session.user) {
-        return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>);
-    }
-     if (!profile) {
-         return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> );
-     }
-
+    if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
+     if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
-    // --- Main Return JSX (dark: prefix များ ဖယ်ရှား) ---
+    // --- Main Return JSX ---
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-dark-primary">
             {/* Tab Navigation */}
@@ -515,7 +601,8 @@ export default function MyAccountPage() {
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
                      <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
                      <button onClick={() => setActiveTab('anime_list')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'anime_list' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><ListVideo size={16} /> Anime List</button>
-                     <button onClick={() => setActiveTab('settings')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'settings' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Settings size={16} /> Settings</button>
+                      <button onClick={() => setActiveTab('favorites')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'favorites' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Heart size={16} /> Favorites</button>
+                     <button onClick={() => setActiveTab('settings')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'settings' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Settings size={16} /> Settings</button>
                  </nav>
             </div>
             {/* Tab Content */}
@@ -527,24 +614,34 @@ export default function MyAccountPage() {
                             uploadingBanner={uploadingBanner} bannerInputRef={bannerInputRef} handleImageUpload={handleImageUpload} setUploadingBanner={setUploadingBanner}
                             uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
                             isSubscribed={isSubscribed}
-                            isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
-                            isEditingUsername={isEditingUsername} setIsEditingUsername={setIsEditingUsername} editingUsernameText={editingUsernameText} setEditingUsernameText={setEditingUsernameText} handleSaveUsername={handleSaveUsername} savingUsername={savingUsername}
                             profileStats={profileStats}
+                            // Edit states/handlers တွေကို မပို့တော့ပါ
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
+                    {activeTab === 'favorites' && <FavoritesTabContent key="favorites" />}
                     {activeTab === 'settings' &&
                         <SettingsTabContent
                             key="settings"
+                            profile={profile}
+                            userEmail={session?.user?.email} // Email ကို session ကနေ ပို့ပါ
                             receipts={receipts}
                             deletingReceipt={deletingReceipt}
                             handleDeleteReceipt={handleDeleteReceipt}
+                            // --- Edit states/handlers တွေကို ပို့ပါ ---
+                            isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
+                            isEditingUsername={isEditingUsername} setIsEditingUsername={setIsEditingUsername} editingUsernameText={editingUsernameText} setEditingUsernameText={setEditingUsernameText} handleSaveUsername={handleSaveUsername} savingUsername={savingUsername}
+                            // --- Other handlers ---
+                            // handleEmailChange={...} savingEmail={...}
+                            // handlePasswordChange={...} savingPassword={...}
+                            // handleDeleteAccount={...} deletingAccount={...}
+                            // handleAccentColorChange={...} savingAccentColor={...}
                         />
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display */}
-            {error && (
+            {/* Global Error Display (Username error မဟုတ်ရင် ပြရန်) */}
+            {error && !(savingUsername && error.includes('already taken')) && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
                      <div>
@@ -554,6 +651,17 @@ export default function MyAccountPage() {
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
             )}
+             {/* Username error ကို Settings tab မှာ သီးသန့်ပြရန် */}
+             {activeTab === 'settings' && error && savingUsername && error.includes('already taken') && (
+                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
+                     <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
+                     <div>
+                         <p className="font-semibold text-sm">Error</p>
+                         <p className="text-xs">{error}</p>
+                     </div>
+                     <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
+                 </motion.div>
+             )}
         </div>
     );
 }
