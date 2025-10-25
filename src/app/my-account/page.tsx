@@ -60,20 +60,9 @@ const ProfileTabContent = ({
     uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
     uploadingAvatar, avatarInputRef, setUploadingAvatar,
     isSubscribed,
-    // --- Edit Bio/Username states တွေကို ဒီ component ကနေ ဖယ်ရှားလိုက်ပါ ---
-    // isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
-    // isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
     profileStats
 }: any) => {
-    // --- Edit Bio/Username functions တွေကို ဒီ component ကနေ ဖယ်ရှားလိုက်ပါ ---
-    // const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
-    // const cancelEditingBio = () => { setIsEditingBio(false); };
-    // const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
-    // const cancelEditingUsername = () => { setIsEditingUsername(false); };
     const displayUsername = profile?.naju_id || 'User';
-
-    // --- Loading states တွေကို အပေါ်ကနေ ယူသုံးပါ (props အဖြစ် pass လုပ်ရန်) ---
-    // ဒီ component ထဲမှာ savingBio, savingUsername မသုံးတော့ပါ
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -93,14 +82,12 @@ const ProfileTabContent = ({
                          {uploadingAvatar ? <Loader size={20} className="animate-spin mb-1"/> : <UploadCloud size={20} className="mb-1"/>} {uploadingAvatar ? 'Uploading...' : 'Change Avatar'} </button>
                      <input type="file" ref={avatarInputRef} onChange={(e) => handleImageUpload(e, 'avatars', setUploadingAvatar)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
                 </div>
-                {/* --- Username ကို Display သာလုပ်ပါ --- */}
                 <div className="text-center sm:text-left pb-2 flex-grow">
                     <div>
                         <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">{displayUsername}</h1>
                         <p className="text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
                     </div>
                 </div>
-                {/* --- Edit Button ကို ဖယ်ရှားပြီး Link အဖြစ် ပြောင်းထား --- */}
                 <div className="sm:ml-auto">
                     <Link href="#settings-edit-profile" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5" >
                         <Edit3 size={14} /> Edit Profile
@@ -121,10 +108,8 @@ const ProfileTabContent = ({
                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
                         <div className="flex justify-between items-center mb-1">
                             <h3 className="font-semibold text-text-dark-primary">About Me</h3>
-                            {/* --- Edit Button ဖယ်ရှား --- */}
                             <Link href="#settings-edit-profile" className="text-xs text-text-dark-secondary hover:text-white"> <Edit3 size={12} className="inline mr-1"/> Edit Bio </Link>
                         </div>
-                        {/* --- Bio ကို Display သာလုပ်ပါ --- */}
                         { profile?.bio ? ( <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">{profile.bio}</p> ) : ( <p className="text-text-dark-secondary text-sm italic">No bio added yet.</p> ) }
                      </div>
                       <div className="bg-card-dark p-4 rounded-lg shadow-md">
@@ -137,31 +122,50 @@ const ProfileTabContent = ({
     );
 };
 
+// --- START: Anime List Tab Content (Sub-tabs နှင့် Filtering ထည့်သွင်း) ---
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
-    // TODO: Implement Status Filtering Logic
-    const [filterStatus, setFilterStatus] = useState('All'); // Example state
+    const [filterStatus, setFilterStatus] = useState('All'); // Default filter ကို 'All' ထားပါ
+
+    // Status mapping for filtering and display
+    const statusMap: { [key: string]: string } = {
+        All: 'All',
+        Watching: 'watching',
+        Completed: 'completed',
+        'Plan to Watch': 'plan_to_watch',
+        'On Hold': 'on_hold',
+        Dropped: 'dropped'
+    };
+    const displayStatuses = Object.keys(statusMap); // ['All', 'Watching', ...]
+
+    // Filter list based on selected status
     const filteredList = filterStatus === 'All'
-        ? animeList
-        : animeList.filter(item => item.status === filterStatus.toLowerCase().replace(' ', '_'));
+        ? animeList // 'All' ဆိုရင် အကုန်ပြ
+        : animeList.filter(item => item.status === statusMap[filterStatus]); // မဟုတ်ရင် သက်ဆိုင်ရာ status နဲ့ filter လုပ်
 
    return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {/* Sub-Tabs for Status */}
           <div className="mb-6 border-b border-border-color">
               <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Anime Status Tabs">
-                  {['All', 'Watching', 'Completed', 'Plan to Watch', 'On Hold', 'Dropped'].map(status => (
+                  {displayStatuses.map(statusLabel => (
                      <button
-                        key={status}
-                        onClick={() => setFilterStatus(status)} // Set filter on click
+                        key={statusLabel}
+                        onClick={() => setFilterStatus(statusLabel)} // Click ရင် filterStatus state ကို update လုပ်
                         className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-xs transition-colors duration-150 ${
-                            filterStatus === status ? 'border-accent-blue text-accent-blue' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500'
+                            filterStatus === statusLabel
+                                ? 'border-accent-blue text-accent-blue' // Active tab style
+                                : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' // Inactive tab style
                         }`}
                      >
-                         {status} {/* TODO: Add counts? */}
+                         {statusLabel}
+                         {/* Optional: Count display */}
+                         {/* {statusLabel === 'All' ? ` (${animeList.length})` : ` (${animeList.filter(item => item.status === statusMap[statusLabel]).length})`} */}
                      </button>
                   ))}
               </nav>
           </div>
 
+          {/* Grid Layout */}
           {filteredList.length > 0 ? (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
                   {filteredList.map((item: UserAnimeListItem) => {
@@ -197,21 +201,27 @@ const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) 
                   })}
               </div>
           ) : (
+              // Empty State Message (Filter အလိုက် ပြောင်းလဲ)
               <div className="bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
-                  <p className="text-text-dark-secondary">No anime found for "{filterStatus}" status.</p>
-                  {filterStatus !== 'All' && (
-                     <button onClick={() => setFilterStatus('All')} className="mt-2 text-accent-blue hover:underline text-sm">Show All</button>
-                  )}
-                  {animeList.length === 0 && ( // Only show browse link if the entire list is empty
+                  <p className="text-text-dark-secondary">
+                    {animeList.length === 0
+                        ? "Your anime list is empty." // List လုံးဝမရှိရင်
+                        : `No anime found for "${filterStatus}" status.`} {/* Filter လုပ်လို့ မတွေ့ရင် */}
+                  </p>
+                  {animeList.length === 0 && ( // List လုံးဝမရှိမှ Browse button ပြ
                     <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
                         Browse Anime
                     </Link>
                   )}
+                   {animeList.length > 0 && filterStatus !== 'All' && ( // Filter လုပ်ထားပြီး မတွေ့ရင် Show All button ပြ
+                     <button onClick={() => setFilterStatus('All')} className="mt-2 text-accent-blue hover:underline text-sm">Show All Anime</button>
+                   )}
               </div>
           )}
        </motion.div>
    );
 };
+// --- END: Anime List Tab Content ---
 
 const FavoritesTabContent = () => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -229,35 +239,22 @@ const FavoritesTabContent = () => (
     </motion.div>
 );
 
-// --- SettingsTabContent (Email ကို prop အနေနဲ့ လက်ခံရန်ပြင်) ---
 const SettingsTabContent = ({
     profile,
-    userEmail, // User email ကို prop အဖြစ် လက်ခံ
+    userEmail,
     receipts,
     deletingReceipt,
     handleDeleteReceipt,
-    // --- Edit Profile states & handlers ကို ဒီကိုရွှေ့ ---
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-    // --- Other handlers ---
-    // handleEmailChange, savingEmail,
-    // handlePasswordChange, savingPassword,
-    // handleDeleteAccount, deletingAccount,
-    // handleAccentColorChange, savingAccentColor,
 }: {
     profile: Profile | null;
-    userEmail: string | undefined; // User email prop type
+    userEmail: string | undefined;
     receipts: Receipt[];
     deletingReceipt: boolean;
     handleDeleteReceipt: (receiptId: string, receiptPath: string | null) => void;
-    // --- Edit Profile props ---
     isEditingBio: boolean; setIsEditingBio: (val: boolean) => void; editingBioText: string; setEditingBioText: (val: string) => void; handleSaveBio: (bio: string) => void; savingBio: boolean;
     isEditingUsername: boolean; setIsEditingUsername: (val: boolean) => void; editingUsernameText: string; setEditingUsernameText: (val: string) => void; handleSaveUsername: (username: string) => void; savingUsername: boolean;
-    // --- Other props ---
-    // handleEmailChange: (newEmail: string) => void; savingEmail: boolean;
-    // handlePasswordChange: (currentPassword: string, newPassword: string) => void; savingPassword: boolean;
-    // handleDeleteAccount: () => void; deletingAccount: boolean;
-    // handleAccentColorChange: (color: string) => void; savingAccentColor: boolean;
 }) => {
 
     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
@@ -268,11 +265,8 @@ const SettingsTabContent = ({
     return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
           <h2 className="text-2xl font-bold text-text-dark-primary">Account Settings</h2>
-
-           {/* Edit Profile Section */}
            <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
-               {/* Username Edit Form */}
                <div className="mb-6">
                   <label className="block text-sm font-medium text-text-dark-secondary mb-1">Username</label>
                   {isEditingUsername ? (
@@ -293,7 +287,6 @@ const SettingsTabContent = ({
                       </div>
                    )}
                </div>
-                {/* Bio Edit Form */}
                <div>
                   <label className="block text-sm font-medium text-text-dark-secondary mb-1">About Me / Bio</label>
                    {isEditingBio ? (
@@ -312,14 +305,11 @@ const SettingsTabContent = ({
                    )}
                </div>
            </div>
-
-           {/* Account Management Section */}
             <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><UserIcon size={18}/> Account Management</h3>
                <div className="space-y-4">
                   <div>
                      <label className="block text-sm font-medium text-text-dark-secondary mb-1">Email Address</label>
-                     {/* --- Email ကို prop ကနေ ပြပါ --- */}
                      <p className="text-text-dark-primary">{userEmail || 'Loading...'}</p>
                      <button className="mt-1 text-xs text-accent-blue hover:underline disabled:opacity-50" disabled>Change Email (Soon)</button>
                   </div>
@@ -329,8 +319,6 @@ const SettingsTabContent = ({
                   </div>
                </div>
            </div>
-
-           {/* Site Preferences Section */}
             <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Palette size={18}/> Site Preferences</h3>
                <div>
@@ -338,8 +326,6 @@ const SettingsTabContent = ({
                   <p className="text-xs text-text-dark-secondary italic">(Coming Soon)</p>
                </div>
            </div>
-
-            {/* My Receipt Submissions */}
             <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary">My Receipt Submissions</h3>
                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -355,8 +341,6 @@ const SettingsTabContent = ({
                </div>
               <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link>
            </div>
-
-           {/* Danger Zone */}
            <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
                <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50" disabled> Delete Account (Soon) </button>
@@ -370,8 +354,6 @@ const SettingsTabContent = ({
 // --- Main Component ---
 export default function MyAccountPage() {
     console.log("[MyAccountPage] Component rendering...");
-
-    // States
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -381,21 +363,17 @@ export default function MyAccountPage() {
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
-    // --- Edit states တွေကို Settings tab အတွက် ဒီမှာ ထိန်းသိမ်း ---
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editingBioText, setEditingBioText] = useState('');
     const [savingBio, setSavingBio] = useState(false);
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
-    // --- End Edit states ---
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
     const [deletingReceipt, setDeletingReceipt] = useState(false);
-
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser, checkSessionAndSetup, Auth Listener (မပြောင်းပါ) ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
@@ -454,7 +432,7 @@ export default function MyAccountPage() {
             const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
             console.log("[MyAccountPage] checkSessionAndSetup: getSession result:", { sessionExists: !!currentSession, sessionError });
             if (sessionError) throw new Error(`Failed to check authentication session: ${sessionError.message}`);
-            setSession(currentSession); // Session state ကို အရင် set လုပ်ပါ
+            setSession(currentSession);
             if (currentSession && currentSession.user) {
                 console.log("[MyAccountPage] checkSessionAndSetup: Session found, calling setupUser...");
                 await setupUser(currentSession.user);
@@ -475,15 +453,13 @@ export default function MyAccountPage() {
     useEffect(() => {
         console.log("[MyAccountPage] Auth Listener useEffect executing.");
         let isMounted = true;
-        checkSessionAndSetup(); // Initial check
+        checkSessionAndSetup();
         const { data: authListener } = supabase.auth.onAuthStateChange( (event, newSession) => {
             if (!isMounted) return;
             console.log("[MyAccountPage] AuthChange event:", event);
             const previousUserId = session?.user?.id;
             const newUserId = newSession?.user?.id;
-            // --- Session state ကို ဒီမှာ update လုပ်ပါ ---
-            setSession(newSession); // Update the session state here
-            // ---
+            setSession(newSession);
             if (newUserId !== previousUserId) {
                  console.log("[MyAccountPage] AuthChange detected user change, calling checkSessionAndSetup.");
                  checkSessionAndSetup();
@@ -547,7 +523,7 @@ export default function MyAccountPage() {
              const { error } = await supabase.from('profiles').update({ bio: trimmedBio || null }).eq('id', session.user.id);
              if (error) throw error;
              setProfile(prev => prev ? { ...prev, bio: trimmedBio || null } : null);
-             setIsEditingBio(false); // Close editing mode in Settings tab
+             setIsEditingBio(false);
          } catch (err: any) {
              console.error("Error saving bio:", err);
              alert(`Failed to save bio: ${err.message}`);
@@ -562,7 +538,6 @@ export default function MyAccountPage() {
         const usernameRegex = /^[a-zA-Z0-9_-]+$/;
         if (!usernameRegex.test(trimmedUsername)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
         if (trimmedUsername === profile.naju_id) { setIsEditingUsername(false); return; }
-
         setSavingUsername(true);
         setError(null);
         try {
@@ -572,22 +547,19 @@ export default function MyAccountPage() {
                  throw updateError;
             }
             setProfile(prev => prev ? { ...prev, naju_id: trimmedUsername } : null);
-            setIsEditingUsername(false); // Close editing mode in Settings tab
-            // alert("Username updated successfully!"); // Error state မှာ ပြမှာဖြစ်လို့ alert မလိုတော့ပါ
+            setIsEditingUsername(false);
+            // alert("Username updated successfully!"); // Error state မှာ ပြမည်
         } catch (err: any) {
             console.error("Error saving username:", err);
-            setError(`Failed to save username: ${err.message}`); // Show error via state
+            setError(`Failed to save username: ${err.message}`);
         } finally {
             setSavingUsername(false);
         }
     };
 
-
     // --- RENDER LOGIC ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-    if (error && !(savingUsername && error.includes('already taken'))) { // Username taken error ကလွဲရင် ပြပါ
-        return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> );
-    }
+    if (error && !(savingUsername && error.includes('already taken'))) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
      if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
@@ -615,7 +587,6 @@ export default function MyAccountPage() {
                             uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
                             isSubscribed={isSubscribed}
                             profileStats={profileStats}
-                            // Edit states/handlers တွေကို မပို့တော့ပါ
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
@@ -624,24 +595,18 @@ export default function MyAccountPage() {
                         <SettingsTabContent
                             key="settings"
                             profile={profile}
-                            userEmail={session?.user?.email} // Email ကို session ကနေ ပို့ပါ
+                            userEmail={session?.user?.email}
                             receipts={receipts}
                             deletingReceipt={deletingReceipt}
                             handleDeleteReceipt={handleDeleteReceipt}
-                            // --- Edit states/handlers တွေကို ပို့ပါ ---
                             isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
                             isEditingUsername={isEditingUsername} setIsEditingUsername={setIsEditingUsername} editingUsernameText={editingUsernameText} setEditingUsernameText={setEditingUsernameText} handleSaveUsername={handleSaveUsername} savingUsername={savingUsername}
-                            // --- Other handlers ---
-                            // handleEmailChange={...} savingEmail={...}
-                            // handlePasswordChange={...} savingPassword={...}
-                            // handleDeleteAccount={...} deletingAccount={...}
-                            // handleAccentColorChange={...} savingAccentColor={...}
                         />
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display (Username error မဟုတ်ရင် ပြရန်) */}
-            {error && !(savingUsername && error.includes('already taken')) && (
+            {/* Global Error Display (Conditional) */}
+            {error && !(activeTab === 'settings' && savingUsername && error.includes('already taken')) && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
                      <div>
@@ -651,12 +616,13 @@ export default function MyAccountPage() {
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
             )}
-             {/* Username error ကို Settings tab မှာ သီးသန့်ပြရန် */}
+             {/* Username taken error display specifically for Settings tab */}
              {activeTab === 'settings' && error && savingUsername && error.includes('already taken') && (
-                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
-                     <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                    className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
+                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
                      <div>
-                         <p className="font-semibold text-sm">Error</p>
+                         <p className="font-semibold text-sm">Error Updating Username</p>
                          <p className="text-xs">{error}</p>
                      </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
