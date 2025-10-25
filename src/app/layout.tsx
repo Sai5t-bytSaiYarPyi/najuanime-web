@@ -19,11 +19,11 @@ export default function RootLayout({
 }) {
   return (
     // <html> tag မှာ class မထည့်ပါ
-    <html lang="en" className=""> {/* <--- ဒီမှာ class="dark" မထည့်တော့ပါ */}
-      {/* <body> မှာ default dark mode အရောင်တွေကို သုံးပါ */}
+    <html lang="en" className=""> {/* <-- ဒီမှာ class မရှိသင့်ပါ */}
+      {/* <body> မှာ font နဲ့ transition ပဲ ထားပါ */}
       <body
-        className={`${inter.className} bg-background-dark text-text-dark-primary dark:bg-background-dark dark:text-text-dark-primary transition-colors duration-200`}
-        // Light mode အတွက် class တွေကို ThemeProvider က ထိန်းချုပ်ပါလိမ့်မယ်
+        className={`${inter.className} transition-colors duration-200`}
+        // <-- background နဲ့ text color class တွေကို ဒီကနေ ဖယ်ရှားပါ
       >
         <ThemeProvider>
           <MainLayout>{children}</MainLayout>
