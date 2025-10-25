@@ -7,10 +7,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'NajuAnime+ | Your Anime Universe',
-  description: 'Your universe for Myanmar subtitled anime and free manhwa reading.',
-};
+export const metadata: Metadata = { /* ... */ };
 
 export default function RootLayout({
   children,
@@ -18,12 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // <html> tag မှာ class မထည့်ပါ
-    <html lang="en" className=""> {/* <-- ဒီမှာ class မရှိသင့်ပါ */}
-      {/* <body> မှာ font နဲ့ transition ပဲ ထားပါ */}
+    // <html> tag တွင် class မရှိရ
+    <html lang="en" className="">
+      {/* <body> tag တွင်လည်း font နှင့် transition class များသာ ရှိသင့်သည် */}
       <body
         className={`${inter.className} transition-colors duration-200`}
-        // <-- background နဲ့ text color class တွေကို ဒီကနေ ဖယ်ရှားပါ
       >
         <ThemeProvider>
           <MainLayout>{children}</MainLayout>

@@ -12,23 +12,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const pathname = usePathname();
 
     return (
-        // --- START: Main flex container မှာ background ကို ထည့်ပါ ---
+        // --- ဒီ div က layout တစ်ခုလုံးရဲ့ နောက်ခံကို ထိန်းချုပ်တယ် ---
         <div className="flex min-h-screen bg-background-light dark:bg-background-dark">
-        {/* --- END: Main flex container မှာ background ကို ထည့်ပါ --- */}
             <Sidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
             {/* Right content area */}
             <div className="flex-1 flex flex-col">
                 <MobileHeader setIsMenuOpen={setIsMenuOpen} />
                 <AnimatePresence mode="wait">
+                    {/* --- ဒီ main က content area ရဲ့ text color နဲ့ padding ကို ထိန်းချုပ်တယ် --- */}
                     <motion.main
                         key={pathname}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        // --- START: Padding နဲ့ Text color ကို သေချာ သတ်မှတ်ပါ ---
                         className="flex-1 p-4 md:p-8 text-text-light-primary dark:text-text-dark-primary"
-                        // --- END: Padding နဲ့ Text color ကို သေချာ သတ်မှတ်ပါ ---
                     >
                         {children}
                     </motion.main>

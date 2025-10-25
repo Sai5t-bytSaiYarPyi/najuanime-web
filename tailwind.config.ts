@@ -2,7 +2,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: 'class',
+  darkMode: 'class', // <-- မှန်ကန်ပါတယ်
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -27,16 +27,8 @@ const config: Config = {
         'border-light': '#E5E7EB',    // Border color (Gray 200)
         'text-light-primary': '#111827', // Primary text color (Gray 900)
         'text-light-secondary': '#6B7280',// Secondary text color (Gray 500)
-        // Light mode accent တွေကို Dark mode နဲ့ တူအောင်ထားနိုင်သလို၊ လိုအပ်ရင် ပြင်နိုင်ပါတယ်
-        // 'accent-green-light': '#16A34A', // Green 600
-        // 'accent-purple-light': '#7C3AED', // Violet 600
-        // 'accent-blue-light': '#2563EB',   // Blue 600
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
+      backgroundImage: { /* ... */ },
     },
   },
   plugins: [],

@@ -1,9 +1,5 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
-body {
-  @apply antialiased; /* Optional: ပိုချောမွေ့တဲ့ font အတွက် */
-}
-
-/* ဒီအောက်မှာ ရှိခဲ့တဲ့ @layer base {...} block တွေ၊ */
-/* CSS variable သတ်မှတ်တာတွေ အားလုံးကို ဖျက်ပေးပါ */
+/* အခြား မည်သည့် CSS rule မှ မရှိသင့်ပါ */
+/* body { @apply antialiased; } ကိုလည်း ခဏ ဖယ်ထားကြည့်ပါ */
