@@ -13,13 +13,30 @@ import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, Up
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
-type UserAnimeListItem = { status: string; rating: number | null; anime_series: { id: string; poster_url: string | null; title_english: string | null; title_romaji: string | null; } | null; };
+// --- Anime Series Data Structure ---
+type AnimeSeriesData = {
+    id: string;
+    poster_url: string | null;
+    title_english: string | null;
+    title_romaji: string | null;
+} | null;
+// --- Favorite Item Type ---
+type FavoriteAnimeItem = {
+    anime_series: AnimeSeriesData; // Use AnimeSeriesData type
+};
+// --- User List Item Type ---
+type UserAnimeListItem = {
+    status: string;
+    rating: number | null;
+    anime_series: AnimeSeriesData; // Use AnimeSeriesData type
+};
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
 
 
 // --- Components ---
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
+    // ... (No changes) ...
     if (!stats) {
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -62,7 +79,8 @@ const ProfileTabContent = ({
     isSubscribed,
     profileStats
 }: any) => {
-    const displayUsername = profile?.naju_id || 'User';
+    // ... (No changes) ...
+     const displayUsername = profile?.naju_id || 'User';
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -122,50 +140,26 @@ const ProfileTabContent = ({
     );
 };
 
-// --- START: Anime List Tab Content (Sub-tabs နှင့် Filtering ထည့်သွင်း) ---
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
-    const [filterStatus, setFilterStatus] = useState('All'); // Default filter ကို 'All' ထားပါ
-
-    // Status mapping for filtering and display
-    const statusMap: { [key: string]: string } = {
-        All: 'All',
-        Watching: 'watching',
-        Completed: 'completed',
-        'Plan to Watch': 'plan_to_watch',
-        'On Hold': 'on_hold',
-        Dropped: 'dropped'
-    };
-    const displayStatuses = Object.keys(statusMap); // ['All', 'Watching', ...]
-
-    // Filter list based on selected status
-    const filteredList = filterStatus === 'All'
-        ? animeList // 'All' ဆိုရင် အကုန်ပြ
-        : animeList.filter(item => item.status === statusMap[filterStatus]); // မဟုတ်ရင် သက်ဆိုင်ရာ status နဲ့ filter လုပ်
+    // ... (No changes in this component) ...
+    const [filterStatus, setFilterStatus] = useState('All');
+    const statusMap: { [key: string]: string } = { All: 'All', Watching: 'watching', Completed: 'completed', 'Plan to Watch': 'plan_to_watch', 'On Hold': 'on_hold', Dropped: 'dropped' };
+    const displayStatuses = Object.keys(statusMap);
+    const filteredList = filterStatus === 'All' ? animeList : animeList.filter(item => item.status === statusMap[filterStatus]);
 
    return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          {/* Sub-Tabs for Status */}
           <div className="mb-6 border-b border-border-color">
               <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Anime Status Tabs">
                   {displayStatuses.map(statusLabel => (
-                     <button
-                        key={statusLabel}
-                        onClick={() => setFilterStatus(statusLabel)} // Click ရင် filterStatus state ကို update လုပ်
-                        className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-xs transition-colors duration-150 ${
-                            filterStatus === statusLabel
-                                ? 'border-accent-blue text-accent-blue' // Active tab style
-                                : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' // Inactive tab style
-                        }`}
-                     >
+                     <button key={statusLabel} onClick={() => setFilterStatus(statusLabel)}
+                        className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-xs transition-colors duration-150 ${ filterStatus === statusLabel ? 'border-accent-blue text-accent-blue' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`} >
                          {statusLabel}
-                         {/* Optional: Count display */}
-                         {/* {statusLabel === 'All' ? ` (${animeList.length})` : ` (${animeList.filter(item => item.status === statusMap[statusLabel]).length})`} */}
                      </button>
                   ))}
               </nav>
           </div>
 
-          {/* Grid Layout */}
           {filteredList.length > 0 ? (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
                   {filteredList.map((item: UserAnimeListItem) => {
@@ -174,90 +168,82 @@ const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) 
                       return (
                           <Link href={`/anime/${anime.id}`} key={`${anime.id}-${item.status}`} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
                               <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
-                                  <Image
-                                      src={anime.poster_url || '/placeholder.png'}
-                                      alt={anime.title_english || anime.title_romaji || 'Poster'}
-                                      fill
-                                      style={{ objectFit: 'cover' }}
-                                      sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
-                                  />
+                                  <Image src={anime.poster_url || '/placeholder.png'} alt={anime.title_english || anime.title_romaji || 'Poster'} fill style={{ objectFit: 'cover' }} sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw" />
                                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2 text-center">
-                                      <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded self-end">
-                                          {item.status.replace('_', ' ').toUpperCase()}
-                                      </span>
-                                       {item.rating && (
-                                           <div className="flex items-center justify-center gap-1 text-yellow-400 bg-black/70 rounded-full px-1.5 py-0.5 self-center mb-1">
-                                                <Star size={10} fill="currentColor"/>
-                                                <span className="text-xs font-bold">{item.rating}</span>
-                                           </div>
-                                       )}
+                                      <span className="bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded self-end"> {item.status.replace('_', ' ').toUpperCase()} </span>
+                                       {item.rating && ( <div className="flex items-center justify-center gap-1 text-yellow-400 bg-black/70 rounded-full px-1.5 py-0.5 self-center mb-1"> <Star size={10} fill="currentColor"/> <span className="text-xs font-bold">{item.rating}</span> </div> )}
                                   </div>
                               </div>
-                               <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate">
-                                   {anime.title_english || anime.title_romaji}
-                               </h3>
+                               <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate"> {anime.title_english || anime.title_romaji} </h3>
                           </Link>
                        );
                   })}
               </div>
           ) : (
-              // Empty State Message (Filter အလိုက် ပြောင်းလဲ)
               <div className="bg-card-dark p-8 rounded-lg text-center shadow-md mt-6">
-                  <p className="text-text-dark-secondary">
-                    {animeList.length === 0
-                        ? "Your anime list is empty." // List လုံးဝမရှိရင်
-                        : `No anime found for "${filterStatus}" status.`} {/* Filter လုပ်လို့ မတွေ့ရင် */}
-                  </p>
-                  {animeList.length === 0 && ( // List လုံးဝမရှိမှ Browse button ပြ
-                    <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
-                        Browse Anime
-                    </Link>
-                  )}
-                   {animeList.length > 0 && filterStatus !== 'All' && ( // Filter လုပ်ထားပြီး မတွေ့ရင် Show All button ပြ
-                     <button onClick={() => setFilterStatus('All')} className="mt-2 text-accent-blue hover:underline text-sm">Show All Anime</button>
-                   )}
+                  <p className="text-text-dark-secondary"> {animeList.length === 0 ? "Your anime list is empty." : `No anime found for "${filterStatus}" status.`} </p>
+                  {animeList.length === 0 && ( <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Browse Anime </Link> )}
+                   {animeList.length > 0 && filterStatus !== 'All' && ( <button onClick={() => setFilterStatus('All')} className="mt-2 text-accent-blue hover:underline text-sm">Show All Anime</button> )}
               </div>
           )}
        </motion.div>
    );
 };
-// --- END: Anime List Tab Content ---
 
-const FavoritesTabContent = () => (
+// --- START: FavoritesTabContent Props Type ပြင်ဆင် ---
+type FavoritesTabContentProps = {
+    favoriteList: FavoriteAnimeItem[]; // Use FavoriteAnimeItem[] type
+};
+
+const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => ( // Use the defined props type
+// --- END: FavoritesTabContent Props Type ပြင်ဆင် ---
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h2 className="text-2xl font-bold text-text-dark-primary mb-4">Favorites</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                <h3 className="font-semibold text-text-dark-primary mb-3">Favorite Anime</h3>
-                <p className="text-text-dark-secondary text-sm italic">(Coming Soon - Grid View)</p>
+        <h2 className="text-2xl font-bold text-text-dark-primary mb-6">Favorite Anime</h2>
+
+        {favoriteList.length > 0 ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
+                {favoriteList.map((item: FavoriteAnimeItem) => {
+                    const anime = item.anime_series;
+                    if (!anime) return null;
+                    return (
+                        <Link href={`/anime/${anime.id}`} key={anime.id} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
+                            <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
+                                <Image src={anime.poster_url || '/placeholder.png'} alt={anime.title_english || anime.title_romaji || 'Poster'} fill style={{ objectFit: 'cover' }} sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Heart size={40} className="text-red-500 fill-current" />
+                                </div>
+                            </div>
+                            <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate">
+                                {anime.title_english || anime.title_romaji}
+                            </h3>
+                        </Link>
+                     );
+                })}
             </div>
-             <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                <h3 className="font-semibold text-text-dark-primary mb-3">Favorite Characters</h3>
-                <p className="text-text-dark-secondary text-sm italic">(Coming Soon - Grid View)</p>
+        ) : (
+            <div className="bg-card-dark p-8 rounded-lg text-center shadow-md">
+                <p className="text-text-dark-secondary">You haven't added any favorite anime yet.</p>
+                <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
+                    Browse Anime
+                </Link>
             </div>
-        </div>
+        )}
+         <div className="mt-8">
+             <h2 className="text-xl font-bold text-text-dark-primary mb-4">Favorite Characters</h2>
+            <div className="bg-card-dark p-4 rounded-lg shadow-md">
+                <p className="text-text-dark-secondary text-sm italic">(Coming Soon)</p>
+            </div>
+         </div>
     </motion.div>
 );
 
 const SettingsTabContent = ({
-    profile,
-    userEmail,
-    receipts,
-    deletingReceipt,
-    handleDeleteReceipt,
+    profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-}: {
-    profile: Profile | null;
-    userEmail: string | undefined;
-    receipts: Receipt[];
-    deletingReceipt: boolean;
-    handleDeleteReceipt: (receiptId: string, receiptPath: string | null) => void;
-    isEditingBio: boolean; setIsEditingBio: (val: boolean) => void; editingBioText: string; setEditingBioText: (val: string) => void; handleSaveBio: (bio: string) => void; savingBio: boolean;
-    isEditingUsername: boolean; setIsEditingUsername: (val: boolean) => void; editingUsernameText: string; setEditingUsernameText: (val: string) => void; handleSaveUsername: (username: string) => void; savingUsername: boolean;
-}) => {
-
-    const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
+}: { /* ... props ... */ }) => {
+    // ... (No changes in this component's internal logic) ...
+     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
     const cancelEditingUsername = () => { setIsEditingUsername(false); };
@@ -358,6 +344,7 @@ export default function MyAccountPage() {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
+    const [favoriteAnimeList, setFavoriteAnimeList] = useState<FavoriteAnimeItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>('profile');
@@ -374,56 +361,69 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
+    // --- setupUser function ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
-        let profileData: Profile | null = null;
-        let receiptsData: Receipt[] = [];
-        let animeListData: UserAnimeListItem[] = [];
-        let statsData: ProfileStatsData = null;
+        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); // Reset states
+
         try {
             console.log("[MyAccountPage] setupUser: Fetching profile...");
             const { data: fetchedProfile, error: profileError } = await supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences').eq('id', user.id).single();
-             if (profileError && profileError.code !== 'PGRST116') { console.error("[MyAccountPage] setupUser: Profile fetch failed!", profileError); throw new Error(`Profile fetch failed: ${profileError.message}`); }
-             console.log("[MyAccountPage] setupUser: Profile fetch successful.", fetchedProfile);
-             profileData = fetchedProfile;
+             if (profileError && profileError.code !== 'PGRST116') { throw new Error(`Profile fetch failed: ${profileError.message}`); }
+             console.log("[MyAccountPage] setupUser: Profile fetch successful.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
-            const [receiptsResponse, animeListResponse, statsResponse] = await Promise.all([
+            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
-                supabase.rpc('get_user_profile_stats', { p_user_id: user.id })
+                supabase.rpc('get_user_profile_stats', { p_user_id: user.id }),
+                supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false })
             ]);
 
-            if (receiptsResponse.error) { console.error("[MyAccountPage] setupUser: Receipts fetch failed!", receiptsResponse.error); throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
-            console.log("[MyAccountPage] setupUser: Receipts fetch successful.");
-            receiptsData = receiptsResponse.data as Receipt[] || [];
+            if (receiptsResponse.error) { throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
+            if (animeListResponse.error) { throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
+            if (statsResponse.error) { throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
+            if (favoritesResponse.error) { throw new Error(`Favorites fetch failed: ${favoritesResponse.error.message}`); }
 
-            if (animeListResponse.error) { console.error("[MyAccountPage] setupUser: Anime list fetch failed!", animeListResponse.error); throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
-            console.log("[MyAccountPage] setupUser: Anime list fetch successful.");
+            console.log("[MyAccountPage] setupUser: All fetches successful.");
+
+            // Process and set states
+            setProfile(fetchedProfile);
+            setReceipts(receiptsResponse.data || []);
+
             const fetchedAnimeList = animeListResponse.data;
-            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) { animeListData = fetchedAnimeList.map((item: any) => { const animeSeriesData = item.anime_series; const typedAnimeSeries = (animeSeriesData && typeof animeSeriesData === 'object' && animeSeriesData !== null) ? { id: animeSeriesData.id, poster_url: animeSeriesData.poster_url, title_english: animeSeriesData.title_english, title_romaji: animeSeriesData.title_romaji } : null; return { status: item.status, rating: item.rating, anime_series: typedAnimeSeries }; }); }
-             else { animeListData = []; }
+            if (fetchedAnimeList && Array.isArray(fetchedAnimeList)) {
+                setAnimeList(fetchedAnimeList.map((item: any) => ({
+                    status: item.status,
+                    rating: item.rating,
+                    anime_series: item.anime_series as AnimeSeriesData // Cast here
+                })));
+            } else { setAnimeList([]); }
 
-            if (statsResponse.error) { console.error("[MyAccountPage] setupUser: Stats fetch failed!", statsResponse.error); throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
-            console.log("[MyAccountPage] setupUser: Stats fetch successful.");
-            statsData = statsResponse.data as ProfileStatsData;
+            setProfileStats(statsResponse.data);
 
-            setProfile(profileData);
-            setReceipts(receiptsData);
-            setAnimeList(animeListData);
-            setProfileStats(statsData);
+            const fetchedFavorites = favoritesResponse.data;
+            // --- START: Correct mapping for favorites ---
+            if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
+                 // The fetched data is already in the format { anime_series: { ... } }[]
+                 // So direct casting should work if the type definition is correct.
+                 // Let's ensure anime_series is not null before adding.
+                setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as FavoriteAnimeItem[]);
+            } else { setFavoriteAnimeList([]); }
+            // --- END: Correct mapping for favorites ---
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
             return true;
         } catch (err: any) {
             console.error("[MyAccountPage] setupUser: Catch block error:", err);
             setError(`Could not load account details: ${err.message}.`);
-            setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
             return false;
         }
     }, []);
 
+    // --- checkSessionAndSetup, Auth Listener (No changes) ---
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`[MyAccountPage] checkSessionAndSetup: Called. Is Retry: ${isRetry}. Setting loading=true`);
         setLoading(true);
@@ -438,12 +438,12 @@ export default function MyAccountPage() {
                 await setupUser(currentSession.user);
             } else {
                 console.log("[MyAccountPage] checkSessionAndSetup: No session found.");
-                setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
             }
         } catch (err: any) {
             console.error("[MyAccountPage] checkSessionAndSetup: Catch block Error:", err);
             setError(err.message || "An unexpected error occurred.");
-            setProfile(null); setReceipts([]); setAnimeList([]); setProfileStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
         } finally {
             console.log("[MyAccountPage] checkSessionAndSetup: Finally block executed. Setting loading=false");
             setLoading(false);
@@ -472,7 +472,7 @@ export default function MyAccountPage() {
     }, []);
 
 
-    // --- Other Handlers ---
+    // --- Other Handlers (No changes) ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
          if (!receiptPath) { alert("Cannot delete receipt: Path is missing."); return; }
         if (window.confirm("Are you sure you want to delete this receipt submission?")) {
@@ -548,7 +548,6 @@ export default function MyAccountPage() {
             }
             setProfile(prev => prev ? { ...prev, naju_id: trimmedUsername } : null);
             setIsEditingUsername(false);
-            // alert("Username updated successfully!"); // Error state မှာ ပြမည်
         } catch (err: any) {
             console.error("Error saving username:", err);
             setError(`Failed to save username: ${err.message}`);
@@ -590,7 +589,7 @@ export default function MyAccountPage() {
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
-                    {activeTab === 'favorites' && <FavoritesTabContent key="favorites" />}
+                    {activeTab === 'favorites' && <FavoritesTabContent key="favorites" favoriteList={favoriteAnimeList} />}
                     {activeTab === 'settings' &&
                         <SettingsTabContent
                             key="settings"
@@ -605,26 +604,16 @@ export default function MyAccountPage() {
                     }
                 </AnimatePresence>
             </div>
-            {/* Global Error Display (Conditional) */}
+            {/* Error Displays */}
             {error && !(activeTab === 'settings' && savingUsername && error.includes('already taken')) && (
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
-                     <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
-                     <div>
-                         <p className="font-semibold text-sm">Error</p>
-                         <p className="text-xs">{error}</p>
-                     </div>
+                     <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
             )}
-             {/* Username taken error display specifically for Settings tab */}
              {activeTab === 'settings' && error && savingUsername && error.includes('already taken') && (
-                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                    className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
-                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/>
-                     <div>
-                         <p className="font-semibold text-sm">Error Updating Username</p>
-                         <p className="text-xs">{error}</p>
-                     </div>
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
+                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error Updating Username</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
              )}
