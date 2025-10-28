@@ -7,6 +7,8 @@ import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
 import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
 import AnimeReviews from '@/components/AnimeReviews';
 import Link from 'next/link';
+// --- FavoriteButton Component ကို import လုပ်ပါ ---
+import FavoriteButton from '@/components/FavoriteButton';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -38,20 +40,30 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  const [animeRes, userListRes] = await Promise.all([
+  // --- START: Promise.all ထဲတွင် favorite status စစ်ဆေးမှု ထပ်တိုးခြင်း ---
+  const [animeRes, userListRes, favoriteRes] = await Promise.all([
+    // Anime details query (ယခင်အတိုင်း)
     supabase
       .from('anime_series')
       .select(`*, anime_genres(genres(name)), anime_episodes(id, episode_number, title, created_at)`)
       .eq('id', params.animeId)
       .order('episode_number', { referencedTable: 'anime_episodes', ascending: true })
       .single(),
+    // User list status query (ယခင်အတိုင်း)
     session
       ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single()
-      : Promise.resolve({ data: null, error: null })
+      : Promise.resolve({ data: null, error: null }),
+    // Favorite status query (အသစ်ထပ်တိုး)
+    session
+      ? supabase.from('user_favorites').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('item_id', params.animeId).eq('item_type', 'anime')
+      : Promise.resolve({ data: null, error: null, count: 0 }) // user မရှိရင် count 0
   ]);
+  // --- END: Promise.all ထဲတွင် favorite status စစ်ဆေးမှု ထပ်တိုးခြင်း ---
 
   const { data: anime, error: animeError } = animeRes;
   const { data: userListEntry } = userListRes;
+  // --- Favorite ရှိမရှိ စစ်ဆေးပြီး boolean အဖြစ်ပြောင်း ---
+  const initialIsFavorited = (favoriteRes.count ?? 0) > 0;
 
   if (animeError || !anime) {
     notFound();
@@ -75,6 +87,17 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             <div className="flex flex-wrap gap-2 mt-2">
               {genres.map(genre => (<span key={genre} className="bg-accent-purple/70 text-white text-xs font-bold px-2 py-1 rounded-full">{genre}</span>))}
             </div>
+            {/* --- START: Favorite Button ကို ထည့်သွင်းရန် နေရာ --- */}
+            {session?.user && (
+              <div className="mt-4">
+                <FavoriteButton
+                  animeId={anime.id}
+                  userId={session.user.id}
+                  initialIsFavorited={initialIsFavorited}
+                />
+              </div>
+            )}
+            {/* --- END: Favorite Button ကို ထည့်သွင်းရန် နေရာ --- */}
           </div>
         </div>
       </div>
