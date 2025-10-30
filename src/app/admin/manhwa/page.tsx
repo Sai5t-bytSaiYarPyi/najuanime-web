@@ -48,19 +48,36 @@ export default function ManhwaManagementPage() {
     setLoading(false);
   }, []);
 
+  // --- START: ပြင်ဆင်ထားသော Admin Check ---
   useEffect(() => {
     const checkAdminAndFetchData = async () => {
+      setLoading(true); // checkAdminAndFetchData ကိုခေါ်တိုင်း loading=true ထားပါ
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.app_metadata?.roles?.includes('admin')) {
-        setIsAdmin(true);
-        fetchManhwaList();
+      
+      if (session && session.user) {
+        // app_metadata အစား profiles table ကို စစ်ဆေးပါ
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('roles')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile && profile.roles && Array.isArray(profile.roles) && profile.roles.includes('admin')) {
+          setIsAdmin(true);
+          fetchManhwaList(); // Admin ဖြစ်မှ data ဆွဲပါ
+        } else {
+          setIsAdmin(false);
+          setLoading(false); // Admin မဟုတ်ရင် loading ရပ်ပါ
+        }
       } else {
         setIsAdmin(false);
-        setLoading(false);
+        setLoading(false); // Session မရှိရင် loading ရပ်ပါ
       }
     };
     checkAdminAndFetchData();
   }, [fetchManhwaList]);
+  // --- END: ပြင်ဆင်ထားသော Admin Check ---
+
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {

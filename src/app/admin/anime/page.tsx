@@ -59,20 +59,36 @@ export default function AnimeManagementPage() {
     setLoading(false);
   }, []);
 
+  // --- START: ပြင်ဆင်ထားသော Admin Check ---
   useEffect(() => {
     const checkAdminAndFetchData = async () => {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.app_metadata?.roles?.includes('admin')) {
-        setIsAdmin(true);
-        await fetchAnimeList();
+      
+      if (session && session.user) {
+        // app_metadata အစား profiles table ကို စစ်ဆေးပါ
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('roles')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile && profile.roles && Array.isArray(profile.roles) && profile.roles.includes('admin')) {
+          setIsAdmin(true);
+          await fetchAnimeList(); // Admin ဖြစ်မှ data ဆွဲပါ
+        } else {
+          setIsAdmin(false);
+          setLoading(false); // Admin မဟုတ်ရင် loading ရပ်ပါ
+        }
       } else {
         setIsAdmin(false);
-        setLoading(false);
+        setLoading(false); // Session မရှိရင် loading ရပ်ပါ
       }
     };
     checkAdminAndFetchData();
   }, [fetchAnimeList]);
+  // --- END: ပြင်ဆင်ထားသော Admin Check ---
+
 
   const openAddModal = () => setIsAddModalOpen(true);
   const closeAddModal = () => {

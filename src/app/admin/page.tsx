@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [pendingReceipts, setPendingReceipts] = useState<Receipt[]>([]);
-  const [daysToAdd, setDaysToAdd] = useState<string>('30'); // --- START: State အသစ် ---
+  const [daysToAdd, setDaysToAdd] = useState<string>('30'); 
 
   const fetchProfiles = useCallback(async (search: string) => {
     setLoading(true);
@@ -60,14 +60,39 @@ export default function AdminDashboard() {
     setLoading(false);
   }, []);
 
+  // --- START: ပြင်ဆင်ထားသော Admin Check ---
   useEffect(() => {
     const checkAdmin = async () => {
+      setLoading(true); // စစ်ဆေးမှု မစခင် loading state ကို true ထားပါ
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.app_metadata?.roles?.includes('admin')) { setIsAdmin(true); } 
-      else { setIsAdmin(false); setLoading(false); }
+      
+      if (session && session.user) {
+        // app_metadata အစား profiles table ကို စစ်ဆေးပါ
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('roles')
+          .eq('id', session.user.id)
+          .single();
+
+        // profile ရှိပြီး 'admin' role ပါမှ isAdmin ကို true ပြောင်းပါ
+        if (profile && profile.roles && Array.isArray(profile.roles) && profile.roles.includes('admin')) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false); // Session မရှိရင် admin မဟုတ်ပါ
+      }
+      
+      // Admin မဟုတ်ရင် data fetch မလုပ်တော့တဲ့အတွက် loading ကို false ပြန်ထားပါ။
+      // Admin ဟုတ်ခဲ့ရင်တော့ fetchProfiles က သူ့ဘာသာ loading ကို false လုပ်ပါလိမ့်မယ်။
+      if (!isAdmin) {
+          setLoading(false);
+      }
     };
     checkAdmin();
-  }, []);
+  }, [isAdmin]); // isAdmin state ကို dependency အဖြစ် ထည့်စရာမလိုတော့ပါ (checkAdmin ထဲမှာတိုက်ရိုက် set လုပ်လို့)
+  // --- END: ပြင်ဆင်ထားသော Admin Check ---
 
   useEffect(() => {
     if (isAdmin) {
@@ -91,7 +116,7 @@ export default function AdminDashboard() {
   
   const closeModal = () => {
     setIsModalOpen(false);
-    setDaysToAdd('30'); // Modal ပိတ်တိုင်း default value ပြန်ထားပါ
+    setDaysToAdd('30'); 
   }
 
   const handleApproveReceipt = async (receiptId: string, userId: string) => {
@@ -116,7 +141,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- START: Subscription ရက် တိုက်ရိုက်ထည့်ရန် Function အသစ် ---
   const handleManualSubscription = async () => {
     if (!selectedProfile || !daysToAdd || parseInt(daysToAdd) <= 0) {
         alert('Please select a user and enter a valid number of days.');
@@ -140,7 +164,6 @@ export default function AdminDashboard() {
         setLoading(false);
     }
   }
-  // --- END: Subscription ရက် တိုက်ရိုက်ထည့်ရန် Function အသစ် ---
 
   const handleViewReceipt = async (path: string) => {
     const { data, error } = await supabase.storage
@@ -225,7 +248,6 @@ export default function AdminDashboard() {
                     <p className="text-gray-400">No pending receipts found for this user.</p>
                 )}
             </div>
-            {/* --- START: Manual Subscription UI အသစ် --- */}
             <hr className="my-6 border-gray-600"/>
             <h3 className="font-bold text-lg mb-4">Manual Subscription</h3>
             <div className='flex items-center gap-4'>
@@ -240,7 +262,6 @@ export default function AdminDashboard() {
                     Add Days
                 </button>
             </div>
-            {/* --- END: Manual Subscription UI အသစ် --- */}
             <button onClick={closeModal} className="mt-6 w-full px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md">Close</button>
         </div>
       </Modal>
