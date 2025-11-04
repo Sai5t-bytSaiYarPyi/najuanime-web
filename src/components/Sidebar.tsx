@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Clapperboard, Flame, User, X, TrendingUp, LogIn, LogOut } from 'lucide-react';
+import { Home, Clapperboard, Flame, User, X, TrendingUp, LogIn, LogOut, Sun, Moon, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient'; //
@@ -27,6 +27,8 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
     const pathname = usePathname();
     const [session, setSession] = useState<Session | null>(null);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+    const [hideSpoilers, setHideSpoilers] = useState<'true' | 'false'>('false');
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -44,6 +46,30 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
             authListener?.subscription.unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const t = (localStorage.getItem('theme') as 'dark' | 'light') || (root.getAttribute('data-theme') as 'dark' | 'light') || 'dark';
+        const s = (localStorage.getItem('hideSpoilers') as 'true' | 'false') || (root.getAttribute('data-hide-spoilers') as 'true' | 'false') || 'false';
+        setTheme(t);
+        setHideSpoilers(s);
+    }, []);
+
+    const toggleTheme = () => {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+        const root = document.documentElement;
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+    };
+
+    const toggleSpoilers = () => {
+        const next = hideSpoilers === 'true' ? 'false' : 'true';
+        setHideSpoilers(next);
+        const root = document.documentElement;
+        root.setAttribute('data-hide-spoilers', next);
+        localStorage.setItem('hideSpoilers', next);
+    };
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -105,7 +131,15 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
                 <div className="flex-grow">
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-2xl font-bold text-text-dark-primary">NajuAnime+</h1>
-                        <button onClick={() => setIsMenuOpen(false)} className="text-text-dark-secondary hover:text-text-dark-primary p-1 rounded-md hover:bg-white/10"><X size={22} /></button>
+                        <div className="flex items-center gap-2">
+                            <button onClick={toggleSpoilers} className="p-1.5 rounded-md hover:bg-white/10" aria-label={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'} title={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'}>
+                                {hideSpoilers === 'true' ? <Eye size={18} /> : <EyeOff size={18} />}
+                            </button>
+                            <button onClick={toggleTheme} className="p-1.5 rounded-md hover:bg-white/10" aria-label="Toggle theme" title="Toggle theme">
+                                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                            </button>
+                            <button onClick={() => setIsMenuOpen(false)} className="text-text-dark-secondary hover:text-text-dark-primary p-1 rounded-md hover:bg-white/10"><X size={22} /></button>
+                        </div>
                     </div>
                     <nav className="flex flex-col gap-2.5">
                         {mobileNavLinks}
@@ -113,6 +147,14 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
                 </div>
                 {/* Bottom Action Button */}
                 <div className="mt-auto pt-4 border-t border-border-color">
+                    <div className="flex items-center gap-2 mb-3">
+                        <button onClick={toggleSpoilers} className="p-2 rounded-md hover:bg-white/10 text-text-dark-secondary hover:text-text-dark-primary" aria-label={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'} title={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'}>
+                            {hideSpoilers === 'true' ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
+                        <button onClick={toggleTheme} className="p-2 rounded-md hover:bg-white/10 text-text-dark-secondary hover:text-text-dark-primary" aria-label="Toggle theme" title="Toggle theme">
+                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                    </div>
                     {session ? (
                          <button onClick={handleLogout} className={getLogoutButtonClasses()}>
                             <LogOut size={20} />
@@ -139,6 +181,14 @@ export default function Sidebar({ isMenuOpen, setIsMenuOpen }: SidebarProps) {
                 </div>
                  {/* Bottom Action Button */}
                  <div className="mt-auto pt-4 border-t border-border-color">
+                    <div className="flex items-center gap-2 mb-3">
+                        <button onClick={toggleSpoilers} className="p-2 rounded-md hover:bg-white/10 text-text-dark-secondary hover:text-text-dark-primary" aria-label={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'} title={hideSpoilers === 'true' ? 'Show spoilers' : 'Hide spoilers'}>
+                            {hideSpoilers === 'true' ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
+                        <button onClick={toggleTheme} className="p-2 rounded-md hover:bg-white/10 text-text-dark-secondary hover:text-text-dark-primary" aria-label="Toggle theme" title="Toggle theme">
+                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                    </div>
                     {session ? (
                         <button onClick={handleLogout} className={getLogoutButtonClasses()}>
                             <LogOut size={20} />

@@ -3,3 +3,40 @@
 
 /* အခြား မည်သည့် CSS rule မှ မရှိသင့်ပါ */
 /* body { @apply antialiased; } ကိုလည်း ခဏ ဖယ်ထားကြည့်ပါ */
+
+/* Light theme overrides mapped to existing dark utility tokens */
+[data-theme='light'] .bg-background-dark { background-color: #F9FAFB !important; }
+[data-theme='light'] .bg-card-dark { background-color: #FFFFFF !important; }
+[data-theme='light'] .text-text-dark-primary { color: #111827 !important; }
+[data-theme='light'] .text-text-dark-secondary { color: #6B7280 !important; }
+[data-theme='light'] .border-border-color { border-color: #E5E7EB !important; }
+
+/* Hover helpers used in code */
+[data-theme='light'] .hover\:bg-white\/10:hover { background-color: rgba(0,0,0,0.06) !important; }
+
+/* Spoiler masking: any element marked with data-spoiler="true" */
+[data-hide-spoilers='true'] [data-spoiler='true'] {
+  filter: blur(7px);
+  transition: filter 150ms ease;
+}
+[data-hide-spoilers='true'] [data-spoiler='true']:hover,
+[data-hide-spoilers='true'] [data-spoiler='true']:focus-within {
+  filter: blur(0);
+}
+
+/* Base text/background for both themes */
+html[data-theme='dark'] body { background-color: #0B0F19; color: #F3F4F6; }
+html[data-theme='light'] body { background-color: #F9FAFB; color: #111827; }
+
+/* Light mode remaps for commonly used dark utilities in pages/components */
+[data-theme='light'] .bg-gray-900 { background-color: #FFFFFF !important; }
+[data-theme='light'] .bg-slate-900 { background-color: #FFFFFF !important; }
+[data-theme='light'] .bg-\[\#0B0F19\] { background-color: #FFFFFF !important; }
+[data-theme='light'] .bg-\[\#111827\] { background-color: #FFFFFF !important; }
+[data-theme='light'] .text-white { color: #111827 !important; }
+[data-theme='light'] .text-gray-300 { color: #6B7280 !important; }
+[data-theme='light'] .text-gray-400 { color: #6B7280 !important; }
+[data-theme='light'] .text-gray-500 { color: #6B7280 !important; }
+[data-theme='light'] .text-slate-300 { color: #6B7280 !important; }
+[data-theme='light'] .border-gray-700 { border-color: #E5E7EB !important; }
+[data-theme='light'] .divide-gray-700 > :not([hidden]) ~ :not([hidden]) { border-color: #E5E7EB !important; }
