@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
 
-// --- Type Definitions ---
 // ... (ယခင် Type Definitions များ အားလုံးကို ဒီနေရာမှာ ထားပါ) ...
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
@@ -50,7 +49,6 @@ type SettingsTabContentProps = {
     savingUsername: boolean;
 };
 
-// --- Components ---
 // ... (ProfileStatsDisplay, ProfileTabContent, AnimeListTabContent, FavoritesTabContent, SettingsTabContent component များ ယခင်အတိုင်း) ...
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
     if (!stats) {
@@ -254,7 +252,95 @@ const SettingsTabContent = ({
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
 }: SettingsTabContentProps) => {
-     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
+    const [isChangingEmail, setIsChangingEmail] = useState(false);
+    const [newEmail, setNewEmail] = useState('');
+    const [savingEmail, setSavingEmail] = useState(false);
+
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [savingPassword, setSavingPassword] = useState(false);
+
+    const [accentColor, setAccentColor] = useState(profile?.preferences?.accentColor || '#39FF14');
+    const [savingAccent, setSavingAccent] = useState(false);
+
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [deletingAccount, setDeletingAccount] = useState(false);
+
+    useEffect(() => {
+        setAccentColor(profile?.preferences?.accentColor || '#39FF14');
+    }, [profile?.preferences?.accentColor]);
+
+    const handleChangeEmail = async () => {
+        if (!newEmail || savingEmail) return;
+        try {
+            setSavingEmail(true);
+            const { error } = await supabase.auth.updateUser({ email: newEmail });
+            if (error) throw error;
+            setIsChangingEmail(false);
+        } catch (e) {
+            console.error('Change email failed', e);
+        } finally {
+            setSavingEmail(false);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        if (!newPassword || newPassword !== confirmPassword || savingPassword) return;
+        try {
+            setSavingPassword(true);
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            setIsChangingPassword(false);
+            setNewPassword(''); setConfirmPassword('');
+        } catch (e) {
+            console.error('Change password failed', e);
+        } finally {
+            setSavingPassword(false);
+        }
+    };
+
+    const handleSaveAccent = async () => {
+        if (!profile?.id || savingAccent) return;
+        try {
+            setSavingAccent(true);
+            const prefs = { ...(profile.preferences || {}), accentColor };
+            const { error } = await supabase.from('profiles').update({ preferences: prefs }).eq('id', profile.id);
+            if (error) throw error;
+            if (accentColor) document.documentElement.style.setProperty('--accent', accentColor);
+        } catch (e) {
+            console.error('Save accent failed', e);
+        } finally {
+            setSavingAccent(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!profile?.id || deletingAccount) return;
+        if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) return;
+        try {
+            setDeletingAccount(true);
+            const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`;
+            const { error } = await supabase.from('profiles').update({
+                is_private: true,
+                avatar_url: null,
+                banner_url: null,
+                bio: null,
+                naju_id: anonHandle,
+                preferences: { ...(profile.preferences || {}), accentColor: null }
+            }).eq('id', profile.id);
+            if (error) throw error;
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        } catch (e) {
+            console.error('Delete account failed', e);
+        } finally {
+            setDeletingAccount(false);
+        }
+    };
+
+    const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
     const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
     const cancelEditingUsername = () => { setIsEditingUsername(false); };
@@ -270,10 +356,10 @@ const SettingsTabContent = ({
                       <div className="space-y-2">
                            <div className="relative">
                                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                               <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-8 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
+                               <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
                            </div>
                            <div className="flex gap-2">
-                               <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                               <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
                                <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
                            </div>
                       </div>
@@ -308,21 +394,49 @@ const SettingsTabContent = ({
                   <div>
                      <label className="block text-sm font-medium text-text-dark-secondary mb-1">Email Address</label>
                      <p className="text-text-dark-primary">{userEmail || 'Loading...'}</p>
-                     <button className="mt-1 text-xs text-accent-blue hover:underline disabled:opacity-50" disabled>Change Email (Soon)</button>
+                     {!isChangingEmail ? (
+                        <button onClick={() => setIsChangingEmail(true)} className="mt-1 text-xs text-accent-blue hover:underline">Change Email</button>
+                     ) : (
+                        <div className="mt-2 flex flex-col sm:flex-row gap-2 max-w-md">
+                           <div className="flex-1">
+                             <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Enter new email" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                           </div>
+                           <div className="flex gap-2">
+                             <button onClick={() => { setIsChangingEmail(false); setNewEmail(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                             <button onClick={handleChangeEmail} disabled={savingEmail || !newEmail} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingEmail ? 'Saving...' : 'Save'}</button>
+                           </div>
+                           <p className="text-xs text-text-dark-secondary">We'll send a confirmation to the new email.</p>
+                        </div>
+                     )}
                   </div>
                    <div>
-                     <label className="block text-sm font-medium text-text-dark-secondary mb-1">Password</label>
-                      <button className="mt-1 text-xs text-accent-blue hover:underline disabled:opacity-50" disabled>Change Password (Soon)</button>
-                  </div>
+                      <label className="block text-sm font-medium text-text-dark-secondary mb-1">Password</label>
+                      {!isChangingPassword ? (
+                        <button onClick={() => setIsChangingPassword(true)} className="mt-1 text-xs text-accent-blue hover:underline">Change Password</button>
+                      ) : (
+                        <div className="mt-2 flex flex-col gap-2 max-w-sm">
+                          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                          <div className="flex gap-2">
+                            <button onClick={() => { setIsChangingPassword(false); setNewPassword(''); setConfirmPassword(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                            <button onClick={handleChangePassword} disabled={savingPassword || !newPassword || newPassword !== confirmPassword} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingPassword ? 'Saving...' : 'Save'}</button>
+                          </div>
+                        </div>
+                      )}
+                   </div>
                </div>
            </div>
             <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Palette size={18}/> Site Preferences</h3>
                <div>
                   <label className="block text-sm font-medium text-text-dark-secondary mb-1">Accent Color</label>
-                  <p className="text-xs text-text-dark-secondary italic">(Coming Soon)</p>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="h-8 w-12 rounded bg-transparent" />
+                    <button onClick={handleSaveAccent} disabled={savingAccent} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingAccent ? 'Saving...' : 'Save'}</button>
+                  </div>
                </div>
            </div>
+
             <div className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary">My Receipt Submissions</h3>
                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -340,13 +454,24 @@ const SettingsTabContent = ({
            </div>
            <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
-               <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50" disabled> Delete Account (Soon) </button>
+               {!deleteConfirmOpen ? (
+                 <button onClick={() => setDeleteConfirmOpen(true)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Delete Account</button>
+               ) : (
+                 <div className="space-y-2">
+                   <p className="text-red-300 text-xs">Type your username (@{profile?.naju_id || ''}) to confirm.</p>
+                   <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="w-full max-w-xs p-2 rounded bg-gray-700 border border-red-700 focus:outline-none focus:ring-1 focus:ring-red-400 text-text-dark-primary" />
+                   <div className="flex gap-2">
+                     <button onClick={() => { setDeleteConfirmOpen(false); setDeleteConfirmText(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                     <button onClick={handleDeleteAccount} disabled={deletingAccount || deleteConfirmText !== (profile?.naju_id || '')} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{deletingAccount ? 'Deleting...' : 'Confirm Delete'}</button>
+                   </div>
+                 </div>
+               )}
                <p className="text-red-300 text-xs mt-2">This action is permanent and cannot be undone.</p>
            </div>
+
        </motion.div>
     );
 };
-
 
 // --- Main Component ---
 export default function MyAccountPage() {
