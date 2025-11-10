@@ -616,9 +616,39 @@ export default function MyAccountPage() {
 
         try {
             console.log("[MyAccountPage] setupUser: Fetching profile...");
-            const { data: fetchedProfile, error: profileError } = await supabase.from('profiles').select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences').eq('id', user.id).single();
-             if (profileError && profileError.code !== 'PGRST116') { throw new Error(`Profile fetch failed: ${profileError.message}`); }
-             console.log("[MyAccountPage] setupUser: Profile fetch successful.");
+            let { data: fetchedProfile, error: profileError } = await supabase
+                .from('profiles')
+                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                .eq('id', user.id)
+                .single();
+            if (profileError && profileError.code !== 'PGRST116') {
+                throw new Error(`Profile fetch failed: ${profileError.message}`);
+            }
+
+            // Auto-create profile if missing
+            if (!fetchedProfile) {
+                console.log('[MyAccountPage] setupUser: No profile found. Creating default profile...');
+                const email = user.email || '';
+                const baseHandle = (email.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 20) || `user${String(Date.now()).slice(-5)}`;
+                let candidate = baseHandle;
+                let insertedProfile = null as any;
+                for (let i = 0; i < 3; i++) {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .insert({ id: user.id, naju_id: candidate, preferences: { theme: 'dark' } })
+                        .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                        .single();
+                    if (!error) { insertedProfile = data; break; }
+                    // If unique violation on naju_id, try another suffix
+                    if (error.message && error.message.includes('duplicate key')) {
+                        candidate = `${baseHandle}-${Math.floor(Math.random() * 1000)}`.slice(0, 20);
+                        continue;
+                    }
+                    throw new Error(`Profile create failed: ${error.message}`);
+                }
+                fetchedProfile = insertedProfile;
+            }
+            console.log("[MyAccountPage] setupUser: Profile ready.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
             const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse] = await Promise.all([
