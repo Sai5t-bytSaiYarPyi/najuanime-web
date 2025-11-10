@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
 
-// ... (ယခင် Type Definitions များ အားလုံးကို ဒီနေရာမှာ ထားပါ) ...
+// --- Types ( မပြောင်းပါ ) ---
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
@@ -49,7 +49,7 @@ type SettingsTabContentProps = {
     savingUsername: boolean;
 };
 
-// ... (ProfileStatsDisplay, ProfileTabContent, AnimeListTabContent, FavoritesTabContent, SettingsTabContent component များ ယခင်အတိုင်း) ...
+// --- Child Components ( မပြောင်းပါ ) ---
 const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
     if (!stats) {
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
@@ -120,9 +120,17 @@ const ProfileTabContent = ({
                     </div>
                 </div>
                 <div className="sm:ml-auto">
-                    <Link href="#settings-edit-profile" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5" >
+                    {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ (Settings tab ကို navigate လုပ်ရန်) */}
+                    <button onClick={() => {
+                        const settingsTab = document.querySelector('button[aria-label="Settings Tab"]'); // Tab button ကို query လုပ်
+                        (settingsTab as HTMLElement)?.click(); // Settings tab ကို နှိပ်
+                        setTimeout(() => { // Tab ပြောင်းပြီးမှ scroll လုပ်
+                            document.getElementById('settings-edit-profile')?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    }} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5" >
                         <Edit3 size={14} /> Edit Profile
-                    </Link>
+                    </button>
+                    {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
                 </div>
             </div>
 
@@ -139,7 +147,15 @@ const ProfileTabContent = ({
                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
                         <div className="flex justify-between items-center mb-1">
                             <h3 className="font-semibold text-text-dark-primary">About Me</h3>
-                            <Link href="#settings-edit-profile" className="text-xs text-text-dark-secondary hover:text-white"> <Edit3 size={12} className="inline mr-1"/> Edit Bio </Link>
+                             {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
+                             <button onClick={() => {
+                                const settingsTab = document.querySelector('button[aria-label="Settings Tab"]');
+                                (settingsTab as HTMLElement)?.click();
+                                setTimeout(() => {
+                                    document.getElementById('settings-edit-profile')?.scrollIntoView({ behavior: 'smooth' });
+                                }, 100);
+                             }} className="text-xs text-text-dark-secondary hover:text-white"> <Edit3 size={12} className="inline mr-1"/> Edit Bio </button>
+                             {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
                         </div>
                         { profile?.bio ? ( <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">{profile.bio}</p> ) : ( <p className="text-text-dark-secondary text-sm italic">No bio added yet.</p> ) }
                      </div>
@@ -247,19 +263,23 @@ const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => (
     </motion.div>
 );
 
+// --- SettingsTabContent (Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ထားသည်) ---
 const SettingsTabContent = ({
     profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
     isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
     isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
 }: SettingsTabContentProps) => {
+    // --- START: States များကို အသက်ဝင်စေရန် ထည့်သွင်း/ပြင်ဆင်ခြင်း ---
     const [isChangingEmail, setIsChangingEmail] = useState(false);
     const [newEmail, setNewEmail] = useState('');
     const [savingEmail, setSavingEmail] = useState(false);
+    const [emailMessage, setEmailMessage] = useState<string | null>(null); // Email message state
 
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [savingPassword, setSavingPassword] = useState(false);
+    const [passwordMessage, setPasswordMessage] = useState<string | null>(null); // Password message state
 
     const [accentColor, setAccentColor] = useState(profile?.preferences?.accentColor || '#39FF14');
     const [savingAccent, setSavingAccent] = useState(false);
@@ -268,34 +288,63 @@ const SettingsTabContent = ({
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deletingAccount, setDeletingAccount] = useState(false);
 
+    // Error state ကို local မှာ ထိန်းသိမ်းရန် (global error state ကို မထိခိုက်စေရန်)
+    const [localError, setLocalError] = useState<string | null>(null);
+    // --- END: States များကို အသက်ဝင်စေရန် ထည့်သွင်း/ပြင်ဆင်ခြင်း ---
+
+
     useEffect(() => {
         setAccentColor(profile?.preferences?.accentColor || '#39FF14');
+        // Accent color ကို CSS variable အဖြစ် သတ်မှတ်ပေးပါ
+        if (profile?.preferences?.accentColor) {
+             document.documentElement.style.setProperty('--accent-color', profile.preferences.accentColor);
+        } else {
+             document.documentElement.style.setProperty('--accent-color', '#39FF14'); // Default
+        }
     }, [profile?.preferences?.accentColor]);
 
+    // --- START: Function Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ခြင်း ---
     const handleChangeEmail = async () => {
         if (!newEmail || savingEmail) return;
+        setSavingEmail(true);
+        setLocalError(null);
+        setEmailMessage(null);
         try {
-            setSavingEmail(true);
             const { error } = await supabase.auth.updateUser({ email: newEmail });
             if (error) throw error;
+            setEmailMessage("Confirmation email sent to your new address. Please verify to complete the change.");
+            setNewEmail('');
             setIsChangingEmail(false);
-        } catch (e) {
+        } catch (e: any) {
             console.error('Change email failed', e);
+            setLocalError(`Failed to update email: ${e.message}`);
         } finally {
             setSavingEmail(false);
         }
     };
 
     const handleChangePassword = async () => {
-        if (!newPassword || newPassword !== confirmPassword || savingPassword) return;
+        if (!newPassword || newPassword !== confirmPassword || savingPassword) {
+            setLocalError("Passwords do not match or are empty.");
+            return;
+        }
+        if (newPassword.length < 6) {
+             setLocalError("Password must be at least 6 characters long.");
+             return;
+        }
+        
+        setSavingPassword(true);
+        setLocalError(null);
+        setPasswordMessage(null);
         try {
-            setSavingPassword(true);
             const { error } = await supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
+            setPasswordMessage("Password updated successfully!");
             setIsChangingPassword(false);
             setNewPassword(''); setConfirmPassword('');
-        } catch (e) {
+        } catch (e: any) {
             console.error('Change password failed', e);
+            setLocalError(`Failed to update password: ${e.message}`);
         } finally {
             setSavingPassword(false);
         }
@@ -303,14 +352,19 @@ const SettingsTabContent = ({
 
     const handleSaveAccent = async () => {
         if (!profile?.id || savingAccent) return;
+        setSavingAccent(true);
+        setLocalError(null);
         try {
-            setSavingAccent(true);
             const prefs = { ...(profile.preferences || {}), accentColor };
             const { error } = await supabase.from('profiles').update({ preferences: prefs }).eq('id', profile.id);
             if (error) throw error;
-            if (accentColor) document.documentElement.style.setProperty('--accent', accentColor);
-        } catch (e) {
+            // CSS variable ကို ချက်ချင်း update လုပ်
+            if (accentColor) {
+                 document.documentElement.style.setProperty('--accent-color', accentColor);
+            }
+        } catch (e: any) {
             console.error('Save accent failed', e);
+            setLocalError(`Failed to save accent color: ${e.message}`);
         } finally {
             setSavingAccent(false);
         }
@@ -318,27 +372,39 @@ const SettingsTabContent = ({
 
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
-        if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) return;
+        if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
+            setLocalError("Username confirmation does not match.");
+            return;
+        }
+        setDeletingAccount(true);
+        setLocalError(null);
         try {
-            setDeletingAccount(true);
+            // ဒါက soft delete ပါ။ User ရဲ့ data ကို 'profiles' table မှာပဲ update လုပ်ပါတယ်။
+            // RLS policy က ဒါကို ခွင့်ပြုဖို့ လိုပါမယ်။
             const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`;
             const { error } = await supabase.from('profiles').update({
-                is_private: true,
+                // is_private: true, // ဒီ field ရှိမရှိ စစ်ဆေးပါ (မရှိရင် ဖယ်ပါ)
                 avatar_url: null,
                 banner_url: null,
                 bio: null,
-                naju_id: anonHandle,
+                naju_id: anonHandle, // Username ကို ပြောင်းလိုက်ပါ
                 preferences: { ...(profile.preferences || {}), accentColor: null }
             }).eq('id', profile.id);
+
             if (error) throw error;
+
+            // Soft delete အောင်မြင်ရင် user ကို logout လုပ်ပေးပါ
             await supabase.auth.signOut();
-            window.location.href = '/';
-        } catch (e) {
+            window.location.href = '/'; // Homepage ကို ပြန်သွားပါ
+        } catch (e: any) {
             console.error('Delete account failed', e);
+            setLocalError(`Failed to delete account: ${e.message}`);
         } finally {
             setDeletingAccount(false);
         }
     };
+    // --- END: Function Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ခြင်း ---
+
 
     const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
     const cancelEditingBio = () => { setIsEditingBio(false); };
@@ -348,6 +414,30 @@ const SettingsTabContent = ({
     return (
        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
           <h2 className="text-2xl font-bold text-text-dark-primary">Account Settings</h2>
+          
+           {/* START: Local Error/Message Display */}
+           <AnimatePresence>
+            {localError && (
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-red-400 bg-red-900/30 border border-red-500/50 p-3 rounded-md">
+                     <AlertTriangle size={16} /><span>{localError}</span>
+                     <button onClick={() => setLocalError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
+                 </motion.div>
+             )}
+             {emailMessage && (
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-green-400 bg-green-900/30 border border-green-500/50 p-3 rounded-md">
+                     <CheckCircle size={16} /><span>{emailMessage}</span>
+                     <button onClick={() => setEmailMessage(null)} className="ml-auto text-green-200 hover:text-white"><XCircle size={16}/></button>
+                 </motion.div>
+             )}
+             {passwordMessage && (
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-green-400 bg-green-900/30 border border-green-500/50 p-3 rounded-md">
+                     <CheckCircle size={16} /><span>{passwordMessage}</span>
+                     <button onClick={() => setPasswordMessage(null)} className="ml-auto text-green-200 hover:text-white"><XCircle size={16}/></button>
+                 </motion.div>
+             )}
+           </AnimatePresence>
+           {/* END: Local Error/Message Display */}
+
            <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
                <div className="mb-6">
@@ -356,7 +446,7 @@ const SettingsTabContent = ({
                       <div className="space-y-2">
                            <div className="relative">
                                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                               <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
+                               <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
                            </div>
                            <div className="flex gap-2">
                                <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
@@ -395,31 +485,41 @@ const SettingsTabContent = ({
                      <label className="block text-sm font-medium text-text-dark-secondary mb-1">Email Address</label>
                      <p className="text-text-dark-primary">{userEmail || 'Loading...'}</p>
                      {!isChangingEmail ? (
-                        <button onClick={() => setIsChangingEmail(true)} className="mt-1 text-xs text-accent-blue hover:underline">Change Email</button>
+                        <button onClick={() => { setIsChangingEmail(true); setLocalError(null); setEmailMessage(null); }} className="mt-1 text-xs text-accent-blue hover:underline">Change Email</button>
                      ) : (
-                        <div className="mt-2 flex flex-col sm:flex-row gap-2 max-w-md">
-                           <div className="flex-1">
-                             <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Enter new email" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                        <div className="mt-2 flex flex-col gap-2 max-w-md">
+                           <div className="relative flex-1">
+                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                             <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Enter new email" className="w-full p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
                            </div>
                            <div className="flex gap-2">
-                             <button onClick={() => { setIsChangingEmail(false); setNewEmail(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
-                             <button onClick={handleChangeEmail} disabled={savingEmail || !newEmail} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingEmail ? 'Saving...' : 'Save'}</button>
+                             <button onClick={() => { setIsChangingEmail(false); setNewEmail(''); setLocalError(null); setEmailMessage(null); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                             <button onClick={handleChangeEmail} disabled={savingEmail || !newEmail} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+                                {savingEmail ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingEmail ? 'Saving...' : 'Save'}
+                             </button>
                            </div>
-                           <p className="text-xs text-text-dark-secondary">We'll send a confirmation to the new email.</p>
                         </div>
                      )}
                   </div>
                    <div>
                       <label className="block text-sm font-medium text-text-dark-secondary mb-1">Password</label>
                       {!isChangingPassword ? (
-                        <button onClick={() => setIsChangingPassword(true)} className="mt-1 text-xs text-accent-blue hover:underline">Change Password</button>
+                        <button onClick={() => { setIsChangingPassword(true); setLocalError(null); setPasswordMessage(null); }} className="mt-1 text-xs text-accent-blue hover:underline">Change Password</button>
                       ) : (
                         <div className="mt-2 flex flex-col gap-2 max-w-sm">
-                          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
-                          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className="w-full p-2 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                          <div className="relative">
+                            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 6 chars)" className="w-full p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                          </div>
+                          <div className="relative">
+                            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="w-full p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" />
+                          </div>
                           <div className="flex gap-2">
-                            <button onClick={() => { setIsChangingPassword(false); setNewPassword(''); setConfirmPassword(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
-                            <button onClick={handleChangePassword} disabled={savingPassword || !newPassword || newPassword !== confirmPassword} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingPassword ? 'Saving...' : 'Save'}</button>
+                            <button onClick={() => { setIsChangingPassword(false); setNewPassword(''); setConfirmPassword(''); setLocalError(null); setPasswordMessage(null); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                            <button onClick={handleChangePassword} disabled={savingPassword || !newPassword || newPassword !== confirmPassword} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+                                {savingPassword ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingPassword ? 'Saving...' : 'Save'}
+                            </button>
                           </div>
                         </div>
                       )}
@@ -431,8 +531,11 @@ const SettingsTabContent = ({
                <div>
                   <label className="block text-sm font-medium text-text-dark-secondary mb-1">Accent Color</label>
                   <div className="flex items-center gap-3">
-                    <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="h-8 w-12 rounded bg-transparent" />
-                    <button onClick={handleSaveAccent} disabled={savingAccent} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{savingAccent ? 'Saving...' : 'Save'}</button>
+                    <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="h-8 w-12 rounded bg-transparent border-none cursor-pointer" />
+                    <span className="text-sm font-mono">{accentColor}</span>
+                    <button onClick={handleSaveAccent} disabled={savingAccent || accentColor === (profile?.preferences?.accentColor || '#39FF14')} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+                         {savingAccent ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingAccent ? 'Saving...' : 'Save'}
+                    </button>
                   </div>
                </div>
            </div>
@@ -452,28 +555,36 @@ const SettingsTabContent = ({
                </div>
               <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link>
            </div>
+           
            <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
                <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
                {!deleteConfirmOpen ? (
-                 <button onClick={() => setDeleteConfirmOpen(true)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Delete Account</button>
+                 <button onClick={() => { setDeleteConfirmOpen(true); setLocalError(null); }} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Delete Account</button>
                ) : (
-                 <div className="space-y-2">
-                   <p className="text-red-300 text-xs">Type your username (@{profile?.naju_id || ''}) to confirm.</p>
-                   <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="w-full max-w-xs p-2 rounded bg-gray-700 border border-red-700 focus:outline-none focus:ring-1 focus:ring-red-400 text-text-dark-primary" />
+                 <div className="space-y-3">
+                   <p className="text-red-300 text-sm">This action will **soft delete** your account by anonymizing your data and will sign you out. This cannot be undone.</p>
+                   <p className="text-red-300 text-xs">Please type your username <strong className='font-mono'>@{profile?.naju_id || ''}</strong> to confirm.</p>
+                   <div className="relative">
+                        <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-red-700 focus:outline-none focus:ring-1 focus:ring-red-400 text-text-dark-primary" />
+                   </div>
                    <div className="flex gap-2">
-                     <button onClick={() => { setDeleteConfirmOpen(false); setDeleteConfirmText(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
-                     <button onClick={handleDeleteAccount} disabled={deletingAccount || deleteConfirmText !== (profile?.naju_id || '')} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500">{deletingAccount ? 'Deleting...' : 'Confirm Delete'}</button>
+                     <button onClick={() => { setDeleteConfirmOpen(false); setDeleteConfirmText(''); setLocalError(null); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
+                     <button onClick={handleDeleteAccount} disabled={deletingAccount || deleteConfirmText !== (profile?.naju_id || '')} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+                         {deletingAccount ? <Loader size={14} className="animate-spin"/> : <Trash2 size={14} />} {deletingAccount ? 'Deleting...' : 'Confirm Delete'}
+                     </button>
                    </div>
                  </div>
                )}
-               <p className="text-red-300 text-xs mt-2">This action is permanent and cannot be undone.</p>
            </div>
 
        </motion.div>
     );
 };
+// --- END: SettingsTabContent (Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ထားသည်) ---
 
-// --- Main Component ---
+
+// --- Main Component ( မပြောင်းပါ ) ---
 export default function MyAccountPage() {
     console.log("[MyAccountPage] Component rendering...");
     const [session, setSession] = useState<Session | null>(null);
@@ -497,7 +608,7 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser function ---
+    // --- setupUser function ( မပြောင်းပါ ) ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
@@ -558,7 +669,7 @@ export default function MyAccountPage() {
         }
     }, []);
 
-    // ... (ကျန် Function များ နှင့် JSX အားလုံး ယခင်အတိုင်း) ...
+    // --- Other Functions (checkSessionAndSetup, useEffect, handleDeleteReceipt, etc.) ( မပြောင်းပါ ) ---
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`[MyAccountPage] checkSessionAndSetup: Called. Is Retry: ${isRetry}. Setting loading=true`);
         setLoading(true);
@@ -612,8 +723,10 @@ export default function MyAccountPage() {
         if (window.confirm("Are you sure you want to delete this receipt submission?")) {
              setDeletingReceipt(true);
              try {
+                // RLS policy: User တွေက ကိုယ့် receipt file ကိုပဲ ဖျက်ခွင့်ရှိရမယ်။
                 const { error: storageError } = await supabase.storage.from('receipts').remove([receiptPath]);
                 if (storageError) { throw new Error(`Storage deletion failed: ${storageError.message}`); }
+                // RLS policy: User တွေက ကိုယ့် receipt record ကိုပဲ ဖျက်ခွင့်ရှိရမယ်။
                 const { error: dbError } = await supabase.from('payment_receipts').delete().eq('id', receiptId);
                 if (dbError) { throw new Error(`Database deletion failed: ${dbError.message}`); }
                  alert("Receipt deleted successfully.");
@@ -628,15 +741,17 @@ export default function MyAccountPage() {
          if (!event.target.files || event.target.files.length === 0 || !session?.user) { return; }
          const file = event.target.files[0];
          const fileExt = file.name.split('.').pop();
-         const fileName = `${session.user.id}.${fileExt}`;
-         const filePath = `${session.user.id}/${fileName}`;
+         const fileName = `${session.user.id}.${fileExt}`; // User ID ကို filename အဖြစ်သုံး (Upsert လုပ်ရန်)
+         const filePath = `${session.user.id}/${fileName}`; // Folder path က user id
          setLoadingState(true);
          try {
+             // Storage RLS: User က ကိုယ့် user_id folder အောက်မှာပဲ upload/update လုပ်ခွင့်ရှိရမယ်။
              const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, { upsert: true, cacheControl: '3600' });
              if (uploadError) { throw uploadError; }
              const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
-             const publicURL = `${urlData.publicUrl}?t=${new Date().getTime()}`;
+             const publicURL = `${urlData.publicUrl}?t=${new Date().getTime()}`; // Cache bust
              const updateField = bucket === 'avatars' ? 'avatar_url' : 'banner_url';
+             // RLS: User က ကိုယ့် profile ကိုပဲ update လုပ်ခွင့်ရှိရမယ်။
              const { error: updateError } = await supabase.from('profiles').update({ [updateField]: publicURL }).eq('id', session.user.id);
              if (updateError) { throw updateError; }
              setProfile(prev => prev ? { ...prev, [updateField]: publicURL } : null);
@@ -654,6 +769,7 @@ export default function MyAccountPage() {
          setSavingBio(true);
          const trimmedBio = newBio.trim();
          try {
+             // RLS: User က ကိုယ့် profile ကိုပဲ update လုပ်ခွင့်ရှိရမယ်။
              const { error } = await supabase.from('profiles').update({ bio: trimmedBio || null }).eq('id', session.user.id);
              if (error) throw error;
              setProfile(prev => prev ? { ...prev, bio: trimmedBio || null } : null);
@@ -675,6 +791,7 @@ export default function MyAccountPage() {
         setSavingUsername(true);
         setError(null);
         try {
+            // RLS: User က ကိုယ့် profile ကိုပဲ update လုပ်ခွင့်ရှိရမယ်။
             const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedUsername }).eq('id', session.user.id).single();
             if (updateError) {
                  if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { throw new Error(`Username "${trimmedUsername}" is already taken.`); }
@@ -690,6 +807,7 @@ export default function MyAccountPage() {
         }
     };
 
+    // --- Main JSX (Loading/Error/No Session states) ( မပြောင်းပါ ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
     if (error && !(savingUsername && error.includes('already taken'))) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
@@ -697,15 +815,16 @@ export default function MyAccountPage() {
 
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
+    // --- Main JSX (Tab Navigation & Content) (aria-label ထည့်ထား) ---
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-dark-primary">
             {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
-                     <button onClick={() => setActiveTab('profile')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
-                     <button onClick={() => setActiveTab('anime_list')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'anime_list' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><ListVideo size={16} /> Anime List</button>
-                      <button onClick={() => setActiveTab('favorites')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'favorites' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Heart size={16} /> Favorites</button>
-                     <button onClick={() => setActiveTab('settings')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'settings' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Settings size={16} /> Settings</button>
+                     <button aria-label="Profile Tab" onClick={() => setActiveTab('profile')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'profile' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><UserIcon size={16} /> Profile</button>
+                     <button aria-label="Anime List Tab" onClick={() => setActiveTab('anime_list')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'anime_list' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><ListVideo size={16} /> Anime List</button>
+                      <button aria-label="Favorites Tab" onClick={() => setActiveTab('favorites')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'favorites' ? 'border-accent-green text-accent-green' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Heart size={16} /> Favorites</button>
+                     <button aria-label="Settings Tab" onClick={() => setActiveTab('settings')} className={`whitespace-nowrap pb-3 pt-1 px-1 border-b-2 font-medium text-sm transition-colors duration-150 flex items-center gap-1.5 ${ activeTab === 'settings' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-text-dark-secondary hover:text-text-dark-primary hover:border-gray-500' }`}><Settings size={16} /> Settings</button>
                  </nav>
             </div>
             {/* Tab Content */}

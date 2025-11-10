@@ -38,6 +38,8 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   // --- handleEmailAuth, handleEmailOtpVerify, etc. (Logic မပြောင်းပါ) ---
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setLoading(true); setError(null); setMessage(null);
+    let trimmedUsername = ''; // username ကို catch block မှာ သုံးနိုင်အောင် အပြင်ထုတ်ထားပါ
+    
     if (isLoginView) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) {
@@ -46,7 +48,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
         } else { onClose(); }
     } else {
       if (!agreedToTerms) { setError('You must agree to the Terms of Service and Privacy Policy.'); setLoading(false); return; }
-      const trimmedUsername = username.trim();
+      trimmedUsername = username.trim(); // trimmedUsername ကို ဒီမှာ value သတ်မှတ်
       if (trimmedUsername.length < 3) { setError('Username must be at least 3 characters long.'); setLoading(false); return; }
       if (trimmedUsername.length > 20) { setError('Username cannot be longer than 20 characters.'); setLoading(false); return; }
       const usernameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -57,6 +59,12 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
             email, password, options: { data: { naju_id: trimmedUsername } }
           });
           if (signUpError) {
+               // --- START: ပြင်ဆင်မှု (Trigger Error ကို ပါ ဖမ်းရန်) ---
+               // Supabase က trigger fail ရင် ဒီ generic error ကို ပြန်ပေးတတ်ပါတယ်
+               if (signUpError.message === 'Database error saving new user') {
+                   throw new Error(`Username "${trimmedUsername}" is already taken.`);
+               }
+               // --- END: ပြင်ဆင်မှု ---
                if (signUpError.message.includes('duplicate key value violates unique constraint') && signUpError.message.includes('naju_id')) { throw new Error(`Username "${trimmedUsername}" is already taken.`); }
                if (signUpError.message.includes('User already registered')) { throw new Error('This email address is already registered. Please log in.'); }
                throw signUpError;
@@ -68,7 +76,18 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
                    else { throw otpFuncError; }
               } else { setMessage(otpData.message || 'Signup initiated. OTP sent to your email.'); setView('email_otp_verify'); }
           } else { throw new Error('User data not returned after signup.'); }
-      } catch (err: any) { console.error("Error during signup or OTP sending:", err); setError(err.message || 'An unexpected error occurred during signup.'); }
+      
+    // --- START: ပြင်ဆင်မှု (Catch Block ကို ပြင်ဆင်) ---
+    } catch (err: any) { 
+        console.error("Error during signup or OTP sending:", err);
+        // Trigger ကနေလာတဲ့ generic error ကို ဖမ်းပြီး user-friendly message ပြပါ
+        if (err.message === 'Database error saving new user' && trimmedUsername) {
+            setError(`Username "${trimmedUsername}" is already taken or another database error occurred. Please try a different username.`);
+        } else {
+            setError(err.message || 'An unexpected error occurred during signup.');
+        }
+    }
+    // --- END: ပြင်ဆင်မှု ---
     }
     setLoading(false);
   };
