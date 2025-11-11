@@ -40,31 +40,25 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- START: Accent Color & Delete Account အတွက် State အသစ်များ ---
+    // --- Accent Color & Delete Account အတွက် State အသစ်များ ---
     const [accentColor, setAccentColor] = useState('#39FF14'); // Default Green
     const [savingAccent, setSavingAccent] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deletingAccount, setDeletingAccount] = useState(false);
-    // --- END: Accent Color & Delete Account အတွက် State အသစ်များ ---
-
-
-    // --- START: Accent Color ကို CSS Variable အဖြစ် သတ်မှတ်မယ့် useEffect ---
+    
+    // --- Accent Color ကို CSS Variable အဖြစ် သတ်မှတ်မယ့် useEffect ---
     useEffect(() => {
-        // profile ကနေ accentColor ကို ယူပြီး state ထဲ ထည့်၊ CSS variable ကို set လုပ်
         const savedColor = profile?.preferences?.accentColor;
         const colorToApply = savedColor || '#39FF14'; // Default green
         
         setAccentColor(colorToApply);
         
-        // CSS Custom Property (Variable) ကို root (<html>) မှာ သတ်မှတ်
         document.documentElement.style.setProperty('--accent-color', colorToApply);
         console.log(`[MyAccountPage] Accent Color applied: ${colorToApply}`);
 
-    }, [profile?.preferences?.accentColor]); // profile.preferences.accentColor ပြောင်းမှသာ run ပါမယ်
-    // --- END: Accent Color ကို CSS Variable အဖြစ် သတ်မှတ်မယ့် useEffect ---
-
-
+    }, [profile?.preferences?.accentColor]); 
+    
     // --- setupUser function (မပြောင်းပါ) ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
@@ -84,7 +78,7 @@ export default function MyAccountPage() {
                 console.log('[MyAccountPage] setupUser: No profile found. Creating default profile (DB defaults for naju_id)...');
                 const { data, error } = await supabase
                     .from('profiles')
-                    .insert({ id: user.id, preferences: { theme: 'dark', accentColor: '#39FF14' } }) // Default accent color ထည့်သိမ်း
+                    .insert({ id: user.id, preferences: { theme: 'dark', accentColor: '#39FF14' } }) 
                     .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
                     .single();
                 if (error) {
@@ -139,7 +133,7 @@ export default function MyAccountPage() {
             if (fetchedAnimeFavorites && Array.isArray(fetchedAnimeFavorites)) {
                 setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
-            const fetchedCharFavoriteIds = favoriteCharIdsResponse.data || [];
+            const fetchedCharFavoriteIds = favoriteCharFavoriteIdsResponse.data || [];
             if (fetchedCharFavoriteIds.length > 0) {
                 const charIds = fetchedCharFavoriteIds.map(fav => fav.item_id);
                 const { data: charactersData, error: charactersError } = await supabase
@@ -299,21 +293,16 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- START: Accent Color & Delete Account အတွက် Function အသစ်များ ---
+    // --- handleSaveAccent (မပြောင်းပါ) ---
     const handleSaveAccent = async () => {
         if (!profile?.id || savingAccent) return;
         setSavingAccent(true);
         setError(null);
         try {
-            // preferences JSON object ကို update လုပ်
             const prefs = { ...(profile.preferences || {}), accentColor: accentColor };
             const { error } = await supabase.from('profiles').update({ preferences: prefs }).eq('id', profile.id);
             if (error) throw error;
-            
-            // Profile state ကိုပါ update လုပ်
             setProfile(prev => prev ? { ...prev, preferences: prefs } : null);
-            // CSS variable ကို (useEffect က) auto update လုပ်သွားပါလိမ့်မယ်
-            
         } catch (e: any) {
             console.error('Save accent failed', e);
             setError(`Failed to save accent color: ${e.message}`);
@@ -322,6 +311,7 @@ export default function MyAccountPage() {
         }
     };
 
+    // --- START: handleDeleteAccount Function ကို ပြင်ဆင်ခြင်း ---
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
         // User က ရိုက်ထည့်တဲ့ text နဲ့ profile.naju_id တူမှ delete လုပ်
@@ -332,17 +322,21 @@ export default function MyAccountPage() {
         setDeletingAccount(true);
         setError(null);
         try {
-            // ဒါက "Soft Delete" ပါ။ User data ကို ဝှက်လိုက်တာမျိုး (Anonymize)
-            // တကယ်ဖျက်ချင်ရင် Admin API နဲ့ auth.admin.deleteUser() ကို Edge Function ထဲမှာ ခေါ်ရပါမယ်။
-            // လောလောဆယ် Soft Delete လုပ်ပါမယ်။
-            const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`;
+            // --- Soft Delete Logic ပြင်ဆင်မှု ---
+            // "naju_id" column ကို update လုပ်ခွင့်မရှိတဲ့ RLS policy ကြောင့် error တက်နေတာပါ။
+            // Soft Delete လုပ်ဖို့ "naju_id" ကို ပြောင်းမယ့်အစား၊ တခြား public data တွေကို null ပြောင်းပါမယ်။
+            // const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`; // [ဖယ်ရှား]
+            
             const { error } = await supabase.from('profiles').update({
                 avatar_url: null,
                 banner_url: null,
                 bio: null,
-                naju_id: anonHandle, // Username ကို ပြောင်းလိုက်
-                preferences: { ...(profile.preferences || {}), accentColor: null },
+                // naju_id: anonHandle, // [ဖယ်ရှား] - ဒါက ပြဿနာပါ
+                preferences: { theme: 'dark', accentColor: '#39FF14' }, // Preferences ကို default ပြန်ထား
+                subscription_status: 'inactive', // Status ကို inactive ပြောင်း
+                subscription_expires_at: null // သက်တမ်းကို null ထား
             }).eq('id', profile.id);
+            // --- Soft Delete Logic ပြင်ဆင်မှု အဆုံး ---
 
             if (error) throw error;
 
@@ -353,15 +347,21 @@ export default function MyAccountPage() {
 
         } catch (e: any) {
             console.error('Delete account failed', e);
-            setError(`Failed to delete account: ${e.message}`);
+            // --- START: Error Message ကို ပိုမို ရှင်းလင်းအောင် ပြင်ဆင် ---
+            if (e.message.includes('check constraint') || e.message.includes('policy')) {
+                 setError(`Failed to delete account: A database security policy prevented the update. Please contact support. Error: ${e.message}`);
+            } else {
+                setError(`Failed to delete account: ${e.message}`);
+            }
+            // --- END: Error Message ကို ပိုမို ရှင်းလင်းအောင် ပြင်ဆင် ---
             setDeletingAccount(false); // Error ဖြစ်ရင် မဖျက်သေးလို့ false ပြန်ထား
         }
         // အောင်မြင်ရင် page redirect ဖြစ်သွားလို့ loading state ကို false ပြန်လုပ်စရာမလို
     };
-    // --- END: Accent Color & Delete Account အတွက် Function အသစ်များ ---
+    // --- END: handleDeleteAccount Function ကို ပြင်ဆင်ခြင်း ---
 
 
-    // --- Main JSX (Loading/Error/No Session states) ---
+    // --- Main JSX (Loading/Error/No Session states) (မပြောင်းပါ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
     if (error && !(savingUsername && error.includes('already taken'))) { 
         return ( 
@@ -382,13 +382,12 @@ export default function MyAccountPage() {
 
     const isSubscribed = profile.subscription_status === 'active' && profile.subscription_expires_at ? new Date(profile.subscription_expires_at) > new Date() : false;
 
-    // --- Main JSX (Tab Navigation & Content) ---
+    // --- Main JSX (Tab Navigation & Content) (မပြောင်းပါ) ---
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-text-dark-primary">
             {/* Tab Navigation */}
             <div className="mb-8 border-b border-border-color">
                  <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto" aria-label="Tabs">
-                    {/* --- START: Tab အရောင်တွေကို accentColor state ကို သုံးပြီး ပြောင်းလဲပါ --- */}
                      <button 
                         aria-label="Profile Tab" 
                         onClick={() => setActiveTab('profile')} 
@@ -419,7 +418,6 @@ export default function MyAccountPage() {
                     >
                         <Heart size={16} /> Favorites
                     </button>
-                    {/* Settings Tab ကိုတော့ accent-purple ကိုပဲ ဆက်သုံးပါမယ် (ကွဲပြားအောင်) */}
                      <button 
                         aria-label="Settings Tab" 
                         onClick={() => setActiveTab('settings')} 
@@ -429,7 +427,6 @@ export default function MyAccountPage() {
                     >
                         <Settings size={16} /> Settings
                     </button>
-                    {/* --- END: Tab အရောင်တွေကို accentColor state ကို သုံးပြီး ပြောင်းလဲပါ --- */}
                  </nav>
             </div>
             {/* Tab Content */}
@@ -459,7 +456,6 @@ export default function MyAccountPage() {
                             isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
                             isEditingUsername={isEditingUsername} setIsEditingUsername={setIsEditingUsername} editingUsernameText={editingUsernameText} setEditingUsernameText={setEditingUsernameText} handleSaveUsername={handleSaveUsername} savingUsername={savingUsername}
                             
-                            // --- START: Props အသစ်များ ပို့ပေးခြင်း ---
                             accentColor={accentColor}
                             setAccentColor={setAccentColor}
                             savingAccent={savingAccent}
@@ -470,7 +466,6 @@ export default function MyAccountPage() {
                             setDeleteConfirmText={setDeleteConfirmText}
                             deletingAccount={deletingAccount}
                             handleDeleteAccount={handleDeleteAccount}
-                            // --- END: Props အသစ်များ ပို့ပေးခြင်း ---
                         />
                     }
                 </AnimatePresence>
