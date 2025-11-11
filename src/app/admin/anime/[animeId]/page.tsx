@@ -5,6 +5,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+// --- START: Icon အသစ် ထပ်ထည့်ပါ ---
+import { Users } from 'lucide-react';
+// --- END: Icon အသစ် ထပ်ထည့်ပါ ---
 
 type VideoUrls = {
   '1080p'?: string;
@@ -151,8 +154,22 @@ export default function ManageEpisodesPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <Link href="/admin/anime" className="text-blue-400 hover:underline mb-6 block">← Back to Anime Series List</Link>
-      <h1 className="text-3xl font-bold mb-2">Manage Episodes for: <span className="text-green-400">{series?.title_english}</span></h1>
-      <p className="text-gray-400 mb-8">Upload new episodes and manage existing ones.</p>
+      
+      {/* --- START: Header ကို ပြင်ဆင်ပါ --- */}
+      <div className="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Manage Episodes for: <span className="text-green-400">{series?.title_english}</span></h1>
+          <p className="text-gray-400">Upload new episodes and manage existing ones.</p>
+        </div>
+        <Link 
+          href={`/admin/anime/${animeId}/characters`} 
+          className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-md font-semibold flex items-center gap-2 self-start"
+        >
+          <Users size={18} /> Manage Characters
+        </Link>
+      </div>
+      {/* --- END: Header ကို ပြင်ဆင်ပါ --- */}
+
       <div className="grid md:grid-cols-2 gap-8">
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Upload New Episode</h2>
