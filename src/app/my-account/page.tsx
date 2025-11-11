@@ -59,7 +59,7 @@ export default function MyAccountPage() {
 
     }, [profile?.preferences?.accentColor]); 
     
-    // --- setupUser function ---
+    // --- setupUser function (မပြောင်းပါ) ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
@@ -134,10 +134,8 @@ export default function MyAccountPage() {
                 setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
             
-            // --- START: Build Error (Typo) ပြင်ဆင်မှု ---
-            // 'FavoriteCharFavoriteIdsResponse' (F အကြီး) အစား 'favoriteCharIdsResponse' (f အသေး) ကို သုံးပါ
+            // Build Error (Typo) ပြင်ဆင်ပြီး
             const fetchedCharFavoriteIds = favoriteCharIdsResponse.data || [];
-            // --- END: Build Error (Typo) ပြင်ဆင်မှု ---
 
             if (fetchedCharFavoriteIds.length > 0) {
                 const charIds = fetchedCharFavoriteIds.map(fav => fav.item_id);
@@ -316,9 +314,10 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- handleDeleteAccount (မပြောင်းပါ၊ RLS error fix ပြီးသား) ---
+    // --- START: handleDeleteAccount Function ကို Edge Function ခေါ်ရန် ပြင်ဆင်ခြင်း ---
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
+        // User က ရိုက်ထည့်တဲ့ text နဲ့ profile.naju_id တူမှ delete လုပ်
         if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
             setError('Username confirmation does not match.');
             return;
@@ -326,30 +325,25 @@ export default function MyAccountPage() {
         setDeletingAccount(true);
         setError(null);
         try {
-            const { error } = await supabase.from('profiles').update({
-                avatar_url: null,
-                banner_url: null,
-                bio: null,
-                preferences: { theme: 'dark', accentColor: '#39FF14' },
-                subscription_status: 'inactive', 
-                subscription_expires_at: null 
-            }).eq('id', profile.id);
+            // Soft Delete အစား Edge Function (Hard Delete) ကို ခေါ်ပါ
+            const { error } = await supabase.functions.invoke('delete-user-account');
 
             if (error) throw error;
 
+            // Function အောင်မြင်ရင် user က logout ဖြစ်သွားပြီးသား (token မရှိတော့)
+            // ဒါကြောင့် signOut() ကို ထပ်ခေါ်ပြီး homepage ကို ပို့ပါ
             await supabase.auth.signOut();
+            alert("Your account has been permanently deleted."); // SignOut မတိုင်ခင် alert ပြပါ
             window.location.href = '/'; 
 
         } catch (e: any) {
             console.error('Delete account failed', e);
-            if (e.message.includes('check constraint') || e.message.includes('policy')) {
-                 setError(`Failed to delete account: A database security policy prevented the update. Please contact support. Error: ${e.message}`);
-            } else {
-                setError(`Failed to delete account: ${e.message}`);
-            }
+            setError(`Failed to delete account: ${e.message}`);
             setDeletingAccount(false); 
         }
     };
+    // --- END: handleDeleteAccount Function ကို Edge Function ခေါ်ရန် ပြင်ဆင်ခြင်း ---
+
 
     // --- Main JSX (Loading/Error/No Session states) (မပြောင်းပါ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
