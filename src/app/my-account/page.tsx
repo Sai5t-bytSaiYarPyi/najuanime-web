@@ -938,18 +938,20 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] setupUser: Profile ready.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
-            // --- START: Promise.all ထဲတွင် favorite characters query ထည့်ပါ ---
-            const [receiptsResponse, animeListResponse, statsResponse, favoritesAnimeResponse, genreStatsResponse, ratingStatsResponse, favoritesCharResponse] = await Promise.all([
+            
+            // --- START: Promise.all ထဲတွင် favorite characters query ကို ပြင်ဆင်ခြင်း ---
+            // Nested query (`characters ( ... )`) အစား ID တွေကိုပဲ ဆွဲထုတ်ပါမယ်။
+            const [receiptsResponse, animeListResponse, statsResponse, favoritesAnimeResponse, genreStatsResponse, ratingStatsResponse, favoriteCharIdsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id }),
                 supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false }),
                 supabase.rpc('get_user_genre_stats', { p_user_id: user.id }),
                 supabase.rpc('get_user_rating_stats', { p_user_id: user.id }),
-                // --- Favorite Characters တွေကို characters table နဲ့ join ပြီး ဆွဲထုတ်ပါ ---
-                supabase.from('user_favorites').select('characters ( id, name, image_url )').eq('user_id', user.id).eq('item_type', 'character').order('created_at', { ascending: false })
+                // --- ပြင်ဆင်ချက်- Favorite Characters တွေရဲ့ ID တွေကိုပဲ အရင် ဆွဲထုတ်ပါ ---
+                supabase.from('user_favorites').select('item_id').eq('user_id', user.id).eq('item_type', 'character').order('created_at', { ascending: false })
             ]);
-            // --- END: Promise.all ထဲတွင် favorite characters query ထည့်ပါ ---
+            // --- END: Promise.all ထဲတွင် favorite characters query ကို ပြင်ဆင်ခြင်း ---
 
 
             if (receiptsResponse.error) { throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
@@ -958,8 +960,9 @@ export default function MyAccountPage() {
             if (favoritesAnimeResponse.error) { throw new Error(`Favorite Anime fetch failed: ${favoritesAnimeResponse.error.message}`); }
             if (genreStatsResponse.error) { throw new Error(`Genre Stats fetch failed: ${genreStatsResponse.error.message}`); }
             if (ratingStatsResponse.error) { throw new Error(`Rating Stats fetch failed: ${ratingStatsResponse.error.message}`); }
-            // --- START: Favorite Characters Error ကို စစ်ဆေးပါ ---
-            if (favoritesCharResponse.error) { throw new Error(`Favorite Characters fetch failed: ${favoritesCharResponse.error.message}`); }
+            
+            // --- START: Favorite Characters Error ကို စစ်ဆေးပါ (ID query အတွက်) ---
+            if (favoriteCharIdsResponse.error) { throw new Error(`Favorite Character IDs fetch failed: ${favoriteCharIdsResponse.error.message}`); }
             // --- END: Favorite Characters Error ကို စစ်ဆေးပါ ---
 
             console.log("[MyAccountPage] setupUser: All fetches successful.");
@@ -987,13 +990,36 @@ export default function MyAccountPage() {
                 setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
 
-            // --- START: Favorite Characters state ကို set လုပ်ပါ ---
-            const fetchedCharFavorites = favoritesCharResponse.data;
-             if (fetchedCharFavorites && Array.isArray(fetchedCharFavorites)) {
-                // `characters` property မပါတဲ့ (null ဖြစ်နေတဲ့) data တွေကို စစ်ထုတ်ပါ
-                setFavoriteCharacterList(fetchedCharFavorites.filter(fav => fav.characters) as unknown as FavoriteCharacterItem[]);
-            } else { setFavoriteCharacterList([]); }
-            // --- END: Favorite Characters state ကို set လုပ်ပါ ---
+            // --- START: Favorite Characters state ကို set လုပ်ပါ (ပြင်ဆင်ထား) ---
+            // ရလာတဲ့ ID တွေနဲ့ characters table ကို ထပ်မံ query လုပ်ပါ
+            const fetchedCharFavoriteIds = favoriteCharIdsResponse.data || [];
+            if (fetchedCharFavoriteIds.length > 0) {
+                const charIds = fetchedCharFavoriteIds.map(fav => fav.item_id);
+                
+                // --- ID တွေနဲ့ characters table ကို ထပ်မံ query လုပ်ပါ ---
+                const { data: charactersData, error: charactersError } = await supabase
+                    .from('characters')
+                    .select('id, name, image_url')
+                    .in('id', charIds);
+                
+                if (charactersError) {
+                    // ဒီနေရာမှာ error ဖြစ်ခဲ့ရင် user ကို အသိပေးပါ
+                    throw new Error(`Favorite Characters data fetch failed: ${charactersError.message}`);
+                }
+
+                // Data ကို frontend component ကနားလည်တဲ့ format ဖြစ်အောင် ပြန်ပြောင်းပါ
+                // { characters: { id, name, image_url } }
+                const formattedCharList = charactersData.map(char => ({
+                    characters: char as CharacterData
+                }));
+                
+                setFavoriteCharacterList(formattedCharList as FavoriteCharacterItem[]);
+
+            } else {
+                // Favorite character မရှိရင် empty array set လုပ်ပါ
+                setFavoriteCharacterList([]);
+            }
+            // --- END: Favorite Characters state ကို set လုပ်ပါ (ပြင်ဆင်ထား) ---
 
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
@@ -1152,7 +1178,25 @@ export default function MyAccountPage() {
 
     // --- Main JSX (Loading/Error/No Session states) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-    if (error && !(savingUsername && error.includes('already taken'))) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
+    
+    // --- START: ပြင်ဆင်ထားသော Error Handling ---
+    // Error ကို page တစ်ခုလုံး မပြတော့ဘဲ၊ အပေါ်က checkSessionAndSetup() ကိုပဲ ခေါ်ခိုင်းလိုက်ပါ
+    if (error && !(savingUsername && error.includes('already taken'))) { 
+        return ( 
+            <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> 
+                <AlertTriangle className="mb-2" size={32} /> 
+                <p className="font-semibold">Failed to Load Account Details</p> 
+                <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> 
+                <button 
+                    onClick={() => checkSessionAndSetup(true)} 
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> 
+                    Try Again 
+                </button> 
+            </div> 
+        ); 
+    }
+    // --- END: ပြင်ဆင်ထားသော Error Handling ---
+
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
      if (!profile) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-yellow-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Account Profile Not Found</p> <p className='text-sm text-gray-400 mt-2'>We couldn't find your profile details. This might be a temporary issue or your profile setup might be incomplete.</p> <button onClick={() => checkSessionAndSetup(true)} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white mr-2"> Retry Loading </button> <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm font-semibold text-white"> Log Out </button> </div> ); }
 
