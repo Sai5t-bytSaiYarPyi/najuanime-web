@@ -8,8 +8,11 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
+// --- START: Chart Component ကို import လုပ်ပါ ---
+import GenreDonutChart from '@/components/charts/GenreDonutChart';
+// --- END: Chart Component ကို import လုပ်ပါ ---
 
-// --- Types ( မပြောင်းပါ ) ---
+// --- Types ---
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
 type Profile = { id: string; naju_id: string; subscription_expires_at: string | null; subscription_status: string | null; avatar_url: string | null; banner_url: string | null; bio: string | null; preferences: ProfilePreferences | null; };
 type Receipt = { id: string; created_at: string; receipt_url: string; status: 'pending' | 'approved' | 'rejected'; };
@@ -29,6 +32,10 @@ type UserAnimeListItem = {
 };
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
+// --- START: Genre Stat Type အသစ် ---
+type GenreStat = { genre_name: string; count: number };
+// --- END: Genre Stat Type အသစ် ---
+
 type SettingsTabContentProps = {
     profile: Profile | null;
     userEmail: string | undefined | null;
@@ -49,8 +56,11 @@ type SettingsTabContentProps = {
     savingUsername: boolean;
 };
 
-// --- Child Components ( မပြောင်းပါ ) ---
-const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
+// --- Child Components ---
+
+// --- START: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
+// (genreStats prop ကို လက်ခံပြီး GenreDonutChart ကို ထည့်သွင်းပါ)
+const ProfileStatsDisplay = ({ stats, genreStats }: { stats: ProfileStatsData, genreStats: GenreStat[] | null }) => {
     if (!stats) {
         return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
     }
@@ -79,19 +89,27 @@ const ProfileStatsDisplay = ({ stats }: { stats: ProfileStatsData }) => {
                     </div>
                  )}
             </div>
+             <div className="mt-4 pt-4 border-t border-border-color">
+                <h4 className="font-semibold text-text-dark-primary text-center mb-1">Top Genres</h4>
+                {/* --- Genre Chart "Coming Soon" အစား Component အသစ်ကို ထည့်ပါ --- */}
+                <GenreDonutChart data={genreStats} />
+            </div>
              <div className="mt-4 text-center text-xs text-text-dark-secondary italic">
-                (Genre Chart & Rating Chart Coming Soon)
+                (Rating Chart Coming Soon)
             </div>
         </div>
     );
 };
+// --- END: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
+
 
 const ProfileTabContent = ({
     profile,
     uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
     uploadingAvatar, avatarInputRef, setUploadingAvatar,
     isSubscribed,
-    profileStats
+    profileStats,
+    genreStats // --- START: genreStats prop ကို လက်ခံပါ ---
 }: any) => {
      const displayUsername = profile?.naju_id || 'User';
 
@@ -137,7 +155,9 @@ const ProfileTabContent = ({
             {/* Stats, Bio, Subscription, Recent Activity */}
             <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-4">
-                     <ProfileStatsDisplay stats={profileStats} />
+                     {/* --- START: genreStats prop ကို ပို့ပေးပါ --- */}
+                     <ProfileStatsDisplay stats={profileStats} genreStats={genreStats} />
+                     {/* --- END: genreStats prop ကို ပို့ပေးပါ --- */}
                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
                          <h3 className="font-semibold text-text-dark-primary mb-1">Subscription</h3>
                          {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-accent-blue hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )}
@@ -584,7 +604,7 @@ const SettingsTabContent = ({
 // --- END: SettingsTabContent (Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ထားသည်) ---
 
 
-// --- Main Component ( မပြောင်းပါ ) ---
+// --- Main Component ---
 export default function MyAccountPage() {
     console.log("[MyAccountPage] Component rendering...");
     const [session, setSession] = useState<Session | null>(null);
@@ -604,15 +624,20 @@ export default function MyAccountPage() {
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
+    // --- START: genreStats အတွက် state အသစ် ---
+    const [genreStats, setGenreStats] = useState<GenreStat[] | null>(null);
+    // --- END: genreStats အတွက် state အသစ် ---
     const [deletingReceipt, setDeletingReceipt] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- setupUser function ( မပြောင်းပါ ) ---
+    // --- setupUser function ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
-        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); // Reset states
+        // --- START: State တွေကို reset လုပ်ပါ ---
+        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+        // --- END: State တွေကို reset လုပ်ပါ ---
 
         try {
             console.log("[MyAccountPage] setupUser: Fetching profile...");
@@ -653,17 +678,25 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] setupUser: Profile ready.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
-            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse] = await Promise.all([
+            // --- START: Promise.all ထဲတွင် genre stats RPC call ထည့်ပါ ---
+            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse, genreStatsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id }),
-                supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false })
+                supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false }),
+                // --- Function အသစ်ကို ခေါ်ပါ ---
+                supabase.rpc('get_user_genre_stats', { p_user_id: user.id })
             ]);
+            // --- END: Promise.all ထဲတွင် genre stats RPC call ထည့်ပါ ---
+
 
             if (receiptsResponse.error) { throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
             if (animeListResponse.error) { throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
             if (statsResponse.error) { throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
             if (favoritesResponse.error) { throw new Error(`Favorites fetch failed: ${favoritesResponse.error.message}`); }
+            // --- START: Genre Stats Error ကို စစ်ဆေးပါ ---
+            if (genreStatsResponse.error) { throw new Error(`Genre Stats fetch failed: ${genreStatsResponse.error.message}`); }
+            // --- END: Genre Stats Error ကို စစ်ဆေးပါ ---
 
             console.log("[MyAccountPage] setupUser: All fetches successful.");
 
@@ -681,14 +714,14 @@ export default function MyAccountPage() {
             } else { setAnimeList([]); }
 
             setProfileStats(statsResponse.data);
+            // --- START: Genre Stats state ကို set လုပ်ပါ ---
+            setGenreStats(genreStatsResponse.data || []);
+            // --- END: Genre Stats state ကို set လုပ်ပါ ---
 
             const fetchedFavorites = favoritesResponse.data;
-            // --- START: ပြင်ဆင်ထားသော အပိုင်း ---
             if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
-                // Filter လုပ်ပြီးသား data ကို unknown အဖြစ် အရင် cast လုပ်၊ ပြီးမှ FavoriteAnimeItem[] အဖြစ် cast ပါ
                 setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
-            // --- END: ပြင်ဆင်ထားသော အပိုင်း ---
 
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
@@ -696,12 +729,14 @@ export default function MyAccountPage() {
         } catch (err: any) {
             console.error("[MyAccountPage] setupUser: Catch block error:", err);
             setError(`Could not load account details: ${err.message}.`);
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
+            // --- START: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+            // --- END: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
             return false;
         }
     }, []);
 
-    // --- Other Functions (checkSessionAndSetup, useEffect, handleDeleteReceipt, etc.) ( မပြောင်းပါ ) ---
+    // --- Other Functions (checkSessionAndSetup, useEffect, handleDeleteReceipt, etc.) ---
      const checkSessionAndSetup = useCallback(async (isRetry = false) => {
         console.log(`[MyAccountPage] checkSessionAndSetup: Called. Is Retry: ${isRetry}. Setting loading=true`);
         setLoading(true);
@@ -716,12 +751,16 @@ export default function MyAccountPage() {
                 await setupUser(currentSession.user);
             } else {
                 console.log("[MyAccountPage] checkSessionAndSetup: No session found.");
-                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
+                // --- START: State အားလုံး reset လုပ်ပါ ---
+                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+                // --- END: State အားလုံး reset လုပ်ပါ ---
             }
         } catch (err: any) {
             console.error("[MyAccountPage] checkSessionAndSetup: Catch block Error:", err);
             setError(err.message || "An unexpected error occurred.");
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null);
+            // --- START: State အားလုံး reset လုပ်ပါ ---
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+            // --- END: State အားလုံး reset လုပ်ပါ ---
         } finally {
             console.log("[MyAccountPage] checkSessionAndSetup: Finally block executed. Setting loading=false");
             setLoading(false);
@@ -839,7 +878,7 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- Main JSX (Loading/Error/No Session states) ( မပြောင်းပါ ) ---
+    // --- Main JSX (Loading/Error/No Session states) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
     if (error && !(savingUsername && error.includes('already taken'))) { return ( <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> <AlertTriangle className="mb-2" size={32} /> <p className="font-semibold">Failed to Load Account Details</p> <p className="text-sm text-gray-400 mt-1 mb-4">{error}</p> <button onClick={() => checkSessionAndSetup(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold text-white"> Try Again </button> </div> ); }
     if (!session || !session.user) { return (<div className="flex flex-col items-center justify-center text-center pt-20 text-white"><h1 className="text-3xl font-bold mb-4">Please Log In</h1><p className="text-gray-300 mb-8">You need to be logged in to view your account.</p><p className="text-gray-400">Use the Login button in the sidebar.</p></div>); }
@@ -869,6 +908,9 @@ export default function MyAccountPage() {
                             uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
                             isSubscribed={isSubscribed}
                             profileStats={profileStats}
+                            // --- START: genreStats prop ကို ပို့ပေးပါ ---
+                            genreStats={genreStats}
+                            // --- END: genreStats prop ကို ပို့ပေးပါ ---
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
