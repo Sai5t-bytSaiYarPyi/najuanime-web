@@ -42,9 +42,9 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   genreStats,
   ratingStats,
 }) => {
-  // --- START: displayUsername ကို 'naju_id' ကနေ ယူသုံး (ဒါက အခု "Name" ဖြစ်သွားပြီ) ---
-  const displayUsername = profile?.naju_id || 'User';
-  // --- END: displayUsername ကို 'naju_id' ကနေ ယူသုံး ---
+  // --- START: display_name ကို အဓိက သုံး၊မရှိရင် naju_id ကို သုံး ---
+  const displayName = profile?.display_name || profile?.naju_id || 'User';
+  // --- END: display_name ကို အဓိက သုံး၊မရှိရင် naju_id ကို သုံး ---
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -123,15 +123,14 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         </div>
         <div className="text-center sm:text-left pb-2 flex-grow">
           <div>
-            {/* --- START: 'naju_id' (Name) ကို အကြီးကြီး ပြ --- */}
+            {/* --- START: 'display_name' ကို အကြီးပြ၊ 'naju_id' ကို @handle အသေးပြ --- */}
             <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">
-              {displayUsername}
+              {displayName}
             </h1>
-            {/* --- '@' ကို ဖယ်ရှားပြီး၊ email ကို ပြ (Optional) --- */}
             <p className="text-text-dark-secondary font-mono text-sm">
-              {profile?.naju_id || 'N/A'}
+              @{profile?.naju_id || 'N/A'}
             </p>
-            {/* --- END: 'naju_id' (Name) ကို အကြီးကြီး ပြ --- */}
+            {/* --- END: 'display_name' ကို အကြီးပြ၊ 'naju_id' ကို @handle အသေးပြ --- */}
           </div>
         </div>
         <div className="sm:ml-auto">
@@ -140,10 +139,9 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             onClick={() => {
               const settingsTab = document.querySelector(
                 'button[aria-label="Settings Tab"]'
-              ); // Tab button ကို query လုပ်
-              (settingsTab as HTMLElement)?.click(); // Settings tab ကို နှိပ်
+              ); 
+              (settingsTab as HTMLElement)?.click(); 
               setTimeout(() => {
-                // Tab ပြောင်းပြီးမှ scroll လုပ်
                 document
                   .getElementById('settings-edit-profile')
                   ?.scrollIntoView({ behavior: 'smooth' });

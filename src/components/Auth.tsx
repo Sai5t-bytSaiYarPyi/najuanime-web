@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Send, Eye, EyeOff, CheckSquare, Square, Hash, AtSign, User } from 'lucide-react'; // User icon ထည့်ပါ
+import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Send, Eye, EyeOff, CheckSquare, Square, Hash, AtSign, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
@@ -19,9 +19,10 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  // --- START: "username" state ကို "name" လို့ ပိုရှင်းအောင် ပြောင်း (variable name) ---
-  const [name, setName] = useState('');
-  // --- END: "username" state ကို "name" လို့ ပိုရှင်းအောင် ပြောင်း ---
+  // --- START: State (၂) ခု ခွဲခြားခြင်း ---
+  const [displayName, setDisplayName] = useState(''); // လူတိုင်း မြင်ရမယ့် နာမည် (ထပ်နိုင်သည်)
+  const [username, setUsername] = useState(''); // Unique @handle (မထပ်ရ)
+  // --- END: State (၂) ခု ခွဲခြားခြင်း ---
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -32,53 +33,64 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [message, setMessage] = useState<string | null>(null);
 
   const resetStates = (keepEmail = false) => {
-      if (!keepEmail) setEmail(''); setPassword(''); setNewPassword(''); setName(''); setOtp(''); // name ကို reset လုပ်
+      if (!keepEmail) setEmail(''); setPassword(''); setNewPassword(''); 
+      setDisplayName(''); setUsername(''); setOtp(''); // state (၂) ခုလုံး reset
       setShowPassword(false); setShowNewPassword(false); setRememberMe(false); setAgreedToTerms(false);
       setError(null); setMessage(null); setLoading(false);
   };
 
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setLoading(true); setError(null); setMessage(null);
-    let trimmedName = ''; // name ကို catch block မှာ သုံးနိုင်အောင် အပြင်ထုတ်ထားပါ
+    let trimmedDisplayName = '';
+    let trimmedUsername = '';
     
     if (isLoginView) {
+        // --- Login Logic (မပြောင်းပါ) ---
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) {
              if (signInError.message === 'Email not confirmed') { setError('Your email is not confirmed yet. Please verify using the OTP sent to your email.'); setMessage('You can request a new OTP if needed.'); }
              else { setError(signInError.message); }
         } else { onClose(); }
     } else {
+      // --- Signup Logic (ပြင်ဆင်ထား) ---
       if (!agreedToTerms) { setError('You must agree to the Terms of Service and Privacy Policy.'); setLoading(false); return; }
       
-      // --- START: Validation ကို "Name" အတွက် ပြင်ဆင်ခြင်း ---
-      trimmedName = name.trim(); // trimmedName ကို ဒီမှာ value သတ်မှတ်
-      if (trimmedName.length < 3) { setError('Name must be at least 3 characters long.'); setLoading(false); return; }
-      if (trimmedName.length > 20) { setError('Name cannot be longer than 20 characters.'); setLoading(false); return; }
-      
-      // --- Regex Validation ကို ဖယ်ရှားလိုက်ပါပြီ ---
-      // const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-      // if (!usernameRegex.test(trimmedName)) { setError("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); setLoading(false); return; }
-      // --- END: Validation ကို "Name" အတွက် ပြင်ဆင်ခြင်း ---
+      trimmedDisplayName = displayName.trim();
+      trimmedUsername = username.trim();
+
+      // 1. Display Name Validation
+      if (trimmedDisplayName.length < 3) { setError('Display Name must be at least 3 characters long.'); setLoading(false); return; }
+      if (trimmedDisplayName.length > 20) { setError('Display Name cannot be longer than 20 characters.'); setLoading(false); return; }
+
+      // 2. Username Validation (Unique Handle)
+      if (trimmedUsername.length < 3) { setError('Username must be at least 3 characters long.'); setLoading(false); return; }
+      if (trimmedUsername.length > 20) { setError('Username cannot be longer than 20 characters.'); setLoading(false); return; }
+      const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+      if (!usernameRegex.test(trimmedUsername)) { setError("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); setLoading(false); return; }
 
       try {
-          // --- START: signUp မှာ 'naju_id' ကို 'trimmedName' နဲ့ ပို့ပါ ---
+          // --- START: signUp မှာ 'display_name' နှင့် 'naju_id' (၂) ခုလုံး ပို့ပါ ---
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email, password, options: { data: { naju_id: trimmedName } } // 'naju_id' column ကို user ထည့်တဲ့ Name နဲ့ set လုပ်
+            email, password, options: { 
+              data: { 
+                display_name: trimmedDisplayName, // display_name column အသစ်
+                naju_id: trimmedUsername      // naju_id (unique username)
+              } 
+            }
           });
-          // --- END: signUp မှာ 'naju_id' ကို 'trimmedName' နဲ့ ပို့ပါ ---
+          // --- END: signUp မှာ 'display_name' နှင့် 'naju_id' (၂) ခုလုံး ပို့ပါ ---
           
           if (signUpError) {
-               if (signUpError.message === 'Database error saving new user') {
-                   throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
-               }
+               // Username (naju_id) တူနေခဲ့ရင်
                if (signUpError.message.includes('duplicate key value violates unique constraint') && signUpError.message.includes('naju_id')) { 
-                   throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
-                }
+                   throw new Error(`Username "@${trimmedUsername}" is already taken.`);
+               }
+               // Email တူနေခဲ့ရင်
                if (signUpError.message.includes('User already registered')) { throw new Error('This email address is already registered. Please log in.'); }
                throw signUpError;
           }
           if (signUpData.user) {
-              const { data: otpData, error: otpFuncError } = await supabase.functions.invoke('send-signup-otp', { body: { email } }); //
+              const { data: otpData, error: otpFuncError } = await supabase.functions.invoke('send-signup-otp', { body: { email } });
               if (otpFuncError) {
                    if (otpFuncError.context?.status === 409) { setError("This email is already confirmed. Please log in."); setIsLoginView(true); }
                    else { throw otpFuncError; }
@@ -87,11 +99,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       
     } catch (err: any) { 
         console.error("Error during signup or OTP sending:", err);
-        if (err.message === 'Database error saving new user' && trimmedName) {
-            setError(`Name "${trimmedName}" is already taken or another database error occurred. Please try a different name.`); // Error message ပြောင်း
-        } else {
-            setError(err.message || 'An unexpected error occurred during signup.');
-        }
+        setError(err.message || 'An unexpected error occurred during signup.');
     }
     }
     setLoading(false);
@@ -148,21 +156,38 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
          <p className="text-text-dark-secondary text-center mb-6">{isLoginView ? 'Log in to continue your journey.' : 'Create an account to get started.'}</p>
          <form onSubmit={handleEmailAuth} className="space-y-4">
              {!isLoginView && (
-                 // --- START: "Username" ကို "Name" လို့ ပြောင်း၊ Validation တွေ ဖြေလျှော့ ---
-                 <div className="relative">
+              // --- START: Signup Form ကို (၂) ခု ပြောင်းလဲခြင်း ---
+              <>
+                <div className="relative">
                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                      <input 
                         type="text" 
-                        placeholder="Name (3-20 characters)" 
-                        value={name} 
-                        onChange={(e) => setName(e.target.value)} 
+                        placeholder="Display Name (e.g., Sai Naju)" 
+                        value={displayName} 
+                        onChange={(e) => setDisplayName(e.target.value)} 
                         required 
                         minLength={3} 
                         maxLength={20} 
                         className={inputClasses} 
                      />
                  </div>
-                 // --- END: "Username" ကို "Name" လို့ ပြောင်း၊ Validation တွေ ဖြေလျှော့ ---
+                 <div className="relative">
+                     <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                     <input 
+                        type="text" 
+                        placeholder="Username (e.g., sainaju, 3-20 chars, a-z, 0-9, _, -)" 
+                        value={username} 
+                        onChange={(e) => setUsername(e.target.value)} 
+                        required 
+                        minLength={3} 
+                        maxLength={20} 
+                        pattern="^[a-zA-Z0-9_-]+$" 
+                        title="Username can only contain letters, numbers, underscores (_), and hyphens (-)." 
+                        className={inputClasses} 
+                     />
+                 </div>
+              </>
+              // --- END: Signup Form ကို (၂) ခု ပြောင်းလဲခြင်း ---
              )}
              <div className="relative">
                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />

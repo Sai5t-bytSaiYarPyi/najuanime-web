@@ -12,9 +12,10 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
   isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
   
-  // --- START: "Name" props တွေကို လက်ခံ ---
-  isEditingName, setIsEditingName, editingNameText, setEditingNameText, handleSaveName, savingName,
-  // --- END: "Name" props တွေကို လက်ခံ ---
+  // --- START: "DisplayName" & "Username" props တွေကို လက်ခံ ---
+  isEditingDisplayName, setIsEditingDisplayName, editingDisplayNameText, setEditingDisplayNameText, handleSaveDisplayName, savingDisplayName,
+  isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
+  // --- END: "DisplayName" & "Username" props တွေကို လက်ခံ ---
   
   accentColor, setAccentColor, savingAccent, handleSaveAccent,
   deleteConfirmOpen, setDeleteConfirmOpen, deleteConfirmText, setDeleteConfirmText, deletingAccount, handleDeleteAccount
@@ -83,10 +84,12 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
   const cancelEditingBio = () => { setIsEditingBio(false); };
   
-  // --- START: "Name" အတွက် helper function များ ---
-  const startEditingName = () => { setIsEditingName(true); setEditingNameText(profile?.naju_id || ''); };
-  const cancelEditingName = () => { setIsEditingName(false); };
-  // --- END: "Name" အတွက် helper function များ ---
+  // --- "Name" & "Username" အတွက် helper function များ ---
+  const startEditingDisplayName = () => { setIsEditingDisplayName(true); setEditingDisplayNameText(profile?.display_name || profile?.naju_id || ''); };
+  const cancelEditingDisplayName = () => { setIsEditingDisplayName(false); };
+  const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
+  const cancelEditingUsername = () => { setIsEditingUsername(false); };
+  // --- helper function များ အဆုံး ---
 
 
   return (
@@ -118,44 +121,84 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
       <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
         
-        {/* --- START: "Username" အပိုင်းကို "Name" သို့ ပြောင်းလဲခြင်း --- */}
+        {/* --- START: "Display Name" (သာမန်နာမည်) ပြင်ဆင်ရန် UI --- */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-text-dark-secondary mb-1">Display Name</label>
-          {isEditingName ? (
+          {isEditingDisplayName ? (
             <div className="space-y-2">
               <div className="relative">
-                {/* AtSign icon ကို User icon သို့ ပြောင်း */}
                 <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input 
                   type="text" 
-                  value={editingNameText} 
-                  onChange={(e) => setEditingNameText(e.target.value)} 
-                  placeholder="Enter new name (3-20 chars)" 
+                  value={editingDisplayNameText} 
+                  onChange={(e) => setEditingDisplayNameText(e.target.value)} 
+                  placeholder="Enter new display name (3-20 chars)" 
                   className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" 
                   maxLength={20} 
                   minLength={3}
                 />
               </div>
               <div className="flex gap-2">
-                <button onClick={cancelEditingName} disabled={savingName} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                <button onClick={cancelEditingDisplayName} disabled={savingDisplayName} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
                 <button 
-                  onClick={() => handleSaveName(editingNameText)} 
-                  disabled={savingName || editingNameText.trim().length < 3 || editingNameText.trim() === profile?.naju_id} 
+                  onClick={() => handleSaveDisplayName(editingDisplayNameText)} 
+                  disabled={savingDisplayName || editingDisplayNameText.trim().length < 3 || editingDisplayNameText.trim() === (profile?.display_name || profile?.naju_id)} 
                   className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"
                 > 
-                  {savingName ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingName ? 'Saving...' : 'Save'} 
+                  {savingDisplayName ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingDisplayName ? 'Saving...' : 'Save'} 
                 </button>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              {/* "@" သင်္ကေတကို ဖယ်ရှား */}
-              <p className="text-text-dark-primary font-bold">{profile?.naju_id || 'N/A'}</p> 
-              <button onClick={startEditingName} disabled={savingBio} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
+              <p className="text-text-dark-primary font-bold">{profile?.display_name || profile?.naju_id || 'N/A'}</p> 
+              <button onClick={startEditingDisplayName} disabled={savingBio || savingUsername} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
             </div>
           )}
         </div>
-        {/* --- END: "Username" အပိုင်းကို "Name" သို့ ပြောင်းလဲခြင်း --- */}
+        {/* --- END: "Display Name" (သာမန်နာမည်) ပြင်ဆင်ရန် UI --- */}
+
+
+        {/* --- START: "Username" (@handle) ပြင်ဆင်ရန် UI --- */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-text-dark-secondary mb-1">Username (@handle)</label>
+          {isEditingUsername ? (
+            <div className="space-y-2">
+              <div className="relative">
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input 
+                  type="text" 
+                  value={editingUsernameText} 
+                  onChange={(e) => setEditingUsernameText(e.target.value)} 
+                  placeholder="Enter new username" 
+                  className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" 
+                  maxLength={20} 
+                  minLength={3}
+                  pattern="^[a-zA-Z0-9_-]+$"
+                  title="Username can only contain letters, numbers, underscores (_), and hyphens (-)."
+                />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                <button 
+                  onClick={() => handleSaveUsername(editingUsernameText)} 
+                  disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} 
+                  className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"
+                > 
+                  {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} 
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <p className="text-text-dark-primary font-mono">@{profile?.naju_id || 'N/A'}</p>
+              <button onClick={startEditingUsername} disabled={savingBio || savingDisplayName} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
+            </div>
+          )}
+          <p className="text-xs text-text-dark-secondary mt-2">Your unique handle. Can only contain letters, numbers, underscores, and hyphens.</p>
+        </div>
+        {/* --- END: "Username" (@handle) ပြင်ဆင်ရန် UI --- */}
+
 
         {/* Bio Section (မပြောင်းပါ) */}
         <div>
@@ -165,13 +208,13 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
               <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-700 border border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" rows={4} maxLength={500} />
               <div className="flex justify-end gap-2">
                 <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingName} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
+                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername || savingDisplayName} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
               </div>
             </div>
           ) : (
             <div className="flex items-start gap-4">
               <p className="text-text-dark-secondary text-sm whitespace-pre-wrap flex-grow">{profile?.bio || <span className="italic">No bio added yet.</span>}</p>
-              <button onClick={startEditingBio} disabled={savingName} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50 shrink-0"> <Edit3 size={12} className="inline mr-0.5"/> Edit </button>
+              <button onClick={startEditingBio} disabled={savingUsername || savingDisplayName} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50 shrink-0"> <Edit3 size={12} className="inline mr-0.5"/> Edit </button>
             </div>
           )}
         </div>
@@ -274,7 +317,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         <Link href="/subscribe" className="mt-4 inline-block hover:underline text-sm" style={{ color: accentColor }}> Submit another receipt &rarr; </Link>
       </div>
 
-      {/* --- START: Danger Zone UI ကို "Name" အတွက် ပြင်ဆင်ခြင်း --- */}
+      {/* --- START: Danger Zone UI ကို "Username" (@handle) အတွက် ပြင်ဆင်ခြင်း --- */}
       <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
         {!deleteConfirmOpen ? (
@@ -287,10 +330,9 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         ) : (
           <div className="space-y-3">
             <p className="text-red-300 text-sm">This action will **permanently delete** your account, profile, and all associated data. This cannot be undone.</p>
-            <p className="text-red-300 text-xs">Please type your name <strong className='font-mono'>{profile?.naju_id || ''}</strong> to confirm.</p>
+            <p className="text-red-300 text-xs">Please type your unique username <strong className='font-mono'>@{profile?.naju_id || ''}</strong> to confirm.</p>
             <div className="relative">
-              {/* AtSign icon ကို User icon သို့ ပြောင်း */}
-              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input 
                 type="text" 
                 value={deleteConfirmText} 
@@ -316,7 +358,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
           </div>
         )}
       </div>
-      {/* --- END: Danger Zone UI ကို "Name" အတွက် ပြင်ဆင်ခြင်း --- */}
+      {/* --- END: Danger Zone UI ကို "Username" (@handle) အတွက် ပြင်ဆင်ခြင်း --- */}
 
     </motion.div>
   );

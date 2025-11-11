@@ -31,11 +31,15 @@ export default function MyAccountPage() {
     const [editingBioText, setEditingBioText] = useState('');
     const [savingBio, setSavingBio] = useState(false);
     
-    // --- START: "Username" state တွေကို "Name" လို့ အမည်ပြောင်း ---
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [editingNameText, setEditingNameText] = useState('');
-    const [savingName, setSavingName] = useState(false);
-    // --- END: "Username" state တွေကို "Name" လို့ အမည်ပြောင်း ---
+    // --- START: "Username" (@handle) နဲ့ "Display Name" (သာမန်နာမည်) state တွေခွဲ ---
+    const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+    const [editingDisplayNameText, setEditingDisplayNameText] = useState('');
+    const [savingDisplayName, setSavingDisplayName] = useState(false);
+
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [editingUsernameText, setEditingUsernameText] = useState('');
+    const [savingUsername, setSavingUsername] = useState(false);
+    // --- END: "Username" (@handle) နဲ့ "Display Name" (သာမန်နာမည်) state တွေခွဲ ---
 
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
     const [genreStats, setGenreStats] = useState<GenreStat[] | null>(null);
@@ -58,33 +62,37 @@ export default function MyAccountPage() {
         console.log(`[MyAccountPage] Accent Color applied: ${colorToApply}`);
     }, [profile?.preferences?.accentColor]); 
     
-    // --- setupUser function (မပြောင်းပါ) ---
+    // --- setupUser function ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
         setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setFavoriteCharacterList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
         try {
             console.log("[MyAccountPage] setupUser: Fetching profile...");
+            // --- START: `display_name` ကိုပါ select လုပ် ---
             let { data: fetchedProfile, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                .select('id, naju_id, display_name, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
                 .eq('id', user.id)
                 .single();
+            // --- END: `display_name` ကိုပါ select လုပ် ---
+
             if (profileError && profileError.code !== 'PGRST116') {
                 throw new Error(`Profile fetch failed: ${profileError.message}`);
             }
             if (!fetchedProfile) {
                 console.log('[MyAccountPage] setupUser: No profile found. Creating default profile (DB defaults for naju_id)...');
+                // Note: display_name ကို trigger ကနေ naju_id နဲ့ တူအောင် အလိုလိုထည့်ပေးသင့် (DB level မှာ)
                 const { data, error } = await supabase
                     .from('profiles')
                     .insert({ id: user.id, preferences: { theme: 'dark', accentColor: '#39FF14' } }) 
-                    .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                    .select('id, naju_id, display_name, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
                     .single();
                 if (error) {
                     if ((error as any).code === '23505' || (error.message && error.message.toLowerCase().includes('duplicate key'))) {
                         const retry = await supabase
                             .from('profiles')
-                            .select('id, naju_id, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
+                            .select('id, naju_id, display_name, subscription_expires_at, subscription_status, avatar_url, banner_url, bio, preferences')
                             .eq('id', user.id)
                             .single();
                         if (retry.error) throw new Error(`Profile fetch after conflict failed: ${retry.error.message}`);
@@ -270,45 +278,67 @@ export default function MyAccountPage() {
          }
      };
 
-    // --- START: handleSaveUsername ကို handleSaveName လို့ ပြောင်းပြီး Regex ဖယ်ရှား ---
-    const handleSaveName = async (newName: string) => {
+    // --- START: handleSaveDisplayName (Function အသစ်) ---
+    const handleSaveDisplayName = async (newName: string) => {
         if (!session?.user || !profile) return;
         const trimmedName = newName.trim();
         if (trimmedName.length < 3 || trimmedName.length > 20) { 
-            alert('Name must be between 3 and 20 characters.'); 
+            alert('Display Name must be between 3 and 20 characters.'); 
+            return; 
+        }
+        if (trimmedName === (profile.display_name || '')) { 
+            setIsEditingDisplayName(false); 
             return; 
         }
         
-        // --- Regex validation ကို ဖယ်ရှားလိုက်ပါပြီ ---
-        // const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-        // if (!usernameRegex.test(trimmedName)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
-        
-        if (trimmedName === profile.naju_id) { 
-            setIsEditingName(false); 
-            return; 
+        setSavingDisplayName(true);
+        setError(null);
+        try {
+            // 'display_name' column ကို update လုပ်
+            const { error: updateError } = await supabase.from('profiles').update({ display_name: trimmedName }).eq('id', session.user.id).single();
+            if (updateError) throw updateError;
+            
+            setProfile(prev => prev ? { ...prev, display_name: trimmedName } : null);
+            setIsEditingDisplayName(false);
+        } catch (err: any) {
+            console.error("Error saving display name:", err);
+            setError(`Failed to save display name: ${err.message}`);
+        } finally {
+            setSavingDisplayName(false);
         }
+    };
+    // --- END: handleSaveDisplayName (Function အသစ်) ---
+
+    // --- START: handleSaveUsername (handleSaveName မဟုတ်တော့) ---
+    const handleSaveUsername = async (newUsername: string) => {
+        if (!session?.user || !profile) return;
+        const trimmedUsername = newUsername.trim();
         
-        setSavingName(true);
+        // Validation (Unique handle အတွက်)
+        if (trimmedUsername.length < 3 || trimmedUsername.length > 20) { alert('Username must be between 3 and 20 characters.'); return; }
+        const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+        if (!usernameRegex.test(trimmedUsername)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
+        if (trimmedUsername === profile.naju_id) { setIsEditingUsername(false); return; }
+        
+        setSavingUsername(true);
         setError(null);
         try {
             // 'naju_id' column ကို update လုပ်
-            const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedName }).eq('id', session.user.id).single();
+            const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedUsername }).eq('id', session.user.id).single();
             if (updateError) {
-                 if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { 
-                    throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
-                 }
+                 if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { throw new Error(`Username "@${trimmedUsername}" is already taken.`); }
                  throw updateError;
             }
-            setProfile(prev => prev ? { ...prev, naju_id: trimmedName } : null);
-            setIsEditingName(false);
+            setProfile(prev => prev ? { ...prev, naju_id: trimmedUsername } : null);
+            setIsEditingUsername(false);
         } catch (err: any) {
-            console.error("Error saving name:", err);
-            setError(`Failed to save name: ${err.message}`); // Error message ပြောင်း
+            console.error("Error saving username:", err);
+            setError(`Failed to save username: ${err.message}`);
         } finally {
-            setSavingName(false);
+            setSavingUsername(false);
         }
     };
-    // --- END: handleSaveUsername ကို handleSaveName လို့ ပြောင်းပြီး Regex ဖယ်ရှား ---
+    // --- END: handleSaveUsername (handleSaveName မဟုတ်တော့) ---
 
 
     // --- handleSaveAccent, handleDeleteAccount (မပြောင်းပါ) ---
@@ -331,14 +361,14 @@ export default function MyAccountPage() {
 
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
+        // 'naju_id' (Username) နဲ့ စစ်ဆေးပါ
         if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
-            setError('Name confirmation does not match.'); // "Username" အစား "Name"
+            setError('Username confirmation does not match.'); 
             return;
         }
         setDeletingAccount(true);
         setError(null);
         try {
-            // Hard delete function ကို ခေါ်
             const { error } = await supabase.functions.invoke('delete-user-account');
             if (error) throw error;
 
@@ -356,7 +386,7 @@ export default function MyAccountPage() {
 
     // --- Main JSX (Loading/Error/No Session states) (မပြောင်းပါ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-    if (error && !(savingName && error.includes('already taken'))) { // savingUsername -> savingName
+    if (error && !(savingUsername && error.includes('already taken'))) { // savingName -> savingUsername
         return ( 
             <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> 
                 <AlertTriangle className="mb-2" size={32} /> 
@@ -448,14 +478,21 @@ export default function MyAccountPage() {
                             handleDeleteReceipt={handleDeleteReceipt}
                             isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
                             
-                            // --- START: "Name" props တွေကို ပို့ပေးခြင်း ---
-                            isEditingName={isEditingName}
-                            setIsEditingName={setIsEditingName}
-                            editingNameText={editingNameText}
-                            setEditingNameText={setEditingNameText}
-                            handleSaveName={handleSaveName}
-                            savingName={savingName}
-                            // --- END: "Name" props တွေကို ပို့ပေးခြင်း ---
+                            // --- START: "DisplayName" & "Username" props တွေကို ပို့ပေးခြင်း ---
+                            isEditingDisplayName={isEditingDisplayName}
+                            setIsEditingDisplayName={setIsEditingDisplayName}
+                            editingDisplayNameText={editingDisplayNameText}
+                            setEditingDisplayNameText={setEditingDisplayNameText}
+                            handleSaveDisplayName={handleSaveDisplayName}
+                            savingDisplayName={savingDisplayName}
+                            
+                            isEditingUsername={isEditingUsername}
+                            setIsEditingUsername={setIsEditingUsername}
+                            editingUsernameText={editingUsernameText}
+                            setEditingUsernameText={setEditingUsernameText}
+                            handleSaveUsername={handleSaveUsername}
+                            savingUsername={savingUsername}
+                            // --- END: "DisplayName" & "Username" props တွေကို ပို့ပေးခြင်း ---
                             
                             accentColor={accentColor}
                             setAccentColor={setAccentColor}
@@ -471,16 +508,16 @@ export default function MyAccountPage() {
                     }
                 </AnimatePresence>
             </div>
-            {/* Error Displays (မပြောင်းပါ) */}
-            {error && !(activeTab === 'settings' && savingName && error.includes('already taken')) && ( // savingUsername -> savingName
+            {/* Error Displays */}
+            {error && !(activeTab === 'settings' && (savingUsername || savingDisplayName) && error.includes('already taken')) && ( 
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
             )}
-             {activeTab === 'settings' && error && savingName && error.includes('already taken') && ( // savingUsername -> savingName
+             {activeTab === 'settings' && error && (savingUsername || savingDisplayName) && error.includes('already taken') && ( 
                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
-                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error Updating Name</p> <p className="text-xs">{error}</p> </div>
+                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error Updating Profile</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
              )}
