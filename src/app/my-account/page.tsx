@@ -8,9 +8,10 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
-// --- START: Chart Component ကို import လုပ်ပါ ---
+// --- START: Chart Component များကို import လုပ်ပါ ---
 import GenreDonutChart from '@/components/charts/GenreDonutChart';
-// --- END: Chart Component ကို import လုပ်ပါ ---
+import RatingBarChart from '@/components/charts/RatingBarChart';
+// --- END: Chart Component များကို import လုပ်ပါ ---
 
 // --- Types ---
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
@@ -32,9 +33,10 @@ type UserAnimeListItem = {
 };
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
-// --- START: Genre Stat Type အသစ် ---
 type GenreStat = { genre_name: string; count: number };
-// --- END: Genre Stat Type အသစ် ---
+// --- START: Rating Stat Type အသစ် ---
+type RatingStat = { rating_value: number; count: number };
+// --- END: Rating Stat Type အသစ် ---
 
 type SettingsTabContentProps = {
     profile: Profile | null;
@@ -59,135 +61,325 @@ type SettingsTabContentProps = {
 // --- Child Components ---
 
 // --- START: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
-// (genreStats prop ကို လက်ခံပြီး GenreDonutChart ကို ထည့်သွင်းပါ)
-const ProfileStatsDisplay = ({ stats, genreStats }: { stats: ProfileStatsData, genreStats: GenreStat[] | null }) => {
-    if (!stats) {
-        return <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">Loading stats...</div>;
-    }
+// (ratingStats prop ကို လက်ခံပြီး RatingBarChart ကို ထည့်သွင်းပါ)
+const ProfileStatsDisplay = ({
+  stats,
+  genreStats,
+  ratingStats,
+}: {
+  stats: ProfileStatsData;
+  genreStats: GenreStat[] | null;
+  ratingStats: RatingStat[] | null; // <-- Prop အသစ်
+}) => {
+  if (!stats) {
     return (
-        <div className="bg-card-dark p-4 rounded-lg shadow-md">
-            <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2"><BarChart2 size={16}/> Statistics</h3>
-            <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                    <p className="text-2xl font-bold text-accent-green">{stats.completed_count ?? 0}</p>
-                    <p className="text-xs text-text-dark-secondary uppercase flex items-center justify-center gap-1"><CheckCircle size={12}/> Anime Completed</p>
-                </div>
-                <div>
-                    <p className="text-2xl font-bold text-yellow-400">{stats.mean_score?.toFixed(2) ?? 'N/A'}</p>
-                    <p className="text-xs text-text-dark-secondary uppercase flex items-center justify-center gap-1"><Star size={12}/> Mean Score</p>
-                </div>
-                {stats.total_episodes !== undefined && (
-                     <div>
-                        <p className="text-2xl font-bold text-accent-blue">{stats.total_episodes ?? 0}</p>
-                        <p className="text-xs text-text-dark-secondary uppercase">Episodes Watched</p>
-                    </div>
-                )}
-                 {stats.days_watched !== undefined && (
-                     <div>
-                        <p className="text-2xl font-bold text-accent-purple">{stats.days_watched?.toFixed(1) ?? 0}</p>
-                        <p className="text-xs text-text-dark-secondary uppercase">Days Watched</p>
-                    </div>
-                 )}
-            </div>
-             <div className="mt-4 pt-4 border-t border-border-color">
-                <h4 className="font-semibold text-text-dark-primary text-center mb-1">Top Genres</h4>
-                {/* --- Genre Chart "Coming Soon" အစား Component အသစ်ကို ထည့်ပါ --- */}
-                <GenreDonutChart data={genreStats} />
-            </div>
-             <div className="mt-4 text-center text-xs text-text-dark-secondary italic">
-                (Rating Chart Coming Soon)
-            </div>
-        </div>
+      <div className="bg-card-dark p-4 rounded-lg shadow-md text-text-dark-secondary text-sm">
+        Loading stats...
+      </div>
     );
+  }
+  return (
+    <div className="bg-card-dark p-4 rounded-lg shadow-md">
+      <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2">
+        <BarChart2 size={16} /> Statistics
+      </h3>
+      <div className="grid grid-cols-2 gap-4 text-center">
+        <div>
+          <p className="text-2xl font-bold text-accent-green">
+            {stats.completed_count ?? 0}
+          </p>
+          <p className="text-xs text-text-dark-secondary uppercase flex items-center justify-center gap-1">
+            <CheckCircle size={12} /> Anime Completed
+          </p>
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-yellow-400">
+            {stats.mean_score?.toFixed(2) ?? 'N/A'}
+          </p>
+          <p className="text-xs text-text-dark-secondary uppercase flex items-center justify-center gap-1">
+            <Star size={12} /> Mean Score
+          </p>
+        </div>
+        {stats.total_episodes !== undefined && (
+          <div>
+            <p className="text-2xl font-bold text-accent-blue">
+              {stats.total_episodes ?? 0}
+            </p>
+            <p className="text-xs text-text-dark-secondary uppercase">
+              Episodes Watched
+            </p>
+          </div>
+        )}
+        {stats.days_watched !== undefined && (
+          <div>
+            <p className="text-2xl font-bold text-accent-purple">
+              {stats.days_watched?.toFixed(1) ?? 0}
+            </p>
+            <p className="text-xs text-text-dark-secondary uppercase">
+              Days Watched
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* --- Genre Chart Section --- */}
+      <div className="mt-4 pt-4 border-t border-border-color">
+        <h4 className="font-semibold text-text-dark-primary text-center mb-1">
+          Top Genres
+        </h4>
+        <GenreDonutChart data={genreStats} />
+      </div>
+
+      {/* --- Rating Chart Section --- */}
+      <div className="mt-4 pt-4 border-t border-border-color">
+        <h4 className="font-semibold text-text-dark-primary text-center mb-1">
+          Score Distribution
+        </h4>
+        {/* --- Rating Chart "Coming Soon" အစား Component အသစ်ကို ထည့်ပါ --- */}
+        <RatingBarChart data={ratingStats} />
+      </div>
+    </div>
+  );
 };
 // --- END: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
 
-
 const ProfileTabContent = ({
-    profile,
-    uploadingBanner, bannerInputRef, handleImageUpload, setUploadingBanner,
-    uploadingAvatar, avatarInputRef, setUploadingAvatar,
-    isSubscribed,
-    profileStats,
-    genreStats // --- START: genreStats prop ကို လက်ခံပါ ---
+  profile,
+  uploadingBanner,
+  bannerInputRef,
+  handleImageUpload,
+  setUploadingBanner,
+  uploadingAvatar,
+  avatarInputRef,
+  setUploadingAvatar,
+  isSubscribed,
+  profileStats,
+  genreStats,
+  ratingStats, // --- START: ratingStats prop ကို လက်ခံပါ ---
 }: any) => {
-     const displayUsername = profile?.naju_id || 'User';
+  const displayUsername = profile?.naju_id || 'User';
 
-    return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            {/* Banner */}
-            <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
-                {profile?.banner_url ? ( <Image src={profile.banner_url} alt="Profile Banner" fill style={{ objectFit: 'cover' }} className="rounded-lg" priority sizes="(max-width: 768px) 100vw, 1184px"/> ) : ( <div className="absolute inset-0 flex items-center justify-center text-gray-500">Default Banner Area</div> )}
-                 <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner || uploadingAvatar} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed">
-                     {uploadingBanner ? <Loader size={14} className="animate-spin"/> : <UploadCloud size={14} />} {uploadingBanner ? 'Uploading...' : 'Change Banner'} </button>
-                 <input type="file" ref={bannerInputRef} onChange={(e) => handleImageUpload(e, 'banners', setUploadingBanner)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
-            </div>
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      {/* Banner */}
+      <div className="h-40 md:h-56 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 rounded-lg relative shadow-lg group overflow-hidden">
+        {profile?.banner_url ? (
+          <Image
+            src={profile.banner_url}
+            alt="Profile Banner"
+            fill
+            style={{ objectFit: 'cover' }}
+            className="rounded-lg"
+            priority
+            sizes="(max-width: 768px) 100vw, 1184px"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+            Default Banner Area
+          </div>
+        )}
+        <button
+          onClick={() => bannerInputRef.current?.click()}
+          disabled={uploadingBanner || uploadingAvatar}
+          className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors text-xs opacity-0 group-hover:opacity-100 flex items-center gap-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {uploadingBanner ? (
+            <Loader size={14} className="animate-spin" />
+          ) : (
+            <UploadCloud size={14} />
+          )}{' '}
+          {uploadingBanner ? 'Uploading...' : 'Change Banner'}{' '}
+        </button>
+        <input
+          type="file"
+          ref={bannerInputRef}
+          onChange={(e) =>
+            handleImageUpload(e, 'banners', setUploadingBanner)
+          }
+          accept="image/png, image/jpeg, image/webp, image/gif"
+          style={{ display: 'none' }}
+        />
+      </div>
 
-            {/* Avatar & Basic Info */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
-                 <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
-                    {profile?.avatar_url ? ( <Image src={profile.avatar_url} alt="User Avatar" fill style={{ objectFit: 'cover' }} className="rounded-full" sizes="(max-width: 768px) 128px, 160px"/> ) : ( <UserIcon size={64} className="text-gray-400" /> )}
-                     <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar || uploadingBanner} className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed">
-                         {uploadingAvatar ? <Loader size={20} className="animate-spin mb-1"/> : <UploadCloud size={20} className="mb-1"/>} {uploadingAvatar ? 'Uploading...' : 'Change Avatar'} </button>
-                     <input type="file" ref={avatarInputRef} onChange={(e) => handleImageUpload(e, 'avatars', setUploadingAvatar)} accept="image/png, image/jpeg, image/webp, image/gif" style={{ display: 'none' }} />
-                </div>
-                <div className="text-center sm:text-left pb-2 flex-grow">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">{displayUsername}</h1>
-                        <p className="text-text-dark-secondary font-mono text-sm">@{profile?.naju_id || 'N/A'}</p>
-                    </div>
-                </div>
-                <div className="sm:ml-auto">
-                    {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ (Settings tab ကို navigate လုပ်ရန်) */}
-                    <button onClick={() => {
-                        const settingsTab = document.querySelector('button[aria-label="Settings Tab"]'); // Tab button ကို query လုပ်
-                        (settingsTab as HTMLElement)?.click(); // Settings tab ကို နှိပ်
-                        setTimeout(() => { // Tab ပြောင်းပြီးမှ scroll လုပ်
-                            document.getElementById('settings-edit-profile')?.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                    }} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5" >
-                        <Edit3 size={14} /> Edit Profile
-                    </button>
-                    {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
-                </div>
-            </div>
+      {/* Avatar & Basic Info */}
+      <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20 px-6">
+        <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-background-dark bg-gray-600 flex items-center justify-center overflow-hidden shadow-xl shrink-0 group">
+          {profile?.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt="User Avatar"
+              fill
+              style={{ objectFit: 'cover' }}
+              className="rounded-full"
+              sizes="(max-width: 768px) 128px, 160px"
+            />
+          ) : (
+            <UserIcon size={64} className="text-gray-400" />
+          )}
+          <button
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={uploadingAvatar || uploadingBanner}
+            className="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs cursor-pointer z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploadingAvatar ? (
+              <Loader size={20} className="animate-spin mb-1" />
+            ) : (
+              <UploadCloud size={20} className="mb-1" />
+            )}{' '}
+            {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}{' '}
+          </button>
+          <input
+            type="file"
+            ref={avatarInputRef}
+            onChange={(e) =>
+              handleImageUpload(e, 'avatars', setUploadingAvatar)
+            }
+            accept="image/png, image/jpeg, image/webp, image/gif"
+            style={{ display: 'none' }}
+          />
+        </div>
+        <div className="text-center sm:text-left pb-2 flex-grow">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">
+              {displayUsername}
+            </h1>
+            <p className="text-text-dark-secondary font-mono text-sm">
+              @{profile?.naju_id || 'N/A'}
+            </p>
+          </div>
+        </div>
+        <div className="sm:ml-auto">
+          {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ (Settings tab ကို navigate လုပ်ရန်) */}
+          <button
+            onClick={() => {
+              const settingsTab = document.querySelector(
+                'button[aria-label="Settings Tab"]'
+              ); // Tab button ကို query လုပ်
+              (settingsTab as HTMLElement)?.click(); // Settings tab ကို နှိပ်
+              setTimeout(() => {
+                // Tab ပြောင်းပြီးမှ scroll လုပ်
+                document
+                  .getElementById('settings-edit-profile')
+                  ?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <Edit3 size={14} /> Edit Profile
+          </button>
+          {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
+        </div>
+      </div>
 
-            {/* Stats, Bio, Subscription, Recent Activity */}
-            <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-4">
-                     {/* --- START: genreStats prop ကို ပို့ပေးပါ --- */}
-                     <ProfileStatsDisplay stats={profileStats} genreStats={genreStats} />
-                     {/* --- END: genreStats prop ကို ပို့ပေးပါ --- */}
-                     <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                         <h3 className="font-semibold text-text-dark-primary mb-1">Subscription</h3>
-                         {isSubscribed ? ( <div className="flex items-center gap-2"> <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span> <span className="text-green-400 font-medium">ACTIVE</span> <span className="text-text-dark-secondary text-sm">(Expires: {profile?.subscription_expires_at ? new Date(profile.subscription_expires_at).toLocaleDateString() : 'N/A'})</span> </div> ) : ( <div className="flex items-center gap-2"> <span className={`w-3 h-3 ${profile?.subscription_status === 'expired' ? 'bg-red-500' : 'bg-yellow-500'} rounded-full inline-block`}></span> <span className={`${profile?.subscription_status === 'expired' ? 'text-red-400' : 'text-yellow-400'} font-medium`}> {profile?.subscription_status === 'expired' ? 'EXPIRED' : 'INACTIVE'} </span> <Link href="/subscribe" className="ml-auto text-accent-blue hover:underline text-sm font-semibold">Subscribe Now</Link> </div> )}
-                    </div>
-                 </div>
-                 <div className="space-y-4">
-                     <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className="font-semibold text-text-dark-primary">About Me</h3>
-                             {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
-                             <button onClick={() => {
-                                const settingsTab = document.querySelector('button[aria-label="Settings Tab"]');
-                                (settingsTab as HTMLElement)?.click();
-                                setTimeout(() => {
-                                    document.getElementById('settings-edit-profile')?.scrollIntoView({ behavior: 'smooth' });
-                                }, 100);
-                             }} className="text-xs text-text-dark-secondary hover:text-white"> <Edit3 size={12} className="inline mr-1"/> Edit Bio </button>
-                             {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
-                        </div>
-                        { profile?.bio ? ( <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">{profile.bio}</p> ) : ( <p className="text-text-dark-secondary text-sm italic">No bio added yet.</p> ) }
-                     </div>
-                      <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                         <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2"><Activity size={16}/> Recent Activity</h3>
-                         <p className="text-text-dark-secondary text-sm italic">(Coming Soon)</p>
-                     </div>
-                 </div>
+      {/* Stats, Bio, Subscription, Recent Activity */}
+      <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          {/* --- START: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ --- */}
+          <ProfileStatsDisplay
+            stats={profileStats}
+            genreStats={genreStats}
+            ratingStats={ratingStats}
+          />
+          {/* --- END: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ --- */}
+          <div className="bg-card-dark p-4 rounded-lg shadow-md">
+            <h3 className="font-semibold text-text-dark-primary mb-1">
+              Subscription
+            </h3>
+            {isSubscribed ? (
+              <div className="flex items-center gap-2">
+                {' '}
+                <span className="w-3 h-3 bg-green-500 rounded-full inline-block animate-pulse"></span>{' '}
+                <span className="text-green-400 font-medium">ACTIVE</span>{' '}
+                <span className="text-text-dark-secondary text-sm">
+                  (Expires:{' '}
+                  {profile?.subscription_expires_at
+                    ? new Date(
+                        profile.subscription_expires_at
+                      ).toLocaleDateString()
+                    : 'N/A'}
+                  )
+                </span>{' '}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {' '}
+                <span
+                  className={`w-3 h-3 ${
+                    profile?.subscription_status === 'expired'
+                      ? 'bg-red-500'
+                      : 'bg-yellow-500'
+                  } rounded-full inline-block`}
+                ></span>{' '}
+                <span
+                  className={`${
+                    profile?.subscription_status === 'expired'
+                      ? 'text-red-400'
+                      : 'text-yellow-400'
+                  } font-medium`}
+                >
+                  {' '}
+                  {profile?.subscription_status === 'expired'
+                    ? 'EXPIRED'
+                    : 'INACTIVE'}{' '}
+                </span>{' '}
+                <Link
+                  href="/subscribe"
+                  className="ml-auto text-accent-blue hover:underline text-sm font-semibold"
+                >
+                  Subscribe Now
+                </Link>{' '}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="bg-card-dark p-4 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="font-semibold text-text-dark-primary">About Me</h3>
+              {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
+              <button
+                onClick={() => {
+                  const settingsTab = document.querySelector(
+                    'button[aria-label="Settings Tab"]'
+                  );
+                  (settingsTab as HTMLElement)?.click();
+                  setTimeout(() => {
+                    document
+                      .getElementById('settings-edit-profile')
+                      ?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
+                className="text-xs text-text-dark-secondary hover:text-white"
+              >
+                {' '}
+                <Edit3 size={12} className="inline mr-1" /> Edit Bio{' '}
+              </button>
+              {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
             </div>
-        </motion.div>
-    );
+            {profile?.bio ? (
+              <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">
+                {profile.bio}
+              </p>
+            ) : (
+              <p className="text-text-dark-secondary text-sm italic">
+                No bio added yet.
+              </p>
+            )}
+          </div>
+          <div className="bg-card-dark p-4 rounded-lg shadow-md">
+            <h3 className="font-semibold text-text-dark-primary mb-3 flex items-center gap-2">
+              <Activity size={16} /> Recent Activity
+            </h3>
+            <p className="text-text-dark-secondary text-sm italic">
+              (Coming Soon)
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
 };
+
 
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
     const [filterStatus, setFilterStatus] = useState('All');
@@ -624,9 +816,10 @@ export default function MyAccountPage() {
     const [editingUsernameText, setEditingUsernameText] = useState('');
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
-    // --- START: genreStats အတွက် state အသစ် ---
     const [genreStats, setGenreStats] = useState<GenreStat[] | null>(null);
-    // --- END: genreStats အတွက် state အသစ် ---
+    // --- START: ratingStats အတွက် state အသစ် ---
+    const [ratingStats, setRatingStats] = useState<RatingStat[] | null>(null);
+    // --- END: ratingStats အတွက် state အသစ် ---
     const [deletingReceipt, setDeletingReceipt] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -636,7 +829,7 @@ export default function MyAccountPage() {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
         // --- START: State တွေကို reset လုပ်ပါ ---
-        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
         // --- END: State တွေကို reset လုပ်ပါ ---
 
         try {
@@ -678,25 +871,27 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] setupUser: Profile ready.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
-            // --- START: Promise.all ထဲတွင် genre stats RPC call ထည့်ပါ ---
-            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse, genreStatsResponse] = await Promise.all([
+            // --- START: Promise.all ထဲတွင် rating stats RPC call ထည့်ပါ ---
+            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse, genreStatsResponse, ratingStatsResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id }),
                 supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false }),
+                supabase.rpc('get_user_genre_stats', { p_user_id: user.id }),
                 // --- Function အသစ်ကို ခေါ်ပါ ---
-                supabase.rpc('get_user_genre_stats', { p_user_id: user.id })
+                supabase.rpc('get_user_rating_stats', { p_user_id: user.id })
             ]);
-            // --- END: Promise.all ထဲတွင် genre stats RPC call ထည့်ပါ ---
+            // --- END: Promise.all ထဲတွင် rating stats RPC call ထည့်ပါ ---
 
 
             if (receiptsResponse.error) { throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
             if (animeListResponse.error) { throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
             if (statsResponse.error) { throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
             if (favoritesResponse.error) { throw new Error(`Favorites fetch failed: ${favoritesResponse.error.message}`); }
-            // --- START: Genre Stats Error ကို စစ်ဆေးပါ ---
             if (genreStatsResponse.error) { throw new Error(`Genre Stats fetch failed: ${genreStatsResponse.error.message}`); }
-            // --- END: Genre Stats Error ကို စစ်ဆေးပါ ---
+            // --- START: Rating Stats Error ကို စစ်ဆေးပါ ---
+            if (ratingStatsResponse.error) { throw new Error(`Rating Stats fetch failed: ${ratingStatsResponse.error.message}`); }
+            // --- END: Rating Stats Error ကို စစ်ဆေးပါ ---
 
             console.log("[MyAccountPage] setupUser: All fetches successful.");
 
@@ -714,9 +909,10 @@ export default function MyAccountPage() {
             } else { setAnimeList([]); }
 
             setProfileStats(statsResponse.data);
-            // --- START: Genre Stats state ကို set လုပ်ပါ ---
             setGenreStats(genreStatsResponse.data || []);
-            // --- END: Genre Stats state ကို set လုပ်ပါ ---
+            // --- START: Rating Stats state ကို set လုပ်ပါ ---
+            setRatingStats(ratingStatsResponse.data || []);
+            // --- END: Rating Stats state ကို set လုပ်ပါ ---
 
             const fetchedFavorites = favoritesResponse.data;
             if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
@@ -730,7 +926,7 @@ export default function MyAccountPage() {
             console.error("[MyAccountPage] setupUser: Catch block error:", err);
             setError(`Could not load account details: ${err.message}.`);
             // --- START: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
             // --- END: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
             return false;
         }
@@ -752,14 +948,14 @@ export default function MyAccountPage() {
             } else {
                 console.log("[MyAccountPage] checkSessionAndSetup: No session found.");
                 // --- START: State အားလုံး reset လုပ်ပါ ---
-                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
                 // --- END: State အားလုံး reset လုပ်ပါ ---
             }
         } catch (err: any) {
             console.error("[MyAccountPage] checkSessionAndSetup: Catch block Error:", err);
             setError(err.message || "An unexpected error occurred.");
             // --- START: State အားလုံး reset လုပ်ပါ ---
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
             // --- END: State အားလုံး reset လုပ်ပါ ---
         } finally {
             console.log("[MyAccountPage] checkSessionAndSetup: Finally block executed. Setting loading=false");
@@ -908,9 +1104,10 @@ export default function MyAccountPage() {
                             uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
                             isSubscribed={isSubscribed}
                             profileStats={profileStats}
-                            // --- START: genreStats prop ကို ပို့ပေးပါ ---
+                            // --- START: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ ---
                             genreStats={genreStats}
-                            // --- END: genreStats prop ကို ပို့ပေးပါ ---
+                            ratingStats={ratingStats}
+                            // --- END: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ ---
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
