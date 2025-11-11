@@ -1,6 +1,9 @@
 // src/components/charts/RatingBarChart.tsx
 'use client';
 
+// --- START: useEffect, useState ကို import လုပ်ပါ ---
+import { useEffect, useState } from 'react';
+// --- END: useEffect, useState ကို import လုပ်ပါ ---
 import {
   BarChart,
   Bar,
@@ -39,6 +42,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 // --- ပင်မ Bar Chart Component ---
 // ------------------------------
 export default function RatingBarChart({ data }: { data: RatingStat[] | null }) {
+  // --- START: Accent Color ကို CSS Variable ကနေ ဖတ်ယူရန် ---
+  const [chartColor, setChartColor] = useState('#39FF14'); // Default green
+
+  useEffect(() => {
+    // Client-side မှာသာ document object ကို access လုပ်လို့ရမှာဖြစ်ပါတယ်။
+    if (typeof window !== 'undefined') {
+      const color = getComputedStyle(document.documentElement)
+        .getPropertyValue('--accent-color')
+        .trim(); // .trim() က အရှေ့အနောက် space တွေ ပါလာရင် ဖယ်ရှားပေး
+      
+      // color က မရှိခဲ့ရင် (သို့) '' (empty string) ဖြစ်နေခဲ့ရင် default ကိုပဲ သုံး
+      if (color) {
+        setChartColor(color);
+      } else {
+        setChartColor('#39FF14'); // Default green
+      }
+    }
+  }, [data]); // data ပြောင်းတိုင်း (tab ပြောင်းတိုင်း) အရောင်ကို ပြန်စစ်
+  // --- END: Accent Color ကို CSS Variable ကနေ ဖတ်ယူရန် ---
+
+
   if (!data || data.every((d) => d.count === 0)) {
     return (
       <div className="text-center text-sm text-text-dark-secondary italic py-4">
@@ -47,13 +71,15 @@ export default function RatingBarChart({ data }: { data: RatingStat[] | null }) 
     );
   }
 
+  // --- START: Hardcode လုပ်ထားတဲ့ အရောင် logic ကို ဖယ်ရှားပါ ---
   // Accent color ကို CSS variable ကနေ ယူသုံးပါ
-  const accentColor =
-    typeof window !== 'undefined'
-      ? getComputedStyle(document.documentElement).getPropertyValue(
-          '--accent-color'
-        ) || '#39FF14'
-      : '#39FF14';
+  // const accentColor =
+  //   typeof window !== 'undefined'
+  //     ? getComputedStyle(document.documentElement).getPropertyValue(
+  //         '--accent-color'
+  //       ) || '#39FF14'
+  //     : '#39FF14';
+  // --- END: Hardcode လုပ်ထားတဲ့ အရောင် logic ကို ဖယ်ရှားပါ ---
 
   return (
     <div className="mt-4" style={{ width: '100%', height: 250 }}>
@@ -99,8 +125,8 @@ export default function RatingBarChart({ data }: { data: RatingStat[] | null }) 
             cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
           />
 
-          {/* Bar တိုင်များ */}
-          <Bar dataKey="count" fill={accentColor} radius={[3, 3, 0, 0]} />
+          {/* Bar တိုင်များ (chartColor state ကို သုံးပါ) */}
+          <Bar dataKey="count" fill={chartColor} radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

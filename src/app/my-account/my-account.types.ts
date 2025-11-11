@@ -31,6 +31,7 @@ export type ProfileStatsData = { completed_count: number; mean_score: number; to
 export type GenreStat = { genre_name: string; count: number };
 export type RatingStat = { rating_value: number; count: number };
 
+// --- START: SettingsTabContentProps ကို မွမ်းမံခြင်း ---
 export type SettingsTabContentProps = {
   profile: Profile | null;
   userEmail: string | undefined | null;
@@ -49,7 +50,23 @@ export type SettingsTabContentProps = {
   setEditingUsernameText: (text: string) => void;
   handleSaveUsername: (newUsername: string) => void;
   savingUsername: boolean;
+  
+  // --- Accent Color အတွက် Props အသစ်များ ---
+  accentColor: string;
+  setAccentColor: (color: string) => void;
+  savingAccent: boolean;
+  handleSaveAccent: () => void;
+  
+  // --- Delete Account အတွက် Props အသစ်များ ---
+  deleteConfirmOpen: boolean;
+  setDeleteConfirmOpen: (isOpen: boolean) => void;
+  deleteConfirmText: string;
+  setDeleteConfirmText: (text: string) => void;
+  deletingAccount: boolean;
+  handleDeleteAccount: () => void;
 };
+// --- END: SettingsTabContentProps ကို မွမ်းမံခြင်း ---
+
 export type FavoritesTabContentProps = {
   favoriteAnimeList: FavoriteAnimeItem[];
   favoriteCharacterList: FavoriteCharacterItem[];

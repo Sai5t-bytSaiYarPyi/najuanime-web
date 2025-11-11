@@ -1,3 +1,4 @@
+// src/app/my-account/components/SettingsTabContent.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -11,6 +12,10 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
   isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
   isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
+  // --- START: Props အသစ်များကို လက်ခံခြင်း ---
+  accentColor, setAccentColor, savingAccent, handleSaveAccent,
+  deleteConfirmOpen, setDeleteConfirmOpen, deleteConfirmText, setDeleteConfirmText, deletingAccount, handleDeleteAccount
+  // --- END: Props အသစ်များကို လက်ခံခြင်း ---
 }) => {
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -22,25 +27,33 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  
+  // --- START: accentColor state ကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state ကို ဖယ်ရှားပါ ---
+  // const [accentColor, setAccentColor] = useState(profile?.preferences?.accentColor || '#39FF14');
+  // const [savingAccent, setSavingAccent] = useState(false);
+  // --- END: accentColor state ကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state ကို ဖယ်ရှားပါ ---
 
-  const [accentColor, setAccentColor] = useState(profile?.preferences?.accentColor || '#39FF14');
-  const [savingAccent, setSavingAccent] = useState(false);
-
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  const [deletingAccount, setDeletingAccount] = useState(false);
+  // --- START: Delete Account state တွေကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state တွေကို ဖယ်ရှားပါ ---
+  // const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  // const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  // const [deletingAccount, setDeletingAccount] = useState(false);
+  // --- END: Delete Account state တွေကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state တွေကို ဖယ်ရှားပါ ---
 
   const [localError, setLocalError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setAccentColor(profile?.preferences?.accentColor || '#39FF14');
-    if (profile?.preferences?.accentColor) {
-      document.documentElement.style.setProperty('--accent-color', profile.preferences.accentColor || '#39FF14');
-    } else {
-      document.documentElement.style.setProperty('--accent-color', '#39FF14');
-    }
-  }, [profile?.preferences?.accentColor]);
+  // --- START: ဒီ useEffect ကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
+  // useEffect(() => {
+  //   setAccentColor(profile?.preferences?.accentColor || '#39FF14');
+  //   if (profile?.preferences?.accentColor) {
+  //     document.documentElement.style.setProperty('--accent-color', profile.preferences.accentColor || '#39FF14');
+  //   } else {
+  //     document.documentElement.style.setProperty('--accent-color', '#39FF14');
+  //   }
+  // }, [profile?.preferences?.accentColor]);
+  // --- END: ဒီ useEffect ကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
 
+
+  // --- handleChangeEmail, handleChangePassword functions (မပြောင်းပါ) ---
   const handleChangeEmail = async () => {
     if (!newEmail || savingEmail) return;
     setSavingEmail(true);
@@ -87,56 +100,13 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
       setSavingPassword(false);
     }
   };
+  
+  // --- START: ဒီ function တွေကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
+  // const handleSaveAccent = async () => { ... };
+  // const handleDeleteAccount = async () => { ... };
+  // --- END: ဒီ function တွေကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
 
-  const handleSaveAccent = async () => {
-    if (!profile?.id || savingAccent) return;
-    setSavingAccent(true);
-    setLocalError(null);
-    try {
-      const prefs = { ...(profile.preferences || {}), accentColor };
-      const { error } = await supabase.from('profiles').update({ preferences: prefs }).eq('id', profile.id);
-      if (error) throw error;
-      if (accentColor) {
-        document.documentElement.style.setProperty('--accent-color', accentColor);
-      }
-    } catch (e: any) {
-      console.error('Save accent failed', e);
-      setLocalError(`Failed to save accent color: ${e.message}`);
-    } finally {
-      setSavingAccent(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!profile?.id || deletingAccount) return;
-    if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
-      setLocalError('Username confirmation does not match.');
-      return;
-    }
-    setDeletingAccount(true);
-    setLocalError(null);
-    try {
-      const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`;
-      const { error } = await supabase.from('profiles').update({
-        avatar_url: null,
-        banner_url: null,
-        bio: null,
-        naju_id: anonHandle,
-        preferences: { ...(profile.preferences || {}), accentColor: null },
-      }).eq('id', profile.id);
-
-      if (error) throw error;
-
-      await supabase.auth.signOut();
-      window.location.href = '/';
-    } catch (e: any) {
-      console.error('Delete account failed', e);
-      setLocalError(`Failed to delete account: ${e.message}`);
-    } finally {
-      setDeletingAccount(false);
-    }
-  };
-
+  // --- startEditingBio, cancelEditingBio, etc. (မပြောင်းပါ) ---
   const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
   const cancelEditingBio = () => { setIsEditingBio(false); };
   const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
@@ -146,6 +116,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <h2 className="text-2xl font-bold text-text-dark-primary">Account Settings</h2>
 
+      {/* Error/Message Display (မပြောင်းပါ) */}
       <AnimatePresence>
         {localError && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-red-400 bg-red-900/30 border border-red-500/50 p-3 rounded-md">
@@ -167,6 +138,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         )}
       </AnimatePresence>
 
+      {/* Edit Profile Section (id ထည့်ပါ) (မပြောင်းပါ) */}
       <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
         <div className="mb-6">
@@ -208,6 +180,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         </div>
       </div>
 
+      {/* Account Management Section (မပြောင်းပါ) */}
       <div className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><UserIcon size={18}/> Account Management</h3>
         <div className="space-y-4">
@@ -257,20 +230,35 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         </div>
       </div>
 
+      {/* --- START: Accent Color UI အသစ် ထည့်သွင်းခြင်း --- */}
       <div className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Palette size={18}/> Site Preferences</h3>
         <div>
           <label className="block text-sm font-medium text-text-dark-secondary mb-1">Accent Color</label>
           <div className="flex items-center gap-3">
-            <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="h-8 w-12 rounded bg-transparent border-none cursor-pointer" />
+            <input 
+              type="color" 
+              value={accentColor} 
+              onChange={(e) => setAccentColor(e.target.value)} 
+              className="h-8 w-12 rounded bg-transparent border-none cursor-pointer" 
+              style={{ padding: 0, border: 'none' }} // iOS မှာ ပုံမှန်ပေါ်အောင်
+            />
             <span className="text-sm font-mono">{accentColor}</span>
-            <button onClick={handleSaveAccent} disabled={savingAccent || accentColor === (profile?.preferences?.accentColor || '#39FF14')} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+            <button 
+              onClick={handleSaveAccent} 
+              disabled={savingAccent || accentColor === (profile?.preferences?.accentColor || '#39FF14')} 
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1"
+            >
               {savingAccent ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingAccent ? 'Saving...' : 'Save'}
             </button>
           </div>
+          <p className="text-xs text-text-dark-secondary mt-2">This color will be used for active tabs and charts on your profile.</p>
         </div>
       </div>
+      {/* --- END: Accent Color UI အသစ် ထည့်သွင်းခြင်း --- */}
 
+
+      {/* Receipt Submissions Section (မပြောင်းပါ) */}
       <div className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary">My Receipt Submissions</h3>
         <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -288,30 +276,51 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
             </div>
           )) : <p className="text-text-dark-secondary">No submission history.</p>}
         </div>
-        <Link href="/subscribe" className="mt-4 inline-block text-accent-green hover:underline text-sm"> Submit another receipt &rarr; </Link>
+        <Link href="/subscribe" className="mt-4 inline-block hover:underline text-sm" style={{ color: accentColor }}> Submit another receipt &rarr; </Link>
       </div>
 
+      {/* --- START: Danger Zone UI အသစ် ထည့်သွင်းခြင်း --- */}
       <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
         {!deleteConfirmOpen ? (
-          <button onClick={() => { setDeleteConfirmOpen(true); setLocalError(null); }} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Delete Account</button>
+          <button 
+            onClick={() => { setDeleteConfirmOpen(true); setLocalError(null); }} 
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Delete Account
+          </button>
         ) : (
           <div className="space-y-3">
             <p className="text-red-300 text-sm">This action will **soft delete** your account by anonymizing your data and will sign you out. This cannot be undone.</p>
             <p className="text-red-300 text-xs">Please type your username <strong className='font-mono'>@{profile?.naju_id || ''}</strong> to confirm.</p>
             <div className="relative">
               <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              <input type="text" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-red-700 focus:outline-none focus:ring-1 focus:ring-red-400 text-text-dark-primary" />
+              <input 
+                type="text" 
+                value={deleteConfirmText} 
+                onChange={(e) => setDeleteConfirmText(e.target.value)} 
+                className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-red-700 focus:outline-none focus:ring-1 focus:ring-red-400 text-text-dark-primary" 
+              />
             </div>
             <div className="flex gap-2">
-              <button onClick={() => { setDeleteConfirmOpen(false); setDeleteConfirmText(''); setLocalError(null); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold">Cancel</button>
-              <button onClick={handleDeleteAccount} disabled={deletingAccount || deleteConfirmText !== (profile?.naju_id || '')} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1">
+              <button 
+                onClick={() => { setDeleteConfirmOpen(false); setDeleteConfirmText(''); setLocalError(null); }} 
+                className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount} 
+                disabled={deletingAccount || deleteConfirmText !== (profile?.naju_id || '')} 
+                className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 flex items-center gap-1"
+              >
                 {deletingAccount ? <Loader size={14} className="animate-spin"/> : <Trash2 size={14} />} {deletingAccount ? 'Deleting...' : 'Confirm Delete'}
               </button>
             </div>
           </div>
         )}
       </div>
+      {/* --- END: Danger Zone UI အသစ် ထည့်သွင်းခြင်း --- */}
 
     </motion.div>
   );
