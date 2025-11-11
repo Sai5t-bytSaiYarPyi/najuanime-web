@@ -59,7 +59,7 @@ export default function MyAccountPage() {
 
     }, [profile?.preferences?.accentColor]); 
     
-    // --- setupUser function (မပြောင်းပါ) ---
+    // --- setupUser function ---
     const setupUser = useCallback(async (user: User) => {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
@@ -133,7 +133,12 @@ export default function MyAccountPage() {
             if (fetchedAnimeFavorites && Array.isArray(fetchedAnimeFavorites)) {
                 setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
-            const fetchedCharFavoriteIds = favoriteCharFavoriteIdsResponse.data || [];
+            
+            // --- START: Build Error (Typo) ပြင်ဆင်မှု ---
+            // 'FavoriteCharFavoriteIdsResponse' (F အကြီး) အစား 'favoriteCharIdsResponse' (f အသေး) ကို သုံးပါ
+            const fetchedCharFavoriteIds = favoriteCharIdsResponse.data || [];
+            // --- END: Build Error (Typo) ပြင်ဆင်မှု ---
+
             if (fetchedCharFavoriteIds.length > 0) {
                 const charIds = fetchedCharFavoriteIds.map(fav => fav.item_id);
                 const { data: charactersData, error: charactersError } = await supabase
@@ -311,10 +316,9 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- START: handleDeleteAccount Function ကို ပြင်ဆင်ခြင်း ---
+    // --- handleDeleteAccount (မပြောင်းပါ၊ RLS error fix ပြီးသား) ---
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
-        // User က ရိုက်ထည့်တဲ့ text နဲ့ profile.naju_id တူမှ delete လုပ်
         if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
             setError('Username confirmation does not match.');
             return;
@@ -322,44 +326,30 @@ export default function MyAccountPage() {
         setDeletingAccount(true);
         setError(null);
         try {
-            // --- Soft Delete Logic ပြင်ဆင်မှု ---
-            // "naju_id" column ကို update လုပ်ခွင့်မရှိတဲ့ RLS policy ကြောင့် error တက်နေတာပါ။
-            // Soft Delete လုပ်ဖို့ "naju_id" ကို ပြောင်းမယ့်အစား၊ တခြား public data တွေကို null ပြောင်းပါမယ်။
-            // const anonHandle = `${profile.naju_id}-deleted-${Date.now()}`; // [ဖယ်ရှား]
-            
             const { error } = await supabase.from('profiles').update({
                 avatar_url: null,
                 banner_url: null,
                 bio: null,
-                // naju_id: anonHandle, // [ဖယ်ရှား] - ဒါက ပြဿနာပါ
-                preferences: { theme: 'dark', accentColor: '#39FF14' }, // Preferences ကို default ပြန်ထား
-                subscription_status: 'inactive', // Status ကို inactive ပြောင်း
-                subscription_expires_at: null // သက်တမ်းကို null ထား
+                preferences: { theme: 'dark', accentColor: '#39FF14' },
+                subscription_status: 'inactive', 
+                subscription_expires_at: null 
             }).eq('id', profile.id);
-            // --- Soft Delete Logic ပြင်ဆင်မှု အဆုံး ---
 
             if (error) throw error;
 
-            // Anonymize လုပ်ပြီးတာနဲ့ user ကို sign out လုပ်
             await supabase.auth.signOut();
-            // Homepage ကို ပြန်ပို့
             window.location.href = '/'; 
 
         } catch (e: any) {
             console.error('Delete account failed', e);
-            // --- START: Error Message ကို ပိုမို ရှင်းလင်းအောင် ပြင်ဆင် ---
             if (e.message.includes('check constraint') || e.message.includes('policy')) {
                  setError(`Failed to delete account: A database security policy prevented the update. Please contact support. Error: ${e.message}`);
             } else {
                 setError(`Failed to delete account: ${e.message}`);
             }
-            // --- END: Error Message ကို ပိုမို ရှင်းလင်းအောင် ပြင်ဆင် ---
-            setDeletingAccount(false); // Error ဖြစ်ရင် မဖျက်သေးလို့ false ပြန်ထား
+            setDeletingAccount(false); 
         }
-        // အောင်မြင်ရင် page redirect ဖြစ်သွားလို့ loading state ကို false ပြန်လုပ်စရာမလို
     };
-    // --- END: handleDeleteAccount Function ကို ပြင်ဆင်ခြင်း ---
-
 
     // --- Main JSX (Loading/Error/No Session states) (မပြောင်းပါ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
