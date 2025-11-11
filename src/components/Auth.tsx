@@ -19,10 +19,10 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  // --- START: State (၂) ခု ခွဲခြားခြင်း ---
-  const [displayName, setDisplayName] = useState(''); // လူတိုင်း မြင်ရမယ့် နာမည် (ထပ်နိုင်သည်)
+  // --- START: "displayName" state ကို ဖယ်ရှားလိုက်ပါပြီ ---
+  // const [displayName, setDisplayName] = useState(''); 
   const [username, setUsername] = useState(''); // Unique @handle (မထပ်ရ)
-  // --- END: State (၂) ခု ခွဲခြားခြင်း ---
+  // --- END: "displayName" state ကို ဖယ်ရှားလိုက်ပါပြီ ---
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -34,14 +34,15 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
 
   const resetStates = (keepEmail = false) => {
       if (!keepEmail) setEmail(''); setPassword(''); setNewPassword(''); 
-      setDisplayName(''); setUsername(''); setOtp(''); // state (၂) ခုလုံး reset
+      // setDisplayName(''); // ဖယ်ရှား
+      setUsername(''); setOtp(''); 
       setShowPassword(false); setShowNewPassword(false); setRememberMe(false); setAgreedToTerms(false);
       setError(null); setMessage(null); setLoading(false);
   };
 
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setLoading(true); setError(null); setMessage(null);
-    let trimmedDisplayName = '';
+    // let trimmedDisplayName = ''; // ဖယ်ရှား
     let trimmedUsername = '';
     
     if (isLoginView) {
@@ -55,39 +56,38 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       // --- Signup Logic (ပြင်ဆင်ထား) ---
       if (!agreedToTerms) { setError('You must agree to the Terms of Service and Privacy Policy.'); setLoading(false); return; }
       
-      trimmedDisplayName = displayName.trim();
+      // trimmedDisplayName = displayName.trim(); // ဖယ်ရှား
       trimmedUsername = username.trim();
 
-      // 1. Display Name Validation
-      if (trimmedDisplayName.length < 3) { setError('Display Name must be at least 3 characters long.'); setLoading(false); return; }
-      if (trimmedDisplayName.length > 20) { setError('Display Name cannot be longer than 20 characters.'); setLoading(false); return; }
+      // 1. Display Name Validation (ဖယ်ရှား)
+      // if (trimmedDisplayName.length < 3) { setError('Display Name must be at least 3 characters long.'); setLoading(false); return; }
+      // if (trimmedDisplayName.length > 20) { setError('Display Name cannot be longer than 20 characters.'); setLoading(false); return; }
 
-      // 2. Username Validation (Unique Handle)
+      // 2. Username Validation (Unique Handle) (ဆက်လက်ထားရှိ)
       if (trimmedUsername.length < 3) { setError('Username must be at least 3 characters long.'); setLoading(false); return; }
       if (trimmedUsername.length > 20) { setError('Username cannot be longer than 20 characters.'); setLoading(false); return; }
       const usernameRegex = /^[a-zA-Z0-9_-]+$/;
       if (!usernameRegex.test(trimmedUsername)) { setError("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); setLoading(false); return; }
 
       try {
-          // --- START: signUp မှာ 'display_name' နှင့် 'naju_id' (၂) ခုလုံး ပို့ပါ ---
+          // --- START: signUp မှာ 'naju_id' (Username) တစ်ခုတည်းကိုသာ ပို့ပါ ---
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email, password, options: { 
               data: { 
-                display_name: trimmedDisplayName, // display_name column အသစ်
+                // display_name: trimmedDisplayName, // [ဖယ်ရှား]
                 naju_id: trimmedUsername      // naju_id (unique username)
               } 
             }
           });
-          // --- END: signUp မှာ 'display_name' နှင့် 'naju_id' (၂) ခုလုံး ပို့ပါ ---
+          // --- END: signUp မှာ 'naju_id' (Username) တစ်ခုတည်းကိုသာ ပို့ပါ ---
           
           if (signUpError) {
-               // Username (naju_id) တူနေခဲ့ရင်
                if (signUpError.message.includes('duplicate key value violates unique constraint') && signUpError.message.includes('naju_id')) { 
                    throw new Error(`Username "@${trimmedUsername}" is already taken.`);
                }
-               // Email တူနေခဲ့ရင်
                if (signUpError.message.includes('User already registered')) { throw new Error('This email address is already registered. Please log in.'); }
-               throw signUpError;
+               // Generic error ကို ဒီအတိုင်း ပြန်ပြ
+               throw signUpError; 
           }
           if (signUpData.user) {
               const { data: otpData, error: otpFuncError } = await supabase.functions.invoke('send-signup-otp', { body: { email } });
@@ -156,21 +156,8 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
          <p className="text-text-dark-secondary text-center mb-6">{isLoginView ? 'Log in to continue your journey.' : 'Create an account to get started.'}</p>
          <form onSubmit={handleEmailAuth} className="space-y-4">
              {!isLoginView && (
-              // --- START: Signup Form ကို (၂) ခု ပြောင်းလဲခြင်း ---
+              // --- START: "Display Name" input ကို ဖယ်ရှားပြီး "Username" တစ်ခုတည်း ထားရှိ ---
               <>
-                <div className="relative">
-                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                     <input 
-                        type="text" 
-                        placeholder="Display Name (e.g., Sai Naju)" 
-                        value={displayName} 
-                        onChange={(e) => setDisplayName(e.target.value)} 
-                        required 
-                        minLength={3} 
-                        maxLength={20} 
-                        className={inputClasses} 
-                     />
-                 </div>
                  <div className="relative">
                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                      <input 
@@ -187,7 +174,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
                      />
                  </div>
               </>
-              // --- END: Signup Form ကို (၂) ခု ပြောင်းလဲခြင်း ---
+              // --- END: "Display Name" input ကို ဖယ်ရှားပြီး "Username" တစ်ခုတည်း ထားရှိ ---
              )}
              <div className="relative">
                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
