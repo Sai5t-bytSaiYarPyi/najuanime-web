@@ -8,10 +8,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Loader, AlertTriangle, User as UserIcon, ListVideo, Settings, Edit3, UploadCloud, Save, XCircle, AtSign, BarChart2, CheckCircle, Star, Heart, Activity, Palette, Mail, KeyRound, Trash2 } from 'lucide-react';
-// --- START: Chart Component များကို import လုပ်ပါ ---
 import GenreDonutChart from '@/components/charts/GenreDonutChart';
 import RatingBarChart from '@/components/charts/RatingBarChart';
-// --- END: Chart Component များကို import လုပ်ပါ ---
 
 // --- Types ---
 type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string };
@@ -23,9 +21,21 @@ type AnimeSeriesData = {
     title_english: string | null;
     title_romaji: string | null;
 } | null;
+// --- START: Character Data Type အသစ် ---
+type CharacterData = {
+    id: string;
+    name: string;
+    image_url: string | null;
+} | null;
+// --- END: Character Data Type အသစ် ---
 type FavoriteAnimeItem = {
     anime_series: AnimeSeriesData;
 };
+// --- START: Favorite Character Type အသစ် ---
+type FavoriteCharacterItem = {
+    characters: CharacterData;
+};
+// --- END: Favorite Character Type အသစ် ---
 type UserAnimeListItem = {
     status: string;
     rating: number | null;
@@ -34,9 +44,7 @@ type UserAnimeListItem = {
 type Tab = 'profile' | 'anime_list' | 'favorites' | 'settings';
 type ProfileStatsData = { completed_count: number; mean_score: number; total_episodes?: number; days_watched?: number; } | null;
 type GenreStat = { genre_name: string; count: number };
-// --- START: Rating Stat Type အသစ် ---
 type RatingStat = { rating_value: number; count: number };
-// --- END: Rating Stat Type အသစ် ---
 
 type SettingsTabContentProps = {
     profile: Profile | null;
@@ -60,8 +68,6 @@ type SettingsTabContentProps = {
 
 // --- Child Components ---
 
-// --- START: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
-// (ratingStats prop ကို လက်ခံပြီး RatingBarChart ကို ထည့်သွင်းပါ)
 const ProfileStatsDisplay = ({
   stats,
   genreStats,
@@ -69,7 +75,7 @@ const ProfileStatsDisplay = ({
 }: {
   stats: ProfileStatsData;
   genreStats: GenreStat[] | null;
-  ratingStats: RatingStat[] | null; // <-- Prop အသစ်
+  ratingStats: RatingStat[] | null;
 }) => {
   if (!stats) {
     return (
@@ -135,13 +141,11 @@ const ProfileStatsDisplay = ({
         <h4 className="font-semibold text-text-dark-primary text-center mb-1">
           Score Distribution
         </h4>
-        {/* --- Rating Chart "Coming Soon" အစား Component အသစ်ကို ထည့်ပါ --- */}
         <RatingBarChart data={ratingStats} />
       </div>
     </div>
   );
 };
-// --- END: ProfileStatsDisplay Component ကို ပြင်ဆင်ခြင်း ---
 
 const ProfileTabContent = ({
   profile,
@@ -155,7 +159,7 @@ const ProfileTabContent = ({
   isSubscribed,
   profileStats,
   genreStats,
-  ratingStats, // --- START: ratingStats prop ကို လက်ခံပါ ---
+  ratingStats,
 }: any) => {
   const displayUsername = profile?.naju_id || 'User';
 
@@ -274,13 +278,11 @@ const ProfileTabContent = ({
       {/* Stats, Bio, Subscription, Recent Activity */}
       <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
-          {/* --- START: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ --- */}
           <ProfileStatsDisplay
             stats={profileStats}
             genreStats={genreStats}
             ratingStats={ratingStats}
           />
-          {/* --- END: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ --- */}
           <div className="bg-card-dark p-4 rounded-lg shadow-md">
             <h3 className="font-semibold text-text-dark-primary mb-1">
               Subscription
@@ -380,7 +382,6 @@ const ProfileTabContent = ({
   );
 };
 
-
 const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) => {
     const [filterStatus, setFilterStatus] = useState('All');
     const statusMap: { [key: string]: string } = { All: 'All', Watching: 'watching', Completed: 'completed', 'Plan to Watch': 'plan_to_watch', 'On Hold': 'on_hold', Dropped: 'dropped' };
@@ -430,50 +431,115 @@ const AnimeListTabContent = ({ animeList }: { animeList: UserAnimeListItem[] }) 
    );
 };
 
+// --- START: FavoritesTabContent Component ကို ပြင်ဆင်ခြင်း ---
 type FavoritesTabContentProps = {
-    favoriteList: FavoriteAnimeItem[];
+  favoriteAnimeList: FavoriteAnimeItem[];
+  favoriteCharacterList: FavoriteCharacterItem[]; // <-- Prop အသစ်
 };
 
-const FavoritesTabContent = ({ favoriteList }: FavoritesTabContentProps) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h2 className="text-2xl font-bold text-text-dark-primary mb-6">Favorite Anime</h2>
+const FavoritesTabContent = ({
+  favoriteAnimeList,
+  favoriteCharacterList,
+}: FavoritesTabContentProps) => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    {/* --- Favorite Anime Section (ယခင်အတိုင်း) --- */}
+    <h2 className="text-2xl font-bold text-text-dark-primary mb-6">
+      Favorite Anime
+    </h2>
+    {favoriteAnimeList.length > 0 ? (
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
+        {favoriteAnimeList.map((item: FavoriteAnimeItem) => {
+          const anime = item.anime_series;
+          if (!anime) return null;
+          return (
+            <Link
+              href={`/anime/${anime.id}`}
+              key={anime.id}
+              className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1"
+            >
+              <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
+                <Image
+                  src={anime.poster_url || '/placeholder.png'}
+                  alt={anime.title_english || anime.title_romaji || 'Poster'}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Heart size={40} className="text-red-500 fill-current" />
+                </div>
+              </div>
+              <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate">
+                {anime.title_english || anime.title_romaji}
+              </h3>
+            </Link>
+          );
+        })}
+      </div>
+    ) : (
+      <div className="bg-card-dark p-8 rounded-lg text-center shadow-md">
+        <p className="text-text-dark-secondary">
+          You haven't added any favorite anime yet.
+        </p>
+        <Link
+          href="/anime"
+          className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white"
+        >
+          Browse Anime
+        </Link>
+      </div>
+    )}
 
-        {favoriteList.length > 0 ? (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
-                {favoriteList.map((item: FavoriteAnimeItem) => {
-                    const anime = item.anime_series;
-                    if (!anime) return null;
-                    return (
-                        <Link href={`/anime/${anime.id}`} key={anime.id} className="group relative transition-transform duration-200 ease-in-out hover:-translate-y-1">
-                            <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg border border-transparent group-hover:border-accent-green bg-gray-800">
-                                <Image src={anime.poster_url || '/placeholder.png'} alt={anime.title_english || anime.title_romaji || 'Poster'} fill style={{ objectFit: 'cover' }} sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Heart size={40} className="text-red-500 fill-current" />
-                                </div>
-                            </div>
-                            <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary group-hover:text-accent-green truncate">
-                                {anime.title_english || anime.title_romaji}
-                            </h3>
-                        </Link>
-                     );
-                })}
-            </div>
-        ) : (
-            <div className="bg-card-dark p-8 rounded-lg text-center shadow-md">
-                <p className="text-text-dark-secondary">You haven't added any favorite anime yet.</p>
-                <Link href="/anime" className="mt-4 inline-block px-4 py-2 bg-accent-blue hover:bg-blue-700 rounded-md text-sm font-semibold text-white">
-                    Browse Anime
-                </Link>
-            </div>
-        )}
-         <div className="mt-8">
-             <h2 className="text-xl font-bold text-text-dark-primary mb-4">Favorite Characters</h2>
-            <div className="bg-card-dark p-4 rounded-lg shadow-md">
-                <p className="text-text-dark-secondary text-sm italic">(Coming Soon)</p>
-            </div>
-         </div>
-    </motion.div>
+    {/* --- Favorite Characters Section (အသစ်) --- */}
+    <div className="mt-8">
+      <h2 className="text-2xl font-bold text-text-dark-primary mb-6">
+        Favorite Characters
+      </h2>
+      {favoriteCharacterList.length > 0 ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-6">
+          {favoriteCharacterList.map((item: FavoriteCharacterItem) => {
+            const char = item.characters;
+            if (!char) return null;
+            return (
+              // Character တွေက detail page မရှိသေးလို့ Link မထည့်သေးပါ
+              <div
+                key={char.id}
+                className="group relative transition-transform duration-200 ease-in-out"
+              >
+                <div className="aspect-[2/3] relative rounded-md overflow-hidden shadow-lg bg-gray-800">
+                  <Image
+                    src={char.image_url || '/placeholder.png'}
+                    alt={char.name}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Heart size={40} className="text-red-400 fill-current" />
+                  </div>
+                </div>
+                <h3 className="mt-1.5 text-xs font-semibold text-text-dark-secondary truncate">
+                  {char.name}
+                </h3>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="bg-card-dark p-8 rounded-lg text-center shadow-md">
+          <p className="text-text-dark-secondary">
+            You haven't added any favorite characters yet.
+          </p>
+          <p className="text-sm text-text-dark-secondary mt-2">
+            You can add characters from any anime detail page.
+          </p>
+        </div>
+      )}
+    </div>
+  </motion.div>
 );
+// --- END: FavoritesTabContent Component ကို ပြင်ဆင်ခြင်း ---
+
 
 // --- SettingsTabContent (Logic များကို အသက်ဝင်စေရန် ပြင်ဆင်ထားသည်) ---
 const SettingsTabContent = ({
@@ -804,6 +870,9 @@ export default function MyAccountPage() {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [animeList, setAnimeList] = useState<UserAnimeListItem[]>([]);
     const [favoriteAnimeList, setFavoriteAnimeList] = useState<FavoriteAnimeItem[]>([]);
+    // --- START: favoriteCharacterList အတွက် state အသစ် ---
+    const [favoriteCharacterList, setFavoriteCharacterList] = useState<FavoriteCharacterItem[]>([]);
+    // --- END: favoriteCharacterList အတွက် state အသစ် ---
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>('profile');
@@ -817,9 +886,7 @@ export default function MyAccountPage() {
     const [savingUsername, setSavingUsername] = useState(false);
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
     const [genreStats, setGenreStats] = useState<GenreStat[] | null>(null);
-    // --- START: ratingStats အတွက် state အသစ် ---
     const [ratingStats, setRatingStats] = useState<RatingStat[] | null>(null);
-    // --- END: ratingStats အတွက် state အသစ် ---
     const [deletingReceipt, setDeletingReceipt] = useState(false);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -829,7 +896,7 @@ export default function MyAccountPage() {
         console.log("[MyAccountPage] setupUser: Starting data fetch for user:", user.id);
         setError(null);
         // --- START: State တွေကို reset လုပ်ပါ ---
-        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
+        setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setFavoriteCharacterList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
         // --- END: State တွေကို reset လုပ်ပါ ---
 
         try {
@@ -871,27 +938,29 @@ export default function MyAccountPage() {
             console.log("[MyAccountPage] setupUser: Profile ready.");
 
             console.log("[MyAccountPage] setupUser: Fetching other data in parallel...");
-            // --- START: Promise.all ထဲတွင် rating stats RPC call ထည့်ပါ ---
-            const [receiptsResponse, animeListResponse, statsResponse, favoritesResponse, genreStatsResponse, ratingStatsResponse] = await Promise.all([
+            // --- START: Promise.all ထဲတွင် favorite characters query ထည့်ပါ ---
+            const [receiptsResponse, animeListResponse, statsResponse, favoritesAnimeResponse, genreStatsResponse, ratingStatsResponse, favoritesCharResponse] = await Promise.all([
                 supabase.from('payment_receipts').select('id, created_at, receipt_url, status').eq('user_id', user.id).order('created_at', { ascending: false }),
                 supabase.from('user_anime_list').select('status, rating, anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).order('updated_at', { ascending: false }),
                 supabase.rpc('get_user_profile_stats', { p_user_id: user.id }),
                 supabase.from('user_favorites').select('anime_series (id, poster_url, title_english, title_romaji)').eq('user_id', user.id).eq('item_type', 'anime').order('created_at', { ascending: false }),
                 supabase.rpc('get_user_genre_stats', { p_user_id: user.id }),
-                // --- Function အသစ်ကို ခေါ်ပါ ---
-                supabase.rpc('get_user_rating_stats', { p_user_id: user.id })
+                supabase.rpc('get_user_rating_stats', { p_user_id: user.id }),
+                // --- Favorite Characters တွေကို characters table နဲ့ join ပြီး ဆွဲထုတ်ပါ ---
+                supabase.from('user_favorites').select('characters ( id, name, image_url )').eq('user_id', user.id).eq('item_type', 'character').order('created_at', { ascending: false })
             ]);
-            // --- END: Promise.all ထဲတွင် rating stats RPC call ထည့်ပါ ---
+            // --- END: Promise.all ထဲတွင် favorite characters query ထည့်ပါ ---
 
 
             if (receiptsResponse.error) { throw new Error(`Receipts fetch failed: ${receiptsResponse.error.message}`); }
             if (animeListResponse.error) { throw new Error(`Anime list fetch failed: ${animeListResponse.error.message}`); }
             if (statsResponse.error) { throw new Error(`Stats fetch failed: ${statsResponse.error.message}`); }
-            if (favoritesResponse.error) { throw new Error(`Favorites fetch failed: ${favoritesResponse.error.message}`); }
+            if (favoritesAnimeResponse.error) { throw new Error(`Favorite Anime fetch failed: ${favoritesAnimeResponse.error.message}`); }
             if (genreStatsResponse.error) { throw new Error(`Genre Stats fetch failed: ${genreStatsResponse.error.message}`); }
-            // --- START: Rating Stats Error ကို စစ်ဆေးပါ ---
             if (ratingStatsResponse.error) { throw new Error(`Rating Stats fetch failed: ${ratingStatsResponse.error.message}`); }
-            // --- END: Rating Stats Error ကို စစ်ဆေးပါ ---
+            // --- START: Favorite Characters Error ကို စစ်ဆေးပါ ---
+            if (favoritesCharResponse.error) { throw new Error(`Favorite Characters fetch failed: ${favoritesCharResponse.error.message}`); }
+            // --- END: Favorite Characters Error ကို စစ်ဆေးပါ ---
 
             console.log("[MyAccountPage] setupUser: All fetches successful.");
 
@@ -910,14 +979,21 @@ export default function MyAccountPage() {
 
             setProfileStats(statsResponse.data);
             setGenreStats(genreStatsResponse.data || []);
-            // --- START: Rating Stats state ကို set လုပ်ပါ ---
             setRatingStats(ratingStatsResponse.data || []);
-            // --- END: Rating Stats state ကို set လုပ်ပါ ---
 
-            const fetchedFavorites = favoritesResponse.data;
-            if (fetchedFavorites && Array.isArray(fetchedFavorites)) {
-                setFavoriteAnimeList(fetchedFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
+            // Set Favorite Anime
+            const fetchedAnimeFavorites = favoritesAnimeResponse.data;
+            if (fetchedAnimeFavorites && Array.isArray(fetchedAnimeFavorites)) {
+                setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
+
+            // --- START: Favorite Characters state ကို set လုပ်ပါ ---
+            const fetchedCharFavorites = favoritesCharResponse.data;
+             if (fetchedCharFavorites && Array.isArray(fetchedCharFavorites)) {
+                // `characters` property မပါတဲ့ (null ဖြစ်နေတဲ့) data တွေကို စစ်ထုတ်ပါ
+                setFavoriteCharacterList(fetchedCharFavorites.filter(fav => fav.characters) as unknown as FavoriteCharacterItem[]);
+            } else { setFavoriteCharacterList([]); }
+            // --- END: Favorite Characters state ကို set လုပ်ပါ ---
 
 
             console.log("[MyAccountPage] setupUser: Data fetch complete, state updated.");
@@ -926,7 +1002,7 @@ export default function MyAccountPage() {
             console.error("[MyAccountPage] setupUser: Catch block error:", err);
             setError(`Could not load account details: ${err.message}.`);
             // --- START: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setFavoriteCharacterList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
             // --- END: Error ဖြစ်လျှင် state အားလုံး reset လုပ်ပါ ---
             return false;
         }
@@ -948,14 +1024,14 @@ export default function MyAccountPage() {
             } else {
                 console.log("[MyAccountPage] checkSessionAndSetup: No session found.");
                 // --- START: State အားလုံး reset လုပ်ပါ ---
-                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
+                setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setFavoriteCharacterList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
                 // --- END: State အားလုံး reset လုပ်ပါ ---
             }
         } catch (err: any) {
             console.error("[MyAccountPage] checkSessionAndSetup: Catch block Error:", err);
             setError(err.message || "An unexpected error occurred.");
             // --- START: State အားလုံး reset လုပ်ပါ ---
-            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
+            setProfile(null); setReceipts([]); setAnimeList([]); setFavoriteAnimeList([]); setFavoriteCharacterList([]); setProfileStats(null); setGenreStats(null); setRatingStats(null);
             // --- END: State အားလုံး reset လုပ်ပါ ---
         } finally {
             console.log("[MyAccountPage] checkSessionAndSetup: Finally block executed. Setting loading=false");
@@ -1104,14 +1180,14 @@ export default function MyAccountPage() {
                             uploadingAvatar={uploadingAvatar} avatarInputRef={avatarInputRef} setUploadingAvatar={setUploadingAvatar}
                             isSubscribed={isSubscribed}
                             profileStats={profileStats}
-                            // --- START: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ ---
                             genreStats={genreStats}
                             ratingStats={ratingStats}
-                            // --- END: genreStats နှင့် ratingStats prop ကို ပို့ပေးပါ ---
                         />
                     }
                     {activeTab === 'anime_list' && <AnimeListTabContent key="anime_list" animeList={animeList} />}
-                    {activeTab === 'favorites' && <FavoritesTabContent key="favorites" favoriteList={favoriteAnimeList} />}
+                    {/* --- START: favoriteCharacterList prop ကို ပို့ပေးပါ --- */}
+                    {activeTab === 'favorites' && <FavoritesTabContent key="favorites" favoriteAnimeList={favoriteAnimeList} favoriteCharacterList={favoriteCharacterList} />}
+                    {/* --- END: favoriteCharacterList prop ကို ပို့ပေးပါ --- */}
                     {activeTab === 'settings' &&
                         <SettingsTabContent
                             key="settings"

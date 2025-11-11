@@ -3,12 +3,14 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film } from 'lucide-react';
+import { PlayCircle, Calendar, Clock, Tag, BookOpen, Film, Users } from 'lucide-react'; // --- Users icon ထည့်ပါ ---
 import AnimeStatusUpdater from '@/components/AnimeStatusUpdater';
 import AnimeReviews from '@/components/AnimeReviews';
 import Link from 'next/link';
-// --- FavoriteButton Component ကို import လုပ်ပါ ---
 import FavoriteButton from '@/components/FavoriteButton';
+// --- START: CharacterFavoriteButton Component ကို import လုပ်ပါ ---
+import CharacterFavoriteButton from '@/components/CharacterFavoriteButton';
+// --- END: CharacterFavoriteButton Component ကို import လုပ်ပါ ---
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -18,6 +20,18 @@ type AnimeDetailPageProps = {
 };
 
 type Episode = { id: string; episode_number: number; title: string | null; created_at: string; };
+
+// --- START: Character Type အသစ်များ ---
+type LinkedCharacter = {
+  role: string | null;
+  characters: {
+    id: string;
+    name: string;
+    image_url: string | null;
+  } | null;
+};
+// --- END: Character Type အသစ်များ ---
+
 
 const InfoPill = ({ icon, text }: { icon: React.ReactNode, text: string | number | null }) => {
   if (!text) return null;
@@ -40,30 +54,49 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  // --- START: Promise.all ထဲတွင် favorite status စစ်ဆေးမှု ထပ်တိုးခြင်း ---
-  const [animeRes, userListRes, favoriteRes] = await Promise.all([
-    // Anime details query (ယခင်အတိုင်း)
+  // --- START: Promise.all ထဲတွင် Character Queries (၂) ခု ထပ်တိုးခြင်း ---
+  const [animeRes, userListRes, favoriteRes, linkedCharsRes, userCharFavoritesRes] = await Promise.all([
+    // 1. Anime details query (ယခင်အတိုင်း)
     supabase
       .from('anime_series')
       .select(`*, anime_genres(genres(name)), anime_episodes(id, episode_number, title, created_at)`)
       .eq('id', params.animeId)
       .order('episode_number', { referencedTable: 'anime_episodes', ascending: true })
       .single(),
-    // User list status query (ယခင်အတိုင်း)
+    // 2. User list status query (ယခင်အတိုင်း)
     session
       ? supabase.from('user_anime_list').select('status, rating').eq('anime_id', params.animeId).eq('user_id', session.user.id).single()
       : Promise.resolve({ data: null, error: null }),
-    // Favorite status query (အသစ်ထပ်တိုး)
+    // 3. Anime Favorite status query (ယခင်အတိုင်း)
     session
       ? supabase.from('user_favorites').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id).eq('item_id', params.animeId).eq('item_type', 'anime')
-      : Promise.resolve({ data: null, error: null, count: 0 }) // user မရှိရင် count 0
+      : Promise.resolve({ data: null, error: null, count: 0 }),
+    
+    // 4. ဒီ Anime နဲ့ ချိတ်ထားတဲ့ Characters တွေကို ဆွဲထုတ်ရန် (Query အသစ်)
+    supabase
+      .from('anime_characters')
+      .select(`role, characters ( id, name, image_url )`)
+      .eq('anime_id', params.animeId)
+      .order('role', { ascending: true }) // Main ကို အရင်ပြ
+      .limit(12), // Page မှာ ထိပ်ဆုံး ၁၂ ယောက်ပဲ ပြ
+
+    // 5. User Favorite လုပ်ထားတဲ့ Character တွေကို ဆွဲထုတ်ရန် (Query အသစ်)
+    session
+      ? supabase.from('user_favorites').select('item_id').eq('user_id', session.user.id).eq('item_type', 'character')
+      : Promise.resolve({ data: [], error: null })
   ]);
-  // --- END: Promise.all ထဲတွင် favorite status စစ်ဆေးမှု ထပ်တိုးခြင်း ---
+  // --- END: Promise.all ထဲတွင် Character Queries (၂) ခု ထပ်တိုးခြင်း ---
 
   const { data: anime, error: animeError } = animeRes;
   const { data: userListEntry } = userListRes;
-  // --- Favorite ရှိမရှိ စစ်ဆေးပြီး boolean အဖြစ်ပြောင်း ---
   const initialIsFavorited = (favoriteRes.count ?? 0) > 0;
+
+  // --- START: Character Data များကို ပြင်ဆင်ခြင်း ---
+  const linkedCharacters: LinkedCharacter[] = (linkedCharsRes.data || []) as LinkedCharacter[];
+  // User favorite လုပ်ထားတဲ့ character ID တွေကို Set တစ်ခုထဲ ထည့်ထား (စစ်ဆေးရ လွယ်ကူအောင်)
+  const userFavoriteCharIds = new Set((userCharFavoritesRes.data || []).map(fav => fav.item_id));
+  // --- END: Character Data များကို ပြင်ဆင်ခြင်း ---
+
 
   if (animeError || !anime) {
     notFound();
@@ -87,7 +120,6 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             <div className="flex flex-wrap gap-2 mt-2">
               {genres.map(genre => (<span key={genre} className="bg-accent-purple/70 text-white text-xs font-bold px-2 py-1 rounded-full">{genre}</span>))}
             </div>
-            {/* --- START: Favorite Button ကို ထည့်သွင်းရန် နေရာ --- */}
             {session?.user && (
               <div className="mt-4">
                 <FavoriteButton
@@ -97,7 +129,6 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 />
               </div>
             )}
-            {/* --- END: Favorite Button ကို ထည့်သွင်းရန် နေရာ --- */}
           </div>
         </div>
       </div>
@@ -108,6 +139,45 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
         <div className="lg:col-span-2">
           <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 mb-4">Synopsis</h2>
           <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{anime.synopsis || 'No synopsis available.'}</p>
+          
+          {/* --- START: Character Section အသစ် ထည့်သွင်းခြင်း --- */}
+          {linkedCharacters.length > 0 && (
+            <>
+              <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 my-6 flex items-center gap-2">
+                <Users size={22} /> Characters
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {linkedCharacters.map(link => link.characters && (
+                  <div key={link.characters.id} className="bg-card-dark rounded-lg overflow-hidden group relative">
+                    {/* Character Favorite Button */}
+                    {session?.user && (
+                      <CharacterFavoriteButton
+                        characterId={link.characters.id}
+                        userId={session.user.id}
+                        initialIsFavorited={userFavoriteCharIds.has(link.characters.id)}
+                      />
+                    )}
+                    
+                    <div className="aspect-[2/3] relative">
+                      <Image
+                        src={link.characters.image_url || '/placeholder.png'}
+                        alt={link.characters.name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                      />
+                    </div>
+                    <div className="p-3 text-center">
+                      <p className="font-semibold text-sm text-white truncate">{link.characters.name}</p>
+                      <p className="text-xs text-gray-400">{link.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {/* --- END: Character Section အသစ် ထည့်သွင်းခြင်း --- */}
+
           {anime.trailer_url && (
             <>
               <h2 className="text-2xl font-bold border-b-2 border-accent-green pb-2 my-6">Trailer</h2>
