@@ -91,8 +91,24 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
   const { data: userListEntry } = userListRes;
   const initialIsFavorited = (favoriteRes.count ?? 0) > 0;
 
-  // --- START: Character Data များကို ပြင်ဆင်ခြင်း ---
-  const linkedCharacters: LinkedCharacter[] = (linkedCharsRes.data || []) as LinkedCharacter[];
+  // --- START: Character Data များကို ပြင်ဆင်ခြင်း (Build Error Fix) ---
+  // Vercel build error (image_d9d304.png) ကို ဖြေရှင်းရန် Type ကို manually ရှင်းလင်းပါ
+  const processedLinkedCharacters = (linkedCharsRes.data || []).map(link => {
+    // `characters` property က array ဖြစ်ပြီး ပါလာခဲ့ရင် (မဖြစ်နိုင်ပေမယ့်) ပထမဆုံး item ကို ယူပါ။
+    // ပုံမှန် object (သို့) null အတိုင်း ပါလာရင် သူ့အတိုင်း ထားပါ။
+    const characterObject = Array.isArray(link.characters)
+      ? (link.characters[0] || null)
+      : (link.characters || null);
+    
+    return {
+      role: link.role,
+      characters: characterObject
+    };
+  });
+
+  // Type ရှင်းလင်းပြီးသား data ကိုမှ state ထဲ ထည့်ပါ။ null တွေပါ မသွားအောင် filter လုပ်ပါ။
+  const linkedCharacters: LinkedCharacter[] = (processedLinkedCharacters as LinkedCharacter[]).filter(lc => lc.characters);
+  
   // User favorite လုပ်ထားတဲ့ character ID တွေကို Set တစ်ခုထဲ ထည့်ထား (စစ်ဆေးရ လွယ်ကူအောင်)
   const userFavoriteCharIds = new Set((userCharFavoritesRes.data || []).map(fav => fav.item_id));
   // --- END: Character Data များကို ပြင်ဆင်ခြင်း ---
