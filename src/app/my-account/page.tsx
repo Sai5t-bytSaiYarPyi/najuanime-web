@@ -30,9 +30,13 @@ export default function MyAccountPage() {
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [editingBioText, setEditingBioText] = useState('');
     const [savingBio, setSavingBio] = useState(false);
-    const [isEditingUsername, setIsEditingUsername] = useState(false);
-    const [editingUsernameText, setEditingUsernameText] = useState('');
-    const [savingUsername, setSavingUsername] = useState(false);
+    
+    // --- START: "Username" state တွေကို "Name" လို့ အမည်ပြောင်း ---
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editingNameText, setEditingNameText] = useState('');
+    const [savingName, setSavingName] = useState(false);
+    // --- END: "Username" state တွေကို "Name" လို့ အမည်ပြောင်း ---
+
     const [profileStats, setProfileStats] = useState<ProfileStatsData>(null);
     const [genreStats, setGenreStats] = useState<GenreStat[] | null>(null);
     const [ratingStats, setRatingStats] = useState<RatingStat[] | null>(null);
@@ -40,23 +44,18 @@ export default function MyAccountPage() {
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    // --- Accent Color & Delete Account အတွက် State အသစ်များ ---
-    const [accentColor, setAccentColor] = useState('#39FF14'); // Default Green
+    const [accentColor, setAccentColor] = useState('#39FF14'); 
     const [savingAccent, setSavingAccent] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deletingAccount, setDeletingAccount] = useState(false);
     
-    // --- Accent Color ကို CSS Variable အဖြစ် သတ်မှတ်မယ့် useEffect ---
     useEffect(() => {
         const savedColor = profile?.preferences?.accentColor;
-        const colorToApply = savedColor || '#39FF14'; // Default green
-        
+        const colorToApply = savedColor || '#39FF14'; 
         setAccentColor(colorToApply);
-        
         document.documentElement.style.setProperty('--accent-color', colorToApply);
         console.log(`[MyAccountPage] Accent Color applied: ${colorToApply}`);
-
     }, [profile?.preferences?.accentColor]); 
     
     // --- setupUser function (မပြောင်းပါ) ---
@@ -134,7 +133,6 @@ export default function MyAccountPage() {
                 setFavoriteAnimeList(fetchedAnimeFavorites.filter(fav => fav.anime_series) as unknown as FavoriteAnimeItem[]);
             } else { setFavoriteAnimeList([]); }
             
-            // Build Error (Typo) ပြင်ဆင်ပြီး
             const fetchedCharFavoriteIds = favoriteCharIdsResponse.data || [];
 
             if (fetchedCharFavoriteIds.length > 0) {
@@ -212,7 +210,7 @@ export default function MyAccountPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // --- handleDeleteReceipt, handleImageUpload, handleSaveBio, handleSaveUsername (မပြောင်းပါ) ---
+    // --- handleDeleteReceipt, handleImageUpload, handleSaveBio (မပြောင်းပါ) ---
      const handleDeleteReceipt = async (receiptId: string, receiptPath: string | null) => {
          if (!receiptPath) { alert("Cannot delete receipt: Path is missing."); return; }
         if (window.confirm("Are you sure you want to delete this receipt submission?")) {
@@ -271,32 +269,49 @@ export default function MyAccountPage() {
              setSavingBio(false);
          }
      };
-    const handleSaveUsername = async (newUsername: string) => {
+
+    // --- START: handleSaveUsername ကို handleSaveName လို့ ပြောင်းပြီး Regex ဖယ်ရှား ---
+    const handleSaveName = async (newName: string) => {
         if (!session?.user || !profile) return;
-        const trimmedUsername = newUsername.trim();
-        if (trimmedUsername.length < 3 || trimmedUsername.length > 20) { alert('Username must be between 3 and 20 characters.'); return; }
-        const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-        if (!usernameRegex.test(trimmedUsername)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
-        if (trimmedUsername === profile.naju_id) { setIsEditingUsername(false); return; }
-        setSavingUsername(true);
+        const trimmedName = newName.trim();
+        if (trimmedName.length < 3 || trimmedName.length > 20) { 
+            alert('Name must be between 3 and 20 characters.'); 
+            return; 
+        }
+        
+        // --- Regex validation ကို ဖယ်ရှားလိုက်ပါပြီ ---
+        // const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+        // if (!usernameRegex.test(trimmedName)) { alert("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); return; }
+        
+        if (trimmedName === profile.naju_id) { 
+            setIsEditingName(false); 
+            return; 
+        }
+        
+        setSavingName(true);
         setError(null);
         try {
-            const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedUsername }).eq('id', session.user.id).single();
+            // 'naju_id' column ကို update လုပ်
+            const { error: updateError } = await supabase.from('profiles').update({ naju_id: trimmedName }).eq('id', session.user.id).single();
             if (updateError) {
-                 if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { throw new Error(`Username "${trimmedUsername}" is already taken.`); }
+                 if (updateError.message.includes('duplicate key value violates unique constraint') && updateError.message.includes('naju_id')) { 
+                    throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
+                 }
                  throw updateError;
             }
-            setProfile(prev => prev ? { ...prev, naju_id: trimmedUsername } : null);
-            setIsEditingUsername(false);
+            setProfile(prev => prev ? { ...prev, naju_id: trimmedName } : null);
+            setIsEditingName(false);
         } catch (err: any) {
-            console.error("Error saving username:", err);
-            setError(`Failed to save username: ${err.message}`);
+            console.error("Error saving name:", err);
+            setError(`Failed to save name: ${err.message}`); // Error message ပြောင်း
         } finally {
-            setSavingUsername(false);
+            setSavingName(false);
         }
     };
+    // --- END: handleSaveUsername ကို handleSaveName လို့ ပြောင်းပြီး Regex ဖယ်ရှား ---
 
-    // --- handleSaveAccent (မပြောင်းပါ) ---
+
+    // --- handleSaveAccent, handleDeleteAccount (မပြောင်းပါ) ---
     const handleSaveAccent = async () => {
         if (!profile?.id || savingAccent) return;
         setSavingAccent(true);
@@ -314,26 +329,21 @@ export default function MyAccountPage() {
         }
     };
 
-    // --- START: handleDeleteAccount Function ကို Edge Function ခေါ်ရန် ပြင်ဆင်ခြင်း ---
     const handleDeleteAccount = async () => {
         if (!profile?.id || deletingAccount) return;
-        // User က ရိုက်ထည့်တဲ့ text နဲ့ profile.naju_id တူမှ delete လုပ်
         if (!deleteConfirmText || deleteConfirmText !== (profile.naju_id || '')) {
-            setError('Username confirmation does not match.');
+            setError('Name confirmation does not match.'); // "Username" အစား "Name"
             return;
         }
         setDeletingAccount(true);
         setError(null);
         try {
-            // Soft Delete အစား Edge Function (Hard Delete) ကို ခေါ်ပါ
+            // Hard delete function ကို ခေါ်
             const { error } = await supabase.functions.invoke('delete-user-account');
-
             if (error) throw error;
 
-            // Function အောင်မြင်ရင် user က logout ဖြစ်သွားပြီးသား (token မရှိတော့)
-            // ဒါကြောင့် signOut() ကို ထပ်ခေါ်ပြီး homepage ကို ပို့ပါ
             await supabase.auth.signOut();
-            alert("Your account has been permanently deleted."); // SignOut မတိုင်ခင် alert ပြပါ
+            alert("Your account has been permanently deleted.");
             window.location.href = '/'; 
 
         } catch (e: any) {
@@ -342,12 +352,11 @@ export default function MyAccountPage() {
             setDeletingAccount(false); 
         }
     };
-    // --- END: handleDeleteAccount Function ကို Edge Function ခေါ်ရန် ပြင်ဆင်ခြင်း ---
 
 
     // --- Main JSX (Loading/Error/No Session states) (မပြောင်းပါ) ---
     if (loading) { return (<div className="flex min-h-[calc(100vh-200px)] items-center justify-center text-text-dark-primary"><Loader className="animate-spin mr-2" size={24} /> Loading Account...</div>); }
-    if (error && !(savingUsername && error.includes('already taken'))) { 
+    if (error && !(savingName && error.includes('already taken'))) { // savingUsername -> savingName
         return ( 
             <div className="flex min-h-[calc(100vh-200px)] flex-col items-center justify-center text-red-400 text-center px-4"> 
                 <AlertTriangle className="mb-2" size={32} /> 
@@ -438,7 +447,15 @@ export default function MyAccountPage() {
                             deletingReceipt={deletingReceipt}
                             handleDeleteReceipt={handleDeleteReceipt}
                             isEditingBio={isEditingBio} setIsEditingBio={setIsEditingBio} editingBioText={editingBioText} setEditingBioText={setEditingBioText} handleSaveBio={handleSaveBio} savingBio={savingBio}
-                            isEditingUsername={isEditingUsername} setIsEditingUsername={setIsEditingUsername} editingUsernameText={editingUsernameText} setEditingUsernameText={setEditingUsernameText} handleSaveUsername={handleSaveUsername} savingUsername={savingUsername}
+                            
+                            // --- START: "Name" props တွေကို ပို့ပေးခြင်း ---
+                            isEditingName={isEditingName}
+                            setIsEditingName={setIsEditingName}
+                            editingNameText={editingNameText}
+                            setEditingNameText={setEditingNameText}
+                            handleSaveName={handleSaveName}
+                            savingName={savingName}
+                            // --- END: "Name" props တွေကို ပို့ပေးခြင်း ---
                             
                             accentColor={accentColor}
                             setAccentColor={setAccentColor}
@@ -455,15 +472,15 @@ export default function MyAccountPage() {
                 </AnimatePresence>
             </div>
             {/* Error Displays (မပြောင်းပါ) */}
-            {error && !(activeTab === 'settings' && savingUsername && error.includes('already taken')) && (
+            {error && !(activeTab === 'settings' && savingName && error.includes('already taken')) && ( // savingUsername -> savingName
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
             )}
-             {activeTab === 'settings' && error && savingUsername && error.includes('already taken') && (
+             {activeTab === 'settings' && error && savingName && error.includes('already taken') && ( // savingUsername -> savingName
                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="fixed bottom-4 right-4 max-w-sm bg-red-800 text-white p-4 rounded-lg shadow-lg flex items-start gap-3 z-50">
-                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error Updating Username</p> <p className="text-xs">{error}</p> </div>
+                      <AlertTriangle size={20} className="mt-0.5 shrink-0"/> <div> <p className="font-semibold text-sm">Error Updating Name</p> <p className="text-xs">{error}</p> </div>
                      <button onClick={() => setError(null)} className="ml-auto text-red-200 hover:text-white"><XCircle size={16}/></button>
                  </motion.div>
              )}

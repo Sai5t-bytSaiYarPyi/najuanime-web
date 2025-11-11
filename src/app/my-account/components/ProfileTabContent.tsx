@@ -1,3 +1,4 @@
+// src/app/my-account/components/ProfileTabContent.tsx
 'use client';
 
 import React from 'react';
@@ -41,7 +42,9 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   genreStats,
   ratingStats,
 }) => {
+  // --- START: displayUsername ကို 'naju_id' ကနေ ယူသုံး (ဒါက အခု "Name" ဖြစ်သွားပြီ) ---
   const displayUsername = profile?.naju_id || 'User';
+  // --- END: displayUsername ကို 'naju_id' ကနေ ယူသုံး ---
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -120,16 +123,19 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         </div>
         <div className="text-center sm:text-left pb-2 flex-grow">
           <div>
+            {/* --- START: 'naju_id' (Name) ကို အကြီးကြီး ပြ --- */}
             <h1 className="text-2xl md:text-3xl font-bold text-text-dark-primary">
               {displayUsername}
             </h1>
+            {/* --- '@' ကို ဖယ်ရှားပြီး၊ email ကို ပြ (Optional) --- */}
             <p className="text-text-dark-secondary font-mono text-sm">
-              @{profile?.naju_id || 'N/A'}
+              {profile?.naju_id || 'N/A'}
             </p>
+            {/* --- END: 'naju_id' (Name) ကို အကြီးကြီး ပြ --- */}
           </div>
         </div>
         <div className="sm:ml-auto">
-          {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ (Settings tab ကို navigate လုပ်ရန်) */}
+          {/* // Edit Profile Button (မပြောင်းပါ) */}
           <button
             onClick={() => {
               const settingsTab = document.querySelector(
@@ -147,11 +153,10 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           >
             <Edit3 size={14} /> Edit Profile
           </button>
-          {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
         </div>
       </div>
 
-      {/* Stats, Bio, Subscription, Recent Activity */}
+      {/* Stats, Bio, Subscription, Recent Activity (မပြောင်းပါ) */}
       <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
           <ProfileStatsDisplay
@@ -214,7 +219,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           <div className="bg-card-dark p-4 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-1">
               <h3 className="font-semibold text-text-dark-primary">About Me</h3>
-              {/* // START: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
               <button
                 onClick={() => {
                   const settingsTab = document.querySelector(
@@ -232,7 +236,6 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
                 {' '}
                 <Edit3 size={12} className="inline mr-1" /> Edit Bio{' '}
               </button>
-              {/* // END: Link ကို #settings-edit-profile သို့ ပြောင်းထားပါ */}
             </div>
             {profile?.bio ? (
               <p className="text-text-dark-secondary text-sm whitespace-pre-wrap">

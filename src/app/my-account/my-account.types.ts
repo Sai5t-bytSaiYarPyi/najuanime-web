@@ -3,7 +3,7 @@
 export type ProfilePreferences = { theme?: 'light' | 'dark'; accentColor?: string | null };
 export type Profile = {
   id: string;
-  naju_id: string;
+  naju_id: string; // DB column က 'naju_id' အတိုင်း ဆက်ရှိနေပါမယ်
   subscription_expires_at: string | null;
   subscription_status: string | null;
   avatar_url: string | null;
@@ -31,7 +31,7 @@ export type ProfileStatsData = { completed_count: number; mean_score: number; to
 export type GenreStat = { genre_name: string; count: number };
 export type RatingStat = { rating_value: number; count: number };
 
-// --- START: SettingsTabContentProps ကို မွမ်းမံခြင်း ---
+// --- START: SettingsTabContentProps ကို "Name" အတွက် မွမ်းမံခြင်း ---
 export type SettingsTabContentProps = {
   profile: Profile | null;
   userEmail: string | undefined | null;
@@ -44,20 +44,22 @@ export type SettingsTabContentProps = {
   setEditingBioText: (text: string) => void;
   handleSaveBio: (newBio: string) => void;
   savingBio: boolean;
-  isEditingUsername: boolean;
-  setIsEditingUsername: (isEditing: boolean) => void;
-  editingUsernameText: string;
-  setEditingUsernameText: (text: string) => void;
-  handleSaveUsername: (newUsername: string) => void;
-  savingUsername: boolean;
   
-  // --- Accent Color အတွက် Props အသစ်များ ---
+  // "Username" မှ "Name" သို့ prop အမည်များ ပြောင်းလဲခြင်း
+  isEditingName: boolean;
+  setIsEditingName: (isEditing: boolean) => void;
+  editingNameText: string;
+  setEditingNameText: (text: string) => void;
+  handleSaveName: (newName: string) => void;
+  savingName: boolean;
+  
+  // Accent Color အတွက် Props 
   accentColor: string;
   setAccentColor: (color: string) => void;
   savingAccent: boolean;
   handleSaveAccent: () => void;
   
-  // --- Delete Account အတွက် Props အသစ်များ ---
+  // Delete Account အတွက် Props
   deleteConfirmOpen: boolean;
   setDeleteConfirmOpen: (isOpen: boolean) => void;
   deleteConfirmText: string;
@@ -65,7 +67,7 @@ export type SettingsTabContentProps = {
   deletingAccount: boolean;
   handleDeleteAccount: () => void;
 };
-// --- END: SettingsTabContentProps ကို မွမ်းမံခြင်း ---
+// --- END: SettingsTabContentProps ကို "Name" အတွက် မွမ်းမံခြင်း ---
 
 export type FavoritesTabContentProps = {
   favoriteAnimeList: FavoriteAnimeItem[];

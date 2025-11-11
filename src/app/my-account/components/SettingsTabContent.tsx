@@ -11,11 +11,13 @@ import { SettingsTabContentProps, Receipt } from '../my-account.types';
 const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   profile, userEmail, receipts, deletingReceipt, handleDeleteReceipt,
   isEditingBio, setIsEditingBio, editingBioText, setEditingBioText, handleSaveBio, savingBio,
-  isEditingUsername, setIsEditingUsername, editingUsernameText, setEditingUsernameText, handleSaveUsername, savingUsername,
-  // --- START: Props အသစ်များကို လက်ခံခြင်း ---
+  
+  // --- START: "Name" props တွေကို လက်ခံ ---
+  isEditingName, setIsEditingName, editingNameText, setEditingNameText, handleSaveName, savingName,
+  // --- END: "Name" props တွေကို လက်ခံ ---
+  
   accentColor, setAccentColor, savingAccent, handleSaveAccent,
   deleteConfirmOpen, setDeleteConfirmOpen, deleteConfirmText, setDeleteConfirmText, deletingAccount, handleDeleteAccount
-  // --- END: Props အသစ်များကို လက်ခံခြင်း ---
 }) => {
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -27,33 +29,10 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
-  
-  // --- START: accentColor state ကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state ကို ဖယ်ရှားပါ ---
-  // const [accentColor, setAccentColor] = useState(profile?.preferences?.accentColor || '#39FF14');
-  // const [savingAccent, setSavingAccent] = useState(false);
-  // --- END: accentColor state ကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state ကို ဖယ်ရှားပါ ---
-
-  // --- START: Delete Account state တွေကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state တွေကို ဖယ်ရှားပါ ---
-  // const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  // const [deleteConfirmText, setDeleteConfirmText] = useState('');
-  // const [deletingAccount, setDeletingAccount] = useState(false);
-  // --- END: Delete Account state တွေကို prop ကနေ ယူသုံးမှာဖြစ်လို့ ဒီက state တွေကို ဖယ်ရှားပါ ---
 
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // --- START: ဒီ useEffect ကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
-  // useEffect(() => {
-  //   setAccentColor(profile?.preferences?.accentColor || '#39FF14');
-  //   if (profile?.preferences?.accentColor) {
-  //     document.documentElement.style.setProperty('--accent-color', profile.preferences.accentColor || '#39FF14');
-  //   } else {
-  //     document.documentElement.style.setProperty('--accent-color', '#39FF14');
-  //   }
-  // }, [profile?.preferences?.accentColor]);
-  // --- END: ဒီ useEffect ကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
-
-
-  // --- handleChangeEmail, handleChangePassword functions (မပြောင်းပါ) ---
+  // (useEffect, handleChangeEmail, handleChangePassword functions မပြောင်းပါ)
   const handleChangeEmail = async () => {
     if (!newEmail || savingEmail) return;
     setSavingEmail(true);
@@ -100,17 +79,15 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
       setSavingPassword(false);
     }
   };
-  
-  // --- START: ဒီ function တွေကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
-  // const handleSaveAccent = async () => { ... };
-  // const handleDeleteAccount = async () => { ... };
-  // --- END: ဒီ function တွေကို page.tsx ဆီ ရွှေ့ပြီးဖြစ်လို့ ဖယ်ရှားပါ ---
 
-  // --- startEditingBio, cancelEditingBio, etc. (မပြောင်းပါ) ---
   const startEditingBio = () => { setIsEditingBio(true); setEditingBioText(profile?.bio || ''); };
   const cancelEditingBio = () => { setIsEditingBio(false); };
-  const startEditingUsername = () => { setIsEditingUsername(true); setEditingUsernameText(profile?.naju_id || ''); };
-  const cancelEditingUsername = () => { setIsEditingUsername(false); };
+  
+  // --- START: "Name" အတွက် helper function များ ---
+  const startEditingName = () => { setIsEditingName(true); setEditingNameText(profile?.naju_id || ''); };
+  const cancelEditingName = () => { setIsEditingName(false); };
+  // --- END: "Name" အတွက် helper function များ ---
+
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -138,29 +115,49 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Edit Profile Section (id ထည့်ပါ) (မပြောင်းပါ) */}
       <div id="settings-edit-profile" className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Edit3 size={18}/> Edit Profile</h3>
+        
+        {/* --- START: "Username" အပိုင်းကို "Name" သို့ ပြောင်းလဲခြင်း --- */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-text-dark-secondary mb-1">Username</label>
-          {isEditingUsername ? (
+          <label className="block text-sm font-medium text-text-dark-secondary mb-1">Display Name</label>
+          {isEditingName ? (
             <div className="space-y-2">
               <div className="relative">
-                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input type="text" value={editingUsernameText} onChange={(e) => setEditingUsernameText(e.target.value)} placeholder="Enter new username" className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" maxLength={20} />
+                {/* AtSign icon ကို User icon သို့ ပြောင်း */}
+                <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input 
+                  type="text" 
+                  value={editingNameText} 
+                  onChange={(e) => setEditingNameText(e.target.value)} 
+                  placeholder="Enter new name (3-20 chars)" 
+                  className="w-full max-w-xs p-2 pl-9 rounded bg-gray-700 border border-border-color focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" 
+                  maxLength={20} 
+                  minLength={3}
+                />
               </div>
               <div className="flex gap-2">
-                <button onClick={cancelEditingUsername} disabled={savingUsername} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                <button onClick={() => handleSaveUsername(editingUsernameText)} disabled={savingUsername || editingUsernameText.trim().length < 3 || editingUsernameText.trim() === profile?.naju_id} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"> {savingUsername ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingUsername ? 'Saving...' : 'Save'} </button>
+                <button onClick={cancelEditingName} disabled={savingName} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50 text-text-dark-primary"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
+                <button 
+                  onClick={() => handleSaveName(editingNameText)} 
+                  disabled={savingName || editingNameText.trim().length < 3 || editingNameText.trim() === profile?.naju_id} 
+                  className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-1"
+                > 
+                  {savingName ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingName ? 'Saving...' : 'Save'} 
+                </button>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <p className="text-text-dark-primary font-mono">@{profile?.naju_id || 'N/A'}</p>
-              <button onClick={startEditingUsername} disabled={savingBio} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
+              {/* "@" သင်္ကေတကို ဖယ်ရှား */}
+              <p className="text-text-dark-primary font-bold">{profile?.naju_id || 'N/A'}</p> 
+              <button onClick={startEditingName} disabled={savingBio} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50"> <Edit3 size={12} className="inline mr-0.5"/> Change </button>
             </div>
           )}
         </div>
+        {/* --- END: "Username" အပိုင်းကို "Name" သို့ ပြောင်းလဲခြင်း --- */}
+
+        {/* Bio Section (မပြောင်းပါ) */}
         <div>
           <label className="block text-sm font-medium text-text-dark-secondary mb-1">About Me / Bio</label>
           {isEditingBio ? (
@@ -168,13 +165,13 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
               <textarea value={editingBioText} onChange={(e) => setEditingBioText(e.target.value)} placeholder="Tell us about yourself..." className="w-full p-2 rounded bg-gray-700 border border-border-color min-h-[100px] text-sm focus:outline-none focus:ring-1 focus:ring-accent-green text-text-dark-primary" rows={4} maxLength={500} />
               <div className="flex justify-end gap-2">
                 <button onClick={cancelEditingBio} disabled={savingBio} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-md text-text-dark-primary text-xs font-semibold disabled:opacity-50"> <XCircle size={14} className="inline mr-1"/> Cancel </button>
-                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingUsername} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
+                <button onClick={() => handleSaveBio(editingBioText)} disabled={savingBio || savingName} className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-white text-xs font-semibold disabled:bg-gray-500 disabled:cursor-wait flex items-center gap-1"> {savingBio ? <Loader size={14} className="animate-spin"/> : <Save size={14} />} {savingBio ? 'Saving...' : 'Save Bio'} </button>
               </div>
             </div>
           ) : (
             <div className="flex items-start gap-4">
               <p className="text-text-dark-secondary text-sm whitespace-pre-wrap flex-grow">{profile?.bio || <span className="italic">No bio added yet.</span>}</p>
-              <button onClick={startEditingBio} disabled={savingUsername} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50 shrink-0"> <Edit3 size={12} className="inline mr-0.5"/> Edit </button>
+              <button onClick={startEditingBio} disabled={savingName} className="text-xs text-text-dark-secondary hover:text-white disabled:opacity-50 shrink-0"> <Edit3 size={12} className="inline mr-0.5"/> Edit </button>
             </div>
           )}
         </div>
@@ -230,7 +227,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         </div>
       </div>
 
-      {/* --- START: Accent Color UI အသစ် ထည့်သွင်းခြင်း --- */}
+      {/* Accent Color Section (မပြောင်းပါ) */}
       <div className="bg-card-dark p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4 text-text-dark-primary flex items-center gap-2"><Palette size={18}/> Site Preferences</h3>
         <div>
@@ -241,7 +238,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
               value={accentColor} 
               onChange={(e) => setAccentColor(e.target.value)} 
               className="h-8 w-12 rounded bg-transparent border-none cursor-pointer" 
-              style={{ padding: 0, border: 'none' }} // iOS မှာ ပုံမှန်ပေါ်အောင်
+              style={{ padding: 0, border: 'none' }}
             />
             <span className="text-sm font-mono">{accentColor}</span>
             <button 
@@ -255,8 +252,6 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
           <p className="text-xs text-text-dark-secondary mt-2">This color will be used for active tabs and charts on your profile.</p>
         </div>
       </div>
-      {/* --- END: Accent Color UI အသစ် ထည့်သွင်းခြင်း --- */}
-
 
       {/* Receipt Submissions Section (မပြောင်းပါ) */}
       <div className="bg-card-dark p-6 rounded-lg shadow-md">
@@ -279,7 +274,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         <Link href="/subscribe" className="mt-4 inline-block hover:underline text-sm" style={{ color: accentColor }}> Submit another receipt &rarr; </Link>
       </div>
 
-      {/* --- START: Danger Zone UI အသစ် ထည့်သွင်းခြင်း --- */}
+      {/* --- START: Danger Zone UI ကို "Name" အတွက် ပြင်ဆင်ခြင်း --- */}
       <div className="bg-red-900/30 border border-red-700 p-6 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-3 text-red-300 flex items-center gap-2"><AlertTriangle size={18}/> Danger Zone</h3>
         {!deleteConfirmOpen ? (
@@ -291,10 +286,11 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
           </button>
         ) : (
           <div className="space-y-3">
-            <p className="text-red-300 text-sm">This action will **soft delete** your account by anonymizing your data and will sign you out. This cannot be undone.</p>
-            <p className="text-red-300 text-xs">Please type your username <strong className='font-mono'>@{profile?.naju_id || ''}</strong> to confirm.</p>
+            <p className="text-red-300 text-sm">This action will **permanently delete** your account, profile, and all associated data. This cannot be undone.</p>
+            <p className="text-red-300 text-xs">Please type your name <strong className='font-mono'>{profile?.naju_id || ''}</strong> to confirm.</p>
             <div className="relative">
-              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              {/* AtSign icon ကို User icon သို့ ပြောင်း */}
+              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input 
                 type="text" 
                 value={deleteConfirmText} 
@@ -320,7 +316,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
           </div>
         )}
       </div>
-      {/* --- END: Danger Zone UI အသစ် ထည့်သွင်းခြင်း --- */}
+      {/* --- END: Danger Zone UI ကို "Name" အတွက် ပြင်ဆင်ခြင်း --- */}
 
     </motion.div>
   );

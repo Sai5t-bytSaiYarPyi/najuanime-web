@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Send, Eye, EyeOff, CheckSquare, Square, Hash, AtSign } from 'lucide-react';
+import { Mail, KeyRound, LogIn, UserPlus, X, AlertCircle, Send, Eye, EyeOff, CheckSquare, Square, Hash, AtSign, User } from 'lucide-react'; // User icon ထည့်ပါ
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
@@ -19,7 +19,9 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [username, setUsername] = useState('');
+  // --- START: "username" state ကို "name" လို့ ပိုရှင်းအောင် ပြောင်း (variable name) ---
+  const [name, setName] = useState('');
+  // --- END: "username" state ကို "name" လို့ ပိုရှင်းအောင် ပြောင်း ---
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -30,15 +32,14 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
   const [message, setMessage] = useState<string | null>(null);
 
   const resetStates = (keepEmail = false) => {
-      if (!keepEmail) setEmail(''); setPassword(''); setNewPassword(''); setUsername(''); setOtp('');
+      if (!keepEmail) setEmail(''); setPassword(''); setNewPassword(''); setName(''); setOtp(''); // name ကို reset လုပ်
       setShowPassword(false); setShowNewPassword(false); setRememberMe(false); setAgreedToTerms(false);
       setError(null); setMessage(null); setLoading(false);
   };
 
-  // --- handleEmailAuth, handleEmailOtpVerify, etc. (Logic မပြောင်းပါ) ---
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setLoading(true); setError(null); setMessage(null);
-    let trimmedUsername = ''; // username ကို catch block မှာ သုံးနိုင်အောင် အပြင်ထုတ်ထားပါ
+    let trimmedName = ''; // name ကို catch block မှာ သုံးနိုင်အောင် အပြင်ထုတ်ထားပါ
     
     if (isLoginView) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -48,24 +49,31 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
         } else { onClose(); }
     } else {
       if (!agreedToTerms) { setError('You must agree to the Terms of Service and Privacy Policy.'); setLoading(false); return; }
-      trimmedUsername = username.trim(); // trimmedUsername ကို ဒီမှာ value သတ်မှတ်
-      if (trimmedUsername.length < 3) { setError('Username must be at least 3 characters long.'); setLoading(false); return; }
-      if (trimmedUsername.length > 20) { setError('Username cannot be longer than 20 characters.'); setLoading(false); return; }
-      const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-      if (!usernameRegex.test(trimmedUsername)) { setError("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); setLoading(false); return; }
+      
+      // --- START: Validation ကို "Name" အတွက် ပြင်ဆင်ခြင်း ---
+      trimmedName = name.trim(); // trimmedName ကို ဒီမှာ value သတ်မှတ်
+      if (trimmedName.length < 3) { setError('Name must be at least 3 characters long.'); setLoading(false); return; }
+      if (trimmedName.length > 20) { setError('Name cannot be longer than 20 characters.'); setLoading(false); return; }
+      
+      // --- Regex Validation ကို ဖယ်ရှားလိုက်ပါပြီ ---
+      // const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+      // if (!usernameRegex.test(trimmedName)) { setError("Username can only contain letters, numbers, underscores (_), and hyphens (-)."); setLoading(false); return; }
+      // --- END: Validation ကို "Name" အတွက် ပြင်ဆင်ခြင်း ---
 
       try {
+          // --- START: signUp မှာ 'naju_id' ကို 'trimmedName' နဲ့ ပို့ပါ ---
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email, password, options: { data: { naju_id: trimmedUsername } }
+            email, password, options: { data: { naju_id: trimmedName } } // 'naju_id' column ကို user ထည့်တဲ့ Name နဲ့ set လုပ်
           });
+          // --- END: signUp မှာ 'naju_id' ကို 'trimmedName' နဲ့ ပို့ပါ ---
+          
           if (signUpError) {
-               // --- START: ပြင်ဆင်မှု (Trigger Error ကို ပါ ဖမ်းရန်) ---
-               // Supabase က trigger fail ရင် ဒီ generic error ကို ပြန်ပေးတတ်ပါတယ်
                if (signUpError.message === 'Database error saving new user') {
-                   throw new Error(`Username "${trimmedUsername}" is already taken.`);
+                   throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
                }
-               // --- END: ပြင်ဆင်မှု ---
-               if (signUpError.message.includes('duplicate key value violates unique constraint') && signUpError.message.includes('naju_id')) { throw new Error(`Username "${trimmedUsername}" is already taken.`); }
+               if (signUpError.message.includes('duplicate key value violates unique constraint') && signUpError.message.includes('naju_id')) { 
+                   throw new Error(`Name "${trimmedName}" is already taken.`); // Error message ပြောင်း
+                }
                if (signUpError.message.includes('User already registered')) { throw new Error('This email address is already registered. Please log in.'); }
                throw signUpError;
           }
@@ -77,21 +85,19 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
               } else { setMessage(otpData.message || 'Signup initiated. OTP sent to your email.'); setView('email_otp_verify'); }
           } else { throw new Error('User data not returned after signup.'); }
       
-    // --- START: ပြင်ဆင်မှု (Catch Block ကို ပြင်ဆင်) ---
     } catch (err: any) { 
         console.error("Error during signup or OTP sending:", err);
-        // Trigger ကနေလာတဲ့ generic error ကို ဖမ်းပြီး user-friendly message ပြပါ
-        if (err.message === 'Database error saving new user' && trimmedUsername) {
-            setError(`Username "${trimmedUsername}" is already taken or another database error occurred. Please try a different username.`);
+        if (err.message === 'Database error saving new user' && trimmedName) {
+            setError(`Name "${trimmedName}" is already taken or another database error occurred. Please try a different name.`); // Error message ပြောင်း
         } else {
             setError(err.message || 'An unexpected error occurred during signup.');
         }
     }
-    // --- END: ပြင်ဆင်မှု ---
     }
     setLoading(false);
   };
 
+    // (ကျန်တဲ့ function တွေ handleEmailOtpVerify, handleAutoLoginAfterVerification, handleRequestPasswordOtp, handleVerifyOtpAndSubmitNewPassword, handleClose မပြောင်းပါ)
     const handleEmailOtpVerify = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); setLoading(true); setError(null); setMessage(null);
         try {
@@ -132,30 +138,38 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
 
     const handleClose = () => { resetStates(); setView('email'); setIsLoginView(true); onClose(); };
 
-    // --- START: Input & Button Styles (Dark Theme) ---
     const inputClasses = "w-full bg-gray-700 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-text-dark-primary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-purple";
     const otpInputClasses = "w-full bg-gray-700 border border-border-color rounded-lg py-2.5 pl-10 pr-4 text-text-dark-primary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-purple tracking-[0.3em] text-center";
     const buttonClasses = "w-full bg-accent-purple hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-600 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2";
-    // --- END: Input & Button Styles (Dark Theme) ---
 
-    // --- START: Render functions များအတွင်းမှ text color class များကို တိုက်ရိုက်သတ်မှတ် ---
     const renderEmailView = () => (
        <motion.div key="email" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}>
          <h2 className="text-3xl font-bold text-center text-text-dark-primary mb-2">{isLoginView ? 'Welcome Back!' : 'Join the Universe'}</h2>
          <p className="text-text-dark-secondary text-center mb-6">{isLoginView ? 'Log in to continue your journey.' : 'Create an account to get started.'}</p>
          <form onSubmit={handleEmailAuth} className="space-y-4">
              {!isLoginView && (
+                 // --- START: "Username" ကို "Name" လို့ ပြောင်း၊ Validation တွေ ဖြေလျှော့ ---
                  <div className="relative">
-                     <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                     <input type="text" placeholder="Username (3-20 characters, a-z, 0-9, _, -)" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={20} pattern="^[a-zA-Z0-9_-]+$" title="Username can only contain letters, numbers, underscores (_), and hyphens (-)." className={inputClasses} />
+                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                     <input 
+                        type="text" 
+                        placeholder="Name (3-20 characters)" 
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        required 
+                        minLength={3} 
+                        maxLength={20} 
+                        className={inputClasses} 
+                     />
                  </div>
+                 // --- END: "Username" ကို "Name" လို့ ပြောင်း၊ Validation တွေ ဖြေလျှော့ ---
              )}
              <div className="relative">
                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                  <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClasses} />
              </div>
              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <KeyRound className="absolute left-3 top-1/Vl-translate-y-1/2 text-gray-400" size={20} />
                 <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={`${inputClasses} pr-10`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
              </div>
@@ -167,6 +181,7 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
     </motion.div>
   );
 
+    // (renderEmailOtpVerifyView, renderForgotPasswordRequestOtpView, renderResetOtpVerifyView, renderNewPasswordView တို့ မပြောင်းပါ)
     const renderEmailOtpVerifyView = () => (
         <motion.div key="email_otp_verify" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}>
           <h2 className="text-3xl font-bold text-center text-text-dark-primary mb-2">Verify Email OTP</h2> <p className="text-text-dark-secondary text-center mb-6">Enter the 6-digit code sent to {email}.</p>
@@ -210,15 +225,13 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
          <p className="text-center text-sm text-text-dark-secondary mt-4"><button onClick={() => { setView('email'); resetStates(); }} className="font-semibold text-accent-green hover:text-green-400">Back to Login</button></p>
     </motion.div>
     );
-    // --- END: Render functions များအတွင်းမှ text color class များကို တိုက်ရိုက်သတ်မှတ် ---
+    // --- (Render functions အဆုံး) ---
 
 
-  // --- START: Modal Background & Text Color (Dark Theme) ---
   return (
        <AnimatePresence>
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleClose}>
-          {/* Modal background ကို card-dark နဲ့ border-color သုံးပါ */}
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} transition={{ type: 'spring', damping: 15, stiffness: 200 }} className="relative w-full max-w-md bg-card-dark border border-border-color rounded-2xl p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <button onClick={handleClose} className="absolute top-4 right-4 text-text-dark-secondary hover:text-text-dark-primary transition-colors"><X size={24} /></button>
             <AnimatePresence mode="wait">
@@ -228,7 +241,6 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
               {view === 'new_password' && renderNewPasswordView()}
               {view === 'email_otp_verify' && renderEmailOtpVerifyView()}
             </AnimatePresence>
-            {/* Error/Message styling (Dark theme) */}
             {(error || message) && (
               <div className="mt-4"><AnimatePresence>
                   {error && (<motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex items-center gap-2 text-sm text-red-400 bg-red-900/30 border border-red-500/50 p-3 rounded-md"><AlertCircle size={16} /><span>{error}</span></motion.div>)}
@@ -240,5 +252,4 @@ export default function Auth({ isOpen, onClose }: AuthProps) {
       )}
     </AnimatePresence>
   );
-  // --- END: Modal Background & Text Color (Dark Theme) ---
 }
