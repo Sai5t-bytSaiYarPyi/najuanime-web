@@ -98,7 +98,7 @@ export default function ManageCharactersPage() {
     setSeries(seriesData as AnimeSeries);
 
     // 3. ချိတ်ဆက်ပြီးသား Character တွေကို fetch လုပ်
-    const { data: charactersData } = await supabase
+    const { data: charactersData, error: charactersError } = await supabase // <-- error ကိုပါ ဖမ်း
       .from('anime_characters')
       .select(`
         id,
@@ -107,8 +107,37 @@ export default function ManageCharactersPage() {
       `)
       .eq('anime_id', animeId)
       .order('created_at', { ascending: true });
-      
-    setLinkedCharacters((charactersData as LinkedCharacter[]) || []);
+
+    // --- START: Build Error Fix (TypeScript Type Inference) ---
+    if (charactersError) {
+        console.error("Error fetching linked characters:", charactersError);
+        setLoading(false);
+        return;
+    }
+
+    // Vercel build မှာ TypeScript က `characters` property ကို object[] (array) 
+    // पण ဖြစ်နိုင်တယ်လို့ မှားယွင်းစွာ ကောက်ချက်ဆွဲ (infer) နေပါတယ်။
+    // ကျွန်တော်တို့ရဲ့ schema အရ (character_id FK) က object | null ပဲ 
+    // ပြန်လာမှာ သေချာတဲ့အတွက်၊ data ကို manually map လုပ်ပြီး type ကို ရှင်းလင်းပေးပါမယ်။
+    
+    const processedData = (charactersData || []).map(link => {
+        // `characters` property က array ဖြစ်ပြီး ပါလာခဲ့ရင် (မဖြစ်နိုင်ပေမယ့်) ပထမဆုံး item ကို ယူပါ။
+        // ပုံမှန် object (သို့) null အတိုင်း ပါလာရင် သူ့အတိုင်း ထားပါ။
+        const characterObject = Array.isArray(link.characters) 
+            ? (link.characters[0] || null) 
+            : (link.characters || null);
+            
+        return {
+            id: link.id,
+            role: link.role,
+            characters: characterObject
+        };
+    });
+    
+    // Type ရှင်းလင်းပြီးသား data ကိုမှ state ထဲ ထည့်ပါ။
+    // ဒီနေရာမှာ (as LinkedCharacter[]) cast လုပ်လို့ အဆင်ပြေသွားပါပြီ။
+    setLinkedCharacters((processedData as LinkedCharacter[]) || []);
+    // --- END: Build Error Fix ---
     
     setLoading(false);
   }, [animeId]);
