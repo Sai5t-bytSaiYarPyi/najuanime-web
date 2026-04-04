@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaJu Anime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto p-3 md:p-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                
+                <a href="#" class="text-2xl md:text-3xl font-black tracking-wider text-blue-500 uppercase hover:scale-105 transition-transform">
+                    NaJu<span class="text-white">Anime</span>
+                </a>
+                
+                <nav class="flex gap-4 md:gap-8 text-sm md:text-base font-bold text-gray-300">
+                    <a href="#" class="hover:text-blue-500 transition-colors">ပင်မစာမျက်နှာ</a>
+                    <a href="#about" class="hover:text-blue-500 transition-colors">ကျွန်ုပ်တို့အကြောင်း</a>
+                    <a href="#contact" class="hover:text-blue-500 transition-colors">ဆက်သွယ်ရန်</a>
+                </nav>
+
+                <div class="w-full md:w-1/3 relative mt-2 md:mt-0">
+                    <input type="text" id="searchInput" placeholder="ဇာတ်ကားနာမည် ရှာရန်..." 
+                           class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm md:text-base">
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-3 md:p-4 mt-4 md:mt-6">
+        <h2 class="text-lg md:text-xl font-bold mb-4 md:mb-6 border-l-4 border-blue-500 pl-3 uppercase tracking-wide">
+            ဇာတ်ကားစာရင်းများ <span id="movieCount" class="text-sm text-gray-400 font-normal ml-2"></span>
+        </h2>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6" id="anime-grid">
+            </div>
+    </main>
+
+    <section id="about" class="container mx-auto p-3 md:p-4 mt-12 mb-8">
+        <div class="bg-gray-800 rounded-2xl p-6 md:p-10 shadow-2xl border border-gray-700 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-900 via-blue-500 to-blue-900"></div>
+
+            <h2 class="text-2xl md:text-3xl font-black text-center text-blue-500 mb-8 uppercase tracking-wider">ကျွန်ုပ်တို့အကြောင်း</h2>
+            
+            <blockquote class="italic text-center text-gray-300 border-l-4 border-r-4 border-blue-500 px-4 py-2 mb-10 max-w-3xl mx-auto md:text-lg">
+                "အနုပညာဆိုတာ သန့်စင်ရပါတယ်။ ဇာတ်လမ်းတစ်ပုဒ်ရဲ့ ရသကို ခံစားနေချိန်မှာ အခြားသော အနှောင့်အယှက်တွေ မရှိသင့်ဘူးလို့ ကျွန်တော်တို့ ယုံကြည်တယ်။"
+            </blockquote>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors duration-300">
+                    <h3 class="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        မျှော်လင့်ချက်ကို ပုံဖော်ခြင်း
+                    </h3>
+                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                        NaJu Anime ဟာ ရိုးရှင်းတဲ့ ရည်ရွယ်ချက်လေးတစ်ခုကနေ အသက်ဝင်လာတာပါ။ မြန်မာနိုင်ငံက Anime ချစ်သူတွေအတွက် အရည်အသွေးပြည့်ဝတဲ့ ဘာသာပြန် ဇာတ်ကားတွေကို လွတ်လွတ်လပ်လပ်နဲ့ အခမဲ့ ခံစားကြည့်ရှုနိုင်ဖို့ပါပဲ။ အွန်လိုင်းလောကမှာ နေရာတကာ မြင်တွေ့နေရတဲ့ လောင်းကစားကြော်ငြာတွေ၊ စိတ်အနှောင့်အယှက်ဖြစ်စရာတွေကင်းစင်တဲ့ "သန့်စင်သော ရသကမ္ဘာလေးတစ်ခု" ကို ဖန်တီးပေးချင်ခဲ့တာပါ။ ရှင်သန်ရပ်တည်နိုင်ဖို့ နောက်ကွယ်မှာ မိသားစုရဲ့ အရိပ်အာဝါသကို မှီခိုနေရတဲ့ အခြေအနေတွေ ရှိနေပေမယ့်၊ ဒီအိပ်မက်လေး ဘယ်လောက်အထိ ခရီးဆက်နိုင်မလဲဆိုတာ မသိနိုင်ပေမယ့်၊ လျှောက်လှမ်းခွင့်ရတဲ့ အချိန်တိုင်းမှာတော့ အလှပဆုံး ခြေရာတွေ ချန်ထားရစ်ချင်ပါတယ်။
+                    </p>
+                </div>
+
+                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors duration-300">
+                    <h3 class="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        မုန်တိုင်းများကြားက အစပြုခြင်း
+                    </h3>
+                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                        ၂၀၂၅ ခုနှစ်၊ မေလ (၁၉) ရက်နေ့... ဒီရက်စွဲလေးဟာ NaJu ဆိုတဲ့ နာမည်လေး သန္ဓေတည်ခဲ့တဲ့ နေ့တစ်နေ့ပေါ့။ အရာရာဟာ လမ်းခင်းထားသလို ချောမွေ့မနေခဲ့ပါဘူး။ အကန့်အသတ်ရှိတဲ့ ဖုန်းဒေတာလေးတွေနဲ့ Anime တွေကို ဒေါင်းလုဒ်ဆွဲ၊ ပြန်တင်ရတဲ့ အစပိုင်းကာလတွေဟာ ခန္ဓာကိုယ်ရော စိတ်ပါ ယိုင်လဲလုနီးပါးပါပဲ။ ဒီ Channel လေး အခုလို မတ်မတ်ရပ်နိုင်ဖို့အတွက် နောက်ကွယ်မှာ အလွန်ကြမ်းတမ်းတဲ့ ဘဝရဲ့ မုန်တိုင်းကြီး ၃ ခုကို ကြံ့ကြံ့ခံ ဖြတ်သန်းခဲ့ရပါတယ်။ နာကျင်မှုတွေ၊ ဆုံးရှုံးမှုတွေနဲ့ ပင်ပန်းမှုတွေဟာ ကျွန်တော့်ရဲ့ ကိုယ်ပိုင်ဒိုင်ယာရီထဲမှာပဲ အမြဲတမ်း လျှို့ဝှက်စွာ ကျန်ရစ်နေခဲ့ပေမယ့်၊ အဲဒီ ကျောခိုင်းခဲ့ရတဲ့ ဒဏ်ရာတွေကပဲ ဒီ NaJu ကို ပိုပြီး ခိုင်မာတဲ့ ရဲတိုက်တစ်ခုဖြစ်အောင် တည်ဆောက်ပေးခဲ့တာပါ။
+                    </p>
+                </div>
+
+                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors duration-300">
+                    <h3 class="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        အထီးကျန် ဖန်တီးသူ
+                    </h3>
+                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                        ကြီးကျယ်ခမ်းနားတဲ့ အဖွဲ့အစည်းဆိုတာ NaJu မှာ မရှိပါဘူး။ အစကနေ အခုချိန်ထိ ဇာတ်လမ်းတွဲပေါင်း (၁၀၀) ကျော်ကို တစ်ကိုယ်တော် ဖန်တီးပုံဖော်နေတဲ့ လူတစ်ယောက်ရဲ့ ရုန်းကန်မှုတွေသာ ရှိပါတယ်။ လောကကြီးဆီကနေ သင်ယူရင်း၊ အခြားသူတွေရဲ့ ဖန်တီးမှုတွေကို လေ့လာရင်း ပရိသတ်အတွက် အကောင်းဆုံးဖြစ်အောင် ကြိုးစားနေတဲ့ သာမန်လူတစ်ယောက်ရဲ့ အနုပညာတစ်ခုသာ ဖြစ်ပါတယ်။
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-10 pt-6 border-t border-gray-700">
+                <p class="text-center text-blue-400 font-semibold italic text-sm md:text-base px-4">
+                    "လူတစ်ယောက်တည်းရဲ့ အားမာန်နဲ့ စတင်ခဲ့ပေမယ့်၊ အခုတော့ NaJu ဟာ Anime ကို ချစ်မြတ်နိုးတဲ့ ခင်ဗျားတို့အားလုံးရဲ့ နားခိုရာ အိမ်လေးတစ်လုံး ဖြစ်လာခဲ့ပါပြီ။ အတူတူ ဆက်ပြီး လျှောက်လှမ်းပေးကြပါဦး။"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-gray-900 border-t-2 border-blue-600 pt-10 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-8 text-center md:text-left">
+                
+                <div class="md:w-1/3">
+                    <h2 class="text-2xl font-black tracking-wider text-blue-500 uppercase mb-3">
+                        NaJu<span class="text-white">Anime</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        လောင်းကစားကြော်ငြာ ကင်းစင်ပြီး အရည်အသွေးပြည့်ဝသော ဘာသာပြန် Anime များကို လွတ်လပ်စွာ အခမဲ့ ကြည့်ရှုနိုင်မည့် သန့်စင်သော ရသကမ္ဘာ။
+                    </p>
+                </div>
+
+                <div class="md:w-1/3 flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-white mb-4 uppercase tracking-wider">Follow Us</h3>
+                    <div class="flex flex-col gap-3">
+                        <a href="https://www.facebook.com/profile.php?id=61577006233895" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                            Facebook Page
+                        </a>
+                        <a href="https://www.tiktok.com/@najuanime23?is_from_webapp=1&sender_device=pc" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91.04.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.12-3.44-3.17-3.8-5.46-.4-2.51.33-5.11 2.05-6.9 1.63-1.63 4.02-2.5 6.35-2.28v4.09c-1.3-.12-2.61.16-3.66.92-1.28.94-1.95 2.55-1.74 4.14.16 1.34 1.08 2.57 2.31 3.15 1.25.59 2.75.56 3.98-.12 1.44-.75 2.2-2.35 2.22-3.99.04-3.79.02-7.58.02-11.37z"/></svg>
+                            TikTok
+                        </a>
+                    </div>
+                </div>
+
+                <div class="md:w-1/3 flex flex-col items-center md:items-end">
+                    <h3 class="text-lg font-bold text-white mb-4 uppercase tracking-wider">ဆက်သွယ်ရန်</h3>
+                    <div class="flex flex-col gap-3">
+                        <a href="https://t.me/NaJu_New" target="_blank" class="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            Telegram: @NaJu_New
+                        </a>
+                        <a href="mailto:najuanimevipweb@gmail.com" class="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            najuanimevipweb@gmail.com
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="border-t border-gray-800 pt-6 text-center">
+                <p class="text-gray-500 text-sm">© 2026 NaJu Anime. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
