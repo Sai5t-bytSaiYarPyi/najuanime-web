@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review - NaJu Anime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <header class="bg-gray-800 shadow-lg border-b border-gray-700 py-4 sticky top-0 z-50">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="index.html" class="text-blue-500 hover:text-white transition flex items-center gap-2 font-bold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                နောက်သို့
+            </a>
+            <h1 class="text-xl font-black tracking-wider text-gray-300 uppercase">
+                NaJu<span class="text-white">Anime</span> Review
+            </h1>
+            <div class="w-16"></div> </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl" id="reviewContainer">
+        <div class="text-center text-gray-400 py-20">Loading...</div>
+    </main>
+
+    <section class="container mx-auto px-4 pb-16 max-w-4xl">
+        <div class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-xl border border-gray-700">
+            <h2 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                📝 အကြံပြုရန် / လင့်ခ်သေ တိုင်ကြားရန်
+            </h2>
+            <p class="text-sm text-gray-400 mb-6">စာတန်းထိုး အမှားအယွင်းများ၊ လင့်ခ်သေနေတာများရှိပါက အောက်တွင် အကြောင်းကြားပေးနိုင်ပါသည်။</p>
+            
+            <form id="feedbackForm" class="space-y-4">
+                <input type="hidden" id="animeId" name="animeId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">အမည် (သို့မဟုတ်) Telegram နာမည်</label>
+                    <input type="text" id="userName" name="name" required class="w-full bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">အကြောင်းအရာ</label>
+                    <textarea id="userFeedback" name="feedback" rows="4" required placeholder="ဥပမာ - အပိုင်း ၅ လင့်ခ်ပျက်နေပါတယ်..." class="w-full bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+                
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
+                    <span>ပေးပို့မည်</span>
+                </button>
+                
+                <p id="successMsg" class="hidden text-green-400 text-center font-semibold mt-4">✓ ကျေးဇူးတင်ပါသည်! သင့်အကြံပြုချက်ကို လက်ခံရရှိပါသည်။</p>
+            </form>
+        </div>
+    </section>
+
+    <script src="data.js"></script>
+    <script>
+        // ၁။ URL ထဲက id ကို လှမ်းယူခြင်း (ဥပမာ review.html?id=zenshu ဆိုရင် 'zenshu' ကို ယူမည်)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentAnimeId = urlParams.get('id');
+
+        // ၂။ data.js ထဲက animeData အားလုံးထဲမှာ အဲဒီ id နဲ့တူတဲ့ ဇာတ်ကားကို ရှာခြင်း
+        const anime = animeData.find(a => a.id === currentAnimeId);
+        
+        const container = document.getElementById('reviewContainer');
+        const formAnimeIdInput = document.getElementById('animeId');
+
+        if(anime) {
+            // ဖောင်ထဲကို ဘယ်ဇာတ်ကားလဲဆိုတာ ထည့်ပေးထားခြင်း
+            formAnimeIdInput.value = anime.title;
+
+            // Review စာမျက်နှာကို Design ဖန်တီးပြီး ပြသခြင်း
+            container.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3 flex-shrink-0">
+                        <img src="${anime.image}" alt="${anime.title}" class="w-full rounded-xl shadow-2xl border border-gray-700">
+                    </div>
+                    
+                    <div class="w-full md:w-2/3 flex flex-col">
+                        <span class="inline-block bg-blue-600/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full mb-4 w-max border border-blue-500/30">
+                            Year: ${anime.year}
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-black text-white mb-6 leading-tight">${anime.title}</h2>
+                        
+                        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-8 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-200 mb-3 border-b border-gray-700 pb-2">ဇာတ်လမ်းအကျဉ်း</h3>
+                            <p class="text-gray-300 leading-relaxed text-justify">
+                                ${anime.review ? anime.review : "ယခု ဇာတ်ကားအတွက် ဇာတ်လမ်းအကျဉ်း (Review) ရေးသားထားခြင်း မရှိသေးပါ။ Telegram Channel တွင် ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။"}
+                            </p>
+                        </div>
+                        
+                        <a href="${anime.link}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-500/30 text-lg">
+                            ▶ Telegram တွင် ယခုပဲ ကြည့်ရှုရန်
+                        </a>
+                    </div>
+                </div>
+            `;
+        } else {
+            // ဇာတ်ကား ရှာမတွေ့ရင် ပြမည့်စာ
+            container.innerHTML = `<div class="text-center text-red-400 py-20 text-xl font-bold">⚠️ ဇာတ်ကားရှာမတွေ့ပါ! လင့်ခ်မှားယွင်းနေပါသည်။</div>`;
+        }
+
+        // ၃။ Google Sheets သို့ Data ပို့သည့် အပိုင်း
+        const form = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('successMsg');
+
+        // 👇👇 ဒီနေရာမှာ ခုနက Copy ကူးလာတဲ့ Apps Script URL အရှည်ကြီးကို အစားထိုးပါ 👇👇
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmYLn31_O2ki3pOajB7NQlYmAlBfkaKt_T6hl_rY4Vk8LK-_e2mmTGyNhh09kfCq0/exec"; 
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            submitBtn.innerHTML = "ပေးပို့နေပါသည်... ⏳";
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData(form);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: formData })
+                .then(response => {
+                    successMsg.classList.remove('hidden');
+                    form.reset(); // ဖောင်ကို ပြန်ရှင်းမယ်
+                    submitBtn.innerHTML = "ပေးပို့မည်";
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    // ၃ စက္ကန့်နေရင် အောင်မြင်ကြောင်းစာကို ပြန်ဖျောက်မယ်
+                    setTimeout(() => successMsg.classList.add('hidden'), 3000);
+                })
+                .catch(error => {
+                    alert("အင်တာနက် ချိတ်ဆက်မှု အဆင်မပြေပါ။ ပြန်လည်ကြိုးစားကြည့်ပါ။");
+                    submitBtn.innerHTML = "ပေးပို့မည်";
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+        });
+    </script>
+</body>
+</html>
