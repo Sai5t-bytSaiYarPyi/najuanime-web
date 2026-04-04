@@ -755,5 +755,4 @@
             image: "./images/Zenshu.jpg",
             link: "https://t.me/NaJuAnimeLinkCollection/38"
         }
-
-];
+]
