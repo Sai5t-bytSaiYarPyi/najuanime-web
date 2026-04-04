@@ -37,10 +37,17 @@ function displayAnimes(animes) {
                     <div>
                         <h3 class="font-bold text-sm md:text-base line-clamp-2 mb-3 text-gray-100 group-hover:text-blue-400 transition-colors" title="${anime.title}">${anime.title}</h3>
                     </div>
-                    <a href="${anime.link}" target="_blank" 
-                       class="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 md:py-2 text-sm rounded-lg transition-colors mt-auto shadow-md">
-                        Telegram တွင် ကြည့်ရန်
-                    </a>
+                    
+                    <div class="flex gap-2 mt-auto pt-3 border-t border-gray-700">
+                        <a href="review.html?id=${anime.id}" 
+                           class="flex-1 text-center bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-1.5 md:py-2 text-xs sm:text-sm rounded-lg transition-colors border border-gray-600">
+                            📝 Review
+                        </a>
+                        <a href="${anime.link}" target="_blank" 
+                           class="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 md:py-2 text-xs sm:text-sm rounded-lg transition-colors shadow-md">
+                            ▶ ကြည့်ရန်
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
