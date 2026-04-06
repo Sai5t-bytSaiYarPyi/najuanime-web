@@ -298,18 +298,12 @@ async function deleteAnime(id, title) {
 async function migrateData() {
   let raw = document.getElementById('migrateData').value.trim();
 
-  // JS → JSON ပြောင်းပေး
-  raw = raw
-    // unquoted keys → quoted keys  (id: → "id":)
-    .replace(/([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g, '$1"$2"$3')
-    // trailing commas ဖျက်
-    .replace(/,(\s*[}\]])/g, '$1');
-
   let parsed;
   try {
-    parsed = JSON.parse(raw);
+    // Regex မဟုတ်ဘဲ JS ကိုယ်တိုင် parse လုပ်
+    parsed = Function('"use strict"; return (' + raw + ')')();
   } catch(e) {
-    showMsg('migrateMsg', '❌ JSON error: ' + e.message, 'error');
+    showMsg('migrateMsg', '❌ Parse error: ' + e.message, 'error');
     return;
   }
 
