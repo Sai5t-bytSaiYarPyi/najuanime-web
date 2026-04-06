@@ -297,41 +297,74 @@ async function deleteAnime(id, title) {
 
 async function migrateData() {
   let raw = document.getElementById('migrateData').value.trim();
+  if (!raw) {
+    showMsg('migrateMsg', '❌ Data ထည့်ပါဦး', 'error');
+    return;
+  }
 
-  // ၁။ မျက်စိနဲ့မမြင်ရတဲ့ Non-breaking spaces (&nbsp;) တွေကို ရိုးရိုး Space အဖြစ် အလိုအလျောက် ပြောင်းမယ်
+  // ၁။ မျက်စိနဲ့မမြင်ရတဲ့ space (Telegram က ပါလာတတ်တဲ့) တွေကို ရှင်းမယ်
   raw = raw.replace(/\u00A0/g, ' ');
 
-  // ၂။ "" (Double Quotes) ကြားထဲမှာ Enter ခေါက်ပြီး အောက်ဆင်းထားတဲ့ စာကြောင်းတွေကို 
-  // JSON က လက်ခံနိုင်တဲ့ \n အဖြစ် အလိုအလျောက် ပြောင်းပေးမယ်
-  raw = raw.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, function(match) {
-      return match.replace(/\r?\n/g, '\\n');
-  });
+  // ၂။ Double Quotes (" ") ထဲမှာ Enter ခေါက်ထားတာတွေကို အလိုအလျောက် \n ပြောင်းပေးမယ့် ပိုတိကျတဲ့ နည်းလမ်း
+  let cleanedRaw = "";
+  let isInsideQuotes = false;
+  
+  for (let i = 0; i < raw.length; i++) {
+    let char = raw[i];
+    
+    // Quote အဖွင့်အပိတ်ကို စစ်မယ် (Backslash ပါရင် ကျော်မယ်)
+    if (char === '"' && raw[i - 1] !== '\\') {
+      isInsideQuotes = !isInsideQuotes;
+    }
+    
+    // Quote ထဲမှာဖြစ်ပြီး Enter (\n) ခေါက်ထားရင် \\n အဖြစ် ပြောင်းမယ်
+    if (isInsideQuotes && char === '\n') {
+      cleanedRaw += '\\n';
+    } else if (isInsideQuotes && char === '\r') {
+      // \r (Carriage Return) ကို လျစ်လျူရှုမယ်
+    } else {
+      cleanedRaw += char;
+    }
+  }
 
   let parsed;
   try {
-    // Regex မဟုတ်ဘဲ JS ကိုယ်တိုင် parse လုပ်
-    parsed = Function('"use strict"; return (' + raw + ')')();
-  } catch(e) {
-    showMsg('migrateMsg', '❌ Parse error: ' + e.message, 'error');
-    return;
+    // ပထမဆုံး JSON အနေနဲ့ ဖတ်ကြည့်မယ်
+    parsed = JSON.parse(cleanedRaw);
+  } catch (e1) {
+    try {
+      // JSON ဖတ်မရရင် JS Object အနေနဲ့ ထပ်ဖတ်မယ် (ပိုပြီး Error ခံနိုင်ရည်ရှိအောင်)
+      parsed = Function('"use strict"; return (' + cleanedRaw + ')')();
+    } catch (e2) {
+      showMsg('migrateMsg', '❌ Data ထဲမှာ Quote ( " " ) အဖွင့်အပိတ် လွဲနေတာမျိုး ပါနေနိုင်ပါတယ်။', 'error');
+      console.error(e2);
+      return;
+    }
   }
 
   if (!Array.isArray(parsed)) {
-    showMsg('migrateMsg', '❌ Array [ ] ဖြစ်ရမည်', 'error');
+    showMsg('migrateMsg', '❌ Array [ ] ပုံစံ ဖြစ်ရပါမည်', 'error');
     return;
   }
 
-  if (!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`)) return;
+  if (!confirm(`Anime စုစုပေါင်း ${parsed.length} ကားကို import မည်။ လက်ရှိ Data အကုန် Replace ဖြစ်မည်။`)) return;
+
+  // Loading ပုံစံလေး ပြထားမယ်
+  document.getElementById('migrateMsg').textContent = "⏳ Import လုပ်နေပါသည်...";
+  document.getElementById('migrateMsg').style.color = "var(--blue)";
+  document.getElementById('migrateMsg').style.display = "block";
 
   const r = await fetch(WORKER_URL + '/admin/migrate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
     body: JSON.stringify({ animeList: parsed })
   });
+  
   const d = await r.json();
   if (d.success) {
-    showMsg('migrateMsg', `✓ ${d.count} ကား import ပြီးပါပြီ`, 'success');
-    loadAnimes();
+    showMsg('migrateMsg', `✓ ${d.count} ကား အောင်မြင်စွာ Import လုပ်ပြီးပါပြီ!`, 'success');
+    document.getElementById('migrateData').value = ''; // အောင်မြင်သွားရင် Textarea ကို ရှင်းပေးမယ်
+    loadAnimes(); // List ကို အသစ်ပြန်ခေါ်မယ်
   } else {
     showMsg('migrateMsg', '❌ ' + d.error, 'error');
   }
