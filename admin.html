@@ -296,19 +296,42 @@ async function deleteAnime(id, title) {
 }
 
 async function migrateData() {
-  const raw = document.getElementById('migrateData').value.trim();
+  let raw = document.getElementById('migrateData').value.trim();
+
+  // JS → JSON ပြောင်းပေး
+  raw = raw
+    // unquoted keys → quoted keys  (id: → "id":)
+    .replace(/([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g, '$1"$2"$3')
+    // trailing commas ဖျက်
+    .replace(/,(\s*[}\]])/g, '$1');
+
   let parsed;
-  try { parsed = JSON.parse(raw); } catch(e) { showMsg('migrateMsg','❌ JSON format မှားနေသည်','error'); return; }
-  if (!Array.isArray(parsed)) { showMsg('migrateMsg','❌ Array ဖြစ်ရမည်','error'); return; }
-  if (!confirm(`Anime ${parsed.length} ကားကို KV ထဲ import မည်။ လက်ရှိ data အကုန်ဖျက်မည်။ ဆက်လုပ်မည်လား?`)) return;
-  const r = await fetch(WORKER_URL+'/admin/migrate', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body: JSON.stringify({animeList: parsed})
+  try {
+    parsed = JSON.parse(raw);
+  } catch(e) {
+    showMsg('migrateMsg', '❌ JSON error: ' + e.message, 'error');
+    return;
+  }
+
+  if (!Array.isArray(parsed)) {
+    showMsg('migrateMsg', '❌ Array [ ] ဖြစ်ရမည်', 'error');
+    return;
+  }
+
+  if (!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`)) return;
+
+  const r = await fetch(WORKER_URL + '/admin/migrate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+    body: JSON.stringify({ animeList: parsed })
   });
   const d = await r.json();
-  if (d.success) { showMsg('migrateMsg',`✓ ${d.count} ကား import ပြီးပါပြီ`,'success'); loadAnimes(); }
-  else showMsg('migrateMsg','❌ '+d.error,'error');
+  if (d.success) {
+    showMsg('migrateMsg', `✓ ${d.count} ကား import ပြီးပါပြီ`, 'success');
+    loadAnimes();
+  } else {
+    showMsg('migrateMsg', '❌ ' + d.error, 'error');
+  }
 }
 
 function showMsg(id, txt, type) {
