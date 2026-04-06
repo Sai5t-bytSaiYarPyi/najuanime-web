@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NaJu AI Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     *{font-family:'Outfit',sans-serif;box-sizing:border-box}
@@ -19,116 +18,118 @@
     ::-webkit-scrollbar{width:4px}
     ::-webkit-scrollbar-track{background:var(--bg2)}
     ::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
-    .chat-header{
-      background:rgba(15,17,23,0.97);backdrop-filter:blur(20px);
-      border-bottom:1px solid var(--border);
-      padding:12px 18px;display:flex;align-items:center;gap:12px;
-      position:sticky;top:0;z-index:50;
-    }
-    .back-btn{display:flex;align-items:center;gap:5px;color:var(--muted);
+
+    /* Header */
+    .hdr{background:rgba(15,17,23,.97);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);padding:12px 18px;
+      display:flex;align-items:center;gap:12px;
+      position:sticky;top:0;z-index:50}
+    .back{display:flex;align-items:center;gap:5px;color:var(--muted);
       text-decoration:none;font-size:13px;font-weight:600;transition:color .2s}
-    .back-btn:hover{color:var(--blue)}
-    .ai-avatar{width:36px;height:36px;border-radius:50%;
+    .back:hover{color:var(--blue)}
+    .aav{width:36px;height:36px;border-radius:50%;
       background:linear-gradient(135deg,#1e3a8a,#3b82f6);
       display:flex;align-items:center;justify-content:center;
-      font-size:15px;flex-shrink:0;box-shadow:0 0 12px rgba(59,130,246,.3)}
-    .ai-name{font-size:14px;font-weight:700;color:white}
-    .ai-sub{font-size:11px;color:#4ade80;display:flex;align-items:center;gap:4px}
-    .dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:blink 2s infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-    #messages{padding:18px 18px 110px;display:flex;flex-direction:column;gap:14px;
-      max-width:700px;margin:0 auto}
-    .msg-row{display:flex;gap:9px;align-items:flex-end;animation:fadeUp .28s ease both}
-    .msg-row.user{flex-direction:row-reverse}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+      font-size:15px;flex-shrink:0;box-shadow:0 0 14px rgba(59,130,246,.35)}
+    .anm{font-size:14px;font-weight:700;color:white}
+    .asb{font-size:11px;color:#4ade80;display:flex;align-items:center;gap:4px}
+    .dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:bl 2s infinite}
+    @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* Messages */
+    #msgs{padding:18px 18px 120px;display:flex;flex-direction:column;gap:14px;
+      max-width:720px;margin:0 auto}
+    .row{display:flex;gap:9px;align-items:flex-end;animation:fu .25s ease both}
+    .row.u{flex-direction:row-reverse}
+    @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     .av{width:26px;height:26px;border-radius:50%;flex-shrink:0;
       display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-    .av.bot{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white}
-    .av.user{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
-    .bubble{max-width:80%;padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.65}
-    .bubble.bot{background:var(--bg2);border:1px solid var(--border);
+    .av.b{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white}
+    .av.u{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+
+    /* Bubble */
+    .bbl{max-width:82%;padding:11px 15px;border-radius:18px;
+      font-size:13.5px;line-height:1.7;word-break:break-word}
+    .bbl.b{background:var(--bg2);border:1px solid var(--border);
       border-bottom-left-radius:4px;color:var(--text)}
-    .bubble.user{background:var(--blue);color:white;border-bottom-right-radius:4px}
-    .ac{background:var(--bg3);border:1px solid rgba(59,130,246,.18);
-      border-radius:11px;padding:10px;margin-top:9px;
-      display:flex;gap:9px;align-items:flex-start;transition:border-color .2s}
-    .ac:hover{border-color:rgba(59,130,246,.38)}
-    .ac img{width:42px;height:58px;object-fit:cover;border-radius:6px;flex-shrink:0}
-    .ac-info{flex:1;min-width:0}
-    .ac-title{font-size:12.5px;font-weight:700;color:white;margin-bottom:2px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ac-year{font-size:10.5px;color:var(--blue);font-weight:600}
-    .ac-preview{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;
-      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .ac-btns{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
-    .bs{font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;
-      text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:3px;cursor:pointer;border:none}
-    .bs.rev{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
-    .bs.rev:hover{color:white;border-color:rgba(255,255,255,.2)}
-    .bs.wat{background:var(--blue);color:white}
-    .bs.wat:hover{background:var(--blue-dark)}
-    .bs.ais{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25)}
-    .bs.ais:hover{background:rgba(59,130,246,.22)}
-    .bs.tgl{background:rgba(0,136,204,.15);color:#38bdf8;border:1px solid rgba(0,136,204,.3)}
-    .bs.tgl:hover{background:rgba(0,136,204,.25)}
-    .ai-loading{font-size:11px;color:var(--muted);font-style:italic;padding:5px 0}
-    .ai-result{font-size:12px;color:#94a3b8;line-height:1.6;
-      padding:8px 10px;background:rgba(59,130,246,.06);
-      border-left:2px solid var(--blue);border-radius:0 6px 6px 0;margin-top:6px}
-    .qr{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-    .qb{font-size:12px;padding:5px 11px;border:1px solid var(--border);
+    .bbl.u{background:var(--blue);color:white;border-bottom-right-radius:4px}
+
+    /* Link styling inside bubbles */
+    .bbl a{color:#60a5fa;text-decoration:underline;text-underline-offset:2px}
+    .bbl a:hover{color:#93c5fd}
+
+    /* Typing indicator */
+    .typ{background:var(--bg2);border:1px solid var(--border);
+      border-radius:18px;border-bottom-left-radius:4px;
+      padding:13px 16px;display:flex;gap:4px;align-items:center}
+    .td{width:6px;height:6px;border-radius:50%;background:var(--muted);
+      animation:tb 1.2s infinite}
+    .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+    @keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    /* Error bubble */
+    .err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);
+      border-radius:12px;padding:10px 14px;font-size:12.5px;color:#fca5a5;margin-top:4px}
+
+    /* Input bar */
+    .ibar{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(15,17,23,.98);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);padding:11px 18px;z-index:40}
+    .inn{max-width:720px;margin:0 auto;display:flex;gap:9px;align-items:flex-end}
+    #inp{flex:1;background:var(--bg3);border:1px solid var(--border);
+      color:white;border-radius:13px;padding:11px 15px;font-size:13.5px;
+      font-family:'Outfit',sans-serif;resize:none;outline:none;
+      transition:border-color .2s,box-shadow .2s;
+      max-height:120px;min-height:44px;line-height:1.5}
+    #inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+    #inp::placeholder{color:var(--muted)}
+    #inp:disabled{opacity:.5;cursor:not-allowed}
+    #snd{width:44px;height:44px;border-radius:13px;background:var(--blue);
+      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:background .2s,transform .15s,opacity .2s;flex-shrink:0}
+    #snd:hover{background:var(--blue-dark)}
+    #snd:active{transform:scale(.93)}
+    #snd:disabled{opacity:.45;cursor:not-allowed}
+    #snd svg{width:17px;height:17px;fill:white}
+
+    /* Quick replies */
+    .qr{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .qb{font-size:12px;padding:6px 12px;border:1px solid var(--border);
       border-radius:99px;background:var(--bg3);color:#94a3b8;
       cursor:pointer;transition:all .15s;white-space:nowrap}
     .qb:hover{border-color:rgba(59,130,246,.4);color:white;background:rgba(59,130,246,.08)}
-    .typing-ind{background:var(--bg2);border:1px solid var(--border);
-      border-radius:18px;border-bottom-left-radius:4px;
-      padding:13px 16px;display:flex;gap:4px;align-items:center}
-    .td{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:tdb 1.2s infinite}
-    .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
-    @keyframes tdb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-    .input-bar{position:fixed;bottom:0;left:0;right:0;
-      background:rgba(15,17,23,0.97);backdrop-filter:blur(20px);
-      border-top:1px solid var(--border);padding:11px 18px}
-    .input-inner{max-width:700px;margin:0 auto;display:flex;gap:9px;align-items:flex-end}
-    #uinput{flex:1;background:var(--bg3);border:1px solid var(--border);
-      color:white;border-radius:13px;padding:11px 15px;font-size:13.5px;
-      font-family:'Outfit',sans-serif;resize:none;outline:none;
-      transition:border-color .2s,box-shadow .2s;max-height:110px;min-height:44px;line-height:1.5}
-    #uinput:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-    #uinput::placeholder{color:var(--muted)}
-    #sbtn{width:44px;height:44px;border-radius:13px;background:var(--blue);
-      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
-      transition:background .2s,transform .15s;flex-shrink:0}
-    #sbtn:hover{background:var(--blue-dark)}#sbtn:active{transform:scale(.93)}
-    #sbtn svg{width:17px;height:17px;fill:white}
+
     .logo-naju{color:var(--blue)}.logo-anime{color:white}
     @media(max-width:640px){
-      #messages{padding:13px 13px 105px}
-      .bubble{max-width:87%;font-size:13px}
+      #msgs{padding:13px 13px 110px}
+      .bbl{max-width:88%;font-size:13px}
     }
   </style>
 </head>
 <body>
 
-<div class="chat-header">
-  <a href="index.html" class="back-btn">
+<!-- Header -->
+<div class="hdr">
+  <a href="index.html" class="back">
     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
     </svg>
   </a>
-  <div class="ai-avatar">🤖</div>
+  <div class="aav">🤖</div>
   <div style="flex:1">
-    <div class="ai-name"><span class="logo-naju">NaJu</span><span class="logo-anime"> AI</span></div>
-    <div class="ai-sub"><span class="dot"></span><span id="statusTxt">အဆင်သင့်...</span></div>
+    <div class="anm"><span class="logo-naju">NaJu</span><span class="logo-anime"> AI</span></div>
+    <div class="asb"><span class="dot"></span><span id="stxt">ချိတ်ဆက်နေသည်...</span></div>
   </div>
 </div>
 
-<div id="messages"></div>
+<!-- Messages -->
+<div id="msgs"></div>
 
-<div class="input-bar">
-  <div class="input-inner">
-    <textarea id="uinput" placeholder="Anime ရှာမည်၊ မေးမည်..." rows="1"></textarea>
-    <button id="sbtn" onclick="send()">
+<!-- Input -->
+<div class="ibar">
+  <div class="inn">
+    <textarea id="inp" placeholder="မေးလိုတာ မေးလိုက်ပေါ့ဗျ..." rows="1" disabled></textarea>
+    <button id="snd" onclick="send()" disabled>
       <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
     </button>
   </div>
@@ -136,312 +137,211 @@
 
 <script src="data.js"></script>
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// CONFIG
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// Cloudflare Worker URL ကို deploy ပြီးရင် ဒီမှာ ထည့်ပေးပါ
-const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+// ══════════════════════════════════════════════
+// CONFIG — Worker URL ကို deploy ပြီးရင် ထည့်ပါ
+// ══════════════════════════════════════════════
+const WORKER_URL = 'https://YOUR_WORKER.YOUR_SUBDOMAIN.workers.dev';
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// STOPWORDS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const SW = new Set([
-  'ပါ','တယ်','တာ','က','ကို','နဲ့','မှာ','ရဲ့','လဲ','ဘဲ','လိုက်','ထားပါ',
-  'ပြောပြ','ပြောပေး','ပေးပါ','ရှာပေး','ထုတ်ပေး','ကြည့်ချင်','မလဲ','ဆိုတာ',
-  'ကား','ဇာတ်','the','a','an','is','of','and','for','in','please',
-  'me','tell','show','find','get','what','which','give','can','you','i',
-  'want','to','do','မင်','ငါ','ကျွန်','ချင်','ပါတယ်','လေ','ဗျ','ဗျာ',
-  'ရှာ','ရော','ဆိုတာ','ဆို','ပြော','ပြ','ကျေးဇူး','ok','okay','ဟုတ်',
-  'anime','ဟာ','သည်','ဖြစ်','ကား','ဒါ','ဒါမှ','မဟုတ်',
-]);
+// ══════════════════════════════════════════════
+// Prepare compact anime list for system prompt
+// (title + year + telegram link + review snippet)
+// Sent once per message to keep context fresh
+// ══════════════════════════════════════════════
+const ANIME_LIST = animeData.map(a => ({
+  title:   a.title,
+  year:    a.year,
+  link:    a.link,
+  // Trim review to 180 chars to keep payload lean
+  snippet: (a.review || '').replace(/\s+/g, ' ').trim().slice(0, 180) || '',
+}));
 
-function clean(text) {
-  return text.toLowerCase()
-    .replace(/[^\u1000-\u109fa-z0-9\s]/g,' ')
-    .split(/\s+/)
-    .filter(w => w.length > 1 && !SW.has(w))
-    .join(' ').trim();
+// ══════════════════════════════════════════════
+// Conversation history (multi-turn)
+// ══════════════════════════════════════════════
+let history = [];    // [{role:'user'|'assistant', content:'...'}]
+let busy    = false;
+
+// ══════════════════════════════════════════════
+// UI helpers
+// ══════════════════════════════════════════════
+const msgsEl = document.getElementById('msgs');
+const inpEl  = document.getElementById('inp');
+const sndEl  = document.getElementById('snd');
+
+const scrollEnd = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+function setReady(ready) {
+  inpEl.disabled = !ready;
+  sndEl.disabled = !ready;
+  if (ready) inpEl.focus();
 }
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// FUSE SEARCH
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const fuse = new Fuse(animeData, {
-  keys: ['title'],
-  threshold: 0.42,
-  includeScore: true,
-  minMatchCharLength: 2,
-});
-
-function fuzzy(q) {
-  if (!q || q.length < 2) return [];
-  return fuse.search(q).slice(0, 4).map(r => r.item);
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// MOOD MAP
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const MOOD = {
-  ဝမ်းနည်:  ['နာကျင်','ဆုံး','ကွာ','sad','drama','tears'],
-  ငိုချင်:  ['နာကျင်','ဆုံး','ကွာ','sad','drama'],
-  ပျော်:    ['comedy','ရယ်','ဟာသ','fun','ပျော်'],
-  ပျော်ချင်:['comedy','ရယ်','ဟာသ','fun'],
-  ဟာသ:     ['comedy','ရယ်','ဟာသ','fun'],
-  ရယ်:      ['comedy','ရယ်','ဟာသ'],
-  တိုက်:    ['action','fight','battle','တိုက်','စစ်'],
-  action:   ['action','fight','battle','တိုက်','စစ်'],
-  စစ်:      ['action','fight','battle'],
-  အချစ်:   ['romance','love','ချစ်','romantic'],
-  ချစ်:     ['romance','love','ချစ်'],
-  romance:  ['romance','love','ချစ်'],
-  love:     ['romance','love','ချစ်'],
-  နက်:     ['psychological','mystery','နာကျင်','နက်','thriller'],
-  psychological:['psychological','mystery','thriller'],
-  mystery:  ['mystery','psychological','thriller'],
-  ကြောက်:  ['horror','thriller','mystery','dark'],
-  fantasy:  ['fantasy','magic','isekai','မှော်'],
-  မှော်:    ['fantasy','magic','isekai'],
-  isekai:   ['fantasy','isekai'],
-  slice:    ['slice','everyday','နေ့စဉ်','ဘဝ'],
-  နေ့စဉ်:  ['slice','everyday','နေ့စဉ်'],
-  bl:       ['bl','boys','love'],
-  ငြိမ်:   ['slice','calm','everyday'],
-  အငြိမ်:  ['slice','calm','everyday'],
-};
-
-function moodFilter(words) {
-  const gkeys = [];
-  for (const w of words) {
-    for (const [mood, keys] of Object.entries(MOOD)) {
-      if (w.includes(mood) || mood.includes(w)) gkeys.push(...keys);
-    }
-  }
-  if (!gkeys.length) return [];
-  return animeData.map(a => {
-    const hay = ((a.review||'')+' '+a.title).toLowerCase();
-    return { a, s: gkeys.filter(k => hay.includes(k)).length };
-  }).filter(x => x.s > 0).sort((a,b) => b.s-a.s).slice(0,4).map(x => x.a);
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// INTENT PATTERNS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const INTENTS = [
-  ['telegram',  /telegram|link|download|ဒေါင်း/],
-  ['latest',    /latest|newest|အသစ်|နောက်ဆုံး|ထွက်သစ်|2026|2025/],
-  ['random',    /random|surprise|ကျပန်း|မဘာ|ဘာမဆို|recommend|suggest|ညွှန်|ဘာကြည့်/],
-  ['count',     /ဘယ်နှ|စုစုပေါင်း|total|count|ကားဘယ်လောက်|အရေ/],
-  ['aisummary', /summary|ai.*ရေး|ai.*ပြ|ဇာတ်လမ်း.*ဘာ|ဘာအကြောင်း|ဇာတ်လမ်းပြောပြ|review.*summary/],
-];
-
-function intent(raw, c) {
-  const r = raw.toLowerCase();
-  for (const [name, re] of INTENTS) if (re.test(r)||re.test(c)) return name;
-  return null;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// SESSION DEDUP
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const seen = new Set();
-function getRandom(n=3) {
-  let pool = animeData.filter(a => !seen.has(a.id));
-  if (pool.length < n) { seen.clear(); pool = [...animeData]; }
-  const pick = pool.sort(()=>Math.random()-.5).slice(0,n);
-  pick.forEach(a => seen.add(a.id));
-  return pick;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// WORKER CALL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const aiCache = {};
-async function fetchSummary(anime) {
-  if (aiCache[anime.id]) return aiCache[anime.id];
-  try {
-    const r = await fetch(WORKER_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ animeName:anime.title, year:anime.year, reviewText:(anime.review||'').slice(0,2000) }),
-    });
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    aiCache[anime.id] = d.summary || '';
-    return aiCache[anime.id];
-  } catch { return ''; }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// RESPONSE BUILDER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-async function buildResp(raw) {
-  const c   = clean(raw);
-  const kws = c.split(/\s+/).filter(Boolean);
-  const it  = intent(raw, c);
-
-  if (it === 'count')
-    return { text:`NaJu မှာ အခု <strong>Anime ${animeData.length} ကား</strong> ရှိပါတယ် 📺` };
-
-  if (it === 'latest') {
-    const list = [...animeData].slice(-4).reverse();
-    return { text:`နောက်ဆုံးထည့်ထားတဲ့ Anime ${list.length} ကား —`, animes:list,
-      qr:['Romance ကြိုက်တယ်','Action ကြိုက်တယ်','Random recommend'] };
-  }
-
-  if (it === 'random') {
-    const list = getRandom(3);
-    return { text:`ဒီ ${list.length} ကား ကြည့်ကြည့်ပါ 🎯`, animes:list,
-      qr:['နောက်ထပ် random','Romance ကြိုက်တယ်','Action ကြိုက်တယ်'] };
-  }
-
-  if (it === 'telegram') {
-    const found = fuzzy(c||raw);
-    if (found.length)
-      return { text:`<strong>${found[0].title}</strong> — Telegram link`, tg:{ url:found[0].link, label:`${found[0].title} — ကြည့်ရန်` } };
-    return { text:`NaJu Anime Telegram Channel —`, tg:{ url:'https://t.me/NaJu_New', label:'NaJu Channel ဝင်ရောက်ရန်' } };
-  }
-
-  if (it === 'aisummary') {
-    const found = fuzzy(c||raw);
-    if (!found.length)
-      return { text:`ကားနာမည် ပါမလာဘူး — ဘယ် Anime ရဲ့ Summary လိုချင်လဲ?`,
-        qr:['Random recommend','နောက်ဆုံးထွက် Anime'] };
-    return { text:`<strong>${found[0].title}</strong> — AI Summary ရေးနေပါတယ်...`,
-      animes:[found[0]], aiFor:found[0] };
-  }
-
-  // Mood / Genre
-  const mood = moodFilter(kws);
-  if (mood.length)
-    return { text:`ဒီ Anime တွေ ကြည့်ကြည့်ပါ 🎌`, animes:mood,
-      qr:['နောက်ထပ် ရှာပေး','Random recommend'] };
-
-  // Fuzzy title search
-  const sr = fuzzy(c.length > 1 ? c : raw);
-  if (sr.length) {
-    const msg = sr.length===1
-      ? `<strong>${sr[0].title}</strong> ကို တွေ့ပါတယ် 🎉`
-      : `"${raw}" နဲ့ ဆိုင်တဲ့ Anime ${sr.length} ကား တွေ့ပါတယ် —`;
-    return { text:msg, animes:sr,
-      qr:['AI Summary လိုချင်တယ်','Telegram link ထုတ်ပေး','Random recommend'] };
-  }
-
-  return {
-    text:`"${raw}" နဲ့ ဆိုင်တဲ့ Anime မတွေ့ဘူး 😔<br>နာမည် တိတိကျကျ ရိုက်ပြီး ထပ်ကြိုးစားပါ၊ ဒါမှမဟုတ် Genre ပြောကြည့်ပါ။`,
-    qr:['Action ကားတွေ ပြပေး','Romance ကားတွေ ပြပေး','Random recommend'],
-  };
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-// UI
-// ━━━━━━━━━━━━━━━━━━━━━━━━━
-const msgEl = document.getElementById('messages');
-const inEl  = document.getElementById('uinput');
-const scrollEnd = () => window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 
 function addRow(html, isUser) {
   const row = document.createElement('div');
-  row.className = `msg-row${isUser?' user':''}`;
+  row.className = `row${isUser ? ' u' : ''}`;
   row.innerHTML = isUser
-    ? `<div class="av user">👤</div><div class="bubble user">${html}</div>`
-    : `<div class="av bot">🤖</div><div class="bubble bot">${html}</div>`;
-  msgEl.appendChild(row); scrollEnd(); return row;
+    ? `<div class="av u">👤</div><div class="bbl u">${escHtml(html)}</div>`
+    : `<div class="av b">🤖</div><div class="bbl b">${html}</div>`;
+  msgsEl.appendChild(row);
+  scrollEnd();
+  return row;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Convert plain URLs in AI text → clickable links
+function linkify(text) {
+  return text.replace(
+    /(https?:\/\/[^\s<>"'）]+)/g,
+    '<a href="$1" target="_blank" rel="noopener">$1</a>'
+  );
+}
+
+// Simple markdown-ish formatting: **bold**, newlines
+function formatAI(text) {
+  return linkify(
+    escHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>')
+  );
 }
 
 function showTyping() {
   const r = document.createElement('div');
-  r.className='msg-row'; r.id='typ';
-  r.innerHTML=`<div class="av bot">🤖</div><div class="typing-ind"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
-  msgEl.appendChild(r); scrollEnd();
+  r.className = 'row'; r.id = 'typr';
+  r.innerHTML = `<div class="av b">🤖</div><div class="typ"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  msgsEl.appendChild(r); scrollEnd();
 }
-const hideTyping = () => document.getElementById('typ')?.remove();
+const hideTyping = () => document.getElementById('typr')?.remove();
 
-function card(a, showAIBtn=false) {
-  const snip = (a.review||'').slice(0,90).trim();
-  return `<div class="ac">
-    <img src="${a.image}" alt="${a.title}" onerror="this.style.display='none'">
-    <div class="ac-info">
-      <div class="ac-title" title="${a.title}">${a.title}</div>
-      <div class="ac-year">📅 ${a.year}</div>
-      ${snip?`<div class="ac-preview">${snip}...</div>`:''}
-      <div id="ais_${a.id}"></div>
-      <div class="ac-btns">
-        <a href="review.html?id=${a.id}" class="bs rev">
-          <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6"/></svg>
-          Review
-        </a>
-        <a href="${a.link}" target="_blank" class="bs wat">
-          <svg width="9" height="9" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-          ကြည့်ရန်
-        </a>
-        ${showAIBtn?`<button class="bs ais" onclick="runAI('${a.id}')">🤖 AI Summary</button>`:''}
-      </div>
-    </div>
-  </div>`;
+function showError(msg) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<div class="av b">🤖</div><div class="bbl b"><div class="err">⚠️ ${msg}</div></div>`;
+  msgsEl.appendChild(row); scrollEnd();
 }
 
-function tgBtn(url, label) {
-  return `<a href="${url}" target="_blank" class="bs tgl" style="display:inline-flex;margin-top:9px;padding:8px 14px;border-radius:10px;font-size:13px">
-    <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24" style="margin-right:5px"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.086 13.99l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.73.596z"/></svg>
-    ${label}
-  </a>`;
-}
-
-function qreplies(arr) {
-  if (!arr||!arr.length) return '';
-  return `<div class="qr">${arr.map(r=>`<button class="qb" onclick="hq('${r.replace(/'/g,"\\'")}')"> ${r}</button>`).join('')}</div>`;
-}
-
-// Lazy AI summary per card
-async function runAI(id) {
-  const anime = animeData.find(a => a.id===id);
-  if (!anime) return;
-  const el = document.getElementById(`ais_${id}`);
-  if (!el) return;
-  el.innerHTML = `<div class="ai-loading">🤖 AI ရေးနေပါတယ်...</div>`;
-  const sum = await fetchSummary(anime);
-  el.innerHTML = sum
-    ? `<div class="ai-result">${sum}</div>`
-    : `<div class="ai-loading" style="color:#f87171">Worker URL သတ်မှတ်မထားသေးပါ — Setup Guide ကြည့်ပါ</div>`;
+function addQuickReplies(arr) {
+  const last = msgsEl.lastElementChild;
+  if (!last) return;
+  const bubble = last.querySelector('.bbl.b');
+  if (!bubble) return;
+  const div = document.createElement('div');
+  div.className = 'qr';
+  arr.forEach(txt => {
+    const btn = document.createElement('button');
+    btn.className = 'qb';
+    btn.textContent = txt;
+    btn.onclick = () => submitMsg(txt);
+    div.appendChild(btn);
+  });
+  bubble.appendChild(div);
   scrollEnd();
 }
 
-async function render(resp) {
-  let html = `<div>${resp.text}</div>`;
-  if (resp.tg) html += tgBtn(resp.tg.url, resp.tg.label);
-  const showAI = !!resp.aiFor;
-  if (resp.animes&&resp.animes.length) html += resp.animes.map(a=>card(a,showAI)).join('');
-  html += qreplies(resp.qr);
-  addRow(html, false);
-  if (resp.aiFor) await runAI(resp.aiFor.id);
+// ══════════════════════════════════════════════
+// Call Worker
+// ══════════════════════════════════════════════
+async function callWorker(userMsg) {
+  history.push({ role: 'user', content: userMsg });
+
+  const resp = await fetch(WORKER_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages:  history,
+      animeList: ANIME_LIST,
+    }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Worker error ${resp.status}: ${err}`);
+  }
+
+  const data  = await resp.json();
+  if (data.error) throw new Error(data.error);
+  const reply = data.reply || '';
+
+  // Store assistant reply in history for multi-turn
+  history.push({ role: 'assistant', content: reply });
+
+  // Keep history max 20 turns (40 messages) to avoid bloat
+  if (history.length > 40) history = history.slice(-40);
+
+  return reply;
 }
 
-async function process(q) {
+// ══════════════════════════════════════════════
+// Submit message
+// ══════════════════════════════════════════════
+async function submitMsg(text) {
+  if (busy || !text.trim()) return;
+  busy = true;
+  setReady(false);
+
+  addRow(text, true);
   showTyping();
-  await new Promise(r=>setTimeout(r, 320+Math.random()*280));
-  hideTyping();
-  await render(await buildResp(q));
-}
 
-function hq(t) { addRow(t,true); process(t); }
+  try {
+    const reply = await callWorker(text);
+    hideTyping();
+    addRow(formatAI(reply), false);
+  } catch (err) {
+    hideTyping();
+    // Worker URL not configured yet
+    if (WORKER_URL.includes('YOUR_WORKER')) {
+      showError('Worker URL မသတ်မှတ်ရသေးပါ။ SETUP_GUIDE.md ကြည့်ပြီး chat.html ထဲက WORKER_URL ကို ပြောင်းပေးပါ။');
+    } else {
+      showError(`AI ကို ဆက်သွယ်မရဘူးဗျ — ${err.message}`);
+    }
+    // Remove last user message from history if AI failed
+    if (history[history.length - 1]?.role === 'user') history.pop();
+  }
+
+  busy = false;
+  setReady(true);
+}
 
 function send() {
-  const t = inEl.value.trim();
+  const t = inpEl.value.trim();
   if (!t) return;
-  addRow(t,true); inEl.value=''; inEl.style.height='auto'; process(t);
+  inpEl.value = '';
+  inpEl.style.height = 'auto';
+  submitMsg(t);
 }
 
-inEl.addEventListener('input',()=>{ inEl.style.height='auto'; inEl.style.height=Math.min(inEl.scrollHeight,110)+'px'; });
-inEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
+// Auto-resize textarea
+inpEl.addEventListener('input', () => {
+  inpEl.style.height = 'auto';
+  inpEl.style.height = Math.min(inpEl.scrollHeight, 120) + 'px';
+});
+inpEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
 
-window.addEventListener('load',()=>{
-  document.getElementById('statusTxt').textContent=`Anime ${animeData.length} ကား သိပါတယ်`;
-  setTimeout(()=>{
-    render({
-      text:`မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>Anime ရှာပေးတာ၊ Genre/Mood Suggest ပေးတာ၊ AI Review Summary ရေးပေးတာ ကူညီနိုင်ပါတယ်။`,
-      qr:['Random Anime recommend','နောက်ဆုံးထွက် Anime','Romance ကြိုက်တယ်','Action ကြိုက်တယ်','Psychological ကား'],
-    });
-  },300);
+// ══════════════════════════════════════════════
+// Init
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  document.getElementById('stxt').textContent = `Anime ${animeData.length} ကား သိပါတယ်`;
+  setReady(true);
+
+  // Welcome message (not sent to AI — just UI)
+  const welcomeHtml = `မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>
+NaJu Channel ထဲက Anime <strong>${animeData.length} ကား</strong>ကို သိပါတယ်ဗျ။<br>
+ဘာမဆို မေးလိုက်ပေါ့ — ကားရှာပေးတာ၊ Recommend ပေးတာ၊ Review ပြောပြတာ ကူညီနိုင်ပါတယ်။`;
+
+  addRow(welcomeHtml, false);
+  addQuickReplies([
+    'ဝမ်းနည်းစရာ ကောင်းတဲ့ ကား ညွှန်းပေး',
+    'Action ကားတွေ ဘာဘာရှိလဲ',
+    'Snowball Earth အကြောင်း ပြောပြပေး',
+    'Random Recommend ပေး',
+    'နောက်ဆုံးထွက် ကားတွေ ဘာတွေလဲ',
+  ]);
 });
 </script>
 </body>
