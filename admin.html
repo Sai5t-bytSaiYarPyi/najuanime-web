@@ -298,9 +298,11 @@ async function deleteAnime(id, title) {
 async function migrateData() {
   let raw = document.getElementById('migrateData').value.trim();
 
+  // actual newline တွေကို space နဲ့ အစားထိုး (string ထဲက \n escape က မပျက်ဘူး)
+  raw = raw.replace(/\r?\n/g, ' ');
+
   let parsed;
   try {
-    // Regex မဟုတ်ဘဲ JS ကိုယ်တိုင် parse လုပ်
     parsed = Function('"use strict"; return (' + raw + ')')();
   } catch(e) {
     showMsg('migrateMsg', '❌ Parse error: ' + e.message, 'error');
