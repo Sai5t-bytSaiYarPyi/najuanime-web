@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaJu Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Outfit',sans-serif}
+:root{--blue:#3b82f6;--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+input,textarea,select{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:10px 14px;width:100%;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--blue)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:none}
+.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
+.btn-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}.btn-red:hover{background:rgba(239,68,68,.2)}
+.btn-gray{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-gray:hover{background:#263248;color:white}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
+.pill{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="card" style="max-width:360px;width:100%">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:28px;font-weight:900;margin-bottom:4px"><span style="color:var(--blue)">NaJu</span><span>Anime</span></div>
+      <div style="color:var(--muted);font-size:13px">Admin Panel</div>
+    </div>
+    <label class="label">Admin Password</label>
+    <input type="password" id="tokenInput" placeholder="password ထည့်ပါ..." style="margin-bottom:16px">
+    <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="login()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+      ဝင်ရောက်မည်
+    </button>
+    <p id="loginErr" style="color:#f87171;font-size:12px;margin-top:10px;text-align:center;display:none">Password မှားနေသည်</p>
+  </div>
+</div>
+
+<!-- Main Panel -->
+<div id="panel" style="display:none">
+  <!-- Header -->
+  <header style="background:rgba(15,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px">
+    <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+      <span id="animeCount" class="pill">Loading...</span>
+      <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+      <button class="btn btn-gray" onclick="logout()">ထွက်မည်</button>
+    </div>
+  </header>
+
+  <div style="max-width:1100px;margin:0 auto;padding:24px 16px">
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:24px">
+      <button class="btn" id="tabList" onclick="showTab('list')" style="background:var(--blue);color:white">📋 Anime စာရင်း</button>
+      <button class="btn btn-gray" id="tabAdd" onclick="showTab('add')">➕ အသစ်ထည့်</button>
+      <button class="btn btn-gray" id="tabMigrate" onclick="showTab('migrate')">📦 Migrate</button>
+    </div>
+
+    <!-- Anime List Tab -->
+    <div id="tabListContent">
+      <div style="margin-bottom:16px">
+        <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:320px">
+      </div>
+      <div id="animeList" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <!-- Add Tab -->
+    <div id="tabAddContent" style="display:none">
+      <div class="card" style="max-width:700px">
+        <h2 style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:20px">Anime အသစ်ထည့်ရန်</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label class="label">ID (English, no space)</label><input type="text" id="addId" placeholder="SnowballEarth"></div>
+          <div><label class="label">Year</label><input type="text" id="addYear" placeholder="2026"></div>
+          <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="addTitle" placeholder="Snowball Earth"></div>
+          <div style="grid-column:span 2"><label class="label">Image path</label><input type="text" id="addImage" placeholder="./images/Snowball Earth.jpg"></div>
+          <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="addLink" placeholder="https://t.me/..."></div>
+          <div style="grid-column:span 2"><label class="label">Review</label><textarea id="addReview" style="min-height:160px" placeholder="ဇာတ်ကားအကြောင်း..."></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-blue" onclick="addAnime()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            ထည့်မည်
+          </button>
+          <button class="btn btn-gray" onclick="clearAdd()">ရှင်းမည်</button>
+        </div>
+        <p id="addMsg" style="font-size:13px;margin-top:10px;display:none"></p>
+      </div>
+    </div>
+
+    <!-- Migrate Tab -->
+    <div id="tabMigrateContent" style="display:none">
+      <div class="card" style="max-width:700px">
+        <h2 style="font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:8px">⚠️ Data.js မှ KV သို့ Migrate</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
+          ဒီနေရာမှာ data.js ထဲက <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">animeData</code> array ကို paste လုပ်ပြီး KV ထဲကို တစ်ကြိမ်တည်း import လုပ်နိုင်သည်။<br>
+          ⚠️ လက်ရှိ KV data အကုန် overwrite ဖြစ်မည်!
+        </p>
+        <label class="label">animeData array (JSON format)</label>
+        <textarea id="migrateData" style="min-height:200px;font-size:12px" placeholder='[{"id":"SnowballEarth","title":"Snowball Earth",...}]'></textarea>
+        <button class="btn btn-blue" style="margin-top:12px" onclick="migrateData()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          KV ထဲ Import မည်
+        </button>
+        <p id="migrateMsg" style="font-size:13px;margin-top:10px;display:none"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;padding:20px;overflow-y:auto">
+  <div style="max-width:700px;margin:40px auto">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:between;margin-bottom:20px">
+        <h2 style="font-size:16px;font-weight:700;color:var(--blue);flex:1">Anime ပြင်ရန်</h2>
+        <button class="btn btn-gray" onclick="closeEdit()" style="padding:6px 12px">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><label class="label">ID</label><input type="text" id="editId" disabled style="opacity:.5"></div>
+        <div><label class="label">Year</label><input type="text" id="editYear"></div>
+        <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="editTitle"></div>
+        <div style="grid-column:span 2"><label class="label">Image path</label><input type="text" id="editImage"></div>
+        <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="editLink"></div>
+        <div style="grid-column:span 2"><label class="label">Review</label><textarea id="editReview" style="min-height:200px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-blue" onclick="saveEdit()">💾 သိမ်းမည်</button>
+        <button class="btn btn-gray" onclick="closeEdit()">မလုပ်တော့ပါ</button>
+      </div>
+      <p id="editMsg" style="font-size:13px;margin-top:10px;display:none"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+let TOKEN = '';
+let allAnimes = [];
+let editingId = '';
+
+function login() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) return;
+  TOKEN = t;
+  testLogin();
+}
+
+async function testLogin() {
+  try {
+    const r = await fetch(WORKER_URL + '/admin/migrate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+      body: JSON.stringify({ animeList: null })
+    });
+    if (r.status === 401) {
+      document.getElementById('loginErr').style.display = 'block';
+      return;
+    }
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    loadAnimes();
+  } catch (e) {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function logout() {
+  TOKEN = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('panel').style.display = 'none';
+}
+
+async function loadAnimes() {
+  document.getElementById('animeList').innerHTML = '<p style="color:var(--muted);font-size:13px">Loading...</p>';
+  const r = await fetch(WORKER_URL + '/anime');
+  allAnimes = await r.json();
+  document.getElementById('animeCount').textContent = `${allAnimes.length} ကား`;
+  renderList(allAnimes);
+}
+
+function renderList(list) {
+  const el = document.getElementById('animeList');
+  if (!list.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">Anime မရှိသေးပါ</p>'; return; }
+  el.innerHTML = list.map((a, i) => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
+      <img src="${a.image}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <span class="pill">${a.year}</span>
+          <span style="font-size:11px;color:var(--muted)">${a.id}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-gray" style="padding:7px 12px;font-size:12px" onclick="openEdit('${a.id}')">✏️ ပြင်</button>
+        <button class="btn btn-red" style="padding:7px 12px;font-size:12px" onclick="deleteAnime('${a.id}','${a.title.replace(/'/g,"\\'")}')">🗑️ ဖျက်</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterList() {
+  const q = document.getElementById('searchAdmin').value.toLowerCase();
+  renderList(allAnimes.filter(a => a.title.toLowerCase().includes(q) || a.year.includes(q)));
+}
+
+function showTab(t) {
+  ['list','add','migrate'].forEach(n => {
+    document.getElementById('tabListContent').style.display = n==='list'?'block':'none';
+    document.getElementById('tabAddContent').style.display = n==='add'?'block':'none';
+    document.getElementById('tabMigrateContent').style.display = n==='migrate'?'block':'none';
+  });
+  document.getElementById('tabListContent').style.display = t==='list'?'block':'none';
+  document.getElementById('tabAddContent').style.display = t==='add'?'block':'none';
+  document.getElementById('tabMigrateContent').style.display = t==='migrate'?'block':'none';
+  ['list','add','migrate'].forEach(n => {
+    const btn = document.getElementById('tab'+n.charAt(0).toUpperCase()+n.slice(1));
+    btn.style.background = n===t ? 'var(--blue)' : 'var(--bg3)';
+    btn.style.color = n===t ? 'white' : '#94a3b8';
+  });
+}
+
+async function addAnime() {
+  const id = document.getElementById('addId').value.trim();
+  const title = document.getElementById('addTitle').value.trim();
+  const year = document.getElementById('addYear').value.trim();
+  const image = document.getElementById('addImage').value.trim();
+  const link = document.getElementById('addLink').value.trim();
+  const review = document.getElementById('addReview').value.trim();
+  if (!id||!title||!year) { showMsg('addMsg','ID, Title, Year ထည့်ပါ','error'); return; }
+  const r = await fetch(WORKER_URL+'/admin/anime', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body: JSON.stringify({id,title,year,image,link,review})
+  });
+  const d = await r.json();
+  if (d.success) { showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success'); clearAdd(); loadAnimes(); showTab('list'); }
+  else showMsg('addMsg','❌ '+d.error,'error');
+}
+
+function clearAdd() {
+  ['addId','addTitle','addYear','addImage','addLink','addReview'].forEach(id => document.getElementById(id).value='');
+}
+
+function openEdit(id) {
+  const a = allAnimes.find(x=>x.id===id);
+  if (!a) return;
+  editingId = id;
+  document.getElementById('editId').value = a.id;
+  document.getElementById('editTitle').value = a.title;
+  document.getElementById('editYear').value = a.year;
+  document.getElementById('editImage').value = a.image||'';
+  document.getElementById('editLink').value = a.link||'';
+  document.getElementById('editReview').value = a.review||'';
+  document.getElementById('editModal').style.display = 'block';
+}
+
+function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+
+async function saveEdit() {
+  const r = await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(editingId), {
+    method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body: JSON.stringify({
+      title: document.getElementById('editTitle').value,
+      year: document.getElementById('editYear').value,
+      image: document.getElementById('editImage').value,
+      link: document.getElementById('editLink').value,
+      review: document.getElementById('editReview').value,
+    })
+  });
+  const d = await r.json();
+  if (d.success) { showMsg('editMsg','✓ သိမ်းပြီးပါပြီ','success'); loadAnimes(); setTimeout(closeEdit,1200); }
+  else showMsg('editMsg','❌ '+d.error,'error');
+}
+
+async function deleteAnime(id, title) {
+  if (!confirm(`"${title}" ကို တကယ် ဖျက်မည်လား?`)) return;
+  const r = await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(id), {
+    method:'DELETE',
+    headers:{'Authorization':'Bearer '+TOKEN}
+  });
+  const d = await r.json();
+  if (d.success) loadAnimes();
+  else alert('ဖျက်မရပါ: '+d.error);
+}
+
+async function migrateData() {
+  const raw = document.getElementById('migrateData').value.trim();
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e) { showMsg('migrateMsg','❌ JSON format မှားနေသည်','error'); return; }
+  if (!Array.isArray(parsed)) { showMsg('migrateMsg','❌ Array ဖြစ်ရမည်','error'); return; }
+  if (!confirm(`Anime ${parsed.length} ကားကို KV ထဲ import မည်။ လက်ရှိ data အကုန်ဖျက်မည်။ ဆက်လုပ်မည်လား?`)) return;
+  const r = await fetch(WORKER_URL+'/admin/migrate', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body: JSON.stringify({animeList: parsed})
+  });
+  const d = await r.json();
+  if (d.success) { showMsg('migrateMsg',`✓ ${d.count} ကား import ပြီးပါပြီ`,'success'); loadAnimes(); }
+  else showMsg('migrateMsg','❌ '+d.error,'error');
+}
+
+function showMsg(id, txt, type) {
+  const el = document.getElementById(id);
+  el.textContent = txt;
+  el.style.color = type==='success' ? '#4ade80' : '#f87171';
+  el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 3000);
+}
+
+document.getElementById('tokenInput').addEventListener('keydown', e => {
+  if (e.key==='Enter') login();
+});
+</script>
+</body>
+</html>
