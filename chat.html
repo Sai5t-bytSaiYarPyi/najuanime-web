@@ -1,570 +1,448 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaJu AI Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Outfit', sans-serif; box-sizing: border-box; }
-        :root {
-            --blue: #3b82f6;
-            --blue-dark: #1d4ed8;
-            --blue-glow: rgba(59,130,246,0.15);
-            --bg: #0f1117;
-            --bg2: #161b27;
-            --bg3: #1e2535;
-            --border: rgba(255,255,255,0.07);
-            --text: #e2e8f0;
-            --muted: #64748b;
-        }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; margin: 0; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: var(--bg2); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
-
-        /* Header */
-        .chat-header {
-            background: rgba(15,17,23,0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-        .back-btn {
-            display: flex; align-items: center; gap: 6px;
-            color: var(--muted); text-decoration: none;
-            font-size: 13px; font-weight: 600;
-            transition: color 0.2s; padding: 4px 0;
-        }
-        .back-btn:hover { color: var(--blue); }
-        .ai-avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; flex-shrink: 0;
-            box-shadow: 0 0 12px rgba(59,130,246,0.3);
-        }
-        .ai-name { font-size: 15px; font-weight: 700; color: white; }
-        .ai-status { font-size: 11px; color: #4ade80; display: flex; align-items: center; gap: 4px; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-        /* Messages area */
-        #messages {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            min-height: calc(100vh - 140px);
-            padding-bottom: 100px;
-        }
-        .msg-row { display: flex; gap: 10px; align-items: flex-end; }
-        .msg-row.user { flex-direction: row-reverse; }
-
-        .msg-avatar {
-            width: 28px; height: 28px; border-radius: 50%;
-            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 700;
-        }
-        .msg-avatar.bot { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; }
-        .msg-avatar.user { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
-
-        .bubble {
-            max-width: 78%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .bubble.bot {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 4px;
-            color: var(--text);
-        }
-        .bubble.user {
-            background: var(--blue);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        /* Anime result card inside bubble */
-        .anime-result {
-            background: var(--bg3);
-            border: 1px solid rgba(59,130,246,0.2);
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-            transition: border-color 0.2s;
-        }
-        .anime-result:hover { border-color: rgba(59,130,246,0.4); }
-        .anime-result img {
-            width: 44px; height: 60px; object-fit: cover;
-            border-radius: 6px; flex-shrink: 0;
-        }
-        .anime-result-info { flex: 1; min-width: 0; }
-        .anime-result-title { font-size: 13px; font-weight: 700; color: white; margin-bottom: 3px; }
-        .anime-result-year { font-size: 11px; color: var(--blue); font-weight: 600; }
-        .anime-result-review { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .anime-result-btns { display: flex; gap: 6px; margin-top: 8px; }
-        .btn-sm {
-            font-size: 11px; font-weight: 600; padding: 5px 10px;
-            border-radius: 8px; text-decoration: none;
-            transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
-        }
-        .btn-sm.review { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
-        .btn-sm.review:hover { color: white; border-color: rgba(255,255,255,0.2); }
-        .btn-sm.watch { background: var(--blue); color: white; }
-        .btn-sm.watch:hover { background: var(--blue-dark); }
-
-        /* Quick suggestion buttons */
-        .quick-btns {
-            display: flex; flex-wrap: wrap; gap: 6px;
-            margin-top: 10px;
-        }
-        .quick-btn {
-            font-size: 12px; padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: var(--bg3);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.15s;
-            white-space: nowrap;
-        }
-        .quick-btn:hover { border-color: rgba(59,130,246,0.4); color: white; background: rgba(59,130,246,0.08); }
-
-        /* Typing indicator */
-        .typing-bubble {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            padding: 14px 18px;
-            display: flex; gap: 5px; align-items: center;
-        }
-        .typing-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--muted);
-            animation: typingBounce 1.2s infinite;
-        }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-
-        /* Input area */
-        .input-area {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(15,17,23,0.97);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            padding: 12px 20px;
-        }
-        .input-wrap {
-            max-width: 700px; margin: 0 auto;
-            display: flex; gap: 10px; align-items: flex-end;
-        }
-        #userInput {
-            flex: 1; background: var(--bg3);
-            border: 1px solid var(--border);
-            color: white; border-radius: 14px;
-            padding: 12px 16px; font-size: 14px;
-            font-family: 'Outfit', sans-serif;
-            resize: none; outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            max-height: 120px; min-height: 46px;
-            line-height: 1.5;
-        }
-        #userInput:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-        #userInput::placeholder { color: var(--muted); }
-        #sendBtn {
-            width: 46px; height: 46px; border-radius: 14px;
-            background: var(--blue); border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s, transform 0.15s;
-            flex-shrink: 0;
-        }
-        #sendBtn:hover { background: var(--blue-dark); }
-        #sendBtn:active { transform: scale(0.94); }
-        #sendBtn svg { width: 18px; height: 18px; fill: white; }
-
-        /* Fade in animation */
-        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        .msg-row { animation: fadeUp 0.3s ease both; }
-
-        /* Max width container */
-        .chat-body { max-width: 700px; margin: 0 auto; }
-
-        /* Mobile */
-        @media (max-width: 640px) {
-            #messages { padding: 14px; gap: 12px; }
-            .bubble { max-width: 88%; font-size: 13px; }
-        }
-
-        /* Logo */
-        .logo-naju { color: var(--blue); }
-        .logo-anime { color: white; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NaJu AI Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Outfit',sans-serif;box-sizing:border-box}
+    :root{
+      --blue:#3b82f6;--blue-dark:#1d4ed8;
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+      --border:rgba(255,255,255,0.07);
+      --text:#e2e8f0;--muted:#64748b;
+    }
+    body{background:var(--bg);color:var(--text);min-height:100vh;margin:0}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:var(--bg2)}
+    ::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+    .chat-header{
+      background:rgba(15,17,23,0.97);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      padding:12px 18px;display:flex;align-items:center;gap:12px;
+      position:sticky;top:0;z-index:50;
+    }
+    .back-btn{display:flex;align-items:center;gap:5px;color:var(--muted);
+      text-decoration:none;font-size:13px;font-weight:600;transition:color .2s}
+    .back-btn:hover{color:var(--blue)}
+    .ai-avatar{width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+      display:flex;align-items:center;justify-content:center;
+      font-size:15px;flex-shrink:0;box-shadow:0 0 12px rgba(59,130,246,.3)}
+    .ai-name{font-size:14px;font-weight:700;color:white}
+    .ai-sub{font-size:11px;color:#4ade80;display:flex;align-items:center;gap:4px}
+    .dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    #messages{padding:18px 18px 110px;display:flex;flex-direction:column;gap:14px;
+      max-width:700px;margin:0 auto}
+    .msg-row{display:flex;gap:9px;align-items:flex-end;animation:fadeUp .28s ease both}
+    .msg-row.user{flex-direction:row-reverse}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .av{width:26px;height:26px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+    .av.bot{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white}
+    .av.user{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+    .bubble{max-width:80%;padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.65}
+    .bubble.bot{background:var(--bg2);border:1px solid var(--border);
+      border-bottom-left-radius:4px;color:var(--text)}
+    .bubble.user{background:var(--blue);color:white;border-bottom-right-radius:4px}
+    .ac{background:var(--bg3);border:1px solid rgba(59,130,246,.18);
+      border-radius:11px;padding:10px;margin-top:9px;
+      display:flex;gap:9px;align-items:flex-start;transition:border-color .2s}
+    .ac:hover{border-color:rgba(59,130,246,.38)}
+    .ac img{width:42px;height:58px;object-fit:cover;border-radius:6px;flex-shrink:0}
+    .ac-info{flex:1;min-width:0}
+    .ac-title{font-size:12.5px;font-weight:700;color:white;margin-bottom:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ac-year{font-size:10.5px;color:var(--blue);font-weight:600}
+    .ac-preview{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .ac-btns{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+    .bs{font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;
+      text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:3px;cursor:pointer;border:none}
+    .bs.rev{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+    .bs.rev:hover{color:white;border-color:rgba(255,255,255,.2)}
+    .bs.wat{background:var(--blue);color:white}
+    .bs.wat:hover{background:var(--blue-dark)}
+    .bs.ais{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25)}
+    .bs.ais:hover{background:rgba(59,130,246,.22)}
+    .bs.tgl{background:rgba(0,136,204,.15);color:#38bdf8;border:1px solid rgba(0,136,204,.3)}
+    .bs.tgl:hover{background:rgba(0,136,204,.25)}
+    .ai-loading{font-size:11px;color:var(--muted);font-style:italic;padding:5px 0}
+    .ai-result{font-size:12px;color:#94a3b8;line-height:1.6;
+      padding:8px 10px;background:rgba(59,130,246,.06);
+      border-left:2px solid var(--blue);border-radius:0 6px 6px 0;margin-top:6px}
+    .qr{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+    .qb{font-size:12px;padding:5px 11px;border:1px solid var(--border);
+      border-radius:99px;background:var(--bg3);color:#94a3b8;
+      cursor:pointer;transition:all .15s;white-space:nowrap}
+    .qb:hover{border-color:rgba(59,130,246,.4);color:white;background:rgba(59,130,246,.08)}
+    .typing-ind{background:var(--bg2);border:1px solid var(--border);
+      border-radius:18px;border-bottom-left-radius:4px;
+      padding:13px 16px;display:flex;gap:4px;align-items:center}
+    .td{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:tdb 1.2s infinite}
+    .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+    @keyframes tdb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+    .input-bar{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(15,17,23,0.97);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);padding:11px 18px}
+    .input-inner{max-width:700px;margin:0 auto;display:flex;gap:9px;align-items:flex-end}
+    #uinput{flex:1;background:var(--bg3);border:1px solid var(--border);
+      color:white;border-radius:13px;padding:11px 15px;font-size:13.5px;
+      font-family:'Outfit',sans-serif;resize:none;outline:none;
+      transition:border-color .2s,box-shadow .2s;max-height:110px;min-height:44px;line-height:1.5}
+    #uinput:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+    #uinput::placeholder{color:var(--muted)}
+    #sbtn{width:44px;height:44px;border-radius:13px;background:var(--blue);
+      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:background .2s,transform .15s;flex-shrink:0}
+    #sbtn:hover{background:var(--blue-dark)}#sbtn:active{transform:scale(.93)}
+    #sbtn svg{width:17px;height:17px;fill:white}
+    .logo-naju{color:var(--blue)}.logo-anime{color:white}
+    @media(max-width:640px){
+      #messages{padding:13px 13px 105px}
+      .bubble{max-width:87%;font-size:13px}
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <div class="chat-header">
-        <a href="index.html" class="back-btn">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
+<div class="chat-header">
+  <a href="index.html" class="back-btn">
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  </a>
+  <div class="ai-avatar">🤖</div>
+  <div style="flex:1">
+    <div class="ai-name"><span class="logo-naju">NaJu</span><span class="logo-anime"> AI</span></div>
+    <div class="ai-sub"><span class="dot"></span><span id="statusTxt">အဆင်သင့်...</span></div>
+  </div>
+</div>
+
+<div id="messages"></div>
+
+<div class="input-bar">
+  <div class="input-inner">
+    <textarea id="uinput" placeholder="Anime ရှာမည်၊ မေးမည်..." rows="1"></textarea>
+    <button id="sbtn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONFIG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// Cloudflare Worker URL ကို deploy ပြီးရင် ဒီမှာ ထည့်ပေးပါ
+const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// STOPWORDS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const SW = new Set([
+  'ပါ','တယ်','တာ','က','ကို','နဲ့','မှာ','ရဲ့','လဲ','ဘဲ','လိုက်','ထားပါ',
+  'ပြောပြ','ပြောပေး','ပေးပါ','ရှာပေး','ထုတ်ပေး','ကြည့်ချင်','မလဲ','ဆိုတာ',
+  'ကား','ဇာတ်','the','a','an','is','of','and','for','in','please',
+  'me','tell','show','find','get','what','which','give','can','you','i',
+  'want','to','do','မင်','ငါ','ကျွန်','ချင်','ပါတယ်','လေ','ဗျ','ဗျာ',
+  'ရှာ','ရော','ဆိုတာ','ဆို','ပြော','ပြ','ကျေးဇူး','ok','okay','ဟုတ်',
+  'anime','ဟာ','သည်','ဖြစ်','ကား','ဒါ','ဒါမှ','မဟုတ်',
+]);
+
+function clean(text) {
+  return text.toLowerCase()
+    .replace(/[^\u1000-\u109fa-z0-9\s]/g,' ')
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !SW.has(w))
+    .join(' ').trim();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// FUSE SEARCH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const fuse = new Fuse(animeData, {
+  keys: ['title'],
+  threshold: 0.42,
+  includeScore: true,
+  minMatchCharLength: 2,
+});
+
+function fuzzy(q) {
+  if (!q || q.length < 2) return [];
+  return fuse.search(q).slice(0, 4).map(r => r.item);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// MOOD MAP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const MOOD = {
+  ဝမ်းနည်:  ['နာကျင်','ဆုံး','ကွာ','sad','drama','tears'],
+  ငိုချင်:  ['နာကျင်','ဆုံး','ကွာ','sad','drama'],
+  ပျော်:    ['comedy','ရယ်','ဟာသ','fun','ပျော်'],
+  ပျော်ချင်:['comedy','ရယ်','ဟာသ','fun'],
+  ဟာသ:     ['comedy','ရယ်','ဟာသ','fun'],
+  ရယ်:      ['comedy','ရယ်','ဟာသ'],
+  တိုက်:    ['action','fight','battle','တိုက်','စစ်'],
+  action:   ['action','fight','battle','တိုက်','စစ်'],
+  စစ်:      ['action','fight','battle'],
+  အချစ်:   ['romance','love','ချစ်','romantic'],
+  ချစ်:     ['romance','love','ချစ်'],
+  romance:  ['romance','love','ချစ်'],
+  love:     ['romance','love','ချစ်'],
+  နက်:     ['psychological','mystery','နာကျင်','နက်','thriller'],
+  psychological:['psychological','mystery','thriller'],
+  mystery:  ['mystery','psychological','thriller'],
+  ကြောက်:  ['horror','thriller','mystery','dark'],
+  fantasy:  ['fantasy','magic','isekai','မှော်'],
+  မှော်:    ['fantasy','magic','isekai'],
+  isekai:   ['fantasy','isekai'],
+  slice:    ['slice','everyday','နေ့စဉ်','ဘဝ'],
+  နေ့စဉ်:  ['slice','everyday','နေ့စဉ်'],
+  bl:       ['bl','boys','love'],
+  ငြိမ်:   ['slice','calm','everyday'],
+  အငြိမ်:  ['slice','calm','everyday'],
+};
+
+function moodFilter(words) {
+  const gkeys = [];
+  for (const w of words) {
+    for (const [mood, keys] of Object.entries(MOOD)) {
+      if (w.includes(mood) || mood.includes(w)) gkeys.push(...keys);
+    }
+  }
+  if (!gkeys.length) return [];
+  return animeData.map(a => {
+    const hay = ((a.review||'')+' '+a.title).toLowerCase();
+    return { a, s: gkeys.filter(k => hay.includes(k)).length };
+  }).filter(x => x.s > 0).sort((a,b) => b.s-a.s).slice(0,4).map(x => x.a);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// INTENT PATTERNS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const INTENTS = [
+  ['telegram',  /telegram|link|download|ဒေါင်း/],
+  ['latest',    /latest|newest|အသစ်|နောက်ဆုံး|ထွက်သစ်|2026|2025/],
+  ['random',    /random|surprise|ကျပန်း|မဘာ|ဘာမဆို|recommend|suggest|ညွှန်|ဘာကြည့်/],
+  ['count',     /ဘယ်နှ|စုစုပေါင်း|total|count|ကားဘယ်လောက်|အရေ/],
+  ['aisummary', /summary|ai.*ရေး|ai.*ပြ|ဇာတ်လမ်း.*ဘာ|ဘာအကြောင်း|ဇာတ်လမ်းပြောပြ|review.*summary/],
+];
+
+function intent(raw, c) {
+  const r = raw.toLowerCase();
+  for (const [name, re] of INTENTS) if (re.test(r)||re.test(c)) return name;
+  return null;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// SESSION DEDUP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const seen = new Set();
+function getRandom(n=3) {
+  let pool = animeData.filter(a => !seen.has(a.id));
+  if (pool.length < n) { seen.clear(); pool = [...animeData]; }
+  const pick = pool.sort(()=>Math.random()-.5).slice(0,n);
+  pick.forEach(a => seen.add(a.id));
+  return pick;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// WORKER CALL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const aiCache = {};
+async function fetchSummary(anime) {
+  if (aiCache[anime.id]) return aiCache[anime.id];
+  try {
+    const r = await fetch(WORKER_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ animeName:anime.title, year:anime.year, reviewText:(anime.review||'').slice(0,2000) }),
+    });
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    aiCache[anime.id] = d.summary || '';
+    return aiCache[anime.id];
+  } catch { return ''; }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// RESPONSE BUILDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+async function buildResp(raw) {
+  const c   = clean(raw);
+  const kws = c.split(/\s+/).filter(Boolean);
+  const it  = intent(raw, c);
+
+  if (it === 'count')
+    return { text:`NaJu မှာ အခု <strong>Anime ${animeData.length} ကား</strong> ရှိပါတယ် 📺` };
+
+  if (it === 'latest') {
+    const list = [...animeData].slice(-4).reverse();
+    return { text:`နောက်ဆုံးထည့်ထားတဲ့ Anime ${list.length} ကား —`, animes:list,
+      qr:['Romance ကြိုက်တယ်','Action ကြိုက်တယ်','Random recommend'] };
+  }
+
+  if (it === 'random') {
+    const list = getRandom(3);
+    return { text:`ဒီ ${list.length} ကား ကြည့်ကြည့်ပါ 🎯`, animes:list,
+      qr:['နောက်ထပ် random','Romance ကြိုက်တယ်','Action ကြိုက်တယ်'] };
+  }
+
+  if (it === 'telegram') {
+    const found = fuzzy(c||raw);
+    if (found.length)
+      return { text:`<strong>${found[0].title}</strong> — Telegram link`, tg:{ url:found[0].link, label:`${found[0].title} — ကြည့်ရန်` } };
+    return { text:`NaJu Anime Telegram Channel —`, tg:{ url:'https://t.me/NaJu_New', label:'NaJu Channel ဝင်ရောက်ရန်' } };
+  }
+
+  if (it === 'aisummary') {
+    const found = fuzzy(c||raw);
+    if (!found.length)
+      return { text:`ကားနာမည် ပါမလာဘူး — ဘယ် Anime ရဲ့ Summary လိုချင်လဲ?`,
+        qr:['Random recommend','နောက်ဆုံးထွက် Anime'] };
+    return { text:`<strong>${found[0].title}</strong> — AI Summary ရေးနေပါတယ်...`,
+      animes:[found[0]], aiFor:found[0] };
+  }
+
+  // Mood / Genre
+  const mood = moodFilter(kws);
+  if (mood.length)
+    return { text:`ဒီ Anime တွေ ကြည့်ကြည့်ပါ 🎌`, animes:mood,
+      qr:['နောက်ထပ် ရှာပေး','Random recommend'] };
+
+  // Fuzzy title search
+  const sr = fuzzy(c.length > 1 ? c : raw);
+  if (sr.length) {
+    const msg = sr.length===1
+      ? `<strong>${sr[0].title}</strong> ကို တွေ့ပါတယ် 🎉`
+      : `"${raw}" နဲ့ ဆိုင်တဲ့ Anime ${sr.length} ကား တွေ့ပါတယ် —`;
+    return { text:msg, animes:sr,
+      qr:['AI Summary လိုချင်တယ်','Telegram link ထုတ်ပေး','Random recommend'] };
+  }
+
+  return {
+    text:`"${raw}" နဲ့ ဆိုင်တဲ့ Anime မတွေ့ဘူး 😔<br>နာမည် တိတိကျကျ ရိုက်ပြီး ထပ်ကြိုးစားပါ၊ ဒါမှမဟုတ် Genre ပြောကြည့်ပါ။`,
+    qr:['Action ကားတွေ ပြပေး','Romance ကားတွေ ပြပေး','Random recommend'],
+  };
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+// UI
+// ━━━━━━━━━━━━━━━━━━━━━━━━━
+const msgEl = document.getElementById('messages');
+const inEl  = document.getElementById('uinput');
+const scrollEnd = () => window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+
+function addRow(html, isUser) {
+  const row = document.createElement('div');
+  row.className = `msg-row${isUser?' user':''}`;
+  row.innerHTML = isUser
+    ? `<div class="av user">👤</div><div class="bubble user">${html}</div>`
+    : `<div class="av bot">🤖</div><div class="bubble bot">${html}</div>`;
+  msgEl.appendChild(row); scrollEnd(); return row;
+}
+
+function showTyping() {
+  const r = document.createElement('div');
+  r.className='msg-row'; r.id='typ';
+  r.innerHTML=`<div class="av bot">🤖</div><div class="typing-ind"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  msgEl.appendChild(r); scrollEnd();
+}
+const hideTyping = () => document.getElementById('typ')?.remove();
+
+function card(a, showAIBtn=false) {
+  const snip = (a.review||'').slice(0,90).trim();
+  return `<div class="ac">
+    <img src="${a.image}" alt="${a.title}" onerror="this.style.display='none'">
+    <div class="ac-info">
+      <div class="ac-title" title="${a.title}">${a.title}</div>
+      <div class="ac-year">📅 ${a.year}</div>
+      ${snip?`<div class="ac-preview">${snip}...</div>`:''}
+      <div id="ais_${a.id}"></div>
+      <div class="ac-btns">
+        <a href="review.html?id=${a.id}" class="bs rev">
+          <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6"/></svg>
+          Review
         </a>
-        <div class="ai-avatar">🤖</div>
-        <div style="flex:1">
-            <div class="ai-name">
-                <span class="logo-naju">NaJu</span><span class="logo-anime"> AI</span>
-            </div>
-            <div class="ai-status">
-                <span class="status-dot"></span>
-                Anime ၁၂၆+ ကားကို သိပါတယ်
-            </div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);text-align:right;line-height:1.5">
-            Powered by<br><span style="color:var(--blue);font-weight:700">NaJu Data</span>
-        </div>
+        <a href="${a.link}" target="_blank" class="bs wat">
+          <svg width="9" height="9" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+          ကြည့်ရန်
+        </a>
+        ${showAIBtn?`<button class="bs ais" onclick="runAI('${a.id}')">🤖 AI Summary</button>`:''}
+      </div>
     </div>
+  </div>`;
+}
 
-    <!-- Messages -->
-    <div class="chat-body">
-        <div id="messages"></div>
-    </div>
+function tgBtn(url, label) {
+  return `<a href="${url}" target="_blank" class="bs tgl" style="display:inline-flex;margin-top:9px;padding:8px 14px;border-radius:10px;font-size:13px">
+    <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24" style="margin-right:5px"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.086 13.99l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.73.596z"/></svg>
+    ${label}
+  </a>`;
+}
 
-    <!-- Input -->
-    <div class="input-area">
-        <div class="input-wrap">
-            <textarea id="userInput" placeholder="Anime ရှာမည်၊ မေးမည်..." rows="1"></textarea>
-            <button id="sendBtn" onclick="sendMessage()">
-                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-            </button>
-        </div>
-    </div>
+function qreplies(arr) {
+  if (!arr||!arr.length) return '';
+  return `<div class="qr">${arr.map(r=>`<button class="qb" onclick="hq('${r.replace(/'/g,"\\'")}')"> ${r}</button>`).join('')}</div>`;
+}
 
-    <script src="data.js"></script>
-    <script>
-    // ─────────────────────────────────────────
-    // NaJu AI Engine
-    // ─────────────────────────────────────────
+// Lazy AI summary per card
+async function runAI(id) {
+  const anime = animeData.find(a => a.id===id);
+  if (!anime) return;
+  const el = document.getElementById(`ais_${id}`);
+  if (!el) return;
+  el.innerHTML = `<div class="ai-loading">🤖 AI ရေးနေပါတယ်...</div>`;
+  const sum = await fetchSummary(anime);
+  el.innerHTML = sum
+    ? `<div class="ai-result">${sum}</div>`
+    : `<div class="ai-loading" style="color:#f87171">Worker URL သတ်မှတ်မထားသေးပါ — Setup Guide ကြည့်ပါ</div>`;
+  scrollEnd();
+}
 
-    const ABOUT = {
-        channel: "NaJu Anime ဟာ မြန်မာနိုင်ငံက Anime ချစ်သူတွေအတွက် ဖန်တီးထားတဲ့ Telegram Channel ပါ။ လောင်းကစားကြော်ငြာတွေ ကင်းစင်တဲ့ 'သန့်စင်သော ရသကမ္ဘာ' တစ်ခု ဖြစ်ပါတယ်။",
-        start: "၂၀၂၅ ခုနှစ် မေလ ၁၉ ရက်နေ့မှာ စတင်ခဲ့ပါတယ်။ ဘဝရဲ့ မုန်တိုင်းကြီး ၃ ခုကို ကြံ့ကြံ့ခံ ဖြတ်သန်းပြီး တည်ဆောက်ခဲ့တဲ့ Channel ပါ။",
-        creator: "ကြီးကျယ်တဲ့ အဖွဲ့ မရှိပါဘူး။ ဇာတ်လမ်းတွဲ ၁၀၀ ကျော်ကို တစ်ကိုယ်တော် ဖန်တီးနေတဲ့ လူတစ်ယောက်ရဲ့ ရုန်းကန်မှုတွေသာ ရှိပါတယ်။",
-        mission: "အရည်အသွေးပြည့်ဝတဲ့ ဘာသာပြန် Anime တွေကို မြန်မာ Anime ချစ်သူတွေ လွတ်လပ်စွာ ခံစားနိုင်ဖို့ ဖန်တီးပေးနေပါတယ်။",
-        contact: "Telegram: @NaJu_New | Email: najuanimevipweb@gmail.com | Facebook: NaJu Anime | TikTok: @najuanime23",
-        total: `အခု NaJu မှာ Anime ${animeData.length} ကား ရှိပါတယ်။`
-    };
+async function render(resp) {
+  let html = `<div>${resp.text}</div>`;
+  if (resp.tg) html += tgBtn(resp.tg.url, resp.tg.label);
+  const showAI = !!resp.aiFor;
+  if (resp.animes&&resp.animes.length) html += resp.animes.map(a=>card(a,showAI)).join('');
+  html += qreplies(resp.qr);
+  addRow(html, false);
+  if (resp.aiFor) await runAI(resp.aiFor.id);
+}
 
-    // Genre keywords mapping
-    const GENRE_KEYWORDS = {
-        'action': ['action','တိုက်','စစ်','fight','battle','ရဲကောင်'],
-        'romance': ['romance','ချစ်','love','အချစ်','ရောမန်','romantic'],
-        'drama': ['drama','နာကျင်','ဒုက္ခ','sad','ဝမ်းနည်','ငို'],
-        'comedy': ['comedy','ရယ်','ဟာသ','funny','ပျော်'],
-        'fantasy': ['fantasy','မှော်','magic','ဖန်တီး','isekai','ကမ္ဘာ'],
-        'psychological': ['psychological','စိတ်','တွေး','နက်','mystery'],
-        'slice': ['slice','နေ့စဉ်','ဘဝ','everyday','daily'],
-        'bl': ['bl','boys love','ကောင်လေးချင်း'],
-    };
+async function process(q) {
+  showTyping();
+  await new Promise(r=>setTimeout(r, 320+Math.random()*280));
+  hideTyping();
+  await render(await buildResp(q));
+}
 
-    function tokenize(text) {
-        return text.toLowerCase().replace(/[^\u1000-\u109fa-z0-9\s]/g,'').trim();
-    }
+function hq(t) { addRow(t,true); process(t); }
 
-    function searchAnime(query) {
-        const q = tokenize(query);
-        const words = q.split(/\s+/);
+function send() {
+  const t = inEl.value.trim();
+  if (!t) return;
+  addRow(t,true); inEl.value=''; inEl.style.height='auto'; process(t);
+}
 
-        // Direct title match
-        let results = animeData.filter(a => {
-            const t = a.title.toLowerCase();
-            return words.some(w => w.length > 1 && t.includes(w));
-        });
+inEl.addEventListener('input',()=>{ inEl.style.height='auto'; inEl.style.height=Math.min(inEl.scrollHeight,110)+'px'; });
+inEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
 
-        // If no title match, search in review
-        if (!results.length) {
-            results = animeData.filter(a => {
-                const r = (a.review || '').toLowerCase();
-                return words.some(w => w.length > 2 && r.includes(w));
-            });
-        }
-
-        return results.slice(0, 4);
-    }
-
-    function detectIntent(query) {
-        const q = tokenize(query);
-
-        // About intents
-        if (/channel|about|ကျွန်|ဘယ်သူ|ဘာလုပ်|mission|contact|ဆက်သွယ်|တည်ထောင်|စတင်|ဖန်တီး|ဘယ်တုန်|email|telegram.*naju|facebook|tiktok/.test(q))
-            return 'about';
-
-        // Count
-        if (/ဘယ်နှ|စုစုပေါင်း|total|count|အရေ|ကားဘ/.test(q))
-            return 'count';
-
-        // Recommend / random
-        if (/recommend|suggest|ညွှန်|ဘာကြည့်|ကြည့်ချင်|မဘာ|random|surprise|မသိ|တိုက်ဆိုင်|ကောင်းမယ်|ကောင်းတဲ့/.test(q) && !/ရှာ|search/.test(q))
-            return 'recommend';
-
-        // Latest
-        if (/latest|newest|အသစ်|နောက်ဆုံး|ထွက်သစ်|2026|2025/.test(q))
-            return 'latest';
-
-        // Genre-based
-        for (const [genre, keys] of Object.entries(GENRE_KEYWORDS)) {
-            if (keys.some(k => q.includes(k))) return { type: 'genre', genre };
-        }
-
-        // Search fallback
-        return 'search';
-    }
-
-    function getRandomAnimes(count = 3) {
-        const shuffled = [...animeData].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, count);
-    }
-
-    function getLatestAnimes(count = 4) {
-        return [...animeData].slice(-count).reverse();
-    }
-
-    function getGenreAnimes(genre) {
-        const keys = GENRE_KEYWORDS[genre] || [];
-        return animeData.filter(a => {
-            const text = ((a.review || '') + a.title).toLowerCase();
-            return keys.some(k => text.includes(k));
-        }).slice(0, 4);
-    }
-
-    function buildAnimeCard(anime) {
-        const reviewSnippet = anime.review ? anime.review.slice(0, 100).trim() + '...' : 'ဇာတ်လမ်းအကျဉ်း မရေးသားရသေးပါ။';
-        return `
-        <div class="anime-result">
-            <img src="${anime.image}" alt="${anime.title}" onerror="this.style.display='none'">
-            <div class="anime-result-info">
-                <div class="anime-result-title">${anime.title}</div>
-                <div class="anime-result-year">📅 ${anime.year}</div>
-                <div class="anime-result-review">${reviewSnippet}</div>
-                <div class="anime-result-btns">
-                    <a href="review.html?id=${anime.id}" class="btn-sm review">
-                        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Review
-                    </a>
-                    <a href="${anime.link}" target="_blank" class="btn-sm watch">
-                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                        ကြည့်ရန်
-                    </a>
-                </div>
-            </div>
-        </div>`;
-    }
-
-    function generateResponse(query) {
-        const intent = detectIntent(query);
-
-        // About
-        if (intent === 'about') {
-            const q = tokenize(query);
-            let ans = '';
-            if (/contact|ဆက်သွယ်|email|telegram.*naju|facebook|tiktok/.test(q)) ans = ABOUT.contact;
-            else if (/စတင်|တည်ထောင်|ဘယ်တုန်|start|begin|2025/.test(q)) ans = ABOUT.start;
-            else if (/ဖန်တီး|creator|owner|admin|တစ်ကိုယ်/.test(q)) ans = ABOUT.creator;
-            else if (/mission|ရည်ရွယ်|ဘာလုပ်/.test(q)) ans = ABOUT.mission;
-            else ans = `${ABOUT.channel}\n\n${ABOUT.start}\n\n${ABOUT.creator}`;
-            return { text: ans };
-        }
-
-        // Count
-        if (intent === 'count') {
-            return { text: `NaJu Anime မှာ အခု <strong>Anime ${animeData.length} ကား</strong> ရှိပါတယ်။ ဆက်လက်တိုးချဲ့နေပါတယ် 📺` };
-        }
-
-        // Latest
-        if (intent === 'latest') {
-            const animes = getLatestAnimes(4);
-            return {
-                text: `နောက်ဆုံးထည့်ထားတဲ့ Anime ${animes.length} ကားကတော့ —`,
-                animes,
-                quickReplies: ['Romance ကား ရှာပေး', 'Action ကား ရှာပေး', 'Random recommend']
-            };
-        }
-
-        // Recommend
-        if (intent === 'recommend') {
-            const animes = getRandomAnimes(3);
-            return {
-                text: `ဒီ Anime ${animes.length} ကား ကြည့်ကြည့်ပါ 🎯`,
-                animes,
-                quickReplies: ['နောက်ထပ် recommend', 'Romance ကြိုက်တယ်', 'Action ကြိုက်တယ်']
-            };
-        }
-
-        // Genre
-        if (intent && intent.type === 'genre') {
-            const animes = getGenreAnimes(intent.genre);
-            const genreNames = { action:'Action', romance:'Romance', drama:'Drama', comedy:'Comedy', fantasy:'Fantasy', psychological:'Psychological', slice:'Slice of Life', bl:'BL' };
-            if (!animes.length) return { text: `${genreNames[intent.genre]} Genre ရှာမတွေ့ပါ။ ကားနာမည် ရိုက်ပြီး ရှာကြည့်ပါ။` };
-            return {
-                text: `${genreNames[intent.genre]} Anime တွေကတော့ —`,
-                animes,
-                quickReplies: ['နောက်ထပ် ရှာပေး', 'Random recommend', 'About NaJu']
-            };
-        }
-
-        // Search
-        const animes = searchAnime(query);
-        if (animes.length) {
-            return {
-                text: animes.length === 1
-                    ? `"${animes[0].title}" ကို တွေ့ပါတယ် 🎉`
-                    : `"${query}" နဲ့ ဆိုင်တဲ့ Anime ${animes.length} ကား တွေ့ပါတယ် —`,
-                animes,
-                quickReplies: ['Review ဖတ်ချင်တယ်', 'နောက်ထပ် ရှာပေး', 'Random recommend']
-            };
-        }
-
-        // No results
-        return {
-            text: `"${query}" နဲ့ ဆိုင်တဲ့ Anime မတွေ့ဘူး 😔\n\nတိတိကျကျ ကားနာမည် ရိုက်ပြီး ရှာကြည့်ပါ၊ ဒါမှမဟုတ် genre (Action, Romance...) ပေးကြည့်ပါ။`,
-            quickReplies: ['Action ကားတွေ', 'Romance ကားတွေ', 'Random recommend', 'NaJu အကြောင်း']
-        };
-    }
-
-    // ─────────────────────────────────────────
-    // UI Functions
-    // ─────────────────────────────────────────
-    const messagesEl = document.getElementById('messages');
-    const inputEl = document.getElementById('userInput');
-
-    function scrollBottom() {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-
-    function addMessage(html, isUser) {
-        const row = document.createElement('div');
-        row.className = `msg-row ${isUser ? 'user' : ''}`;
-        if (isUser) {
-            row.innerHTML = `
-                <div class="msg-avatar user">👤</div>
-                <div class="bubble user">${html}</div>`;
-        } else {
-            row.innerHTML = `
-                <div class="msg-avatar bot">🤖</div>
-                <div class="bubble bot">${html}</div>`;
-        }
-        messagesEl.appendChild(row);
-        scrollBottom();
-        return row;
-    }
-
-    function showTyping() {
-        const row = document.createElement('div');
-        row.className = 'msg-row';
-        row.id = 'typing';
-        row.innerHTML = `
-            <div class="msg-avatar bot">🤖</div>
-            <div class="typing-bubble">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>`;
-        messagesEl.appendChild(row);
-        scrollBottom();
-    }
-
-    function removeTyping() {
-        const t = document.getElementById('typing');
-        if (t) t.remove();
-    }
-
-    function renderBotResponse(response) {
-        let html = `<div>${response.text.replace(/\n/g,'<br>')}</div>`;
-
-        if (response.animes && response.animes.length) {
-            html += response.animes.map(buildAnimeCard).join('');
-        }
-
-        if (response.quickReplies && response.quickReplies.length) {
-            html += `<div class="quick-btns">` +
-                response.quickReplies.map(r =>
-                    `<button class="quick-btn" onclick="handleQuick('${r}')">${r}</button>`
-                ).join('') +
-            `</div>`;
-        }
-
-        addMessage(html, false);
-    }
-
-    function handleQuick(text) {
-        addMessage(text, true);
-        processQuery(text);
-    }
-
-    function processQuery(query) {
-        showTyping();
-        const delay = 400 + Math.random() * 400;
-        setTimeout(() => {
-            removeTyping();
-            const response = generateResponse(query);
-            renderBotResponse(response);
-        }, delay);
-    }
-
-    function sendMessage() {
-        const text = inputEl.value.trim();
-        if (!text) return;
-        addMessage(text, true);
-        inputEl.value = '';
-        inputEl.style.height = 'auto';
-        processQuery(text);
-    }
-
-    // Auto-resize textarea
-    inputEl.addEventListener('input', () => {
-        inputEl.style.height = 'auto';
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+window.addEventListener('load',()=>{
+  document.getElementById('statusTxt').textContent=`Anime ${animeData.length} ကား သိပါတယ်`;
+  setTimeout(()=>{
+    render({
+      text:`မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>Anime ရှာပေးတာ၊ Genre/Mood Suggest ပေးတာ၊ AI Review Summary ရေးပေးတာ ကူညီနိုင်ပါတယ်။`,
+      qr:['Random Anime recommend','နောက်ဆုံးထွက် Anime','Romance ကြိုက်တယ်','Action ကြိုက်တယ်','Psychological ကား'],
     });
-
-    inputEl.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    // ─────────────────────────────────────────
-    // Initial welcome message
-    // ─────────────────────────────────────────
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            renderBotResponse({
-                text: `မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI Assistant</strong> ပါ 🎌<br><br>NaJu Telegram Channel ထဲက <strong>Anime ${animeData.length} ကား</strong>ကို အကုန်သိပါတယ်။ Anime ရှာပေးတာ၊ Recommend ပေးတာ၊ Review ဖတ်ပေးတာ ကူညီပါမယ်။`,
-                quickReplies: [
-                    'Random Anime recommend ပေး',
-                    'နောက်ဆုံးထွက် Anime',
-                    'Romance ကား ရှာပေး',
-                    'Action ကား ရှာပေး',
-                    'NaJu Channel အကြောင်း'
-                ]
-            });
-        }, 300);
-    });
-    </script>
+  },300);
+});
+</script>
 </body>
 </html>
