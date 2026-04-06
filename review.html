@@ -5,135 +5,411 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review - NaJu Anime</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
 
-    <header class="bg-gray-800 shadow-lg border-b border-gray-700 py-4 sticky top-0 z-50">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <a href="index.html" class="text-blue-500 hover:text-white transition flex items-center gap-2 font-bold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        :root {
+            --blue: #3b82f6;
+            --blue-dark: #1d4ed8;
+            --bg: #0f1117;
+            --bg2: #161b27;
+            --bg3: #1e2535;
+            --border: rgba(255,255,255,0.07);
+            --text: #e2e8f0;
+            --muted: #64748b;
+        }
+
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
+
+        /* Header */
+        header {
+            background: rgba(15,17,23,0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+            padding: 6px 0;
+        }
+        .back-btn:hover { color: var(--blue); }
+        .logo-naju { color: var(--blue); }
+        .logo-anime { color: white; }
+
+        /* Poster */
+        .poster-wrap {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .poster-wrap img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Year badge */
+        .year-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59,130,246,0.12);
+            border: 1px solid rgba(59,130,246,0.25);
+            color: #60a5fa;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 99px;
+            letter-spacing: 0.04em;
+        }
+
+        /* Anime title */
+        .anime-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+        @media (max-width: 640px) { .anime-title { font-size: 22px; } }
+
+        /* Review box */
+        .review-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .review-box h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #60a5fa;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .review-text {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.85;
+            text-align: justify;
+            white-space: pre-line;
+        }
+
+        /* Watch button */
+        .watch-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: var(--blue);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+        }
+        .watch-btn:hover {
+            background: var(--blue-dark);
+            box-shadow: 0 6px 28px rgba(59,130,246,0.4);
+            transform: translateY(-1px);
+        }
+        .watch-btn:active { transform: scale(0.98); }
+
+        /* Feedback form */
+        .form-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .form-input::placeholder, .form-textarea::placeholder { color: #475569; }
+        .form-textarea { resize: vertical; min-height: 110px; }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--blue);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .submit-btn:hover { background: var(--blue-dark); }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .success-msg {
+            display: none;
+            text-align: center;
+            color: #4ade80;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px;
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        /* Loading */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            gap: 16px;
+            color: var(--muted);
+        }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Error */
+        .error-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #f87171;
+        }
+
+        /* Fade in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.4s ease both; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="index.html" class="back-btn">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
                 နောက်သို့
             </a>
-            <h1 class="text-xl font-black tracking-wider text-gray-300 uppercase">
-                NaJu<span class="text-white">Anime</span> Review
-            </h1>
-            <div class="w-16"></div> </div>
+
+            <a href="index.html" class="text-lg font-black tracking-tight">
+                <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
+                <span style="color: var(--muted); font-weight: 600; font-size: 13px; margin-left: 4px;">Review</span>
+            </a>
+
+            <div style="width: 80px;"></div>
+        </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl" id="reviewContainer">
-        <div class="text-center text-gray-400 py-20">Loading...</div>
+    <!-- Review Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8" id="reviewContainer">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <span>Loading...</span>
+        </div>
     </main>
 
-    <section class="container mx-auto px-4 pb-16 max-w-4xl">
-        <div class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-xl border border-gray-700">
-            <h2 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
-                📝 အကြံပြုရန် / လင့်ခ်သေ တိုင်ကြားရန်
+    <!-- Feedback Form -->
+    <section class="max-w-4xl mx-auto px-4 pb-16" id="feedbackSection" style="display:none;">
+        <div class="form-card">
+            <h2 style="font-size: 16px; font-weight: 700; color: #60a5fa; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                အကြံပြုရန် / လင့်ခ်သေ တိုင်ကြားရန်
             </h2>
-            <p class="text-sm text-gray-400 mb-6">စာတန်းထိုး အမှားအယွင်းများ၊ လင့်ခ်သေနေတာများရှိပါက အောက်တွင် အကြောင်းကြားပေးနိုင်ပါသည်။</p>
-            
-            <form id="feedbackForm" class="space-y-4">
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">
+                စာတန်းထိုး အမှားများ၊ လင့်ခ်သေနေတာများ ရှိပါက အောက်တွင် အကြောင်းကြားနိုင်ပါသည်။
+            </p>
+
+            <form id="feedbackForm">
                 <input type="hidden" id="animeId" name="animeId">
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">အမည် (သို့မဟုတ်) Telegram နာမည်</label>
-                    <input type="text" id="userName" name="name" required class="w-full bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+
+                <div style="margin-bottom: 16px;">
+                    <label class="form-label">အမည် (သို့မဟုတ်) Telegram နာမည်</label>
+                    <input type="text" id="userName" name="name" required class="form-input" placeholder="မင်းနာမည်...">
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">အကြောင်းအရာ</label>
-                    <textarea id="userFeedback" name="feedback" rows="4" required placeholder="ဥပမာ - အပိုင်း ၅ လင့်ခ်ပျက်နေပါတယ်..." class="w-full bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"></textarea>
+
+                <div style="margin-bottom: 20px;">
+                    <label class="form-label">အကြောင်းအရာ</label>
+                    <textarea id="userFeedback" name="feedback" required class="form-textarea" placeholder="ဥပမာ - အပိုင်း ၅ လင့်ခ်ပျက်နေပါတယ်..."></textarea>
                 </div>
-                
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
-                    <span>ပေးပို့မည်</span>
+
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    ပေးပို့မည်
                 </button>
-                
-                <p id="successMsg" class="hidden text-green-400 text-center font-semibold mt-4">✓ ကျေးဇူးတင်ပါသည်! သင့်အကြံပြုချက်ကို လက်ခံရရှိပါသည်။</p>
+
+                <div class="success-msg" id="successMsg">
+                    ✓ ကျေးဇူးတင်ပါသည်! သင့်အကြံပြုချက်ကို လက်ခံရရှိပါသည်။
+                </div>
             </form>
         </div>
     </section>
 
     <script src="data.js"></script>
     <script>
-        // ၁။ URL ထဲက id ကို လှမ်းယူခြင်း (ဥပမာ review.html?id=zenshu ဆိုရင် 'zenshu' ကို ယူမည်)
         const urlParams = new URLSearchParams(window.location.search);
         const currentAnimeId = urlParams.get('id');
-
-        // ၂။ data.js ထဲက animeData အားလုံးထဲမှာ အဲဒီ id နဲ့တူတဲ့ ဇာတ်ကားကို ရှာခြင်း
         const anime = animeData.find(a => a.id === currentAnimeId);
-        
+
         const container = document.getElementById('reviewContainer');
-        const formAnimeIdInput = document.getElementById('animeId');
+        const feedbackSection = document.getElementById('feedbackSection');
 
-        if(anime) {
-            // ဖောင်ထဲကို ဘယ်ဇာတ်ကားလဲဆိုတာ ထည့်ပေးထားခြင်း
-            formAnimeIdInput.value = anime.title;
+        if (anime) {
+            document.title = `${anime.title} - NaJu Anime Review`;
+            document.getElementById('animeId').value = anime.title;
+            feedbackSection.style.display = 'block';
 
-            // Review စာမျက်နှာကို Design ဖန်တီးပြီး ပြသခြင်း
             container.innerHTML = `
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="w-full md:w-1/3 flex-shrink-0">
-                        <img src="${anime.image}" alt="${anime.title}" class="w-full rounded-xl shadow-2xl border border-gray-700">
-                    </div>
-                    
-                    <div class="w-full md:w-2/3 flex flex-col">
-                        <span class="inline-block bg-blue-600/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full mb-4 w-max border border-blue-500/30">
-                            Year: ${anime.year}
-                        </span>
-                        <h2 class="text-3xl md:text-4xl font-black text-white mb-6 leading-tight">${anime.title}</h2>
-                        
-                        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-8 flex-grow">
-                            <h3 class="text-lg font-bold text-gray-200 mb-3 border-b border-gray-700 pb-2">ဇာတ်လမ်းအကျဉ်း</h3>
-                            <p class="text-gray-300 leading-relaxed text-justify">
-                                ${anime.review ? anime.review : "ယခု ဇာတ်ကားအတွက် ဇာတ်လမ်းအကျဉ်း (Review) ရေးသားထားခြင်း မရှိသေးပါ။ Telegram Channel တွင် ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။"}
-                            </p>
+                <div class="fade-in">
+                    <!-- Desktop: side by side | Mobile: stacked -->
+                    <div style="display: flex; flex-direction: column; gap: 28px;">
+
+                        <!-- Top: poster + info -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                            <!-- Poster + meta row -->
+                            <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+
+                                <!-- Poster -->
+                                <div class="poster-wrap" style="width: 140px; flex-shrink: 0;">
+                                    <img src="${anime.image}" alt="${anime.title}">
+                                </div>
+
+                                <!-- Meta -->
+                                <div style="flex: 1; min-width: 180px; padding-top: 4px;">
+                                    <span class="year-pill" style="margin-bottom: 14px;">
+                                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                        ${anime.year}
+                                    </span>
+
+                                    <h1 class="anime-title" style="margin: 12px 0 20px;">${anime.title}</h1>
+
+                                    <a href="${anime.link}" target="_blank" class="watch-btn">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                        Telegram တွင် ကြည့်ရှုရန်
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <a href="${anime.link}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-500/30 text-lg">
-                            ▶ Telegram တွင် ယခုပဲ ကြည့်ရှုရန်
+
+                        <!-- Review text -->
+                        <div class="review-box">
+                            <h3>ဇာတ်လမ်းအကျဉ်း</h3>
+                            <p class="review-text">${anime.review ? anime.review : "ယခု ဇာတ်ကားအတွက် ဇာတ်လမ်းအကျဉ်း မရေးသားထားသေးပါ။ Telegram Channel တွင် ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။"}</p>
+                        </div>
+
+                        <!-- Bottom watch button (mobile friendly) -->
+                        <a href="${anime.link}" target="_blank" class="watch-btn" style="max-width: 400px; margin: 0 auto;">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                            Telegram တွင် ယခုပဲ ကြည့်ရှုရန်
                         </a>
                     </div>
                 </div>
             `;
         } else {
-            // ဇာတ်ကား ရှာမတွေ့ရင် ပြမည့်စာ
-            container.innerHTML = `<div class="text-center text-red-400 py-20 text-xl font-bold">⚠️ ဇာတ်ကားရှာမတွေ့ပါ! လင့်ခ်မှားယွင်းနေပါသည်။</div>`;
+            container.innerHTML = `
+                <div class="error-state">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 16px; color: #f87171;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <p style="font-size: 16px; font-weight: 700; color: #f87171;">ဇာတ်ကားရှာမတွေ့ပါ</p>
+                    <a href="index.html" style="margin-top: 16px; display: inline-flex; align-items: center; gap: 6px; color: #3b82f6; font-size: 14px; font-weight: 600; text-decoration: none;">
+                        ← ပင်မစာမျက်နှာသို့ ပြန်သွားရန်
+                    </a>
+                </div>
+            `;
         }
 
-        // ၃။ Google Sheets သို့ Data ပို့သည့် အပိုင်း
+        // Feedback form
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmYLn31_O2ki3pOajB7NQlYmAlBfkaKt_T6hl_rY4Vk8LK-_e2mmTGyNhh09kfCq0/exec";
         const form = document.getElementById('feedbackForm');
         const submitBtn = document.getElementById('submitBtn');
         const successMsg = document.getElementById('successMsg');
 
-        // 👇👇 ဒီနေရာမှာ ခုနက Copy ကူးလာတဲ့ Apps Script URL အရှည်ကြီးကို အစားထိုးပါ 👇👇
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmYLn31_O2ki3pOajB7NQlYmAlBfkaKt_T6hl_rY4Vk8LK-_e2mmTGyNhh09kfCq0/exec"; 
+        if (form) {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg width="16" height="16" style="animation: spin 0.8s linear infinite;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    ပေးပို့နေပါသည်...
+                `;
 
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            submitBtn.innerHTML = "ပေးပို့နေပါသည်... ⏳";
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const formData = new FormData(form);
-
-            fetch(SCRIPT_URL, { method: 'POST', body: formData })
-                .then(response => {
-                    successMsg.classList.remove('hidden');
-                    form.reset(); // ဖောင်ကို ပြန်ရှင်းမယ်
-                    submitBtn.innerHTML = "ပေးပို့မည်";
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    
-                    // ၃ စက္ကန့်နေရင် အောင်မြင်ကြောင်းစာကို ပြန်ဖျောက်မယ်
-                    setTimeout(() => successMsg.classList.add('hidden'), 3000);
-                })
-                .catch(error => {
-                    alert("အင်တာနက် ချိတ်ဆက်မှု အဆင်မပြေပါ။ ပြန်လည်ကြိုးစားကြည့်ပါ။");
-                    submitBtn.innerHTML = "ပေးပို့မည်";
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                });
-        });
+                fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form) })
+                    .then(() => {
+                        successMsg.style.display = 'block';
+                        form.reset();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> ပေးပို့မည်`;
+                        setTimeout(() => successMsg.style.display = 'none', 4000);
+                    })
+                    .catch(() => {
+                        alert("အင်တာနက် ချိတ်ဆက်မှု အဆင်မပြေပါ။ ပြန်ကြိုးစားပါ။");
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> ပေးပို့မည်`;
+                    });
+            });
+        }
     </script>
 </body>
 </html>
