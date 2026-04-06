@@ -298,6 +298,15 @@ async function deleteAnime(id, title) {
 async function migrateData() {
   let raw = document.getElementById('migrateData').value.trim();
 
+  // ၁။ မျက်စိနဲ့မမြင်ရတဲ့ Non-breaking spaces (&nbsp;) တွေကို ရိုးရိုး Space အဖြစ် အလိုအလျောက် ပြောင်းမယ်
+  raw = raw.replace(/\u00A0/g, ' ');
+
+  // ၂။ "" (Double Quotes) ကြားထဲမှာ Enter ခေါက်ပြီး အောက်ဆင်းထားတဲ့ စာကြောင်းတွေကို 
+  // JSON က လက်ခံနိုင်တဲ့ \n အဖြစ် အလိုအလျောက် ပြောင်းပေးမယ်
+  raw = raw.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, function(match) {
+      return match.replace(/\r?\n/g, '\\n');
+  });
+
   let parsed;
   try {
     // Regex မဟုတ်ဘဲ JS ကိုယ်တိုင် parse လုပ်
