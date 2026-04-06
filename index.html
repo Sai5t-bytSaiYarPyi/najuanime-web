@@ -524,8 +524,80 @@
         </div>
     </nav>
 
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script>
+// Worker URL
+const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+
+// KV ကနေ anime data ဆွဲ
+async function loadFromKV() {
+  try {
+    const r = await fetch(WORKER_URL + '/anime');
+    const data = await r.json();
+    window.animeData = data;
+    displayAnimes(data);
+    setupSearch(data);
+  } catch (e) {
+    document.getElementById('anime-grid').innerHTML = '<p style="color:#f87171;padding:20px">Loading error: ' + e.message + '</p>';
+  }
+}
+
+function displayAnimes(animes) {
+  const grid = document.getElementById('anime-grid');
+  const countEl = document.getElementById('movieCount');
+  grid.innerHTML = '';
+  countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
+  if (!animes.length) {
+    grid.innerHTML = `<div class="empty-state"><p style="color:#64748b">ဇာတ်ကား မတွေ့ပါ</p></div>`;
+    return;
+  }
+  animes.forEach((anime, index) => {
+    const card = document.createElement('div');
+    card.className = 'anime-card';
+    card.style.animationDelay = `${Math.min(index,20)*30}ms`;
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <img src="${anime.image}" alt="${anime.title}" loading="lazy">
+        <div class="card-overlay"></div>
+        <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
+        <span class="year-badge">${anime.year}</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title" title="${anime.title}">${anime.title}</p>
+        <div class="card-actions">
+          <a href="review.html?id=${anime.id}" class="btn-review">
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Review
+          </a>
+          <a href="${anime.link}" target="_blank" class="btn-watch">
+            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            ကြည့်ရန်
+          </a>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function setupSearch(allData) {
+  function handle(e) {
+    const term = e.target.value.toLowerCase();
+    const sDesktop = document.getElementById('searchInputDesktop');
+    const sMobile = document.getElementById('searchInputMobile');
+    if (sDesktop && e.target !== sDesktop) sDesktop.value = e.target.value;
+    if (sMobile && e.target !== sMobile) sMobile.value = e.target.value;
+    displayAnimes(allData.filter(a => a.title.toLowerCase().includes(term) || a.year.includes(term)));
+  }
+  document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
+  document.getElementById('searchInputMobile')?.addEventListener('input', handle);
+}
+
+// Mobile menu
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+  document.getElementById('mobileDrawer')?.classList.toggle('hidden');
+});
+
+loadFromKV();
+</script>
 
     <script>
         // Mobile menu toggle
