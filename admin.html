@@ -14,15 +14,42 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 input,textarea,select{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:10px 14px;width:100%;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 input:focus,textarea:focus{border-color:var(--blue)}
 input::placeholder,textarea::placeholder{color:var(--muted)}
+input[readonly]{opacity:.6;cursor:not-allowed}
 textarea{resize:vertical;min-height:80px}
 .btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:none}
 .btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
 .btn-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}.btn-red:hover{background:rgba(239,68,68,.2)}
 .btn-gray{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-gray:hover{background:#263248;color:white}
 .btn-green{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.2)}.btn-green:hover{background:rgba(74,222,128,.2)}
+.btn-purple{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}.btn-purple:hover{background:rgba(168,85,247,.2)}
+.btn-orange{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.2)}.btn-orange:hover{background:rgba(251,146,60,.2)}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
 .pill{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
 .label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+
+/* Genre Tags */
+.genre-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+.genre-tag .remove{cursor:pointer;opacity:.6;font-size:13px;line-height:1}.genre-tag .remove:hover{opacity:1;color:#f87171}
+.genre-input-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;min-height:44px;cursor:text;transition:border-color .2s}
+.genre-input-wrap:focus-within{border-color:var(--blue)}
+.genre-text-input{background:none;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;min-width:100px;flex:1;padding:2px 4px}
+.genre-text-input::placeholder{color:var(--muted)}
+
+/* Fetch Result Badge */
+.fetch-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.fetch-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.fetch-err{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.fetch-loading{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+
+/* Auto-fetch Box */
+.fetch-box{background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.12);border-radius:12px;padding:14px;margin-bottom:4px}
+.fetch-row{display:flex;gap:8px;align-items:center}
+.fetch-title-input{flex:1}
+
+/* Stat fields */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-item label{font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:5px;display:block}
+.stat-item input{font-size:13px}
 
 /* Image Upload Zone */
 .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
@@ -31,10 +58,13 @@ textarea{resize:vertical;min-height:80px}
 .upload-preview{width:80px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:0 auto 10px;display:block}
 .upload-progress{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:10px}
 .upload-progress-bar{height:100%;background:var(--blue);border-radius:99px;transition:width .3s;width:0%}
-.github-token-row{display:flex;gap:8px;align-items:center}
 .token-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
 .token-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
 .token-missing{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+
+/* Spin animation */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
 </style>
 </head>
 <body>
@@ -50,7 +80,6 @@ textarea{resize:vertical;min-height:80px}
     <label class="label">Admin Password</label>
     <input type="password" id="tokenInput" placeholder="Admin password ထည့်ပါ..." style="margin-bottom:16px">
 
-    <!-- GitHub Token Section -->
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="font-size:12px;font-weight:700;color:#60a5fa">📸 GitHub Image Upload</span>
@@ -61,7 +90,7 @@ textarea{resize:vertical;min-height:80px}
         <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="flex:1">
         <button class="btn btn-green" onclick="saveGhToken()" style="padding:10px 14px;white-space:nowrap">သိမ်း</button>
       </div>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px">Browser မှာပဲ သိမ်းသည် (localStorage) — တစ်ကြိမ်ပဲ ထည့်ရမည်</p>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Browser မှာပဲ သိမ်းသည် (localStorage)</p>
     </div>
 
     <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="login()">
@@ -74,7 +103,6 @@ textarea{resize:vertical;min-height:80px}
 
 <!-- Main Panel -->
 <div id="panel" style="display:none">
-  <!-- Header -->
   <header style="background:rgba(15,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px">
     <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
@@ -109,12 +137,30 @@ textarea{resize:vertical;min-height:80px}
     <div id="tabAddContent" style="display:none">
       <div class="card" style="max-width:700px">
         <h2 style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:20px">Anime အသစ်ထည့်ရန်</h2>
+
+        <!-- ══ AUTO-FETCH SECTION ══ -->
+        <div class="fetch-box" style="margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:700;color:#c084fc">🔍 MAL / AniList မှ Auto-fetch</span>
+            <span id="addFetchBadge" style="display:none" class="fetch-badge"></span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Anime title ရိုက်ပြီး fetch နှိပ်လိုက်ရင် Genre, Year, Episodes, Score တွေ အလိုအလျောက် ဖြည့်ပေးမည်</p>
+          <div class="fetch-row">
+            <input type="text" id="addFetchTitle" class="fetch-title-input" placeholder="Anime title (English) ထည့်ပါ... ဥပမာ: Fullmetal Alchemist">
+            <button class="btn btn-purple" onclick="autoFetch('add')" id="addFetchBtn" style="white-space:nowrap;padding:10px 16px">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Fetch
+            </button>
+          </div>
+          <div id="addFetchResult" style="display:none;margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:12px;color:#94a3b8"></div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div><label class="label">ID (English, no space)</label><input type="text" id="addId" placeholder="SnowballEarth"></div>
           <div><label class="label">Year</label><input type="text" id="addYear" placeholder="2026"></div>
           <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="addTitle" placeholder="Snowball Earth"></div>
 
-          <!-- Image Upload Section -->
+          <!-- Image Upload -->
           <div style="grid-column:span 2">
             <label class="label">အပုံ (GitHub သို့ Upload)</label>
             <div class="upload-zone" id="addUploadZone" ondragover="handleDrag(event,'addUploadZone')" ondragleave="handleDragLeave('addUploadZone')" ondrop="handleDrop(event,'add')">
@@ -129,15 +175,35 @@ textarea{resize:vertical;min-height:80px}
                 <div class="upload-progress-bar" id="addUploadProgressBar"></div>
               </div>
             </div>
-            <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
-              <label class="label" style="margin:0;white-space:nowrap">သို့မဟုတ် path ကိုယ်တိုင်ထည့်</label>
-            </div>
-            <input type="text" id="addImage" placeholder="./images/Snowball Earth.jpg" style="margin-top:6px">
+            <input type="text" id="addImage" placeholder="./images/SnowballEarth.jpg" style="margin-top:8px">
             <p id="addUploadMsg" style="font-size:12px;margin-top:6px;display:none"></p>
           </div>
 
+          <!-- Genres -->
+          <div style="grid-column:span 2">
+            <label class="label">Genres / Tags <span style="color:#475569;font-weight:400">(Enter နှိပ်ပါ သို့မဟုတ် comma ခြားပါ)</span></label>
+            <div class="genre-input-wrap" id="addGenreWrap" onclick="document.getElementById('addGenreText').focus()">
+              <input type="text" id="addGenreText" class="genre-text-input" placeholder="Genre ထည့်ပါ... ဥပမာ: Action">
+            </div>
+            <input type="hidden" id="addGenres">
+          </div>
+
+          <!-- Stats Row -->
+          <div style="grid-column:span 2">
+            <div class="stat-grid">
+              <div class="stat-item">
+                <label>Episodes</label>
+                <input type="text" id="addEpisodes" placeholder="12">
+              </div>
+              <div class="stat-item">
+                <label>MAL Score</label>
+                <input type="text" id="addScore" placeholder="8.5">
+              </div>
+            </div>
+          </div>
+
           <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="addLink" placeholder="https://t.me/..."></div>
-          <div style="grid-column:span 2"><label class="label">Review</label><textarea id="addReview" style="min-height:160px" placeholder="ဇာတ်ကားအကြောင်း..."></textarea></div>
+          <div style="grid-column:span 2"><label class="label">Review (မြန်မာဘာသာ)</label><textarea id="addReview" style="min-height:160px" placeholder="ဇာတ်ကားအကြောင်း..."></textarea></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:16px">
           <button class="btn btn-blue" onclick="addAnime()">
@@ -158,6 +224,18 @@ textarea{resize:vertical;min-height:80px}
           ဒီနေရာမှာ data.js ထဲက <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">animeData</code> array ကို paste လုပ်ပြီး KV ထဲကို တစ်ကြိမ်တည်း import လုပ်နိုင်သည်။<br>
           ⚠️ လက်ရှိ KV data အကုန် overwrite ဖြစ်မည်!
         </p>
+
+        <!-- Bulk Genre Fetch -->
+        <div class="fetch-box" style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px">🔍 Migrate ပြီးနောက် Bulk Genre Fetch</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Import ပြီးတဲ့နောက် ဒီခလုတ်နှိပ်ရင် ရှိတဲ့ anime တိုင်းအတွက် Jikan/AniList မှ genres ကို auto-fetch လုပ်ပြီး KV ကို update မည်</p>
+          <button class="btn btn-purple" onclick="bulkFetchGenres()" id="bulkFetchBtn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Bulk Fetch Genres
+          </button>
+          <p id="bulkFetchMsg" style="font-size:12px;margin-top:8px;display:none;color:#60a5fa"></p>
+        </div>
+
         <label class="label">animeData array (JSON format)</label>
         <textarea id="migrateData" style="min-height:200px;font-size:12px" placeholder='[{"id":"SnowballEarth","title":"Snowball Earth",...}]'></textarea>
         <button class="btn btn-blue" style="margin-top:12px" onclick="migrateData()">
@@ -189,12 +267,11 @@ textarea{resize:vertical;min-height:80px}
         <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
           <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">GitHub Config</h3>
           <div style="display:grid;gap:10px">
-            <div><label class="label">GitHub Username</label><input type="text" id="ghUsername" value="Sai5t-bytSaiYarPyi" readonly style="opacity:.6"></div>
-            <div><label class="label">Repository</label><input type="text" id="ghRepo" value="najuanime-web" readonly style="opacity:.6"></div>
-            <div><label class="label">Branch</label><input type="text" id="ghBranch" value="main" readonly style="opacity:.6"></div>
-            <div><label class="label">Images Folder</label><input type="text" id="ghFolder" value="images" readonly style="opacity:.6"></div>
+            <div><label class="label">GitHub Username</label><input type="text" value="Sai5t-bytSaiYarPyi" readonly></div>
+            <div><label class="label">Repository</label><input type="text" value="najuanime-web" readonly></div>
+            <div><label class="label">Branch</label><input type="text" value="main" readonly></div>
+            <div><label class="label">Images Folder</label><input type="text" value="images" readonly></div>
           </div>
-          <p style="font-size:12px;color:var(--muted);margin-top:12px">Config ပြောင်းချင်ရင် admin.html code ထဲမှာ တိုက်ရိုက် ပြင်ပါ။</p>
         </div>
       </div>
     </div>
@@ -210,12 +287,29 @@ textarea{resize:vertical;min-height:80px}
         <h2 style="font-size:16px;font-weight:700;color:var(--blue);flex:1">Anime ပြင်ရန်</h2>
         <button class="btn btn-gray" onclick="closeEdit()" style="padding:6px 12px">✕</button>
       </div>
+
+      <!-- Edit Auto-fetch -->
+      <div class="fetch-box" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:700;color:#c084fc">🔍 Auto-fetch (Genres/Stats ပြင်ချင်ရင်)</span>
+          <span id="editFetchBadge" style="display:none" class="fetch-badge"></span>
+        </div>
+        <div class="fetch-row">
+          <input type="text" id="editFetchTitle" class="fetch-title-input" placeholder="Anime title (English)...">
+          <button class="btn btn-purple" onclick="autoFetch('edit')" id="editFetchBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Fetch
+          </button>
+        </div>
+        <div id="editFetchResult" style="display:none;margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:12px;color:#94a3b8"></div>
+      </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div><label class="label">ID</label><input type="text" id="editId" disabled style="opacity:.5"></div>
         <div><label class="label">Year</label><input type="text" id="editYear"></div>
         <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="editTitle"></div>
 
-        <!-- Edit Image Upload -->
+        <!-- Edit Image -->
         <div style="grid-column:span 2">
           <label class="label">အပုံ (GitHub သို့ Upload)</label>
           <div class="upload-zone" id="editUploadZone" ondragover="handleDrag(event,'editUploadZone')" ondragleave="handleDragLeave('editUploadZone')" ondrop="handleDrop(event,'edit')">
@@ -223,7 +317,7 @@ textarea{resize:vertical;min-height:80px}
             <img id="editImagePreview" class="upload-preview" style="display:none">
             <div id="editUploadPlaceholder">
               <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 6px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              <p style="font-size:12px;color:var(--muted)">အပုံသစ် ရွေးပါ (မရွေးပဲ ထားလည်း ရသည်)</p>
+              <p style="font-size:12px;color:var(--muted)">အပုံသစ် ရွေးပါ</p>
             </div>
             <div class="upload-progress" id="editUploadProgress" style="display:none">
               <div class="upload-progress-bar" id="editUploadProgressBar"></div>
@@ -232,6 +326,23 @@ textarea{resize:vertical;min-height:80px}
           <p id="editUploadMsg" style="font-size:12px;margin-top:6px;display:none"></p>
           <label class="label" style="margin-top:10px">Image path</label>
           <input type="text" id="editImage">
+        </div>
+
+        <!-- Edit Genres -->
+        <div style="grid-column:span 2">
+          <label class="label">Genres / Tags</label>
+          <div class="genre-input-wrap" id="editGenreWrap" onclick="document.getElementById('editGenreText').focus()">
+            <input type="text" id="editGenreText" class="genre-text-input" placeholder="Genre ထည့်ပါ...">
+          </div>
+          <input type="hidden" id="editGenres">
+        </div>
+
+        <!-- Edit Stats -->
+        <div style="grid-column:span 2">
+          <div class="stat-grid">
+            <div class="stat-item"><label>Episodes</label><input type="text" id="editEpisodes" placeholder="12"></div>
+            <div class="stat-item"><label>MAL Score</label><input type="text" id="editScore" placeholder="8.5"></div>
+          </div>
         </div>
 
         <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="editLink"></div>
@@ -255,271 +366,351 @@ const GH_REPO   = 'najuanime-web';
 const GH_BRANCH = 'main';
 const GH_FOLDER = 'images';
 
-let TOKEN      = '';
-let allAnimes  = [];
-let editingId  = '';
+// Jikan & AniList
+const JIKAN_URL   = 'https://api.jikan.moe/v4';
+const ANILIST_URL = 'https://graphql.anilist.co';
 
-// ── GitHub Token (localStorage) ──────────────────────
+let TOKEN     = '';
+let allAnimes = [];
+let editingId = '';
+
+// ══ Genre Tag UI ══════════════════════════════════
+function initGenreInput(context) {
+  const wrap    = document.getElementById(`${context}GenreWrap`);
+  const textIn  = document.getElementById(`${context}GenreText`);
+  const hiddenIn = document.getElementById(`${context}Genres`);
+
+  function getTags() {
+    return hiddenIn.value ? hiddenIn.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  }
+  function setTags(arr) {
+    hiddenIn.value = arr.join(',');
+    renderTags();
+  }
+  function renderTags() {
+    // Remove existing tag spans
+    wrap.querySelectorAll('.genre-tag').forEach(el => el.remove());
+    getTags().forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'genre-tag';
+      span.innerHTML = `${tag}<span class="remove" data-tag="${tag}">×</span>`;
+      span.querySelector('.remove').onclick = e => {
+        e.stopPropagation();
+        setTags(getTags().filter(t => t !== tag));
+      };
+      wrap.insertBefore(span, textIn);
+    });
+  }
+  function addTag(val) {
+    const tags = val.split(',').map(s=>s.trim()).filter(Boolean);
+    const existing = getTags();
+    const merged = [...new Set([...existing, ...tags])];
+    setTags(merged);
+    textIn.value = '';
+  }
+  textIn.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ',') && textIn.value.trim()) {
+      e.preventDefault();
+      addTag(textIn.value);
+    }
+    if (e.key === 'Backspace' && !textIn.value) {
+      const tags = getTags();
+      if (tags.length) setTags(tags.slice(0,-1));
+    }
+  });
+  textIn.addEventListener('blur', () => {
+    if (textIn.value.trim()) addTag(textIn.value);
+  });
+  // expose setTags for auto-fetch
+  window[`${context}GenreSet`] = setTags;
+}
+
+// ══ Jikan API (MyAnimeList) ═══════════════════════
+async function fetchJikan(title) {
+  const url = `${JIKAN_URL}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Jikan ${res.status}`);
+  const data = await res.json();
+  const a = data.data?.[0];
+  if (!a) throw new Error('MAL တွင် ရှာမတွေ့ပါ');
+  return {
+    year:     String(a.year || a.aired?.prop?.from?.year || ''),
+    genres:   [...(a.genres||[]), ...(a.themes||[]), ...(a.demographics||[])].map(g=>g.name),
+    episodes: String(a.episodes || ''),
+    score:    String(a.score || ''),
+    source:   'Jikan (MAL)',
+    title:    a.title_english || a.title || '',
+  };
+}
+
+// ══ AniList API (GraphQL) ════════════════════════
+async function fetchAniList(title) {
+  const query = `
+    query($search:String){
+      Media(search:$search,type:ANIME){
+        title{romaji english}
+        startDate{year}
+        genres
+        episodes
+        averageScore
+      }
+    }`;
+  const res = await fetch(ANILIST_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ query, variables: { search: title } }),
+  });
+  if (!res.ok) throw new Error(`AniList ${res.status}`);
+  const data = await res.json();
+  const m = data.data?.Media;
+  if (!m) throw new Error('AniList တွင် ရှာမတွေ့ပါ');
+  return {
+    year:     String(m.startDate?.year || ''),
+    genres:   m.genres || [],
+    episodes: String(m.episodes || ''),
+    score:    m.averageScore ? String((m.averageScore / 10).toFixed(1)) : '',
+    source:   'AniList',
+    title:    m.title?.english || m.title?.romaji || '',
+  };
+}
+
+// ══ Auto-fetch (Jikan first, fallback AniList) ════
+async function autoFetch(context) {
+  const titleInput = document.getElementById(`${context}FetchTitle`);
+  const btn        = document.getElementById(`${context}FetchBtn`);
+  const badge      = document.getElementById(`${context}FetchBadge`);
+  const resultBox  = document.getElementById(`${context}FetchResult`);
+  const title      = titleInput.value.trim();
+  if (!title) { titleInput.focus(); return; }
+
+  // Loading state
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span> Fetching...`;
+  badge.className = 'fetch-badge fetch-loading';
+  badge.textContent = '⏳ Searching...';
+  badge.style.display = 'inline-flex';
+  resultBox.style.display = 'none';
+
+  let result = null;
+  let errMsg = '';
+
+  // Try Jikan first
+  try {
+    result = await fetchJikan(title);
+  } catch(e) {
+    errMsg = e.message;
+    // Fallback: AniList
+    try {
+      result = await fetchAniList(title);
+      errMsg = '';
+    } catch(e2) {
+      errMsg = `MAL: ${e.message} | AniList: ${e2.message}`;
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Fetch`;
+
+  if (!result) {
+    badge.className = 'fetch-badge fetch-err';
+    badge.textContent = '❌ ရှာမတွေ့ပါ';
+    resultBox.style.display = 'block';
+    resultBox.textContent = errMsg;
+    return;
+  }
+
+  // Fill fields
+  if (result.year)     document.getElementById(`${context}Year`).value     = result.year;
+  if (result.episodes) document.getElementById(`${context}Episodes`).value = result.episodes;
+  if (result.score)    document.getElementById(`${context}Score`).value    = result.score;
+  if (result.genres?.length && window[`${context}GenreSet`]) {
+    window[`${context}GenreSet`](result.genres);
+  }
+
+  badge.className = 'fetch-badge fetch-ok';
+  badge.textContent = `✓ ${result.source}`;
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = `
+    <strong style="color:white">${result.title}</strong><br>
+    📅 Year: ${result.year || '—'} &nbsp;
+    🎬 Episodes: ${result.episodes || '—'} &nbsp;
+    ⭐ Score: ${result.score || '—'}<br>
+    🏷️ Genres: ${result.genres?.join(', ') || '—'}
+  `;
+}
+
+// ══ Bulk Genre Fetch (Migrate tab) ════════════════
+async function bulkFetchGenres() {
+  const btn = document.getElementById('bulkFetchBtn');
+  const msg = document.getElementById('bulkFetchMsg');
+  if (!allAnimes.length) { msg.style.display='block'; msg.textContent='先 Anime list ကို load လုပ်ပါ'; return; }
+  if (!confirm(`Anime ${allAnimes.length} ကားအတွက် genres fetch မည်။ ကြာနိုင်ပါတယ်။`)) return;
+
+  btn.disabled = true;
+  let done = 0; let failed = 0;
+  const updated = [];
+
+  for (const anime of allAnimes) {
+    msg.style.display = 'block';
+    msg.textContent = `Fetching ${done+1}/${allAnimes.length}: ${anime.title}...`;
+    let result = null;
+    try {
+      result = await fetchJikan(anime.title);
+    } catch {
+      try { result = await fetchAniList(anime.title); } catch {}
+    }
+    if (result && result.genres?.length) {
+      updated.push({
+        ...anime,
+        genres:   result.genres,
+        episodes: anime.episodes || result.episodes,
+        score:    anime.score    || result.score,
+        year:     anime.year     || result.year,
+      });
+      done++;
+    } else {
+      updated.push(anime);
+      failed++;
+    }
+    // Jikan rate limit: 3 req/sec max
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  // Save back to KV
+  const r = await fetch(WORKER_URL + '/admin/migrate', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+    body:    JSON.stringify({ animeList: updated }),
+  });
+  const d = await r.json();
+  btn.disabled = false;
+  if (d.success) {
+    msg.style.color = '#4ade80';
+    msg.textContent = `✓ ${done} ကား update ပြီး။ ${failed} ကား fetch မရ (မပါဘဲ ထားသည်)`;
+    loadAnimes();
+  } else {
+    msg.style.color = '#f87171';
+    msg.textContent = '❌ Save မအောင်မြင်ပါ: ' + d.error;
+  }
+}
+
+// ══ GitHub Token ══════════════════════════════════
 function getGhToken() { return localStorage.getItem('naju_gh_token') || ''; }
-
 function saveGhToken() {
   const t = document.getElementById('ghTokenInput').value.trim();
   if (!t) return;
   localStorage.setItem('naju_gh_token', t);
   updateGhTokenUI();
-  showMsg('addMsg','',''); // clear
   alert('✓ GitHub Token သိမ်းပြီးပါပြီ');
 }
-
 function saveGhTokenFromSettings() {
   const t = document.getElementById('ghTokenSetting').value.trim();
   if (!t) return;
   localStorage.setItem('naju_gh_token', t);
   updateGhTokenUI();
   const el = document.getElementById('settingsTokenStatus');
-  el.style.display = 'block';
-  el.style.background = 'rgba(74,222,128,.08)';
-  el.style.border = '1px solid rgba(74,222,128,.2)';
-  el.style.color = '#4ade80';
-  el.textContent = '✓ Token သိမ်းပြီးပါပြီ';
-  setTimeout(() => el.style.display = 'none', 3000);
+  el.style.display='block'; el.style.background='rgba(74,222,128,.08)';
+  el.style.border='1px solid rgba(74,222,128,.2)'; el.style.color='#4ade80';
+  el.textContent='✓ Token သိမ်းပြီးပါပြီ';
+  setTimeout(()=>el.style.display='none',3000);
 }
-
 function clearGhToken() {
   localStorage.removeItem('naju_gh_token');
-  document.getElementById('ghTokenSetting').value = '';
+  document.getElementById('ghTokenSetting').value='';
   updateGhTokenUI();
-  const el = document.getElementById('settingsTokenStatus');
-  el.style.display = 'block';
-  el.style.background = 'rgba(248,113,113,.08)';
-  el.style.border = '1px solid rgba(248,113,113,.2)';
-  el.style.color = '#f87171';
-  el.textContent = 'Token ဖျက်ပြီးပါပြီ';
-  setTimeout(() => el.style.display = 'none', 3000);
+  const el=document.getElementById('settingsTokenStatus');
+  el.style.display='block'; el.style.background='rgba(248,113,113,.08)';
+  el.style.border='1px solid rgba(248,113,113,.2)'; el.style.color='#f87171';
+  el.textContent='Token ဖျက်ပြီးပါပြီ';
+  setTimeout(()=>el.style.display='none',3000);
 }
-
 function updateGhTokenUI() {
   const hasToken = !!getGhToken();
-  // Login screen
   const loginStatus = document.getElementById('ghTokenStatus');
-  if (loginStatus) {
-    loginStatus.textContent = hasToken ? '✓ Token ရှိပြီ' : 'Token မရှိ';
-    loginStatus.className = 'token-status ' + (hasToken ? 'token-ok' : 'token-missing');
-  }
-  // Header
+  if (loginStatus) { loginStatus.textContent=hasToken?'✓ Token ရှိပြီ':'Token မရှိ'; loginStatus.className='token-status '+(hasToken?'token-ok':'token-missing'); }
   const hdrStatus = document.getElementById('ghStatusHeader');
-  if (hdrStatus) {
-    hdrStatus.textContent = hasToken ? '📸 GitHub ✓' : '📸 Token မရှိ';
-    hdrStatus.className = 'token-status ' + (hasToken ? 'token-ok' : 'token-missing');
-  }
-  // Settings page prefill
-  const settingInput = document.getElementById('ghTokenSetting');
-  if (settingInput && hasToken) settingInput.value = '••••••••••••••••';
+  if (hdrStatus) { hdrStatus.textContent=hasToken?'📸 GitHub ✓':'📸 Token မရှိ'; hdrStatus.className='token-status '+(hasToken?'token-ok':'token-missing'); }
+  const si = document.getElementById('ghTokenSetting');
+  if (si && hasToken) si.value='••••••••••••••••';
 }
 
-// ── GitHub Upload ─────────────────────────────────────
+// ══ GitHub Upload ════════════════════════════════
 async function uploadToGitHub(file, context) {
   const ghToken = getGhToken();
-  if (!ghToken) {
-    showUploadMsg(context, '❌ GitHub Token မရှိပါ — Settings တွင် ထည့်ပါ', 'error');
-    return null;
-  }
-
-  const fileName = file.name;
-  const filePath = `${GH_FOLDER}/${fileName}`;
+  if (!ghToken) { showUploadMsg(context,'❌ GitHub Token မရှိ','error'); return null; }
+  const filePath = `${GH_FOLDER}/${file.name}`;
   const apiUrl   = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${filePath}`;
-
-  // Show progress
-  setUploadProgress(context, true, 0);
-  showUploadMsg(context, '⏳ GitHub သို့ upload လုပ်နေသည်...', 'info');
-
-  // File → base64
+  setUploadProgress(context,true,0);
+  showUploadMsg(context,'⏳ GitHub သို့ upload...','info');
   const base64 = await fileToBase64(file);
-  setUploadProgress(context, true, 30);
-
-  // Check if file already exists (to get SHA for update)
-  let sha = null;
+  setUploadProgress(context,true,30);
+  let sha=null;
+  try { const cr=await fetch(apiUrl,{headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json'}});if(cr.ok){const cd=await cr.json();sha=cd.sha;} } catch{}
+  setUploadProgress(context,true,50);
+  const body={message:`Upload image: ${file.name}`,content:base64,branch:GH_BRANCH};
+  if(sha) body.sha=sha;
   try {
-    const checkRes = await fetch(apiUrl, {
-      headers: { 'Authorization': `Bearer ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (checkRes.ok) {
-      const existData = await checkRes.json();
-      sha = existData.sha;
-    }
-  } catch(e) {}
-
-  setUploadProgress(context, true, 50);
-
-  // Upload
-  const body = {
-    message: `Upload image: ${fileName}`,
-    content: base64,
-    branch:  GH_BRANCH,
-  };
-  if (sha) body.sha = sha; // update existing
-
-  try {
-    const res = await fetch(apiUrl, {
-      method:  'PUT',
-      headers: {
-        'Authorization': `Bearer ${ghToken}`,
-        'Accept':        'application/vnd.github.v3+json',
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    setUploadProgress(context, true, 90);
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Upload မအောင်မြင်ပါ');
-    }
-
-    setUploadProgress(context, true, 100);
-    setTimeout(() => setUploadProgress(context, false, 0), 1000);
-
-    // Return the path used in HTML (relative)
-    const imagePath = `./images/${fileName}`;
-    showUploadMsg(context, `✓ Upload ပြီးပါပြီ — ${fileName}`, 'success');
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    setUploadProgress(context,true,90);
+    if(!res.ok){const err=await res.json();throw new Error(err.message||'Upload failed');}
+    setUploadProgress(context,true,100);
+    setTimeout(()=>setUploadProgress(context,false,0),1000);
+    const imagePath=`./images/${file.name}`;
+    showUploadMsg(context,`✓ Upload ပြီး — ${file.name}`,'success');
     return imagePath;
-
-  } catch(err) {
-    setUploadProgress(context, false, 0);
-    showUploadMsg(context, `❌ ${err.message}`, 'error');
-    return null;
-  }
+  } catch(err) { setUploadProgress(context,false,0); showUploadMsg(context,`❌ ${err.message}`,'error'); return null; }
 }
+function fileToBase64(file){ return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);}); }
+function setUploadProgress(ctx,show,pct){const bar=document.getElementById(`${ctx}UploadProgressBar`);const p=document.getElementById(`${ctx}UploadProgress`);if(!bar||!p)return;p.style.display=show?'block':'none';bar.style.width=pct+'%';}
+function showUploadMsg(ctx,txt,type){const el=document.getElementById(`${ctx}UploadMsg`);if(!el)return;el.textContent=txt;el.style.color=type==='success'?'#4ade80':type==='error'?'#f87171':'#60a5fa';el.style.display=txt?'block':'none';}
 
-function fileToBase64(file) {
-  return new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload  = () => res(reader.result.split(',')[1]);
-    reader.onerror = () => rej(new Error('File read မအောင်မြင်ပါ'));
-    reader.readAsDataURL(file);
-  });
-}
+function handleFileSelect(e,ctx){const f=e.target.files[0];if(!f)return;previewImage(f,ctx);handleAutoUpload(f,ctx);}
+function handleDrag(e,zoneId){e.preventDefault();document.getElementById(zoneId)?.classList.add('drag');}
+function handleDragLeave(zoneId){document.getElementById(zoneId)?.classList.remove('drag');}
+function handleDrop(e,ctx){e.preventDefault();document.getElementById(`${ctx}UploadZone`)?.classList.remove('drag');const f=e.dataTransfer?.files[0];if(!f||!f.type.startsWith('image/'))return;previewImage(f,ctx);handleAutoUpload(f,ctx);}
+function previewImage(file,ctx){const pr=document.getElementById(`${ctx}ImagePreview`);const pl=document.getElementById(`${ctx}UploadPlaceholder`);const r=new FileReader();r.onload=e=>{if(pr){pr.src=e.target.result;pr.style.display='block';}if(pl)pl.style.display='none';};r.readAsDataURL(file);}
+async function handleAutoUpload(file,ctx){const path=await uploadToGitHub(file,ctx);if(path){const id=ctx==='add'?'addImage':'editImage';const inp=document.getElementById(id);if(inp)inp.value=path;}}
 
-function setUploadProgress(context, show, pct) {
-  const bar      = document.getElementById(`${context}UploadProgressBar`);
-  const progress = document.getElementById(`${context}UploadProgress`);
-  if (!bar || !progress) return;
-  progress.style.display = show ? 'block' : 'none';
-  bar.style.width = pct + '%';
-}
-
-function showUploadMsg(context, txt, type) {
-  const el = document.getElementById(`${context}UploadMsg`);
-  if (!el) return;
-  el.textContent = txt;
-  el.style.color = type === 'success' ? '#4ade80' : type === 'error' ? '#f87171' : '#60a5fa';
-  el.style.display = txt ? 'block' : 'none';
-}
-
-// ── File select / drag handlers ───────────────────────
-function handleFileSelect(event, context) {
-  const file = event.target.files[0];
-  if (!file) return;
-  previewImage(file, context);
-  handleAutoUpload(file, context);
-}
-
-function handleDrag(event, zoneId) {
-  event.preventDefault();
-  document.getElementById(zoneId)?.classList.add('drag');
-}
-
-function handleDragLeave(zoneId) {
-  document.getElementById(zoneId)?.classList.remove('drag');
-}
-
-function handleDrop(event, context) {
-  event.preventDefault();
-  const zoneId = `${context}UploadZone`;
-  document.getElementById(zoneId)?.classList.remove('drag');
-  const file = event.dataTransfer?.files[0];
-  if (!file || !file.type.startsWith('image/')) return;
-  previewImage(file, context);
-  handleAutoUpload(file, context);
-}
-
-function previewImage(file, context) {
-  const preview     = document.getElementById(`${context}ImagePreview`);
-  const placeholder = document.getElementById(`${context}UploadPlaceholder`);
-  const reader      = new FileReader();
-  reader.onload = e => {
-    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
-    if (placeholder) placeholder.style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-
-async function handleAutoUpload(file, context) {
-  const path = await uploadToGitHub(file, context);
-  if (path) {
-    // Auto-fill the image path input
-    const inputId = context === 'add' ? 'addImage' : 'editImage';
-    const input   = document.getElementById(inputId);
-    if (input) input.value = path;
-  }
-}
-
-// ── Auth ──────────────────────────────────────────────
-function login() {
-  const t = document.getElementById('tokenInput').value.trim();
-  if (!t) return;
-  TOKEN = t;
-  testLogin();
-}
-
-async function testLogin() {
-  try {
-    const r = await fetch(WORKER_URL + '/admin/migrate', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
-      body:    JSON.stringify({ animeList: null })
-    });
-    if (r.status === 401) {
-      document.getElementById('loginErr').style.display = 'block';
-      return;
-    }
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('panel').style.display       = 'block';
+// ══ Auth ══════════════════════════════════════════
+function login(){const t=document.getElementById('tokenInput').value.trim();if(!t)return;TOKEN=t;testLogin();}
+async function testLogin(){
+  try{
+    const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:null})});
+    if(r.status===401){document.getElementById('loginErr').style.display='block';return;}
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
     updateGhTokenUI();
+    initGenreInput('add');
+    initGenreInput('edit');
     loadAnimes();
-  } catch (e) {
-    document.getElementById('loginErr').style.display = 'block';
-  }
+  }catch(e){document.getElementById('loginErr').style.display='block';}
 }
+function logout(){TOKEN='';document.getElementById('loginScreen').style.display='flex';document.getElementById('panel').style.display='none';}
 
-function logout() {
-  TOKEN = '';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('panel').style.display       = 'none';
-}
-
-// ── Anime CRUD ────────────────────────────────────────
-async function loadAnimes() {
-  document.getElementById('animeList').innerHTML = '<p style="color:var(--muted);font-size:13px">Loading...</p>';
-  const r = await fetch(WORKER_URL + '/anime');
-  allAnimes = await r.json();
-  document.getElementById('animeCount').textContent = `${allAnimes.length} ကား`;
+// ══ CRUD ══════════════════════════════════════════
+async function loadAnimes(){
+  document.getElementById('animeList').innerHTML='<p style="color:var(--muted);font-size:13px">Loading...</p>';
+  const r=await fetch(WORKER_URL+'/anime');
+  allAnimes=await r.json();
+  document.getElementById('animeCount').textContent=`${allAnimes.length} ကား`;
   renderList(allAnimes);
 }
 
-function renderList(list) {
-  const el = document.getElementById('animeList');
-  if (!list.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">Anime မရှိသေးပါ</p>'; return; }
-  el.innerHTML = list.map(a => `
+function renderList(list){
+  const el=document.getElementById('animeList');
+  if(!list.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">Anime မရှိသေးပါ</p>';return;}
+  el.innerHTML=list.map(a=>`
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
-      <img src="${a.image}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
+      <img src="${a.image||''}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
-        <div style="display:flex;gap:8px;margin-top:4px">
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
           <span class="pill">${a.year}</span>
           <span style="font-size:11px;color:var(--muted)">${a.id}</span>
+          ${a.episodes?`<span style="font-size:11px;color:#94a3b8">🎬 ${a.episodes} eps</span>`:''}
+          ${a.score?`<span style="font-size:11px;color:#fbbf24">⭐ ${a.score}</span>`:''}
         </div>
+        ${a.genres?.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${a.genres.slice(0,4).map(g=>`<span class="genre-tag" style="font-size:10px;padding:2px 8px">${g}</span>`).join('')}${a.genres.length>4?`<span style="font-size:10px;color:var(--muted)">+${a.genres.length-4}</span>`:''}</div>`:''}
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-gray" style="padding:7px 12px;font-size:12px" onclick="openEdit('${a.id}')">✏️ ပြင်</button>
@@ -529,154 +720,109 @@ function renderList(list) {
   `).join('');
 }
 
-function filterList() {
-  const q = document.getElementById('searchAdmin').value.toLowerCase();
-  renderList(allAnimes.filter(a => a.title.toLowerCase().includes(q) || a.year.includes(q)));
+function filterList(){
+  const q=document.getElementById('searchAdmin').value.toLowerCase();
+  renderList(allAnimes.filter(a=>a.title.toLowerCase().includes(q)||a.year.includes(q)||(a.genres||[]).some(g=>g.toLowerCase().includes(q))));
 }
 
-function showTab(t) {
-  ['list','add','migrate','settings'].forEach(n => {
-    document.getElementById('tabListContent').style.display     = n==='list'     ? 'block':'none';
-    document.getElementById('tabAddContent').style.display      = n==='add'      ? 'block':'none';
-    document.getElementById('tabMigrateContent').style.display  = n==='migrate'  ? 'block':'none';
-    document.getElementById('tabSettingsContent').style.display = n==='settings' ? 'block':'none';
-  });
-  document.getElementById('tabListContent').style.display     = t==='list'     ? 'block':'none';
-  document.getElementById('tabAddContent').style.display      = t==='add'      ? 'block':'none';
-  document.getElementById('tabMigrateContent').style.display  = t==='migrate'  ? 'block':'none';
-  document.getElementById('tabSettingsContent').style.display = t==='settings' ? 'block':'none';
-
-  ['list','add','migrate','settings'].forEach(n => {
-    const cap = n.charAt(0).toUpperCase() + n.slice(1);
-    const btn = document.getElementById('tab' + cap);
-    if (btn) {
-      btn.style.background = n===t ? 'var(--blue)' : 'var(--bg3)';
-      btn.style.color      = n===t ? 'white' : '#94a3b8';
-    }
+function showTab(t){
+  ['list','add','migrate','settings'].forEach(n=>{
+    document.getElementById(`tab${n.charAt(0).toUpperCase()+n.slice(1)}Content`).style.display=n===t?'block':'none';
+    const btn=document.getElementById(`tab${n.charAt(0).toUpperCase()+n.slice(1)}`);
+    if(btn){btn.style.background=n===t?'var(--blue)':'var(--bg3)';btn.style.color=n===t?'white':'#94a3b8';}
   });
 }
 
-async function addAnime() {
-  const id     = document.getElementById('addId').value.trim();
-  const title  = document.getElementById('addTitle').value.trim();
-  const year   = document.getElementById('addYear').value.trim();
-  const image  = document.getElementById('addImage').value.trim();
-  const link   = document.getElementById('addLink').value.trim();
-  const review = document.getElementById('addReview').value.trim();
-  if (!id||!title||!year) { showMsg('addMsg','ID, Title, Year ထည့်ပါ','error'); return; }
-  const r = await fetch(WORKER_URL+'/admin/anime', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body: JSON.stringify({id,title,year,image,link,review})
-  });
-  const d = await r.json();
-  if (d.success) { showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success'); clearAdd(); loadAnimes(); showTab('list'); }
+async function addAnime(){
+  const id=document.getElementById('addId').value.trim();
+  const title=document.getElementById('addTitle').value.trim();
+  const year=document.getElementById('addYear').value.trim();
+  const image=document.getElementById('addImage').value.trim();
+  const link=document.getElementById('addLink').value.trim();
+  const review=document.getElementById('addReview').value.trim();
+  const genres=document.getElementById('addGenres').value.trim().split(',').map(s=>s.trim()).filter(Boolean);
+  const episodes=document.getElementById('addEpisodes').value.trim();
+  const score=document.getElementById('addScore').value.trim();
+  if(!id||!title||!year){showMsg('addMsg','ID, Title, Year ထည့်ပါ','error');return;}
+  const r=await fetch(WORKER_URL+'/admin/anime',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({id,title,year,image,link,review,genres,episodes,score})});
+  const d=await r.json();
+  if(d.success){showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success');clearAdd();loadAnimes();showTab('list');}
   else showMsg('addMsg','❌ '+d.error,'error');
 }
 
-function clearAdd() {
-  ['addId','addTitle','addYear','addImage','addLink','addReview'].forEach(id => document.getElementById(id).value='');
-  const preview = document.getElementById('addImagePreview');
-  const placeholder = document.getElementById('addUploadPlaceholder');
-  if (preview) { preview.style.display='none'; preview.src=''; }
-  if (placeholder) placeholder.style.display='block';
+function clearAdd(){
+  ['addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore','addFetchTitle'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(window.addGenreSet) window.addGenreSet([]);
+  const pr=document.getElementById('addImagePreview');const pl=document.getElementById('addUploadPlaceholder');
+  if(pr){pr.style.display='none';pr.src='';}if(pl)pl.style.display='block';
   showUploadMsg('add','','');
+  const badge=document.getElementById('addFetchBadge');if(badge)badge.style.display='none';
+  const res=document.getElementById('addFetchResult');if(res)res.style.display='none';
 }
 
-function openEdit(id) {
-  const a = allAnimes.find(x=>x.id===id);
-  if (!a) return;
-  editingId = id;
-  document.getElementById('editId').value     = a.id;
-  document.getElementById('editTitle').value  = a.title;
-  document.getElementById('editYear').value   = a.year;
-  document.getElementById('editImage').value  = a.image||'';
-  document.getElementById('editLink').value   = a.link||'';
-  document.getElementById('editReview').value = a.review||'';
-
-  // Show current image in preview
-  const preview     = document.getElementById('editImagePreview');
-  const placeholder = document.getElementById('editUploadPlaceholder');
-  if (a.image) {
-    preview.src          = a.image;
-    preview.style.display = 'block';
-    if (placeholder) placeholder.style.display = 'none';
-  } else {
-    preview.style.display = 'none';
-    if (placeholder) placeholder.style.display = 'block';
-  }
+function openEdit(id){
+  const a=allAnimes.find(x=>x.id===id);if(!a)return;
+  editingId=id;
+  document.getElementById('editId').value=a.id;
+  document.getElementById('editTitle').value=a.title;
+  document.getElementById('editYear').value=a.year;
+  document.getElementById('editImage').value=a.image||'';
+  document.getElementById('editLink').value=a.link||'';
+  document.getElementById('editReview').value=a.review||'';
+  document.getElementById('editEpisodes').value=a.episodes||'';
+  document.getElementById('editScore').value=a.score||'';
+  document.getElementById('editFetchTitle').value=a.title;
+  if(window.editGenreSet) window.editGenreSet(a.genres||[]);
+  const pr=document.getElementById('editImagePreview');const pl=document.getElementById('editUploadPlaceholder');
+  if(a.image){pr.src=a.image;pr.style.display='block';if(pl)pl.style.display='none';}
+  else{pr.style.display='none';if(pl)pl.style.display='block';}
   showUploadMsg('edit','','');
-  document.getElementById('editModal').style.display = 'block';
+  const badge=document.getElementById('editFetchBadge');if(badge)badge.style.display='none';
+  const res=document.getElementById('editFetchResult');if(res)res.style.display='none';
+  document.getElementById('editModal').style.display='block';
 }
 
-function closeEdit() {
-  document.getElementById('editModal').style.display = 'none';
-  // Reset edit upload zone
-  const file = document.getElementById('editImageFile');
-  if (file) file.value = '';
-}
+function closeEdit(){document.getElementById('editModal').style.display='none';}
 
-async function saveEdit() {
-  const r = await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(editingId), {
-    method:'PUT',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-    body: JSON.stringify({
-      title:  document.getElementById('editTitle').value,
-      year:   document.getElementById('editYear').value,
-      image:  document.getElementById('editImage').value,
-      link:   document.getElementById('editLink').value,
-      review: document.getElementById('editReview').value,
-    })
-  });
-  const d = await r.json();
-  if (d.success) { showMsg('editMsg','✓ သိမ်းပြီးပါပြီ','success'); loadAnimes(); setTimeout(closeEdit,1200); }
+async function saveEdit(){
+  const genres=document.getElementById('editGenres').value.trim().split(',').map(s=>s.trim()).filter(Boolean);
+  const r=await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(editingId),{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({
+    title:document.getElementById('editTitle').value,
+    year:document.getElementById('editYear').value,
+    image:document.getElementById('editImage').value,
+    link:document.getElementById('editLink').value,
+    review:document.getElementById('editReview').value,
+    genres, episodes:document.getElementById('editEpisodes').value,
+    score:document.getElementById('editScore').value,
+  })});
+  const d=await r.json();
+  if(d.success){showMsg('editMsg','✓ သိမ်းပြီးပါပြီ','success');loadAnimes();setTimeout(closeEdit,1200);}
   else showMsg('editMsg','❌ '+d.error,'error');
 }
 
-async function deleteAnime(id, title) {
-  if (!confirm(`"${title}" ကို တကယ် ဖျက်မည်လား?`)) return;
-  const r = await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(id), {
-    method:'DELETE',
-    headers:{'Authorization':'Bearer '+TOKEN}
-  });
-  const d = await r.json();
-  if (d.success) loadAnimes();
-  else alert('ဖျက်မရပါ: '+d.error);
+async function deleteAnime(id,title){
+  if(!confirm(`"${title}" ကို တကယ် ဖျက်မည်လား?`))return;
+  const r=await fetch(WORKER_URL+'/admin/anime/'+encodeURIComponent(id),{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}});
+  const d=await r.json();
+  if(d.success)loadAnimes();else alert('ဖျက်မရပါ: '+d.error);
 }
 
-async function migrateData() {
-  let raw = document.getElementById('migrateData').value.trim();
-  raw = raw.replace(/\r?\n/g, ' ');
+async function migrateData(){
+  let raw=document.getElementById('migrateData').value.trim().replace(/\r?\n/g,' ');
   let parsed;
-  try { parsed = Function('"use strict"; return (' + raw + ')')(); }
-  catch(e) { showMsg('migrateMsg', '❌ Parse error: ' + e.message, 'error'); return; }
-  if (!Array.isArray(parsed)) { showMsg('migrateMsg', '❌ Array [ ] ဖြစ်ရမည်', 'error'); return; }
-  if (!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`)) return;
-  const r = await fetch(WORKER_URL + '/admin/migrate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
-    body: JSON.stringify({ animeList: parsed })
-  });
-  const d = await r.json();
-  if (d.success) { showMsg('migrateMsg', `✓ ${d.count} ကား import ပြီးပါပြီ`, 'success'); loadAnimes(); }
-  else showMsg('migrateMsg', '❌ ' + d.error, 'error');
+  try{parsed=Function('"use strict";return('+raw+')')();}catch(e){showMsg('migrateMsg','❌ Parse error: '+e.message,'error');return;}
+  if(!Array.isArray(parsed)){showMsg('migrateMsg','❌ Array [] ဖြစ်ရမည်','error');return;}
+  if(!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`))return;
+  const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:parsed})});
+  const d=await r.json();
+  if(d.success){showMsg('migrateMsg',`✓ ${d.count} ကား import ပြီးပါပြီ`,'success');loadAnimes();}
+  else showMsg('migrateMsg','❌ '+d.error,'error');
 }
 
-function showMsg(id, txt, type) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent  = txt;
-  el.style.color   = type==='success' ? '#4ade80' : '#f87171';
-  el.style.display = txt ? 'block' : 'none';
-  if (txt) setTimeout(()=>el.style.display='none', 3000);
-}
+function showMsg(id,txt,type){const el=document.getElementById(id);if(!el)return;el.textContent=txt;el.style.color=type==='success'?'#4ade80':'#f87171';el.style.display=txt?'block':'none';if(txt)setTimeout(()=>el.style.display='none',3000);}
 
-// ── Init ──────────────────────────────────────────────
-document.getElementById('tokenInput').addEventListener('keydown', e => {
-  if (e.key==='Enter') login();
-});
-
-// Load saved token status on page load
+// Init
+document.getElementById('tokenInput').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
 updateGhTokenUI();
 </script>
 </body>
