@@ -1,9 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="my" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaJu Anime</title>
+
+    <!-- ═══ SEO Meta Tags ═══ -->
+    <title>NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ</title>
+    <meta name="description" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားပေါင်း ၁၀၀ ကျော်ကို Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။ Action, Drama, Romance Anime များ ရှာဖွေကြည့်ရှုနိုင်သည်။">
+    <meta name="keywords" content="NaJu Anime, မြန်မာ Anime, Myanmar Anime, ဘာသာပြန် Anime, Anime Myanmar, မြန်မာ ကာတွန်း, Telegram Anime">
+    <meta name="author" content="NaJu Anime">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.najuanime.com/">
+
+    <!-- ═══ Open Graph (Facebook / Telegram Preview) ═══ -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.najuanime.com/">
+    <meta property="og:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ">
+    <meta property="og:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားပေါင်း ၁၀၀ ကျော်ကို Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
+    <meta property="og:image" content="https://www.najuanime.com/images/og-cover.jpg">
+    <meta property="og:site_name" content="NaJu Anime">
+    <meta property="og:locale" content="my_MM">
+
+    <!-- ═══ Twitter Card ═══ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime">
+    <meta name="twitter:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
+    <meta name="twitter:image" content="https://www.najuanime.com/images/og-cover.jpg">
+
+    <!-- ═══ JSON-LD Structured Data ═══ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "NaJu Anime",
+      "url": "https://www.najuanime.com",
+      "description": "မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်",
+      "inLanguage": "my",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.najuanime.com/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- ═══ Google Analytics 4 — G-XXXXXXXXXX ကို သင့် Measurement ID နဲ့ အစားထိုးပါ ═══ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -23,23 +75,19 @@
 
         body { background: var(--bg); color: var(--text); }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
 
-        /* Header */
         header {
             background: rgba(15,17,23,0.85);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
         }
 
-        /* Logo */
         .logo-naju { color: var(--blue); }
         .logo-anime { color: white; }
 
-        /* Search */
         .search-wrap { position: relative; }
         .search-wrap input {
             background: var(--bg3);
@@ -58,52 +106,99 @@
         }
         .search-wrap input::placeholder { color: var(--muted); }
         .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
+            position: absolute; left: 14px; top: 50%;
             transform: translateY(-50%);
-            color: var(--muted);
-            pointer-events: none;
+            color: var(--muted); pointer-events: none;
         }
 
-        /* Nav links */
         .nav-link {
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 14px;
-            letter-spacing: 0.02em;
-            transition: color 0.2s;
-            text-decoration: none;
+            color: #94a3b8; font-weight: 600; font-size: 14px;
+            letter-spacing: 0.02em; transition: color 0.2s; text-decoration: none;
         }
         .nav-link:hover { color: white; }
 
-        /* Section title */
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            display: flex;
+        /* ═══ AI Button — Glowing Gradient ═══ */
+        .ai-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+            box-shadow: 0 0 16px rgba(59,130,246,0.4), 0 2px 8px rgba(0,0,0,0.3);
+            transition: box-shadow 0.25s, transform 0.15s, opacity 0.2s;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.02em;
+        }
+        .ai-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.08) 100%);
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .ai-btn:hover {
+            box-shadow: 0 0 28px rgba(59,130,246,0.65), 0 4px 16px rgba(0,0,0,0.4);
+            transform: translateY(-1px);
+        }
+        .ai-btn:hover::before { opacity: 1; }
+        .ai-btn:active { transform: scale(0.96); }
+        .ai-btn-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 6px #4ade80;
+            animation: aiPulse 2s infinite;
+            flex-shrink: 0;
+        }
+        @keyframes aiPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Mobile AI button */
+        .ai-btn-mobile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            flex: 1;
+            color: #60a5fa;
+            position: relative;
+        }
+        .ai-btn-mobile .icon-wrap {
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 10px rgba(59,130,246,0.45);
+        }
+        .ai-btn-mobile:hover .icon-wrap {
+            box-shadow: 0 0 18px rgba(59,130,246,0.7);
+        }
+
+        .section-title {
+            font-size: 18px; font-weight: 700; color: white;
+            display: flex; align-items: center; gap: 10px;
         }
         .section-title::before {
             content: '';
-            display: block;
-            width: 4px;
-            height: 20px;
-            background: var(--blue);
-            border-radius: 99px;
+            display: block; width: 4px; height: 20px;
+            background: var(--blue); border-radius: 99px;
         }
 
-        /* Anime Card */
         .anime-card {
             background: var(--bg2);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
+            border-radius: 16px; overflow: hidden;
             transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
         .anime-card:hover {
             transform: translateY(-4px);
@@ -111,222 +206,90 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.5);
         }
         .card-img-wrap {
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 3/4;
+            position: relative; overflow: hidden; aspect-ratio: 3/4;
         }
         .card-img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 100%; height: 100%; object-fit: cover;
             transition: transform 0.4s, opacity 0.4s;
         }
         .anime-card:hover .card-img-wrap img {
-            transform: scale(1.07);
-            opacity: 0.7;
+            transform: scale(1.07); opacity: 0.7;
         }
         .card-overlay {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%);
             pointer-events: none;
         }
         .card-play {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
         }
         .anime-card:hover .card-play { opacity: 1; }
-        .card-play svg {
-            width: 48px;
-            height: 48px;
-            color: white;
-            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
-        }
+        .card-play svg { width: 48px; height: 48px; color: white; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
         .year-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(59,130,246,0.9);
-            backdrop-filter: blur(4px);
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 6px;
-            letter-spacing: 0.04em;
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(59,130,246,0.9); backdrop-filter: blur(4px);
+            color: white; font-size: 11px; font-weight: 700;
+            padding: 3px 8px; border-radius: 6px; letter-spacing: 0.04em;
         }
         .card-body {
-            padding: 14px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            padding: 14px; flex-grow: 1;
+            display: flex; flex-direction: column; gap: 10px;
         }
         .card-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #e2e8f0;
+            font-size: 13px; font-weight: 600; color: #e2e8f0;
             line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            min-height: 36px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden; min-height: 36px;
         }
         .card-actions { display: flex; gap: 8px; margin-top: auto; }
         .btn-review, .btn-watch {
-            flex: 1;
-            text-align: center;
-            padding: 8px 4px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s, transform 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            flex: 1; text-align: center; padding: 8px 4px;
+            border-radius: 10px; font-size: 12px; font-weight: 600;
+            text-decoration: none; transition: background 0.2s, transform 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
         }
-        .btn-review {
-            background: var(--bg3);
-            color: #94a3b8;
-            border: 1px solid var(--border);
-        }
+        .btn-review { background: var(--bg3); color: #94a3b8; border: 1px solid var(--border); }
         .btn-review:hover { background: #263248; color: white; }
-        .btn-watch {
-            background: var(--blue);
-            color: white;
-        }
+        .btn-watch { background: var(--blue); color: white; }
         .btn-watch:hover { background: var(--blue-dark); }
         .btn-review:active, .btn-watch:active { transform: scale(0.96); }
 
-        /* About */
-        .about-card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-        .about-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--blue), transparent);
-        }
-        .about-inner-card {
-            background: var(--bg3);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 24px;
-            transition: border-color 0.2s;
-        }
-        .about-inner-card:hover { border-color: rgba(59,130,246,0.3); }
-        .about-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(59,130,246,0.12);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 14px;
-        }
-
-        /* Blockquote */
-        .bq {
-            border-left: 3px solid var(--blue);
-            border-right: 3px solid var(--blue);
-            padding: 16px 24px;
-            color: #94a3b8;
-            font-style: italic;
-            line-height: 1.7;
-            text-align: center;
-            font-size: 15px;
-            border-radius: 2px;
-        }
-
-        /* Footer */
         footer { background: var(--bg); border-top: 1px solid var(--border); }
         .footer-link {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
+            color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s;
         }
         .footer-link:hover { color: var(--blue); }
 
-        /* Mobile drawer */
-        #mobileDrawer {
-            background: var(--bg2);
-            border-top: 1px solid var(--border);
-        }
+        #mobileDrawer { background: var(--bg2); border-top: 1px solid var(--border); }
 
-        /* Mobile nav */
         .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(22,27,39,0.95);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border);
-            padding: 10px 0;
-            z-index: 50;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(22,27,39,0.97); backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border); padding: 10px 0; z-index: 50;
         }
         .mobile-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
-            transition: color 0.2s;
-            flex: 1;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; color: var(--muted); text-decoration: none;
+            font-size: 10px; font-weight: 600; transition: color 0.2s; flex: 1;
         }
         .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--blue); }
         .mobile-nav-item svg { width: 22px; height: 22px; }
 
-        /* Empty state */
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--muted);
-        }
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--muted); }
 
-        /* Hamburger */
         #mobileMenuBtn { color: #94a3b8; background: none; border: none; cursor: pointer; }
         #mobileMenuBtn:hover { color: white; }
 
-        /* Drawer nav items */
         .drawer-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            color: #94a3b8;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border);
-            transition: color 0.2s;
+            display: flex; align-items: center; gap: 10px; padding: 10px 0;
+            color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 14px;
+            border-bottom: 1px solid var(--border); transition: color 0.2s;
         }
         .drawer-link:hover { color: white; }
         .drawer-link:last-child { border-bottom: none; }
 
-        /* Fade in animation for cards */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
@@ -341,7 +304,6 @@
         <div class="max-w-7xl mx-auto px-4 py-3">
             <div class="flex items-center gap-4">
 
-                <!-- Logo -->
                 <a href="#" class="flex-shrink-0 text-2xl font-black tracking-tight hover:opacity-80 transition-opacity">
                     <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
                 </a>
@@ -357,9 +319,14 @@
                 <!-- Desktop Nav -->
                 <nav class="hidden md:flex items-center gap-6 ml-auto">
                     <a href="#" class="nav-link">ပင်မစာမျက်နှာ</a>
-                    <a href="#about" class="nav-link">အကြောင်း</a>
                     <a href="#contact" class="nav-link">ဆက်သွယ်</a>
-                    <a href="chat.html" class="nav-link" style="color:#3b82f6">🤖 AI</a>
+                    <a href="chat.html" class="ai-btn">
+                        <span class="ai-btn-dot"></span>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
+                        </svg>
+                        NaJu AI
+                    </a>
                 </nav>
 
                 <!-- Mobile hamburger -->
@@ -370,7 +337,7 @@
                 </button>
             </div>
 
-            <!-- Mobile search (always visible on small screens) -->
+            <!-- Mobile search -->
             <div class="mt-3 sm:hidden search-wrap">
                 <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -386,13 +353,15 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                     ပင်မစာမျက်နှာ
                 </a>
-                <a href="#about" class="drawer-link">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    ကျွန်ုပ်တို့အကြောင်း
-                </a>
                 <a href="#contact" class="drawer-link">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     ဆက်သွယ်ရန်
+                </a>
+                <a href="chat.html" class="drawer-link" style="color:#60a5fa">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
+                    </svg>
+                    NaJu AI Chat
                 </a>
             </div>
         </div>
@@ -400,76 +369,18 @@
 
     <!-- Main -->
     <main class="max-w-7xl mx-auto px-4 md:px-6 mt-8">
-
-        <!-- Section Header -->
         <div class="flex items-center justify-between mb-6">
-            <h2 class="section-title">
-                ဇာတ်ကားစာရင်းများ
-            </h2>
+            <h2 class="section-title">ဇာတ်ကားစာရင်းများ</h2>
             <span id="movieCount" style="color: var(--muted); font-size: 13px; font-weight: 600;"></span>
         </div>
-
-        <!-- Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="anime-grid">
-        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="anime-grid"></div>
     </main>
 
-    <!-- About Section -->
-    <section id="about" class="max-w-7xl mx-auto px-4 md:px-6 mt-20 mb-16">
-        <div class="about-card">
-            <div class="p-6 md:p-10">
-                <h2 style="font-size: 22px; font-weight: 900; color: var(--blue); text-align: center; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 24px;">
-                    ကျွန်ုပ်တို့အကြောင်း
-                </h2>
-
-                <div class="bq mb-10">
-                    "အနုပညာဆိုတာ သန့်စင်ရပါတယ်။ ဇာတ်လမ်းတစ်ပုဒ်ရဲ့ ရသကို ခံစားနေချိန်မှာ အခြားသော အနှောင့်အယှက်တွေ မရှိသင့်ဘူးလို့ ကျွန်တော်တို့ ယုံကြည်တယ်။"
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <!-- Card 1 -->
-                    <div class="about-inner-card">
-                        <div class="about-icon">
-                            <svg width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <h3 style="font-size: 15px; font-weight: 700; color: #3b82f6; margin-bottom: 10px;">မျှော်လင့်ချက်</h3>
-                        <p style="font-size: 13px; color: #94a3b8; line-height: 1.75; text-align: justify;">
-                            NaJu Anime ဟာ ရိုးရှင်းတဲ့ ရည်ရွယ်ချက်လေးတစ်ခုကနေ အသက်ဝင်လာတာပါ။ မြန်မာနိုင်ငံက Anime ချစ်သူတွေအတွက် အရည်အသွေးပြည့်ဝတဲ့ ဘာသာပြန် ဇာတ်ကားတွေကို လွတ်လပ်စွာ ခံစားနိုင်ဖို့ပါ။ လောင်းကစားကြော်ငြာတွေကင်းတဲ့ "သန့်စင်သော ရသကမ္ဘာ" တစ်ခု ဖန်တီးပေးချင်ခဲ့တာပါ။
-                        </p>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="about-inner-card">
-                        <div class="about-icon">
-                            <svg width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <h3 style="font-size: 15px; font-weight: 700; color: #3b82f6; margin-bottom: 10px;">အစပြုခြင်း</h3>
-                        <p style="font-size: 13px; color: #94a3b8; line-height: 1.75; text-align: justify;">
-                            ၂၀၂၅ ခုနှစ် မေလ ၁၉ ရက်နေ့... ဒီ Channel လေး မတ်မတ်ရပ်နိုင်ဖို့အတွက် နောက်ကွယ်မှာ ဘဝရဲ့ မုန်တိုင်းကြီး ၃ ခုကို ကြံ့ကြံ့ခံ ဖြတ်သန်းခဲ့ရပါတယ်။ နာကျင်မှုတွေ ဆုံးရှုံးမှုတွေဟာ NaJu ကို ပိုခိုင်မာတဲ့ ရဲတိုက်တစ်ခုဖြစ်အောင် တည်ဆောက်ပေးခဲ့တာပါ။
-                        </p>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="about-inner-card">
-                        <div class="about-icon">
-                            <svg width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        </div>
-                        <h3 style="font-size: 15px; font-weight: 700; color: #3b82f6; margin-bottom: 10px;">ဖန်တီးသူ</h3>
-                        <p style="font-size: 13px; color: #94a3b8; line-height: 1.75; text-align: justify;">
-                            ကြီးကျယ်တဲ့ အဖွဲ့မရှိပါ။ အစကနေ ဇာတ်လမ်းတွဲ (၁၀၀) ကျော်ကို တစ်ကိုယ်တော် ဖန်တီးနေတဲ့ လူတစ်ယောက်ရဲ့ ရုန်းကန်မှုတွေသာ ရှိပါတယ်။ ပရိသတ်အတွက် အကောင်းဆုံးဖြစ်အောင် ကြိုးစားနေတဲ့ သာမန်လူတစ်ယောက်ရဲ့ အနုပညာတစ်ခုသာ ဖြစ်ပါတယ်။
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer id="contact">
+    <!-- Footer / Contact -->
+    <footer id="contact" style="margin-top: 60px;">
         <div class="max-w-7xl mx-auto px-4 md:px-6 py-10">
             <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-8">
 
-                <!-- Brand -->
                 <div class="md:w-1/3 text-center md:text-left">
                     <div class="text-xl font-black mb-3">
                         <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
@@ -479,14 +390,12 @@
                     </p>
                 </div>
 
-                <!-- Follow -->
                 <div class="flex flex-col items-center gap-3">
                     <h3 style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #475569; text-transform: uppercase;">Follow Us</h3>
                     <a href="https://www.facebook.com/profile.php?id=61577006233895" target="_blank" class="footer-link">Facebook Page</a>
                     <a href="https://www.tiktok.com/@najuanime23" target="_blank" class="footer-link">TikTok</a>
                 </div>
 
-                <!-- Contact -->
                 <div class="flex flex-col items-center md:items-end gap-3">
                     <h3 style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #475569; text-transform: uppercase;">ဆက်သွယ်ရန်</h3>
                     <a href="https://t.me/NaJu_New" target="_blank" class="footer-link">Telegram: @NaJu_New</a>
@@ -502,131 +411,111 @@
 
     <!-- Mobile Bottom Nav -->
     <nav class="mobile-nav md:hidden">
-        <div style="display: flex; justify-content: space-around;">
+        <div style="display: flex; justify-content: space-around; align-items: center;">
             <a href="#" class="mobile-nav-item active" id="navHome">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 Home
-            </a>
-            <a href="#about" class="mobile-nav-item" id="navAbout">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                About
             </a>
             <a href="#contact" class="mobile-nav-item" id="navContact">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 Contact
             </a>
-            <a href="chat.html" class="drawer-link">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
-              </svg>
-                 AI Chat
-           </a>
+            <!-- Mobile AI Button -->
+            <a href="chat.html" class="ai-btn-mobile">
+                <div class="icon-wrap">
+                    <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
+                    </svg>
+                </div>
+                NaJu AI
+            </a>
         </div>
     </nav>
 
     <script>
-// Worker URL
-const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+    const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
 
-// KV ကနေ anime data ဆွဲ
-async function loadFromKV() {
-  try {
-    const r = await fetch(WORKER_URL + '/anime');
-    const data = await r.json();
-    window.animeData = data;
-    displayAnimes(data);
-    setupSearch(data);
-  } catch (e) {
-    document.getElementById('anime-grid').innerHTML = '<p style="color:#f87171;padding:20px">Loading error: ' + e.message + '</p>';
-  }
-}
-
-function displayAnimes(animes) {
-  const grid = document.getElementById('anime-grid');
-  const countEl = document.getElementById('movieCount');
-  grid.innerHTML = '';
-  countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
-  if (!animes.length) {
-    grid.innerHTML = `<div class="empty-state"><p style="color:#64748b">ဇာတ်ကား မတွေ့ပါ</p></div>`;
-    return;
-  }
-  animes.forEach((anime, index) => {
-    const card = document.createElement('div');
-    card.className = 'anime-card';
-    card.style.animationDelay = `${Math.min(index,20)*30}ms`;
-    card.innerHTML = `
-      <div class="card-img-wrap">
-        <img src="${anime.image}" alt="${anime.title}" loading="lazy">
-        <div class="card-overlay"></div>
-        <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
-        <span class="year-badge">${anime.year}</span>
-      </div>
-      <div class="card-body">
-        <p class="card-title" title="${anime.title}">${anime.title}</p>
-        <div class="card-actions">
-          <a href="review.html?id=${anime.id}" class="btn-review">
-            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Review
-          </a>
-          <a href="${anime.link}" target="_blank" class="btn-watch">
-            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-            ကြည့်ရန်
-          </a>
-        </div>
-      </div>`;
-    grid.appendChild(card);
-  });
-}
-
-function setupSearch(allData) {
-  function handle(e) {
-    const term = e.target.value.toLowerCase();
-    const sDesktop = document.getElementById('searchInputDesktop');
-    const sMobile = document.getElementById('searchInputMobile');
-    if (sDesktop && e.target !== sDesktop) sDesktop.value = e.target.value;
-    if (sMobile && e.target !== sMobile) sMobile.value = e.target.value;
-    displayAnimes(allData.filter(a => a.title.toLowerCase().includes(term) || a.year.includes(term)));
-  }
-  document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
-  document.getElementById('searchInputMobile')?.addEventListener('input', handle);
-}
-
-// Mobile menu
-document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-  document.getElementById('mobileDrawer')?.classList.toggle('hidden');
-});
-
-loadFromKV();
-</script>
-
-    <script>
-        // Mobile menu toggle
-        const menuBtn = document.getElementById('mobileMenuBtn');
-        const drawer = document.getElementById('mobileDrawer');
-        menuBtn.addEventListener('click', () => drawer.classList.toggle('hidden'));
-
-        // Sync mobile/desktop search
-        const mobileSearch = document.getElementById('searchInputMobile');
-        const desktopSearch = document.getElementById('searchInputDesktop');
-        if (mobileSearch) {
-            mobileSearch.addEventListener('input', (e) => {
-                if (desktopSearch) desktopSearch.value = e.target.value;
-                desktopSearch && desktopSearch.dispatchEvent(new Event('input'));
-            });
+    async function loadFromKV() {
+        try {
+            const r = await fetch(WORKER_URL + '/anime');
+            const data = await r.json();
+            window.animeData = data;
+            displayAnimes(data);
+            setupSearch(data);
+        } catch (e) {
+            document.getElementById('anime-grid').innerHTML =
+                '<p style="color:#f87171;padding:20px">Loading error: ' + e.message + '</p>';
         }
+    }
 
-        // Active nav on scroll
-        const sections = { home: document.querySelector('main'), about: document.getElementById('about'), contact: document.getElementById('contact') };
-        const navItems = { home: document.getElementById('navHome'), about: document.getElementById('navAbout'), contact: document.getElementById('navContact') };
-        window.addEventListener('scroll', () => {
-            const y = window.scrollY + 100;
-            let active = 'home';
-            if (sections.contact && y >= sections.contact.offsetTop) active = 'contact';
-            else if (sections.about && y >= sections.about.offsetTop) active = 'about';
-            Object.keys(navItems).forEach(k => {
-                navItems[k] && navItems[k].classList.toggle('active', k === active);
-            });
+    function displayAnimes(animes) {
+        const grid = document.getElementById('anime-grid');
+        const countEl = document.getElementById('movieCount');
+        grid.innerHTML = '';
+        countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
+        if (!animes.length) {
+            grid.innerHTML = `<div class="empty-state"><p style="color:#64748b">ဇာတ်ကား မတွေ့ပါ</p></div>`;
+            return;
+        }
+        animes.forEach((anime, index) => {
+            const card = document.createElement('div');
+            card.className = 'anime-card';
+            card.style.animationDelay = `${Math.min(index,20)*30}ms`;
+            card.innerHTML = `
+                <div class="card-img-wrap">
+                    <img src="${anime.image}" alt="${anime.title}" loading="lazy">
+                    <div class="card-overlay"></div>
+                    <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
+                    <span class="year-badge">${anime.year}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-title" title="${anime.title}">${anime.title}</p>
+                    <div class="card-actions">
+                        <a href="review.html?id=${anime.id}" class="btn-review">
+                            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Review
+                        </a>
+                        <a href="${anime.link}" target="_blank" class="btn-watch">
+                            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                            ကြည့်ရန်
+                        </a>
+                    </div>
+                </div>`;
+            grid.appendChild(card);
         });
+    }
+
+    function setupSearch(allData) {
+        function handle(e) {
+            const term = e.target.value.toLowerCase();
+            const sD = document.getElementById('searchInputDesktop');
+            const sM = document.getElementById('searchInputMobile');
+            if (sD && e.target !== sD) sD.value = e.target.value;
+            if (sM && e.target !== sM) sM.value = e.target.value;
+            displayAnimes(allData.filter(a =>
+                a.title.toLowerCase().includes(term) || a.year.includes(term)
+            ));
+        }
+        document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
+        document.getElementById('searchInputMobile')?.addEventListener('input', handle);
+    }
+
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        document.getElementById('mobileDrawer')?.classList.toggle('hidden');
+    });
+
+    // Active nav on scroll
+    const navItems = { home: document.getElementById('navHome'), contact: document.getElementById('navContact') };
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY + 100;
+        const contactEl = document.getElementById('contact');
+        const active = (contactEl && y >= contactEl.offsetTop) ? 'contact' : 'home';
+        Object.keys(navItems).forEach(k => {
+            navItems[k]?.classList.toggle('active', k === active);
+        });
+    });
+
+    loadFromKV();
     </script>
 </body>
 </html>
