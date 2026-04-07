@@ -325,23 +325,32 @@ inpEl.addEventListener('keydown', e => {
 // ══════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════
-window.addEventListener('load', () => {
-  document.getElementById('stxt').textContent = `Anime ${animeData.length} ကား သိပါတယ်`;
-  setReady(true);
+window.addEventListener('load', async () => {
+  // KV ကနေ anime count ဆွဲ
+  try {
+    const r = await fetch(WORKER_URL + '/anime');
+    const list = await r.json();
+    const count = Array.isArray(list) ? list.length : '...';
+    
+    document.getElementById('stxt').textContent = `Anime ${count} ကား သိပါတယ်`;
+    setReady(true);
 
-  // Welcome message (not sent to AI — just UI)
-  const welcomeHtml = `မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>
-NaJu Channel ထဲက Anime <strong>${animeData.length} ကား</strong>ကို သိပါတယ်ဗျ။<br>
+    const welcomeHtml = `မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>
+NaJu Channel ထဲက Anime <strong>${count} ကား</strong>ကို သိပါတယ်ဗျ။<br>
 ဘာမဆို မေးလိုက်ပေါ့ — ကားရှာပေးတာ၊ Recommend ပေးတာ၊ Review ပြောပြတာ ကူညီနိုင်ပါတယ်။`;
 
-  addRow(welcomeHtml, false);
-  addQuickReplies([
-    'ဝမ်းနည်းစရာ ကောင်းတဲ့ ကား ညွှန်းပေး',
-    'Action ကားတွေ ဘာဘာရှိလဲ',
-    'Snowball Earth အကြောင်း ပြောပြပေး',
-    'Random Recommend ပေး',
-    'နောက်ဆုံးထွက် ကားတွေ ဘာတွေလဲ',
-  ]);
+    addRow(welcomeHtml, false);
+    addQuickReplies([
+      'ဝမ်းနည်းစရာ ကောင်းတဲ့ ကား ညွှန်းပေး',
+      'Action ကားတွေ ဘာဘာရှိလဲ',
+      'Snowball Earth အကြောင်း ပြောပြပေး',
+      'Random Recommend ပေး',
+      'နောက်ဆုံးထွက် ကားတွေ ဘာတွေလဲ',
+    ]);
+  } catch(e) {
+    document.getElementById('stxt').textContent = 'AI အသင့်ရှိပါတယ်';
+    setReady(true);
+  }
 });
 </script>
 </body>
