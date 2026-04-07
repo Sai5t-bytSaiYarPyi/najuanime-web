@@ -1,9 +1,33 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="my" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NaJu AI Chat</title>
+
+  <!-- ═══ SEO Meta Tags ═══ -->
+  <title>NaJu AI - မြန်မာ Anime AI Assistant</title>
+  <meta name="description" content="NaJu AI - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ ရှာဖွေရန်၊ Recommend ရယူရန်နှင့် Review မေးမြန်းရန် AI Assistant">
+  <meta name="keywords" content="NaJu AI, မြန်မာ Anime AI, Anime Recommendation Myanmar, NaJu Anime Chat">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.najuanime.com/chat.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.najuanime.com/chat.html">
+  <meta property="og:title" content="NaJu AI - မြန်မာ Anime AI Assistant">
+  <meta property="og:description" content="Anime ဇာတ်ကားများ ရှာဖွေ၊ Recommend ရယူ၊ Review မေးမြန်းနိုင်သည့် AI Assistant">
+  <meta property="og:site_name" content="NaJu Anime">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="NaJu AI - Anime Assistant">
+  <meta name="twitter:description" content="မြန်မာ Anime AI Assistant - ဇာတ်ကားများ ရှာဖွေ Recommend ရယူနိုင်သည်">
+
+  <!-- ═══ Google Analytics 4 — G-XXXXXXXXXX ကို သင့် Measurement ID နဲ့ အစားထိုးပါ ═══ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
@@ -19,7 +43,6 @@
     ::-webkit-scrollbar-track{background:var(--bg2)}
     ::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
 
-    /* Header */
     .hdr{background:rgba(15,17,23,.97);backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);padding:12px 18px;
       display:flex;align-items:center;gap:12px;
@@ -36,7 +59,6 @@
     .dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:bl 2s infinite}
     @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* Messages */
     #msgs{padding:18px 18px 120px;display:flex;flex-direction:column;gap:14px;
       max-width:720px;margin:0 auto}
     .row{display:flex;gap:9px;align-items:flex-end;animation:fu .25s ease both}
@@ -47,18 +69,15 @@
     .av.b{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white}
     .av.u{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
 
-    /* Bubble */
     .bbl{max-width:82%;padding:11px 15px;border-radius:18px;
       font-size:13.5px;line-height:1.7;word-break:break-word}
     .bbl.b{background:var(--bg2);border:1px solid var(--border);
       border-bottom-left-radius:4px;color:var(--text)}
     .bbl.u{background:var(--blue);color:white;border-bottom-right-radius:4px}
 
-    /* Link styling inside bubbles */
     .bbl a{color:#60a5fa;text-decoration:underline;text-underline-offset:2px}
     .bbl a:hover{color:#93c5fd}
 
-    /* Typing indicator */
     .typ{background:var(--bg2);border:1px solid var(--border);
       border-radius:18px;border-bottom-left-radius:4px;
       padding:13px 16px;display:flex;gap:4px;align-items:center}
@@ -67,11 +86,9 @@
     .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
     @keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 
-    /* Error bubble */
     .err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);
       border-radius:12px;padding:10px 14px;font-size:12.5px;color:#fca5a5;margin-top:4px}
 
-    /* Input bar */
     .ibar{position:fixed;bottom:0;left:0;right:0;
       background:rgba(15,17,23,.98);backdrop-filter:blur(20px);
       border-top:1px solid var(--border);padding:11px 18px;z-index:40}
@@ -92,7 +109,6 @@
     #snd:disabled{opacity:.45;cursor:not-allowed}
     #snd svg{width:17px;height:17px;fill:white}
 
-    /* Quick replies */
     .qr{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
     .qb{font-size:12px;padding:6px 12px;border:1px solid var(--border);
       border-radius:99px;background:var(--bg3);color:#94a3b8;
@@ -137,33 +153,18 @@
 
 <script src="data.js"></script>
 <script>
-// ══════════════════════════════════════════════
-// CONFIG — Worker URL ကို deploy ပြီးရင် ထည့်ပါ
-// ══════════════════════════════════════════════
 const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
 
-// ══════════════════════════════════════════════
-// Prepare compact anime list for system prompt
-// (title + year + telegram link + review snippet)
-// Sent once per message to keep context fresh
-// ══════════════════════════════════════════════
 const ANIME_LIST = animeData.map(a => ({
   title:   a.title,
   year:    a.year,
   link:    a.link,
-  // Trim review to 180 chars to keep payload lean
   snippet: (a.review || '').replace(/\s+/g, ' ').trim().slice(0, 180) || '',
 }));
 
-// ══════════════════════════════════════════════
-// Conversation history (multi-turn)
-// ══════════════════════════════════════════════
-let history = [];    // [{role:'user'|'assistant', content:'...'}]
+let history = [];
 let busy    = false;
 
-// ══════════════════════════════════════════════
-// UI helpers
-// ══════════════════════════════════════════════
 const msgsEl = document.getElementById('msgs');
 const inpEl  = document.getElementById('inp');
 const sndEl  = document.getElementById('snd');
@@ -191,7 +192,6 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Convert plain URLs in AI text → clickable links
 function linkify(text) {
   return text.replace(
     /(https?:\/\/[^\s<>"'）]+)/g,
@@ -199,7 +199,6 @@ function linkify(text) {
   );
 }
 
-// Simple markdown-ish formatting: **bold**, newlines
 function formatAI(text) {
   return linkify(
     escHtml(text)
@@ -241,19 +240,13 @@ function addQuickReplies(arr) {
   scrollEnd();
 }
 
-// ══════════════════════════════════════════════
-// Call Worker
-// ══════════════════════════════════════════════
 async function callWorker(userMsg) {
   history.push({ role: 'user', content: userMsg });
 
   const resp = await fetch(WORKER_URL, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages:  history,
-      animeList: ANIME_LIST,
-    }),
+    body: JSON.stringify({ messages: history, animeList: ANIME_LIST }),
   });
 
   if (!resp.ok) {
@@ -265,23 +258,15 @@ async function callWorker(userMsg) {
   if (data.error) throw new Error(data.error);
   const reply = data.reply || '';
 
-  // Store assistant reply in history for multi-turn
   history.push({ role: 'assistant', content: reply });
-
-  // Keep history max 20 turns (40 messages) to avoid bloat
   if (history.length > 40) history = history.slice(-40);
-
   return reply;
 }
 
-// ══════════════════════════════════════════════
-// Submit message
-// ══════════════════════════════════════════════
 async function submitMsg(text) {
   if (busy || !text.trim()) return;
   busy = true;
   setReady(false);
-
   addRow(text, true);
   showTyping();
 
@@ -291,13 +276,7 @@ async function submitMsg(text) {
     addRow(formatAI(reply), false);
   } catch (err) {
     hideTyping();
-    // Worker URL not configured yet
-    if (WORKER_URL.includes('YOUR_WORKER')) {
-      showError('Worker URL မသတ်မှတ်ရသေးပါ။ SETUP_GUIDE.md ကြည့်ပြီး chat.html ထဲက WORKER_URL ကို ပြောင်းပေးပါ။');
-    } else {
-      showError(`AI ကို ဆက်သွယ်မရဘူးဗျ — ${err.message}`);
-    }
-    // Remove last user message from history if AI failed
+    showError(`AI ကို ဆက်သွယ်မရဘူးဗျ — ${err.message}`);
     if (history[history.length - 1]?.role === 'user') history.pop();
   }
 
@@ -313,7 +292,6 @@ function send() {
   submitMsg(t);
 }
 
-// Auto-resize textarea
 inpEl.addEventListener('input', () => {
   inpEl.style.height = 'auto';
   inpEl.style.height = Math.min(inpEl.scrollHeight, 120) + 'px';
@@ -322,16 +300,12 @@ inpEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
-// ══════════════════════════════════════════════
-// Init
-// ══════════════════════════════════════════════
 window.addEventListener('load', async () => {
-  // KV ကနေ anime count ဆွဲ
   try {
     const r = await fetch(WORKER_URL + '/anime');
     const list = await r.json();
     const count = Array.isArray(list) ? list.length : '...';
-    
+
     document.getElementById('stxt').textContent = `Anime ${count} ကား သိပါတယ်`;
     setReady(true);
 
