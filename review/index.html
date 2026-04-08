@@ -284,15 +284,24 @@ async function upvote(revId, animeId) {
   if (!btn||btn.disabled) return;
   btn.disabled=true;
   try {
-    const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(animeId)}/${encodeURIComponent(revId)}/helpful`,
-      { method:'POST' });
+    const r = await fetch(
+      `${WORKER_URL}/reviews/${encodeURIComponent(animeId)}/${encodeURIComponent(revId)}/helpful`,
+      { method:'POST' }
+    );
     const d = await r.json();
     if (d.success) {
       document.getElementById(`hc-${revId}`).textContent = fmtN(d.helpful);
       btn.classList.add('voted');
       votedSet.add(revId); saveVoted();
+    } else {
+      // ← ဒါ ထည့်ပါ
+      console.error('Helpful failed:', d);
+      btn.disabled=false;
     }
-  } catch { btn.disabled=false; }
+  } catch(e) {
+    console.error('Helpful error:', e);
+    btn.disabled=false;
+  }
 }
 
 // ── Load Reviews ──────────────────────────────────────
