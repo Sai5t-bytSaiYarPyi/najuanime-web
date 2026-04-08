@@ -142,11 +142,11 @@
 
 <header>
   <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="back-btn">
+    <a href="/" class="back-btn">
       <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
       နောက်သို့
     </a>
-    <a href="index.html" class="text-lg font-black tracking-tight">
+    <a href="/" class="text-lg font-black tracking-tight">
       <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
       <span style="color:var(--muted);font-weight:600;font-size:13px;margin-left:4px">Review</span>
     </a>
@@ -416,7 +416,7 @@ async function loadReview() {
     const animeData = await r.json();
     const anime = animeData.find(a=>a.id===currentAnimeId);
     if (!anime) {
-      container.innerHTML=`<div class="error-state"><p style="color:#f87171;font-size:16px;font-weight:700">ဇာတ်ကားရှာမတွေ့ပါ</p><a href="index.html" style="color:var(--blue);font-size:14px;font-weight:600;text-decoration:none;display:block;margin-top:12px">← ပင်မစာမျက်နှာ</a></div>`;
+      container.innerHTML=`<div class="error-state"><p style="color:#f87171;font-size:16px;font-weight:700">ဇာတ်ကားရှာမတွေ့ပါ</p><a href="/" style="color:var(--blue);font-size:14px;font-weight:600;text-decoration:none;display:block;margin-top:12px">← ပင်မစာမျက်နှာ</a></div>`;
       return;
     }
 
