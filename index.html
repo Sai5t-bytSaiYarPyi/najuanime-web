@@ -20,10 +20,6 @@
   <meta name="twitter:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime">
   <meta name="twitter:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
   <meta name="twitter:image" content="https://www.najuanime.com/images/og-cover.jpg">
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"NaJu Anime","url":"https://www.najuanime.com","description":"မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်","inLanguage":"my","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.najuanime.com/?q={search_term_string}"},"query-input":"required name=search_term_string"}}
@@ -119,20 +115,6 @@
     .drawer-link{display:flex;align-items:center;gap:10px;padding:10px 0;color:#94a3b8;text-decoration:none;font-weight:600;font-size:14px;border-bottom:1px solid var(--border);transition:color .2s}
     .drawer-link:hover{color:white}.drawer-link:last-child{border-bottom:none}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-
-    @media(max-width:640px){
-  .btn-review, .btn-watch{
-    font-size:11px;
-    padding:7px 3px;
-    gap:3px;
-  }
-  .btn-review svg, .btn-watch svg{
-    width:10px; height:10px;
-  }
-  .card-title{font-size:12px}
-  .genre-chip{font-size:11px; padding:5px 10px}
-  .card-genre-pill{font-size:9px; padding:2px 5px}
-    }
   </style>
 </head>
 <body class="min-h-screen pb-20 md:pb-0">
@@ -355,7 +337,7 @@ function displayAnimes(animes) {
         <p class="card-title" title="${anime.title}">${anime.title}</p>
         ${genrePills?`<div class="card-genres">${genrePills}</div>`:''}
         <div class="card-actions">
-          <a href="/review?id=${anime.id}" class="btn-review">
+          <a href="review.html?id=${anime.id}" class="btn-review">
             <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Review
           </a>
