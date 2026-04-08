@@ -3,1479 +3,416 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NaJu Anime — မြန်မာဘာသာပြန် Anime</title>
-  <meta name="description" content="NaJu Anime — မြန်မာဘာသာပြန် Anime ဇာတ်ကား ၁၀၀ ကျော် Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်">
+  <title>NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ</title>
+  <meta name="description" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားပေါင်း ၁၀၀ ကျော်ကို Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။ Action, Drama, Romance Anime များ ရှာဖွေကြည့်ရှုနိုင်သည်။">
+  <meta name="keywords" content="NaJu Anime, မြန်မာ Anime, Myanmar Anime, ဘာသာပြန် Anime, Anime Myanmar, မြန်မာ ကာတွန်း, Telegram Anime">
+  <meta name="author" content="NaJu Anime">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://www.najuanime.com/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="NaJu Anime — မြန်မာဘာသာပြန် Anime">
-  <meta property="og:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်">
+  <meta property="og:url" content="https://www.najuanime.com/">
+  <meta property="og:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ">
+  <meta property="og:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားပေါင်း ၁၀၀ ကျော်ကို Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
   <meta property="og:image" content="https://www.najuanime.com/images/og-cover.jpg">
   <meta property="og:site_name" content="NaJu Anime">
+  <meta property="og:locale" content="my_MM">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime">
+  <meta name="twitter:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
+  <meta name="twitter:image" content="https://www.najuanime.com/images/og-cover.jpg">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2308080f'/%3E%3Crect x='6' y='6' width='88' height='88' rx='16' fill='none' stroke='%23e8003d' stroke-width='4'/%3E%3Cpath d='M28 25 L28 75 L42 75 L42 42 L58 75 L72 75 L72 25 L58 25 L58 58 L42 25 Z' fill='%23e8003d'/%3E%3C/svg%3E">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"NaJu Anime","url":"https://www.najuanime.com","description":"မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်","inLanguage":"my","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.najuanime.com/?q={search_term_string}"},"query-input":"required name=search_term_string"}}
+  </script>
 
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBNCZMJS9F"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-NBNCZMJS9F');</script>
 
-  <!-- Fonts: Bebas Neue for display, Outfit for body -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    /* ─── DESIGN TOKENS ─────────────────────────────── */
-    :root {
-      --bg:     #08080f;
-      --bg2:    #0d0c1a;
-      --bg3:    #131228;
-      --bg4:    #1c1b35;
-      --red:    #e8003d;
-      --red2:   #ff1f50;
-      --cyan:   #00c8ff;
-      --gold:   #ffc200;
-      --purple: #a855f7;
-      --green:  #22d35d;
-      --text:   #ededf6;
-      --text2:  #9898b8;
-      --muted:  #4e4e6a;
-      --border: rgba(255,255,255,0.055);
-      --border2:rgba(255,255,255,0.10);
-      --r:      12px;
-      --r2:     8px;
+    *{font-family:'Outfit',sans-serif;}
+    :root{
+      --blue:#3b82f6;--blue-dark:#1d4ed8;
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+      --border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;
     }
+    body{background:var(--bg);color:var(--text);}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
 
-    /* ─── RESET & BASE ──────────────────────────────── */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Outfit', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    header{background:rgba(15,17,23,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .logo-naju{color:var(--blue)}.logo-anime{color:white}
+    .search-wrap{position:relative}
+    .search-wrap input{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:12px;padding:10px 16px 10px 44px;width:100%;font-size:14px;transition:border-color .2s,box-shadow .2s;outline:none;}
+    .search-wrap input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+    .search-wrap input::placeholder{color:var(--muted)}
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+    .nav-link{color:#94a3b8;font-weight:600;font-size:14px;letter-spacing:.02em;transition:color .2s;text-decoration:none}
+    .nav-link:hover{color:white}
 
-    /* Noise texture overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
+    .ai-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;color:white;background:linear-gradient(135deg,#1e40af 0%,#3b82f6 50%,#06b6d4 100%);box-shadow:0 0 16px rgba(59,130,246,.4),0 2px 8px rgba(0,0,0,.3);transition:box-shadow .25s,transform .15s;position:relative;overflow:hidden;letter-spacing:.02em}
+    .ai-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.08) 100%);opacity:0;transition:opacity .2s}
+    .ai-btn:hover{box-shadow:0 0 28px rgba(59,130,246,.65),0 4px 16px rgba(0,0,0,.4);transform:translateY(-1px)}
+    .ai-btn:hover::before{opacity:1}
+    .ai-btn:active{transform:scale(.96)}
+    .ai-btn-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:aiPulse 2s infinite;flex-shrink:0}
+    @keyframes aiPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 99px; }
+    .ai-btn-mobile{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;font-size:10px;font-weight:700;flex:1;color:#60a5fa}
+    .ai-btn-mobile .icon-wrap{width:28px;height:28px;background:linear-gradient(135deg,#1e40af,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(59,130,246,.45)}
 
-    /* ─── TYPOGRAPHY ────────────────────────────────── */
-    .bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; }
+    .section-title{font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:10px}
+    .section-title::before{content:'';display:block;width:4px;height:20px;background:var(--blue);border-radius:99px}
 
-    /* ─── PAGE TRANSITIONS ──────────────────────────── */
-    #app { position: relative; z-index: 1; }
-    .page { animation: pgIn 0.35s cubic-bezier(.22,.68,0,1.2) both; }
-    @keyframes pgIn {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.4s ease both; }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    /* ── Genre / Sort Bar ── */
+    .genre-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+    .genre-bar::-webkit-scrollbar{display:none}
+    .genre-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:var(--bg3);color:#94a3b8;flex-shrink:0;font-family:'Outfit',sans-serif}
+    .genre-chip:hover{border-color:rgba(168,85,247,.4);color:#c084fc;background:rgba(168,85,247,.06)}
+    .genre-chip.active{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:#c084fc}
+    /* special chips */
+    .genre-chip.popular{color:#f59e0b;border-color:rgba(245,158,11,.25);background:var(--bg3)}
+    .genre-chip.popular:hover{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07)}
+    .genre-chip.popular.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.45);color:#fbbf24}
+    .genre-chip.all{color:#94a3b8}
+    .genre-chip.all.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#60a5fa}
 
-    /* ─── HEADER ────────────────────────────────────── */
-    #site-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(8,8,15,0.88);
-      backdrop-filter: blur(20px) saturate(160%);
-      border-bottom: 1px solid var(--border);
-    }
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 20px;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    /* ── Cards ── */
+    .anime-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;animation:fadeUp .4s ease both}
+    .anime-card:hover{transform:translateY(-4px);border-color:rgba(59,130,246,.35);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+    .card-img-wrap{position:relative;overflow:hidden;aspect-ratio:3/4}
+    .card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s,opacity .4s}
+    .anime-card:hover .card-img-wrap img{transform:scale(1.07);opacity:.7}
+    .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);pointer-events:none}
+    .card-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+    .anime-card:hover .card-play{opacity:1}
+    .card-play svg{width:48px;height:48px;color:white;filter:drop-shadow(0 2px 8px rgba(0,0,0,.8))}
+    .year-badge{position:absolute;top:10px;right:10px;background:rgba(59,130,246,.9);backdrop-filter:blur(4px);color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.04em}
+    /* ★ rating badge on card (top-left) */
+    .rating-badge-card{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);color:#fbbf24;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:3px}
+    .rating-badge-card .cnt{color:#94a3b8;font-weight:600}
 
-    /* Logo */
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .logo-naju {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      color: var(--red);
-      letter-spacing: 0.04em;
-      line-height: 1;
-    }
-    .logo-anime {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      color: var(--text);
-      letter-spacing: 0.04em;
-      line-height: 1;
-    }
+    .card-body{padding:12px;flex-grow:1;display:flex;flex-direction:column;gap:8px}
+    .card-title{font-size:13px;font-weight:600;color:#e2e8f0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+    .card-genres{display:flex;flex-wrap:wrap;gap:3px}
+    .card-genre-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#c084fc;white-space:nowrap}
+    .card-actions{display:flex;gap:8px;margin-top:auto}
+    .btn-review,.btn-watch{flex:1;text-align:center;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:600;text-decoration:none;transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .btn-review{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-review:hover{background:#263248;color:white}
+    .btn-watch{background:var(--blue);color:white}.btn-watch:hover{background:var(--blue-dark)}
+    .btn-review:active,.btn-watch:active{transform:scale(.96)}
 
-    /* Search bar */
-    .search-wrap {
-      position: relative;
-      flex: 1;
-      max-width: 440px;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-      width: 16px;
-      height: 16px;
-    }
-    .search-wrap input {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 9px 16px 9px 40px;
-      font-size: 13.5px;
-      font-family: 'Outfit', sans-serif;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .search-wrap input:focus {
-      border-color: rgba(232,0,61,0.5);
-      box-shadow: 0 0 0 3px rgba(232,0,61,0.1);
-    }
-    .search-wrap input::placeholder { color: var(--muted); }
+    footer{background:var(--bg);border-top:1px solid var(--border)}
+    .footer-link{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}.footer-link:hover{color:var(--blue)}
+    #mobileDrawer{background:var(--bg2);border-top:1px solid var(--border)}
+    .mobile-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(22,27,39,.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 0;z-index:50}
+    .mobile-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);text-decoration:none;font-size:10px;font-weight:600;transition:color .2s;flex:1}
+    .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--blue)}
+    .mobile-nav-item svg{width:22px;height:22px}
+    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
+    #mobileMenuBtn{color:#94a3b8;background:none;border:none;cursor:pointer}
+    .drawer-link{display:flex;align-items:center;gap:10px;padding:10px 0;color:#94a3b8;text-decoration:none;font-weight:600;font-size:14px;border-bottom:1px solid var(--border);transition:color .2s}
+    .drawer-link:hover{color:white}.drawer-link:last-child{border-bottom:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-    /* Nav links */
-    .nav-link {
-      color: var(--text2);
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      letter-spacing: 0.03em;
-      transition: color 0.2s;
-      white-space: nowrap;
-    }
-    .nav-link:hover { color: var(--text); }
-
-    /* AI Button */
-    .ai-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-      color: white;
-      background: linear-gradient(135deg, #1a0a3a 0%, #4f0a8a 50%, #7c00c8 100%);
-      border: 1px solid rgba(168,85,247,0.35);
-      box-shadow: 0 0 18px rgba(124,0,200,0.3), 0 2px 8px rgba(0,0,0,0.4);
-      transition: box-shadow 0.25s, transform 0.15s;
-      white-space: nowrap;
-      position: relative;
-      overflow: hidden;
-    }
-    .ai-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.06));
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .ai-btn:hover {
-      box-shadow: 0 0 30px rgba(124,0,200,0.5), 0 4px 16px rgba(0,0,0,0.5);
-      transform: translateY(-1px);
-    }
-    .ai-btn:hover::before { opacity: 1; }
-    .ai-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #a855f7;
-      box-shadow: 0 0 8px #a855f7;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
-
-    /* Mobile menu btn */
-    .menu-btn {
-      background: none;
-      border: none;
-      color: var(--text2);
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-    }
-    .mobile-drawer {
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-    }
-    .drawer-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 0;
-      color: var(--text2);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-      transition: color 0.2s;
-    }
-    .drawer-link:last-child { border: none; }
-    .drawer-link:hover { color: var(--text); }
-
-    /* ─── GENRE / FILTER BAR ────────────────────────── */
-    .filter-bar {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      padding: 4px 0 8px;
-      scrollbar-width: none;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 14px;
-      border-radius: 99px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      cursor: pointer;
-      border: 1px solid var(--border2);
-      background: var(--bg3);
-      color: var(--text2);
-      transition: all 0.15s;
-      flex-shrink: 0;
-      font-family: 'Outfit', sans-serif;
-    }
-    .chip:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
-    .chip.active-all  { background: rgba(232,0,61,.15); border-color: rgba(232,0,61,.4); color: var(--red2); }
-    .chip.active-pop  { background: rgba(255,194,0,.12); border-color: rgba(255,194,0,.35); color: var(--gold); }
-    .chip.active-genre{ background: rgba(168,85,247,.15); border-color: rgba(168,85,247,.4); color: #c084fc; }
-
-    /* ─── SECTION TITLE ─────────────────────────────── */
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .section-title-bar {
-      width: 4px;
-      height: 22px;
-      background: var(--red);
-      border-radius: 99px;
-      box-shadow: 0 0 12px rgba(232,0,61,0.5);
-    }
-    .section-title h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 22px;
-      letter-spacing: 0.06em;
-      color: var(--text);
-    }
-
-    /* ─── ANIME GRID ────────────────────────────────── */
-    .anime-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-    @media (min-width: 480px)  { .anime-grid { grid-template-columns: repeat(3,1fr); } }
-    @media (min-width: 768px)  { .anime-grid { grid-template-columns: repeat(4,1fr); gap: 16px; } }
-    @media (min-width: 1024px) { .anime-grid { grid-template-columns: repeat(5,1fr); } }
-    @media (min-width: 1280px) { .anime-grid { grid-template-columns: repeat(6,1fr); } }
-
-    /* ─── ANIME CARD ────────────────────────────────── */
-    .anime-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2), box-shadow 0.28s, border-color 0.28s;
-      animation: fadeUp 0.4s ease both;
-      cursor: pointer;
-      position: relative;
-    }
-    .anime-card:hover {
-      transform: translateY(-5px) scale(1.01);
-      border-color: rgba(232,0,61,0.3);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,0,61,0.15);
-    }
-    /* Red top accent on hover */
-    .anime-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--red), var(--red2));
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-    .anime-card:hover::after { opacity: 1; }
-
-    .card-img-wrap {
-      position: relative;
-      overflow: hidden;
-      aspect-ratio: 2/3;
-      background: var(--bg3);
-    }
-    .card-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.4s ease, filter 0.3s;
-      display: block;
-    }
-    .anime-card:hover .card-img-wrap img {
-      transform: scale(1.07);
-      filter: brightness(0.65);
-    }
-    .card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(8,8,15,0.92) 0%, rgba(8,8,15,0.3) 45%, transparent 70%);
-      pointer-events: none;
-    }
-    .card-play {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-    .anime-card:hover .card-play { opacity: 1; }
-    .card-play svg {
-      width: 46px; height: 46px;
-      color: white;
-      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.9));
-    }
-
-    /* Badges */
-    .badge-year {
-      position: absolute;
-      top: 10px; right: 10px;
-      background: var(--red);
-      color: white;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 5px;
-      letter-spacing: 0.06em;
-      box-shadow: 0 2px 8px rgba(232,0,61,0.5);
-    }
-    .badge-rating {
-      position: absolute;
-      top: 10px; left: 10px;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(8px);
-      color: var(--gold);
-      font-size: 10.5px;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      border: 1px solid rgba(255,194,0,0.2);
-    }
-    .badge-rating .cnt { color: var(--text2); font-weight: 600; }
-
-    /* Card body */
-    .card-body {
-      padding: 10px 10px 12px;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-    .card-title {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      min-height: 34px;
-    }
-    .card-genres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px;
-    }
-    .card-actions {
-      display: flex;
-      gap: 7px;
-      margin-top: auto;
-    }
-    .btn-review, .btn-watch {
-      flex: 1;
-      text-align: center;
-      padding: 7px 4px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.18s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      border: none;
-      font-family: 'Outfit', sans-serif;
-    }
-    .btn-review {
-      background: var(--bg4);
-      color: var(--text2);
-      border: 1px solid var(--border2);
-    }
-    .btn-review:hover { background: #22204a; color: var(--text); }
-    .btn-watch {
-      background: var(--red);
-      color: white;
-    }
-    .btn-watch:hover { background: var(--red2); box-shadow: 0 4px 14px rgba(232,0,61,0.4); }
-    .btn-review:active, .btn-watch:active { transform: scale(0.96); }
-
-    /* Genre pill colors */
-    .gp {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 99px;
-      white-space: nowrap;
-    }
-    .gp-action  { background:rgba(232,0,61,.1);   color:#ff4d75; border:1px solid rgba(232,0,61,.2); }
-    .gp-drama   { background:rgba(0,200,255,.08);  color:#5cd8ff; border:1px solid rgba(0,200,255,.18); }
-    .gp-romance { background:rgba(255,64,180,.1);  color:#ff8fe0; border:1px solid rgba(255,64,180,.2); }
-    .gp-comedy  { background:rgba(255,194,0,.1);   color:#ffd34d; border:1px solid rgba(255,194,0,.2); }
-    .gp-fantasy { background:rgba(168,85,247,.1);  color:#c084fc; border:1px solid rgba(168,85,247,.2); }
-    .gp-scifi   { background:rgba(0,230,180,.08);  color:#5cf0c8; border:1px solid rgba(0,230,180,.18); }
-    .gp-horror  { background:rgba(180,0,0,.12);    color:#ff6b6b; border:1px solid rgba(180,0,0,.25); }
-    .gp-slice   { background:rgba(34,211,93,.08);  color:#4ade80; border:1px solid rgba(34,211,93,.18); }
-    .gp-school  { background:rgba(100,149,237,.1); color:#93b8ff; border:1px solid rgba(100,149,237,.2); }
-    .gp-default { background:rgba(120,120,180,.1); color:#a0a0d0; border:1px solid rgba(120,120,180,.2); }
-
-    /* ─── EMPTY / LOADING ────────────────────────────── */
-    .loading-center {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 80px 20px; gap: 14px; color: var(--muted);
-    }
-    .spinner {
-      width: 38px; height: 38px;
-      border: 3px solid var(--border2);
-      border-top-color: var(--red);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .sm-spin {
-      width: 16px; height: 16px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--text);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-      display: inline-block; vertical-align: middle;
-    }
-    .empty-state {
-      grid-column: 1/-1;
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
-    }
-
-    /* ─── MOBILE NAV ─────────────────────────────────── */
-    .mobile-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(8,8,15,0.97);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
-      padding: 10px 0 14px;
-      z-index: 100;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-    .mob-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 10px;
-      font-weight: 700;
-      transition: color 0.2s;
-      flex: 1;
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: 'Outfit', sans-serif;
-    }
-    .mob-item svg { width: 22px; height: 22px; }
-    .mob-item.active, .mob-item:hover { color: var(--red); }
-    .mob-ai-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      font-size: 10px;
-      font-weight: 700;
-      color: #c084fc;
-      text-decoration: none;
-    }
-    .mob-ai-icon {
-      width: 30px; height: 30px;
-      background: linear-gradient(135deg, #4f0a8a, #a855f7);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 14px rgba(168,85,247,0.5);
-    }
-
-    /* ─── REVIEW PAGE ────────────────────────────────── */
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text2);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      transition: color 0.2s;
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: 'Outfit', sans-serif;
-    }
-    .back-btn:hover { color: var(--red); }
-
-    .poster-card {
-      border-radius: var(--r);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,0,61,0.1);
-      flex-shrink: 0;
-    }
-    .poster-card img { width: 100%; display: block; }
-
-    .rv-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      letter-spacing: 0.03em;
-      color: var(--text);
-      line-height: 1.1;
-    }
-    @media(max-width:640px) { .rv-title { font-size: 24px; } }
-
-    .stat-box {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 14px;
-      text-align: center;
-      flex: 1;
-    }
-    .stat-box .val { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1.1; }
-    .stat-box .lbl { font-size: 10.5px; font-weight: 600; color: var(--muted); margin-top: 2px; }
-
-    .synopsis-box {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 20px;
-    }
-    .synopsis-box h3 {
-      font-size: 12px;
-      font-weight: 800;
-      color: rgba(0,200,255,0.9);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .synopsis-text {
-      font-size: 13.5px;
-      color: var(--text2);
-      line-height: 1.9;
-      white-space: pre-line;
-    }
-
-    .watch-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 15px;
-      background: var(--red);
-      color: white;
-      font-size: 14px;
-      font-weight: 800;
-      border-radius: 12px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(232,0,61,0.35);
-      letter-spacing: 0.02em;
-    }
-    .watch-btn:hover {
-      background: var(--red2);
-      box-shadow: 0 6px 28px rgba(232,0,61,0.5);
-      transform: translateY(-1px);
-    }
-
-    /* Rating & Reviews section */
-    .rating-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 22px;
-    }
-    .star-row { display: flex; gap: 5px; }
-    .star {
-      width: 28px; height: 28px;
-      cursor: pointer;
-      color: var(--bg4);
-      transition: color 0.12s, transform 0.12s;
-      flex-shrink: 0;
-    }
-    .star:hover, .star.on { color: var(--gold); transform: scale(1.2); }
-    .star svg { width: 100%; height: 100%; }
-
-    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 7px; }
-    .form-input, .form-textarea {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 11px 14px;
-      font-size: 13.5px;
-      font-family: 'Outfit', sans-serif;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .form-input:focus, .form-textarea:focus {
-      border-color: rgba(232,0,61,0.5);
-      box-shadow: 0 0 0 3px rgba(232,0,61,0.1);
-    }
-    .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
-    .form-textarea { resize: vertical; min-height: 88px; }
-    .submit-btn {
-      width: 100%; padding: 13px;
-      background: var(--red); color: white;
-      font-size: 13.5px; font-weight: 800;
-      font-family: 'Outfit', sans-serif;
-      border: none; border-radius: 11px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 4px 16px rgba(232,0,61,0.3);
-    }
-    .submit-btn:hover { background: var(--red2); }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Avg score */
-    .avg-wrap {
-      display: flex; align-items: center; gap: 14px;
-      background: rgba(255,194,0,0.05);
-      border: 1px solid rgba(255,194,0,0.15);
-      border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;
-    }
-    .avg-num { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--gold); line-height:1; flex-shrink:0; }
-    .avg-stars { display:flex; gap:3px; margin-bottom:4px; }
-    .avg-star { width:14px; height:14px; color:var(--gold); }
-    .avg-star.e { color: var(--bg4); }
-    .avg-sub { font-size:12px; color:#a07020; font-weight:700; }
-
-    /* Sort tabs */
-    .sort-tabs { display:flex; gap:6px; flex-wrap:wrap; }
-    .sort-tab {
-      padding: 6px 13px; border-radius:99px; font-size:11.5px; font-weight:700;
-      cursor:pointer; border:1px solid var(--border); background:var(--bg3);
-      color:var(--text2); transition:all .15s; font-family:'Outfit',sans-serif;
-    }
-    .sort-tab:hover { border-color:var(--border2); color:var(--text); }
-    .sort-tab.active { background:rgba(232,0,61,.12); border-color:rgba(232,0,61,.35); color:var(--red2); }
-
-    /* Review card */
-    .rev-card {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-    }
-    .rev-name { font-size:13px; font-weight:700; color:var(--text); }
-    .rev-date { font-size:11px; color:var(--muted); }
-    .rating-pill {
-      display:inline-flex; align-items:center; gap:3px;
-      background:rgba(255,194,0,.1); border:1px solid rgba(255,194,0,.22);
-      color:var(--gold); font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px;
-    }
-    .rev-text { font-size:13px; color:var(--text2); line-height:1.75; white-space:pre-wrap; word-break:break-word; }
-    .rev-text.clamped { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
-    .read-more-btn {
-      background:none; border:none; color:var(--cyan); font-size:12px; font-weight:700;
-      cursor:pointer; padding:4px 0; font-family:'Outfit',sans-serif; transition:color .15s;
-    }
-    .read-more-btn:hover { color:#7ee6ff; }
-    .helpful-btn {
-      display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:99px;
-      font-size:11px; font-weight:700; border:1px solid var(--border); background:var(--bg2);
-      color:var(--muted); cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; margin-top:8px;
-    }
-    .helpful-btn:hover { border-color:rgba(232,0,61,.3); color:var(--red2); }
-    .helpful-btn.voted { border-color:rgba(232,0,61,.35); color:var(--red2); background:rgba(232,0,61,.07); }
-    .helpful-btn:disabled { cursor:default; opacity:.7; }
-    .load-more-btn {
-      width:100%; padding:11px; background:var(--bg3); border:1px solid var(--border);
-      color:var(--text2); font-size:13px; font-weight:700; border-radius:11px;
-      cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; margin-top:10px;
-    }
-    .load-more-btn:hover { background:var(--bg4); color:var(--text); border-color:rgba(232,0,61,.25); }
-    .load-more-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-    /* Toast */
-    .toast {
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px);
-      padding:10px 22px; border-radius:99px; font-size:13px; font-weight:700;
-      z-index:999; opacity:0; transition:all .3s; pointer-events:none; white-space:nowrap;
-      box-shadow:0 8px 32px rgba(0,0,0,.6);
-    }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.ok  { background:#0e2a0e; border:1px solid rgba(34,211,93,.3); color:#4ade80; }
-    .toast.err { background:#2a0e0e; border:1px solid rgba(232,0,61,.3); color:var(--red2); }
-
-    /* ─── FOOTER ─────────────────────────────────────── */
-    .footer {
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      padding: 48px 0 80px;
-    }
-    @media(min-width:768px) { .footer { padding-bottom: 48px; } }
-    .footer-logo { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.04em; }
-    .footer-link {
-      color: var(--muted); text-decoration:none; font-size:13.5px;
-      transition:color .2s;
-    }
-    .footer-link:hover { color: var(--red); }
-    .footer-quote {
-      font-size: 13px; color: var(--muted); line-height: 1.8;
-      font-style: italic;
-      border-left: 2px solid var(--red);
-      padding-left: 12px;
-    }
-
-    /* ─── UTILITIES ─────────────────────────────────── */
-    .pb-safe { padding-bottom: 72px; }
-    @media(min-width:768px) { .pb-safe { padding-bottom: 0; } }
-    .hidden { display: none !important; }
-
-    /* Count badge */
-    .count-badge {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text2);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 99px;
+    @media(max-width:640px){
+  .btn-review, .btn-watch{
+    font-size:11px;
+    padding:7px 3px;
+    gap:3px;
+  }
+  .btn-review svg, .btn-watch svg{
+    width:10px; height:10px;
+  }
+  .card-title{font-size:12px}
+  .genre-chip{font-size:11px; padding:5px 10px}
+  .card-genre-pill{font-size:9px; padding:2px 5px}
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen pb-20 md:pb-0">
 
-<!-- ═══ HEADER ══════════════════════════════════════ -->
-<header id="site-header">
-  <div class="header-inner">
-    <!-- Logo -->
-    <a href="#/" class="logo" onclick="navHome()">
-      <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
-    </a>
+  <header class="sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-4">
+        <a href="#" class="flex-shrink-0 text-2xl font-black tracking-tight hover:opacity-80 transition-opacity">
+          <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
+        </a>
+        <div class="flex-grow max-w-lg hidden sm:block search-wrap">
+          <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInputDesktop" placeholder="ဇာတ်ကားနာမည် ရှာရန်...">
+        </div>
+        <nav class="hidden md:flex items-center gap-6 ml-auto">
+          <a href="#" class="nav-link">ပင်မစာမျက်နှာ</a>
+          <a href="#contact" class="nav-link">ဆက်သွယ်</a>
+          <a href="chat.html" class="ai-btn">
+            <span class="ai-btn-dot"></span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
+            NaJu AI
+          </a>
+        </nav>
+        <button id="mobileMenuBtn" class="md:hidden ml-auto p-1">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+      <div class="mt-3 sm:hidden search-wrap">
+        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="searchInputMobile" placeholder="ဇာတ်ကားရှာရန်...">
+      </div>
+    </div>
+    <div id="mobileDrawer" class="hidden md:hidden">
+      <div class="max-w-7xl mx-auto px-4 py-2">
+        <a href="#" class="drawer-link"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>ပင်မစာမျက်နှာ</a>
+        <a href="#contact" class="drawer-link"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>ဆက်သွယ်ရန်</a>
+        <a href="chat.html" class="drawer-link" style="color:#60a5fa"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>NaJu AI Chat</a>
+      </div>
+    </div>
+  </header>
 
-    <!-- Desktop search -->
-    <div class="search-wrap hidden md:block" id="desktopSearch">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input type="text" id="searchD" placeholder="ဇာတ်ကားရှာရန်..." autocomplete="off">
+  <main class="max-w-7xl mx-auto px-4 md:px-6 mt-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="section-title">ဇာတ်ကားစာရင်းများ</h2>
+      <span id="movieCount" style="color:var(--muted);font-size:13px;font-weight:600"></span>
     </div>
 
-    <!-- Desktop nav -->
-    <nav class="hidden md:flex items-center gap-5 ml-auto">
-      <a href="#/" class="nav-link" onclick="navHome()">ပင်မစာမျက်နှာ</a>
-      <a href="#contact" class="nav-link">ဆက်သွယ်</a>
-      <a href="chat.html" class="ai-btn">
-        <span class="ai-dot"></span>
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/>
-        </svg>
+    <!-- Genre + Sort Bar -->
+    <div class="genre-bar mb-5" id="genreBar">
+      <!-- chips injected by JS -->
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="anime-grid"></div>
+  </main>
+
+  <footer id="contact" style="margin-top:60px">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-10">
+      <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-8">
+        <div class="md:w-1/3 text-center md:text-left">
+          <div class="text-xl font-black mb-3"><span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7">"လူတစ်ယောက်တည်းရဲ့ အားမာန်နဲ့ စတင်ခဲ့ပေမယ့် NaJu ဟာ Anime ချစ်သူများ အားလုံးရဲ့ နားခိုရာ ဖြစ်လာခဲ့ပြီ။"</p>
+        </div>
+        <div class="flex flex-col items-center gap-3">
+          <h3 style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase">Follow Us</h3>
+          <a href="https://www.facebook.com/profile.php?id=61577006233895" target="_blank" class="footer-link">Facebook Page</a>
+          <a href="https://www.tiktok.com/@najuanime23" target="_blank" class="footer-link">TikTok</a>
+        </div>
+        <div class="flex flex-col items-center md:items-end gap-3">
+          <h3 style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase">ဆက်သွယ်ရန်</h3>
+          <a href="https://t.me/NaJu_New" target="_blank" class="footer-link">Telegram: @NaJu_New</a>
+          <a href="mailto:najuanimevipweb@gmail.com" class="footer-link">najuanimevipweb@gmail.com</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:20px;text-align:center">
+        <p style="font-size:12px;color:var(--muted)">© 2026 NaJu Anime. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="mobile-nav md:hidden">
+    <div style="display:flex;justify-content:space-around;align-items:center">
+      <a href="#" class="mobile-nav-item active" id="navHome">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Home
+      </a>
+      <a href="#contact" class="mobile-nav-item" id="navContact">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Contact
+      </a>
+      <a href="chat.html" class="ai-btn-mobile">
+        <div class="icon-wrap">
+          <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
+        </div>
         NaJu AI
       </a>
-    </nav>
-
-    <!-- Mobile menu btn -->
-    <button class="menu-btn md:hidden ml-auto" id="menuBtn">
-      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Mobile search -->
-  <div class="px-4 pb-3 md:hidden" id="mobileSearchWrap" style="display:none!important">
-    <div class="search-wrap" style="max-width:none">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input type="text" id="searchM" placeholder="ဇာတ်ကားရှာရန်..." autocomplete="off">
     </div>
-  </div>
+  </nav>
 
-  <!-- Drawer -->
-  <div id="drawer" class="mobile-drawer hidden md:hidden">
-    <a href="#/" class="drawer-link" onclick="navHome();closeDrawer()">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      ပင်မစာမျက်နှာ
-    </a>
-    <a href="#contact" class="drawer-link" onclick="closeDrawer()">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      ဆက်သွယ်ရန်
-    </a>
-    <a href="chat.html" class="drawer-link" style="color:#c084fc">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
-      NaJu AI Chat
-    </a>
-  </div>
-</header>
-
-<!-- ═══ APP ══════════════════════════════════════════ -->
-<div id="app"></div>
-
-<!-- ═══ FOOTER ══════════════════════════════════════ -->
-<footer class="footer pb-safe" id="contact">
-  <div style="max-width:1280px;margin:0 auto;padding:0 20px">
-    <div style="display:flex;flex-direction:column;gap:32px" class="md:flex-row md:justify-between">
-
-      <div style="max-width:280px">
-        <div class="footer-logo">
-          <span style="color:var(--red)">NaJu</span><span style="color:var(--text)">Anime</span>
-        </div>
-        <p class="footer-quote" style="margin-top:12px">
-          "လူတစ်ယောက်တည်းရဲ့ အားမာန်နဲ့ စတင်ခဲ့ပေမယ့် NaJu ဟာ Anime ချစ်သူများ အားလုံးရဲ့ နားခိုရာ ဖြစ်လာခဲ့ပြီ"
-        </p>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <p style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Follow Us</p>
-        <a href="https://www.facebook.com/profile.php?id=61577006233895" target="_blank" class="footer-link">Facebook Page</a>
-        <a href="https://www.tiktok.com/@najuanime23" target="_blank" class="footer-link">TikTok</a>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <p style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px">ဆက်သွယ်ရန်</p>
-        <a href="https://t.me/NaJu_New" target="_blank" class="footer-link">Telegram: @NaJu_New</a>
-        <a href="mailto:najuanimevipweb@gmail.com" class="footer-link">najuanimevipweb@gmail.com</a>
-      </div>
-    </div>
-
-    <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:32px;text-align:center">
-      <p style="font-size:12px;color:var(--muted)">© 2026 NaJu Anime. All Rights Reserved.</p>
-    </div>
-  </div>
-</footer>
-
-<!-- ═══ MOBILE NAV ════════════════════════════════════ -->
-<nav class="mobile-nav md:hidden">
-  <button class="mob-item active" id="mobHome" onclick="navHome()">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-    Home
-  </button>
-  <a href="#contact" class="mob-item" id="mobContact">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-    Contact
-  </a>
-  <a href="chat.html" class="mob-ai-btn">
-    <div class="mob-ai-icon">
-      <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
-    </div>
-    NaJu AI
-  </a>
-</nav>
-
-<!-- ═══ TOAST ═════════════════════════════════════════ -->
-<div id="toast" class="toast"></div>
-
-<!-- ═══ SCRIPT ════════════════════════════════════════ -->
 <script>
 const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
-const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','')+'K' : String(n);
-const esc  = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const starSvg = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`;
+let allAnimes    = [];
+let reviewsMeta  = new Map();   // animeId → {avg, count}
+let activeGenre  = 'all';
+let sortMode     = 'default';   // 'default' | 'popular'
+let searchTerm   = '';
 
-// State
-let allAnimes   = [];
-let reviewsMeta = new Map();
-let activeGenre = 'all';
-let sortMode    = 'default';
-let searchTerm  = '';
+const fmtN = n => n>=1000 ? (n/1000).toFixed(1).replace('.0','')+'K' : String(n);
 
-// Genre color map
-function gpClass(genre) {
-  if (!genre) return 'gp-default';
-  const g = genre.toLowerCase();
-  if (g.includes('action') || g.includes('martial'))      return 'gp-action';
-  if (g.includes('drama'))                                 return 'gp-drama';
-  if (g.includes('romance') || g.includes('love'))        return 'gp-romance';
-  if (g.includes('comedy') || g.includes('humor'))        return 'gp-comedy';
-  if (g.includes('fantasy') || g.includes('magic'))       return 'gp-fantasy';
-  if (g.includes('sci') || g.includes('mecha'))           return 'gp-scifi';
-  if (g.includes('horror') || g.includes('psycho'))       return 'gp-horror';
-  if (g.includes('slice') || g.includes('iyashikei'))     return 'gp-slice';
-  if (g.includes('school') || g.includes('kids'))         return 'gp-school';
-  return 'gp-default';
-}
-
-// ── UI: mobile drawer ────────────────────────────────
-document.getElementById('menuBtn').addEventListener('click', () => {
-  const d = document.getElementById('drawer');
-  d.classList.toggle('hidden');
-});
-function closeDrawer() { document.getElementById('drawer').classList.add('hidden'); }
-function navHome() {
-  location.hash = '/';
-  document.getElementById('mobHome').classList.add('active');
-}
-
-// ── DATA LOAD ────────────────────────────────────────
-async function loadData() {
-  const [animeRes, lbRes] = await Promise.all([
-    fetch(WORKER_URL + '/anime'),
-    fetch(WORKER_URL + '/reviews/leaderboard'),
-  ]);
-  allAnimes = await animeRes.json();
-  const lb  = await lbRes.json();
-  reviewsMeta = new Map(Array.isArray(lb) ? lb.map(x => [x.id, x]) : []);
-}
-
-// ══════════════════════════════════════════════════════
-// HOME PAGE
-// ══════════════════════════════════════════════════════
-function renderHome() {
-  document.title = 'NaJu Anime — မြန်မာဘာသာပြန် Anime';
-  const app = document.getElementById('app');
-
-  // Show mobile search bar
-  const msw = document.getElementById('mobileSearchWrap');
-  msw.style.removeProperty('display');
-  msw.classList.remove('hidden');
-
-  if (!allAnimes.length) {
-    app.innerHTML = `<div style="max-width:1280px;margin:0 auto;padding:24px 20px">
-      <div class="loading-center"><div class="spinner"></div><span style="font-size:14px">Loading...</span></div>
-    </div>`;
-    loadData().then(() => renderHomeContent());
-    return;
-  }
-  renderHomeContent();
-}
-
-function renderHomeContent() {
-  const app = document.getElementById('app');
-  app.innerHTML = `
-    <div class="page pb-safe" style="max-width:1280px;margin:0 auto;padding:28px 20px">
-      <!-- Title bar -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
-        <div class="section-title">
-          <div class="section-title-bar"></div>
-          <h2>ဇာတ်ကားစာရင်းများ</h2>
-        </div>
-        <span class="count-badge" id="countBadge">— ကား</span>
-      </div>
-
-      <!-- Genre / Filter bar -->
-      <div class="filter-bar" id="filterBar"></div>
-
-      <!-- Grid -->
-      <div class="anime-grid" id="animeGrid"></div>
-    </div>`;
-
-  buildFilterBar();
-  applyFilters();
-  setupSearch();
-}
-
-function buildFilterBar() {
-  const bar = document.getElementById('filterBar');
-  if (!bar) return;
+// ── Genre Bar ─────────────────────────────────────────
+function buildGenreBar(animes) {
+  const counts = {};
+  animes.forEach(a=>(a.genres||[]).forEach(g=>{ counts[g]=(counts[g]||0)+1; }));
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([g])=>g);
+  const bar = document.getElementById('genreBar');
   bar.innerHTML = '';
 
   // Popular chip
-  const pop = mkChip('🏆 Popular', sortMode==='popular' ? 'active-pop' : '', () => toggleSort('popular'));
-  bar.appendChild(pop);
+  const popBtn = document.createElement('button');
+  popBtn.className = `genre-chip popular${sortMode==='popular'?' active':''}`;
+  popBtn.dataset.mode = 'popular';
+  popBtn.textContent = '🏆 Popular';
+  popBtn.onclick = () => setSortMode('popular');
+  bar.appendChild(popBtn);
 
   // All chip
-  const all = mkChip('🎬 အားလုံး', activeGenre==='all' && sortMode==='default' ? 'active-all' : '', () => setGenre('all'));
-  bar.appendChild(all);
+  const allBtn = document.createElement('button');
+  allBtn.className = `genre-chip all${activeGenre==='all'&&sortMode==='default'?' active':''}`;
+  allBtn.dataset.genre = 'all';
+  allBtn.textContent = '🎬 အားလုံး';
+  allBtn.onclick = () => filterGenre('all');
+  bar.appendChild(allBtn);
 
   // Genre chips
-  const counts = {};
-  allAnimes.forEach(a => (a.genres||[]).forEach(g => { counts[g]=(counts[g]||0)+1; }));
-  Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([g]) => {
-    const ch = mkChip(g, activeGenre===g && sortMode==='default' ? 'active-genre' : '', () => setGenre(g));
-    bar.appendChild(ch);
+  sorted.forEach(genre => {
+    const btn = document.createElement('button');
+    btn.className = `genre-chip${activeGenre===genre&&sortMode==='default'?' active':''}`;
+    btn.dataset.genre = genre;
+    btn.textContent = genre;
+    btn.onclick = () => filterGenre(genre);
+    bar.appendChild(btn);
   });
 }
 
-function mkChip(label, cls, onClick) {
-  const b = document.createElement('button');
-  b.className = 'chip' + (cls ? ' ' + cls : '');
-  b.textContent = label;
-  b.onclick = onClick;
-  return b;
-}
-
-function toggleSort(mode) {
-  sortMode = sortMode === mode ? 'default' : mode;
-  if (sortMode === 'popular') activeGenre = 'all';
-  buildFilterBar();
+function setSortMode(mode) {
+  sortMode = mode;
+  if (mode==='popular') activeGenre = 'all';
+  updateChipStates();
   applyFilters();
 }
 
-function setGenre(g) {
+function filterGenre(genre) {
   sortMode = 'default';
-  activeGenre = g;
-  buildFilterBar();
+  activeGenre = genre;
+  updateChipStates();
   applyFilters();
+}
+
+function updateChipStates() {
+  document.querySelectorAll('[data-genre]').forEach(el => {
+    el.classList.toggle('active', sortMode==='default' && el.dataset.genre===activeGenre);
+  });
+  document.querySelectorAll('[data-mode]').forEach(el => {
+    el.classList.toggle('active', sortMode===el.dataset.mode);
+  });
 }
 
 function applyFilters() {
-  let list = [...allAnimes];
-  if (activeGenre !== 'all')
-    list = list.filter(a => (a.genres||[]).includes(activeGenre));
-  if (searchTerm)
-    list = list.filter(a =>
+  let list = allAnimes;
+  if (activeGenre !== 'all') {
+    list = list.filter(a=>(a.genres||[]).includes(activeGenre));
+  }
+  if (searchTerm) {
+    list = list.filter(a=>
       a.title.toLowerCase().includes(searchTerm) ||
       a.year.includes(searchTerm) ||
-      (a.genres||[]).some(g => g.toLowerCase().includes(searchTerm))
+      (a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm))
     );
-  if (sortMode === 'popular')
-    list.sort((a,b) => (reviewsMeta.get(b.id)?.count||0) - (reviewsMeta.get(a.id)?.count||0));
-
-  const badge = document.getElementById('countBadge');
-  if (badge) badge.textContent = `${list.length} ကား`;
-  renderGrid(list);
+  }
+  if (sortMode === 'popular') {
+    list = [...list].sort((a,b)=>{
+      const ma = reviewsMeta.get(a.id);
+      const mb = reviewsMeta.get(b.id);
+      return (mb?.count||0) - (ma?.count||0);
+    });
+  }
+  displayAnimes(list);
 }
 
-function renderGrid(animes) {
-  const grid = document.getElementById('animeGrid');
-  if (!grid) return;
+// ── Display ───────────────────────────────────────────
+function displayAnimes(animes) {
+  const grid    = document.getElementById('anime-grid');
+  const countEl = document.getElementById('movieCount');
+  grid.innerHTML = '';
+  countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
   if (!animes.length) {
-    grid.innerHTML = `<div class="empty-state">
-      <svg width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 12px;color:var(--muted)">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <p style="font-size:14px;font-weight:700;color:var(--muted)">ဇာတ်ကား မတွေ့ရှိပါ</p>
-    </div>`;
+    grid.innerHTML=`<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;color:#475569"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><p style="font-size:15px;font-weight:600;color:#64748b">ဇာတ်ကား မတွေ့ရှိပါ</p></div>`;
     return;
   }
-  grid.innerHTML = animes.map((a, i) => {
-    const meta  = reviewsMeta.get(a.id);
-    const rBadge = meta?.count > 0
-      ? `<div class="badge-rating">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>` : '';
-    const genres = (a.genres||[]).slice(0,2).map(g =>
-      `<span class="gp ${gpClass(g)}">${esc(g)}</span>`).join('');
-    return `
-      <div class="anime-card" style="animation-delay:${Math.min(i,20)*25}ms">
-        <div class="card-img-wrap">
-          <img src="${esc(a.image||'')}" alt="${esc(a.title)}" loading="lazy">
-          <div class="card-overlay"></div>
-          <div class="card-play">
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <span class="badge-year">${esc(a.year)}</span>
-          ${rBadge}
-        </div>
-        <div class="card-body">
-          <p class="card-title" title="${esc(a.title)}">${esc(a.title)}</p>
-          ${genres ? `<div class="card-genres">${genres}</div>` : ''}
-          <div class="card-actions">
-            <button class="btn-review" onclick="goReview('${esc(a.id)}')">
-              <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              Review
-            </button>
-            <a href="${esc(a.link||'#')}" target="_blank" class="btn-watch">
-              <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-              ကြည့်ရန်
-            </a>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-}
+  animes.forEach((anime, index) => {
+    const card = document.createElement('div');
+    card.className = 'anime-card';
+    card.style.animationDelay = `${Math.min(index,20)*30}ms`;
 
-function goReview(id) {
-  location.hash = `/review/${id}`;
-}
+    const meta = reviewsMeta.get(anime.id);
+    const ratingBadge = (meta && meta.count > 0)
+      ? `<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>`
+      : '';
 
-function setupSearch() {
-  const d = document.getElementById('searchD');
-  const m = document.getElementById('searchM');
-  function handle(e) {
-    searchTerm = e.target.value.toLowerCase();
-    if (d && e.target !== d) d.value = e.target.value;
-    if (m && e.target !== m) m.value = e.target.value;
-    applyFilters();
-  }
-  d?.addEventListener('input', handle);
-  m?.addEventListener('input', handle);
-}
+    const genrePills = (anime.genres||[]).slice(0,3).map(g=>`<span class="card-genre-pill">${g}</span>`).join('');
 
-// ══════════════════════════════════════════════════════
-// REVIEW PAGE
-// ══════════════════════════════════════════════════════
-let selRating = 0;
-let revSort   = 'newest';
-let revPage   = 1;
-let revLoading = false;
-let revData   = [];
-let revTotal  = 0;
-let revHasMore = false;
-
-const LABELS = {
-  1:'😭 မကောင်းဘူး',2:'😞 မကောင်းဘူး',3:'😐 သာမာန်',
-  4:'🙂 ရပါတယ်',5:'😊 တော်တော်ကောင်းတယ်',6:'😄 ကောင်းတယ်',
-  7:'🤩 အရမ်းကောင်းတယ်',8:'🔥 မိုက်တယ်!',9:'💥 Top-tier!',10:'👑 မာစတာပီး!'
-};
-const votedSet = new Set(JSON.parse(localStorage.getItem('naju_voted')||'[]'));
-function saveVoted() { localStorage.setItem('naju_voted', JSON.stringify([...votedSet])); }
-
-async function renderReview(animeId) {
-  const app = document.getElementById('app');
-  // Hide mobile search while on review page
-  document.getElementById('mobileSearchWrap').style.setProperty('display','none','important');
-
-  app.innerHTML = `<div style="max-width:760px;margin:0 auto;padding:24px 20px 60px">
-    <div class="loading-center"><div class="spinner"></div></div>
-  </div>`;
-
-  if (!allAnimes.length) await loadData();
-  const anime = allAnimes.find(a => a.id === animeId);
-  if (!anime) {
-    app.innerHTML = `<div style="max-width:760px;margin:0 auto;padding:60px 20px;text-align:center">
-      <p style="color:var(--red2);font-size:16px;font-weight:700">ဇာတ်ကားရှာမတွေ့ပါ</p>
-      <button class="back-btn" style="margin-top:16px" onclick="navHome()">← ပင်မစာမျက်နှာ</button>
-    </div>`;
-    return;
-  }
-
-  // SEO
-  document.title = `${anime.title} — NaJu Anime Review`;
-
-  const genres = (anime.genres||[]).map(g => `<span class="gp ${gpClass(g)}">${esc(g)}</span>`).join('');
-  const stats = [];
-  if (anime.episodes) stats.push(`<div class="stat-box"><div class="val">${anime.episodes}</div><div class="lbl">🎬 Episodes</div></div>`);
-  stats.push(`<div class="stat-box"><div class="val bebas" style="color:var(--red)">${anime.year}</div><div class="lbl">📅 ထုတ်နှစ်</div></div>`);
-  if (anime.score) stats.push(`<div class="stat-box"><div class="val" style="color:var(--gold)">⭐ ${anime.score}</div><div class="lbl">MAL Score</div></div>`);
-
-  app.innerHTML = `
-    <div class="page pb-safe" style="max-width:760px;margin:0 auto;padding:24px 20px 80px">
-      <!-- Back -->
-      <button class="back-btn" style="margin-bottom:20px" onclick="navHome()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        နောက်သို့
-      </button>
-
-      <!-- Anime info -->
-      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:24px">
-        <div class="poster-card" style="width:130px">
-          <img src="${esc(anime.image||'')}" alt="${esc(anime.title)}">
-        </div>
-        <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:12px;padding-top:4px">
-          <h1 class="rv-title">${esc(anime.title)}</h1>
-          ${genres ? `<div style="display:flex;flex-wrap:wrap;gap:5px">${genres}</div>` : ''}
-          <div style="display:flex;gap:8px;flex-wrap:wrap">${stats.join('')}</div>
-          <a href="${esc(anime.link||'#')}" target="_blank" class="watch-btn">
-            <svg width="17" height="17" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-            Telegram တွင် ကြည့်ရှုရန်
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <img src="${anime.image||''}" alt="${anime.title}" loading="lazy">
+        <div class="card-overlay"></div>
+        <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
+        <span class="year-badge">${anime.year}</span>
+        ${ratingBadge}
+      </div>
+      <div class="card-body">
+        <p class="card-title" title="${anime.title}">${anime.title}</p>
+        ${genrePills?`<div class="card-genres">${genrePills}</div>`:''}
+        <div class="card-actions">
+          <a href="review.html?id=${anime.id}" class="btn-review">
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Review
+          </a>
+          <a href="${anime.link}" target="_blank" class="btn-watch">
+            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            ကြည့်ရန်
           </a>
         </div>
-      </div>
-
-      <!-- Synopsis -->
-      <div class="synopsis-box" style="margin-bottom:24px">
-        <h3>ဇာတ်လမ်းအကျဉ်း</h3>
-        <p class="synopsis-text">${esc(anime.review || 'ဇာတ်လမ်းအကျဉ်း မရေးသားထားသေးပါ။')}</p>
-      </div>
-
-      <!-- Watch again -->
-      <a href="${esc(anime.link||'#')}" target="_blank" class="watch-btn" style="max-width:380px;margin:0 auto 32px;display:flex">
-        <svg width="17" height="17" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-        Telegram တွင် ယခုပဲ ကြည့်ရှုရန်
-      </a>
-
-      <!-- Rating form -->
-      <div class="rating-card" style="margin-bottom:24px">
-        <h2 style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px">⭐ Rating နှင့် Review ပေးရန်</h2>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px">ဇာတ်ကားကို ကြည့်ပြီးသွားရင် Rating နဲ့ Review ပေးသွားပါ ✨</p>
-
-        <div style="margin-bottom:16px">
-          <label class="form-label">⭐ Rating (1–10) ရွေးပါ</label>
-          <div class="star-row" id="starRow"></div>
-          <p id="rLabel" style="font-size:12px;color:var(--gold);margin-top:7px;font-weight:800;min-height:18px"></p>
-        </div>
-        <div style="margin-bottom:12px">
-          <label class="form-label">အမည် (မဖြစ်မနေမဟုတ်)</label>
-          <input type="text" id="rName" class="form-input" placeholder="မင်းနာမည် သို့မဟုတ် username...">
-        </div>
-        <div style="margin-bottom:18px">
-          <label class="form-label">Review (မဖြစ်မနေမဟုတ်)</label>
-          <textarea id="rText" class="form-textarea" placeholder="ဇာတ်ကားအကြောင်း ထင်မြင်ချက်..."></textarea>
-        </div>
-        <button id="submitBtn" class="submit-btn" onclick="submitRating('${esc(animeId)}')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-          Rating ပေးမည်
-        </button>
-      </div>
-
-      <!-- Reviews panel -->
-      <div id="reviewsPanel"></div>
-    </div>`;
-
-  buildStars();
-  selRating = 0; revSort = 'newest'; revPage = 1; revData = [];
-  loadRevs(animeId, true);
+      </div>`;
+    grid.appendChild(card);
+  });
 }
 
-function buildStars() {
-  const row = document.getElementById('starRow');
-  if (!row) return;
-  row.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
-    const s = document.createElement('span');
-    s.className = 'star'; s.dataset.v = i;
-    s.innerHTML = starSvg;
-    s.onmouseenter = () => hlStars(i);
-    s.onmouseleave = () => hlStars(selRating);
-    s.onclick = () => {
-      selRating = i; hlStars(i);
-      const lbl = document.getElementById('rLabel');
-      if (lbl) lbl.textContent = LABELS[i] || '';
-    };
-    row.appendChild(s);
+// ── Search ────────────────────────────────────────────
+function setupSearch() {
+  function handle(e) {
+    searchTerm = e.target.value.toLowerCase();
+    const sD=document.getElementById('searchInputDesktop');
+    const sM=document.getElementById('searchInputMobile');
+    if(sD&&e.target!==sD) sD.value=e.target.value;
+    if(sM&&e.target!==sM) sM.value=e.target.value;
+    applyFilters();
   }
-}
-function hlStars(n) {
-  document.querySelectorAll('.star').forEach(s => s.classList.toggle('on', +s.dataset.v <= n));
+  document.getElementById('searchInputDesktop')?.addEventListener('input',handle);
+  document.getElementById('searchInputMobile')?.addEventListener('input',handle);
 }
 
-async function loadRevs(animeId, reset) {
-  if (revLoading) return;
-  revLoading = true;
-  if (reset) { revData = []; revPage = 1; }
-  const panel = document.getElementById('reviewsPanel');
-  if (!panel) { revLoading = false; return; }
-  if (reset) panel.innerHTML = `<div style="display:flex;justify-content:center;padding:24px"><div class="spinner" style="width:24px;height:24px;border-width:2px"></div></div>`;
+// ── Load ──────────────────────────────────────────────
+async function loadFromKV() {
   try {
-    const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(animeId)}?sort=${revSort}&page=${revPage}`);
-    const d = await r.json();
-    revData    = reset ? d.reviews : [...revData, ...d.reviews];
-    revTotal   = d.total;
-    revHasMore = d.hasMore;
-    renderRevs(d.meta, animeId);
-  } catch {
-    if (panel) panel.innerHTML = `<p style="color:var(--red2);font-size:13px;padding:16px">Reviews load မရပါ</p>`;
-  }
-  revLoading = false;
-}
+    // Fetch anime list + leaderboard in parallel
+    const [animeRes, lbRes] = await Promise.all([
+      fetch(WORKER_URL+'/anime'),
+      fetch(WORKER_URL+'/reviews/leaderboard'),
+    ]);
+    allAnimes = await animeRes.json();
+    const lb  = await lbRes.json();
+    reviewsMeta = new Map(Array.isArray(lb) ? lb.map(x=>[x.id,x]) : []);
 
-function renderRevs(meta, animeId) {
-  const panel = document.getElementById('reviewsPanel');
-  if (!panel) return;
-
-  const avgHtml = (meta?.count > 0) ? (() => {
-    const filled = Math.round(meta.avg / 2);
-    const stars  = Array.from({length:5}, (_,i) =>
-      `<svg class="avg-star${i<filled?'':' e'}" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`
-    ).join('');
-    return `<div class="avg-wrap">
-      <div class="avg-num">${meta.avg}</div>
-      <div><div class="avg-stars">${stars}</div>
-      <div class="avg-sub">User ${fmtN(meta.count)} ယောက် Rating ပေးထားသည်</div></div>
-    </div>`;
-  })() : '';
-
-  if (!revData.length) {
-    panel.innerHTML = `${avgHtml}<div style="text-align:center;padding:40px 20px;color:var(--muted)">
-      <div style="font-size:28px;margin-bottom:8px">💬</div>
-      <p style="font-size:13.5px;font-weight:700">Review မရှိသေးဘူး</p>
-      <p style="font-size:12px;margin-top:4px">ပထမဆုံး Rating ပေးသူ ဖြစ်ပါ!</p>
-    </div>`;
-    return;
-  }
-
-  const sortHtml = `
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      <h3 style="font-size:14px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px">
-        ⭐ Reviews <span style="font-size:12px;font-weight:600;color:var(--muted)">(${fmtN(revTotal)})</span>
-      </h3>
-      <div class="sort-tabs">
-        <button class="sort-tab${revSort==='newest'?' active':''}" onclick="setRevSort('newest','${esc(animeId)}')">🕒 Newest</button>
-        <button class="sort-tab${revSort==='top'?' active':''}"    onclick="setRevSort('top','${esc(animeId)}')">🏆 Top</button>
-        <button class="sort-tab${revSort==='helpful'?' active':''}" onclick="setRevSort('helpful','${esc(animeId)}')">👍 Helpful</button>
-      </div>
-    </div>`;
-
-  const cards = revData.map(rv => {
-    const voted    = votedSet.has(rv.id);
-    const longText = rv.text && rv.text.length > 180;
-    return `<div class="rev-card" id="rc-${rv.id}">
-      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px">
-        <span class="rev-name">👤 ${esc(rv.name||'Anonymous')}</span>
-        <span class="rating-pill">⭐ ${rv.rating}/10</span>
-        <span class="rev-date">${rv.date||''}</span>
-      </div>
-      ${rv.text ? `
-        <p class="rev-text${longText?' clamped':''}" id="rt-${rv.id}">${esc(rv.text)}</p>
-        ${longText ? `<button class="read-more-btn" id="rm-${rv.id}" onclick="toggleRead('${rv.id}')">▼ ဆက်ဖတ်ရန်</button>` : ''}
-      ` : ''}
-      <button class="helpful-btn${voted?' voted':''}" id="hb-${rv.id}" onclick="upvote('${rv.id}','${esc(animeId)}')" ${voted?'disabled':''}>
-        👍 Helpful &nbsp;<span id="hc-${rv.id}">${fmtN(rv.helpful||0)}</span>
-      </button>
-    </div>`;
-  }).join('');
-
-  const loadMore = revHasMore
-    ? `<button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreRevs('${esc(animeId)}')">
-        ▼ နောက်ထပ် (${fmtN(revTotal - revData.length)} ကျန်)
-       </button>` : '';
-
-  panel.innerHTML = `${avgHtml}${sortHtml}
-    <div style="display:flex;flex-direction:column;gap:9px">${cards}</div>
-    ${loadMore}`;
-}
-
-function setRevSort(s, id) { revSort = s; loadRevs(id, true); }
-function loadMoreRevs(id) {
-  const btn = document.getElementById('loadMoreBtn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="sm-spin"></span> Loading...'; }
-  revPage++;
-  loadRevs(id, false);
-}
-function toggleRead(id) {
-  const el  = document.getElementById(`rt-${id}`);
-  const btn = document.getElementById(`rm-${id}`);
-  if (!el || !btn) return;
-  const c = el.classList.toggle('clamped');
-  btn.textContent = c ? '▼ ဆက်ဖတ်ရန်' : '▲ ခဲ့ပြန်ပြ';
-}
-async function upvote(revId, animeId) {
-  const btn = document.getElementById(`hb-${revId}`);
-  if (!btn || btn.disabled) return;
-  btn.disabled = true;
-  try {
-    const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(animeId)}/${encodeURIComponent(revId)}/helpful`, { method:'POST' });
-    const d = await r.json();
-    if (d.success) {
-      document.getElementById(`hc-${revId}`).textContent = fmtN(d.helpful);
-      btn.classList.add('voted');
-      votedSet.add(revId); saveVoted();
-    }
-  } catch { btn.disabled = false; }
-}
-async function submitRating(animeId) {
-  if (!selRating) { showToast('⚠️ Star နှိပ်ပြီး Rating ပေးပါ!', false); return; }
-  const btn  = document.getElementById('submitBtn');
-  const name = document.getElementById('rName')?.value.trim() || '';
-  const text = document.getElementById('rText')?.value.trim() || '';
-  btn.disabled = true;
-  btn.innerHTML = '<span class="sm-spin"></span> ပေးပို့နေသည်...';
-  try {
-    const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(animeId)}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ name, rating: selRating, text })
-    });
-    const d = await r.json();
-    if (!d.success) throw new Error(d.error||'Error');
-    showToast('✓ Rating ပေးပြီးပါပြီ! ကျေးဇူးပဲ 🙏');
-    document.getElementById('rName').value = '';
-    document.getElementById('rText').value = '';
-    selRating = 0; hlStars(0);
-    const lbl = document.getElementById('rLabel');
-    if (lbl) lbl.textContent = '';
-    loadRevs(animeId, true);
-  } catch { showToast('❌ ချိတ်ဆက်မှု မအောင်မြင်ပါ', false); }
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Rating ပေးမည်';
-}
-
-function showToast(msg, ok=true) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast show ${ok ? 'ok' : 'err'}`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ══════════════════════════════════════════════════════
-// ROUTER
-// ══════════════════════════════════════════════════════
-function router() {
-  const hash = location.hash.slice(1) || '/';
-  if (hash.startsWith('/review/')) {
-    const id = decodeURIComponent(hash.slice(8));
-    renderReview(id);
-  } else {
-    renderHome();
+    buildGenreBar(allAnimes);
+    displayAnimes(allAnimes);
+    setupSearch();
+  } catch(e) {
+    document.getElementById('anime-grid').innerHTML=
+      '<p style="color:#f87171;padding:20px">Loading error: '+e.message+'</p>';
   }
 }
 
-window.addEventListener('hashchange', router);
-window.addEventListener('load', async () => {
-  // Preload data then route
-  try { await loadData(); } catch {}
-  router();
+document.getElementById('mobileMenuBtn')?.addEventListener('click',()=>{
+  document.getElementById('mobileDrawer')?.classList.toggle('hidden');
 });
+
+const navItems={home:document.getElementById('navHome'),contact:document.getElementById('navContact')};
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY+100;
+  const contactEl=document.getElementById('contact');
+  const active=(contactEl&&y>=contactEl.offsetTop)?'contact':'home';
+  Object.keys(navItems).forEach(k=>navItems[k]?.classList.toggle('active',k===active));
+});
+
+loadFromKV();
 </script>
 </body>
 </html>
