@@ -415,6 +415,10 @@ async function loadReview() {
     const r = await fetch(WORKER_URL+'/anime');
     const animeData = await r.json();
     const anime = animeData.find(a=>a.id===currentAnimeId);
+    // ./images/ → /images/ path fix (moved from root to /review/ subfolder)
+if (anime.image) {
+  anime.image = anime.image.replace(/^\.\//, '/');
+}
     if (!anime) {
       container.innerHTML=`<div class="error-state"><p style="color:#f87171;font-size:16px;font-weight:700">ဇာတ်ကားရှာမတွေ့ပါ</p><a href="/" style="color:var(--blue);font-size:14px;font-weight:600;text-decoration:none;display:block;margin-top:12px">← ပင်မစာမျက်နှာ</a></div>`;
       return;
