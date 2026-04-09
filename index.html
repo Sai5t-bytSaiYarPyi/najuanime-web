@@ -284,32 +284,91 @@ function localTimeLabel(date) {
   return `${days[date.getDay()]} ${hhmm} (${tzShort})`;
 }
 
+// ── Auto EP Calculator ────────────────────────────────
+function calcAutoEp(anime) {
+  if (!anime.epStartDate) return null;
+  const startMs = new Date(anime.epStartDate).getTime();
+  if (isNaN(startMs)) return null;
+
+  const now      = Date.now();
+  const msPerWeek = 7 * 24 * 3600 * 1000;
+
+  if (startMs > now) {
+    // EP 1 မထွက်သေး → EP 1 countdown
+    return { nextEpNumber: 1, nextDate: new Date(startMs) };
+  }
+
+  const weeksPassed = Math.floor((now - startMs) / msPerWeek);
+  const nextEp      = weeksPassed + 2; // EP1=week0, nextEp = weeksPassed+2
+  const nextDate    = new Date(startMs + (weeksPassed + 1) * msPerWeek);
+
+  return { nextEpNumber: nextEp, nextDate };
+}
+
 // ── Countdown HTML builder ─────────────────────────────
 function buildCountdownHtml(anime) {
+  const total = anime.episodes;
 
-  // ── Priority 1: Manual KV fields (nextEpNumber + nextAiringAt) ──
+  // helper: render countdown block
+  function cdBlock(id, lbl, nextDate) {
+    cdTargets.set(id, { nextDate, lbl });
+    const ms = nextDate.getTime() - Date.now();
+    return `<div class="countdown-wrap" id="cd-${id}">
+      <div class="cd-badge">
+        <div class="cd-ep-row">
+          <span class="cd-ep-dot"></span>
+          <span class="cd-ep-label">${lbl}</span>
+        </div>
+        <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
+        <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
+      </div>
+    </div>`;
+  }
+
+  const mode = anime.epMode || 'legacy'; // backward compat
+
+  // ── AUTO mode ─────────────────────────────────────────
+  if (mode === 'auto') {
+    const auto = calcAutoEp(anime);
+    if (auto) {
+      const lbl = total
+        ? `EP ${auto.nextEpNumber} / ${total}`
+        : `EP ${auto.nextEpNumber}`;
+      return cdBlock(anime.id, lbl, auto.nextDate);
+    }
+    return ''; // epStartDate မရှိ → ဘာမှမပြ
+  }
+
+  // ── MANUAL mode ───────────────────────────────────────
+  if (mode === 'manual') {
+    if (anime.nextAiringAt && anime.nextEpNumber != null) {
+      const nextDate = new Date(anime.nextAiringAt);
+      if (!isNaN(nextDate) && nextDate > new Date(Date.now() - 7_200_000)) {
+        const lbl = total
+          ? `EP ${anime.nextEpNumber} / ${total}`
+          : `EP ${anime.nextEpNumber}`;
+        return cdBlock(anime.id, lbl, nextDate);
+      }
+    }
+    return ''; // data မပြည့် → ဘာမှမပြ
+  }
+
+  // ── OFF mode ──────────────────────────────────────────
+  if (mode === 'off') return '';
+
+  // ── LEGACY (epMode မသတ်မှတ်ထားတဲ့ ဟောင်းသော data) ───
+  // Priority 1: manual fields ရှိရင်
   if (anime.nextAiringAt && anime.nextEpNumber != null) {
     const nextDate = new Date(anime.nextAiringAt);
     if (!isNaN(nextDate) && nextDate > new Date(Date.now() - 7_200_000)) {
-      const epNum = anime.nextEpNumber;
-      const total = anime.episodes;
-      const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
-      cdTargets.set(anime.id, { nextDate, epNum, lbl });
-      const ms = nextDate.getTime() - Date.now();
-      return `<div class="countdown-wrap" id="cd-${anime.id}">
-        <div class="cd-badge">
-          <div class="cd-ep-row">
-            <span class="cd-ep-dot"></span>
-            <span class="cd-ep-label">${lbl}</span>
-          </div>
-          <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
-          <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
-        </div>
-      </div>`;
+      const lbl = total
+        ? `EP ${anime.nextEpNumber} / ${total}`
+        : `EP ${anime.nextEpNumber}`;
+      return cdBlock(anime.id, lbl, nextDate);
     }
   }
 
-  // ── Priority 2: KV status field (finished/ended) ──
+  // Priority 2: status ended
   const status = (anime.status || '').toLowerCase();
   if (status.includes('finished') || status.includes('ended') || status.includes('complete')) {
     const epTxt = anime.episodes ? `EP ${anime.episodes}` : '';
@@ -320,10 +379,13 @@ function buildCountdownHtml(anime) {
     </div>`;
   }
 
-  // ── Priority 3: JST broadcastDay/Time fallback ──
+  // Priority 3: broadcastDay fallback → "NEXT EP"
   if (anime.broadcastDay && anime.broadcastTime) {
-    const DAY_NUM = { Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,Thursdays:4,Fridays:5,Saturdays:6 };
-    const dayNum  = DAY_NUM[anime.broadcastDay];
+    const DAY_NUM = {
+      Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,
+      Thursdays:4,Fridays:5,Saturdays:6
+    };
+    const dayNum = DAY_NUM[anime.broadcastDay];
     if (dayNum !== undefined) {
       const [hJST, mJST] = anime.broadcastTime.split(':').map(Number);
       let hUTC = hJST - 9, dayUTC = dayNum;
@@ -335,18 +397,7 @@ function buildCountdownHtml(anime) {
       const diff = (dayUTC - c.getUTCDay() + 7) % 7;
       c.setUTCDate(c.getUTCDate() + diff);
       if (c <= now) c.setUTCDate(c.getUTCDate() + 7);
-      cdTargets.set(anime.id, { nextDate: c, epNum: null, lbl: 'NEXT EP' });
-      const ms = c.getTime() - Date.now();
-      return `<div class="countdown-wrap" id="cd-${anime.id}">
-        <div class="cd-badge">
-          <div class="cd-ep-row">
-            <span class="cd-ep-dot"></span>
-            <span class="cd-ep-label">NEXT EP</span>
-          </div>
-          <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
-          <div class="cd-day-label">${localTimeLabel(c)}</div>
-        </div>
-      </div>`;
+      return cdBlock(anime.id, 'NEXT EP', c);
     }
   }
 
