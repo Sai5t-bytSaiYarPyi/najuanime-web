@@ -258,6 +258,22 @@ let searchTerm  = '';
 const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : String(n);
 
 // ══ COUNTDOWN ENGINE ══════════════════════════════════
+
+/*
+  cdTargets Map stores per-anime countdown state:
+  {
+    nextDate : Date,       — next broadcast time
+    epNum    : number|null — current EP number (null = unknown)
+    total    : string      — total episodes (from anime.episodes)
+    lbl      : string      — label shown e.g. "EP 3 / 12"
+    mode     : 'manual'|'schedule'
+                 manual   = nextAiringAt set in KV (admin ထည့်ထားတာ)
+                 schedule = broadcastDay/Time ကနေ တွက်ထားတာ
+  }
+
+  mode='schedule' အတွက် countdown ကုန်ပြီး 5 မိနစ်ကျော်ရင်
+  client-side မှာ epNum++ နဲ့ nextDate += 7days auto လုပ်တယ်
+*/
 const cdTargets = new Map();
 
 function fmtCountdown(ms) {
@@ -284,91 +300,82 @@ function localTimeLabel(date) {
   return `${days[date.getDay()]} ${hhmm} (${tzShort})`;
 }
 
-// ── Auto EP Calculator ────────────────────────────────
-function calcAutoEp(anime) {
-  if (!anime.epStartDate) return null;
-  const startMs = new Date(anime.epStartDate).getTime();
-  if (isNaN(startMs)) return null;
+// ── broadcastDay/Time (JST) → next UTC Date ────────────
+const DAY_NUM = { Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,Thursdays:4,Fridays:5,Saturdays:6 };
 
-  const now      = Date.now();
-  const msPerWeek = 7 * 24 * 3600 * 1000;
-
-  if (startMs > now) {
-    // EP 1 မထွက်သေး → EP 1 countdown
-    return { nextEpNumber: 1, nextDate: new Date(startMs) };
-  }
-
-  const weeksPassed = Math.floor((now - startMs) / msPerWeek);
-  const nextEp      = weeksPassed + 2; // EP1=week0, nextEp = weeksPassed+2
-  const nextDate    = new Date(startMs + (weeksPassed + 1) * msPerWeek);
-
-  return { nextEpNumber: nextEp, nextDate };
+function calcNextBroadcast(broadcastDay, broadcastTime) {
+  const dayNum = DAY_NUM[broadcastDay];
+  if (dayNum === undefined || !broadcastTime) return null;
+  const [hJST, mJST] = broadcastTime.split(':').map(Number);
+  let hUTC = hJST - 9, dayUTC = dayNum;
+  if (hUTC < 0)   { hUTC += 24; dayUTC = (dayNum + 6) % 7; }
+  if (hUTC >= 24) { hUTC -= 24; dayUTC = (dayNum + 1) % 7; }
+  const now = new Date();
+  const c   = new Date(now);
+  c.setUTCHours(hUTC, mJST, 0, 0);
+  const diff = (dayUTC - c.getUTCDay() + 7) % 7;
+  c.setUTCDate(c.getUTCDate() + diff);
+  if (c <= now) c.setUTCDate(c.getUTCDate() + 7);
+  return c;
 }
 
-// ── Countdown HTML builder ─────────────────────────────
-function buildCountdownHtml(anime) {
-  const total = anime.episodes;
-
-  // helper: render countdown block
-  function cdBlock(id, lbl, nextDate) {
-    cdTargets.set(id, { nextDate, lbl });
-    const ms = nextDate.getTime() - Date.now();
-    return `<div class="countdown-wrap" id="cd-${id}">
-      <div class="cd-badge">
-        <div class="cd-ep-row">
-          <span class="cd-ep-dot"></span>
-          <span class="cd-ep-label">${lbl}</span>
-        </div>
-        <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
-        <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
+// ── Shared HTML builder ────────────────────────────────
+function makeCountdownHtml(id, lbl, ms, nextDate) {
+  return `<div class="countdown-wrap" id="cd-${id}">
+    <div class="cd-badge">
+      <div class="cd-ep-row">
+        <span class="cd-ep-dot"></span>
+        <span class="cd-ep-label">${lbl}</span>
       </div>
-    </div>`;
-  }
+      <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
+      <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
+    </div>
+  </div>`;
+}
 
-  const mode = anime.epMode || 'legacy'; // backward compat
+// ── Main countdown HTML builder ────────────────────────
+function buildCountdownHtml(anime) {
 
-  // ── AUTO mode ─────────────────────────────────────────
-  if (mode === 'auto') {
-    const auto = calcAutoEp(anime);
-    if (auto) {
-      const lbl = total
-        ? `EP ${auto.nextEpNumber} / ${total}`
-        : `EP ${auto.nextEpNumber}`;
-      return cdBlock(anime.id, lbl, auto.nextDate);
-    }
-    return ''; // epStartDate မရှိ → ဘာမှမပြ
-  }
-
-  // ── MANUAL mode ───────────────────────────────────────
-  if (mode === 'manual') {
-    if (anime.nextAiringAt && anime.nextEpNumber != null) {
-      const nextDate = new Date(anime.nextAiringAt);
-      if (!isNaN(nextDate) && nextDate > new Date(Date.now() - 7_200_000)) {
-        const lbl = total
-          ? `EP ${anime.nextEpNumber} / ${total}`
-          : `EP ${anime.nextEpNumber}`;
-        return cdBlock(anime.id, lbl, nextDate);
-      }
-    }
-    return ''; // data မပြည့် → ဘာမှမပြ
-  }
-
-  // ── OFF mode ──────────────────────────────────────────
-  if (mode === 'off') return '';
-
-  // ── LEGACY (epMode မသတ်မှတ်ထားတဲ့ ဟောင်းသော data) ───
-  // Priority 1: manual fields ရှိရင်
+  // ═══════════════════════════════════════════════════════
+  // Priority 1 — Manual: nextEpNumber + nextAiringAt (KV)
+  //   Admin မှာ EP number နဲ့ time နှစ်ခုလုံး ကိုယ်တိုင်ထည့်ထားတာ
+  // ═══════════════════════════════════════════════════════
   if (anime.nextAiringAt && anime.nextEpNumber != null) {
     const nextDate = new Date(anime.nextAiringAt);
     if (!isNaN(nextDate) && nextDate > new Date(Date.now() - 7_200_000)) {
-      const lbl = total
-        ? `EP ${anime.nextEpNumber} / ${total}`
-        : `EP ${anime.nextEpNumber}`;
-      return cdBlock(anime.id, lbl, nextDate);
+      const epNum = anime.nextEpNumber;
+      const total = anime.episodes;
+      const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
+      cdTargets.set(anime.id, {
+        nextDate, epNum, total, lbl,
+        mode: 'manual',  // ← manual mode: auto-increment မလုပ်
+      });
+      return makeCountdownHtml(anime.id, lbl, nextDate.getTime() - Date.now(), nextDate);
     }
   }
 
-  // Priority 2: status ended
+  // ═══════════════════════════════════════════════════════
+  // Priority 2 — Schedule + EP: nextEpNumber + broadcastDay/Time
+  //   Admin မှာ EP number ပဲထည့်၊ Time ကို Jikan schedule ကနေ တွက်
+  //   Broadcast ကုန်ရင် client-side မှာ EP auto +1, next week auto
+  // ═══════════════════════════════════════════════════════
+  if (anime.nextEpNumber != null && anime.broadcastDay && anime.broadcastTime) {
+    const nextDate = calcNextBroadcast(anime.broadcastDay, anime.broadcastTime);
+    if (nextDate) {
+      const epNum = anime.nextEpNumber;
+      const total = anime.episodes;
+      const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
+      cdTargets.set(anime.id, {
+        nextDate, epNum, total, lbl,
+        mode: 'schedule',  // ← schedule mode: auto-increment ON
+      });
+      return makeCountdownHtml(anime.id, lbl, nextDate.getTime() - Date.now(), nextDate);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // Priority 3 — Status: Finished / Ended
+  // ═══════════════════════════════════════════════════════
   const status = (anime.status || '').toLowerCase();
   if (status.includes('finished') || status.includes('ended') || status.includes('complete')) {
     const epTxt = anime.episodes ? `EP ${anime.episodes}` : '';
@@ -379,43 +386,78 @@ function buildCountdownHtml(anime) {
     </div>`;
   }
 
-  // Priority 3: broadcastDay fallback → "NEXT EP"
+  // ═══════════════════════════════════════════════════════
+  // Priority 4 — Schedule only: broadcastDay/Time (EP number မပြ)
+  //   nextEpNumber မထည့်ထားရင် "NEXT EP" ပဲပြ
+  // ═══════════════════════════════════════════════════════
   if (anime.broadcastDay && anime.broadcastTime) {
-    const DAY_NUM = {
-      Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,
-      Thursdays:4,Fridays:5,Saturdays:6
-    };
-    const dayNum = DAY_NUM[anime.broadcastDay];
-    if (dayNum !== undefined) {
-      const [hJST, mJST] = anime.broadcastTime.split(':').map(Number);
-      let hUTC = hJST - 9, dayUTC = dayNum;
-      if (hUTC < 0)   { hUTC += 24; dayUTC = (dayNum+6)%7; }
-      if (hUTC >= 24) { hUTC -= 24; dayUTC = (dayNum+1)%7; }
-      const now = new Date();
-      const c   = new Date(now);
-      c.setUTCHours(hUTC, mJST, 0, 0);
-      const diff = (dayUTC - c.getUTCDay() + 7) % 7;
-      c.setUTCDate(c.getUTCDate() + diff);
-      if (c <= now) c.setUTCDate(c.getUTCDate() + 7);
-      return cdBlock(anime.id, 'NEXT EP', c);
+    const nextDate = calcNextBroadcast(anime.broadcastDay, anime.broadcastTime);
+    if (nextDate) {
+      cdTargets.set(anime.id, {
+        nextDate, epNum: null, total: anime.episodes, lbl: 'NEXT EP',
+        mode: 'schedule',
+      });
+      return makeCountdownHtml(anime.id, 'NEXT EP', nextDate.getTime() - Date.now(), nextDate);
     }
   }
 
   return '';
 }
 
+// ── Countdown tick (1s) ────────────────────────────────
 function startCountdownTick() {
   setInterval(() => {
     const now = Date.now();
+
     cdTargets.forEach((info, id) => {
       const el = document.getElementById(`cd-${id}`);
       if (!el) { cdTargets.delete(id); return; }
-      const ms = info.nextDate.getTime() - now;
-      if (ms < -7_200_000) { cdTargets.delete(id); return; }
-      const timerEl = el.querySelector('.cd-timer');
-      const labelEl = el.querySelector('.cd-day-label');
-      if (timerEl) { timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE'; timerEl.className = cdClass(ms); }
-      if (labelEl && ms > 0) labelEl.textContent = localTimeLabel(info.nextDate);
+
+      let ms = info.nextDate.getTime() - now;
+
+      // ════════════════════════════════════════════════
+      // AUTO-INCREMENT (schedule mode only)
+      //   Broadcast ကုန်ပြီး 5 မိနစ်ကျော်ရင်:
+      //     epNum += 1
+      //     nextDate += 7 ရက် (next week)
+      //   Manual mode မှာတော့ auto မလုပ် (admin ကိုယ်တိုင်ပြင်)
+      // ════════════════════════════════════════════════
+      if (ms < -300_000 && info.mode === 'schedule') {
+        const newNextDate = new Date(info.nextDate.getTime() + 7 * 24 * 3600 * 1000);
+        const newEpNum    = info.epNum != null ? info.epNum + 1 : null;
+        const newLbl      = newEpNum != null
+          ? (info.total ? `EP ${newEpNum} / ${info.total}` : `EP ${newEpNum}`)
+          : 'NEXT EP';
+
+        const newInfo = { ...info, nextDate: newNextDate, epNum: newEpNum, lbl: newLbl };
+        cdTargets.set(id, newInfo);
+
+        // DOM update
+        const epLabelEl = el.querySelector('.cd-ep-label');
+        if (epLabelEl) epLabelEl.textContent = newLbl;
+
+        ms = newNextDate.getTime() - now;
+        Object.assign(info, newInfo);
+      }
+
+      // manual mode에서 2시간 지나면 삭제
+      if (ms < -7_200_000 && info.mode === 'manual') {
+        cdTargets.delete(id);
+        return;
+      }
+
+      // Timer + day label update
+      const timerEl    = el.querySelector('.cd-timer');
+      const dayLabelEl = el.querySelector('.cd-day-label');
+      const cur        = cdTargets.get(id) || info;
+
+      if (timerEl) {
+        timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE';
+        timerEl.className   = cdClass(ms);
+      }
+      if (dayLabelEl && ms > 0) {
+        dayLabelEl.textContent = localTimeLabel(cur.nextDate);
+      }
     });
   }, 1000);
 }
