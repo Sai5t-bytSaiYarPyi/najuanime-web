@@ -98,31 +98,41 @@
       padding:22px 8px 8px;
       pointer-events:none;
     }
-    /* Currently Airing — countdown */
+
+    /* ── Currently Airing — LC-powered countdown ── */
     .cd-badge{
-      display:flex;flex-direction:column;align-items:center;gap:2px;
+      display:flex;flex-direction:column;align-items:center;gap:1px;
     }
-    .cd-label{
-      font-size:9px;font-weight:700;color:#4ade80;letter-spacing:.06em;
-      text-transform:uppercase;opacity:.9;
+    /* Row 1: 🟢 EP 5 */
+    .cd-ep-row{
+      display:flex;align-items:center;gap:4px;
     }
+    .cd-ep-dot{
+      display:inline-block;width:5px;height:5px;border-radius:50%;
+      background:#4ade80;box-shadow:0 0 5px #4ade80;
+      animation:aPulse 1.5s infinite;flex-shrink:0;
+    }
+    .cd-ep-label{
+      font-size:10px;font-weight:900;color:#4ade80;letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    /* Row 2: 1d 14h 23m */
     .cd-timer{
-      font-size:12px;font-weight:900;color:white;letter-spacing:.04em;
+      font-size:13px;font-weight:900;color:white;letter-spacing:.04em;
       font-variant-numeric:tabular-nums;
       text-shadow:0 1px 4px rgba(0,0,0,.8);
+      line-height:1.2;
     }
     .cd-timer.soon{color:#fbbf24}   /* < 1 hour */
-    .cd-timer.today{color:#fb923c}  /* < 3 hours */
+    .cd-timer.live{color:#f87171;animation:livePulse 1s infinite}
+    @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.6}}
+    /* Row 3: Thu 20:00 (MMT) */
     .cd-day-label{
-      font-size:10px;font-weight:700;color:#94a3b8;margin-top:1px;
-    }
-    /* Airing dot */
-    .airing-dot{
-      display:inline-block;width:6px;height:6px;border-radius:50%;
-      background:#4ade80;box-shadow:0 0 6px #4ade80;
-      animation:aPulse 1.5s infinite;margin-right:3px;vertical-align:middle;
+      font-size:9px;font-weight:600;color:#94a3b8;margin-top:1px;
+      letter-spacing:.02em;
     }
     @keyframes aPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
     /* Ended badge */
     .ended-badge{
       display:inline-flex;align-items:center;gap:4px;
@@ -166,7 +176,8 @@
       .year-badge{font-size:10px;padding:2px 6px}
       .rating-badge-card{font-size:10px;padding:2px 6px}
       .cd-timer{font-size:11px}
-      .cd-label{font-size:8px}
+      .cd-ep-label{font-size:9px}
+      .cd-day-label{font-size:8px}
     }
   </style>
 </head>
@@ -263,256 +274,411 @@
 
 <script>
 const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+
 let allAnimes   = [];
 let reviewsMeta = new Map();
 let activeGenre = 'all';
 let sortMode    = 'default';
 let searchTerm  = '';
 
-const fmtN = n => n>=1000?(n/1000).toFixed(1).replace('.0','')+'K':String(n);
+const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : String(n);
 
-// ══ COUNTDOWN ENGINE ══════════════════════════════════════
-// Jikan broadcast day names → JS getDay() (0=Sun)
-const DAY_NUM = {
-  'Sundays':0,'Mondays':1,'Tuesdays':2,'Wednesdays':3,
-  'Thursdays':4,'Fridays':5,'Saturdays':6
-};
+// ══════════════════════════════════════════════════════
+// ── LIVECHART SCHEDULE ENGINE ─────────────────────────
+// Replaces the old JST broadcastDay/broadcastTime logic.
+// lcSchedule: Map<normalizedTitle → LC data object>
+// ══════════════════════════════════════════════════════
+
+let lcSchedule = new Map();  // populated by loadLiveChartSchedule()
 
 /**
- * Returns the next UTC Date when this anime airs.
- * broadcastDay  : "Thursdays"  (JST weekday)
- * broadcastTime : "20:00"      (JST HH:MM)
+ * Normalize a title for fuzzy matching.
+ * Strips punctuation, lowercases, collapses whitespace.
  */
-function getNextAirTime(broadcastDay, broadcastTime) {
-  if (!broadcastDay || !broadcastTime) return null;
-  const dayNum = DAY_NUM[broadcastDay];
-  if (dayNum === undefined) return null;
-
-  const [hJST, mJST] = broadcastTime.split(':').map(Number);
-  // Convert JST (UTC+9) to UTC
-  let hUTC = hJST - 9;
-  let dayUTC = dayNum;
-  if (hUTC < 0)  { hUTC += 24; dayUTC = (dayNum - 1 + 7) % 7; }
-  if (hUTC >= 24){ hUTC -= 24; dayUTC = (dayNum + 1) % 7; }
-
-  const now = new Date();
-  // Build a candidate date this week at the correct UTC time
-  const candidate = new Date(now);
-  candidate.setUTCHours(hUTC, mJST, 0, 0);
-  // Move to the correct UTC weekday
-  const diff = (dayUTC - candidate.getUTCDay() + 7) % 7;
-  candidate.setUTCDate(candidate.getUTCDate() + diff);
-  // If it's already past, jump to next week
-  if (candidate <= now) candidate.setUTCDate(candidate.getUTCDate() + 7);
-  return candidate;
+function normalizeTitle(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[：:！!？?～~・•・]/g, ' ')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
- * Format milliseconds into  "Xd Xh Xm Xs"  or shorter forms.
+ * Load LiveChart schedule from Worker proxy and populate lcSchedule map.
+ * Indexes by romajiTitle, englishTitle, and alternativeTitles.
+ * Non-blocking: failures are silently swallowed.
+ */
+async function loadLiveChartSchedule() {
+  try {
+    const r    = await fetch(WORKER_URL + '/livechart');
+    const data = await r.json();
+    if (!Array.isArray(data)) return;
+
+    lcSchedule.clear();
+    for (const item of data) {
+      // Index by all available titles so we get the widest match
+      const titles = [
+        item.romajiTitle,
+        item.englishTitle,
+        ...(Array.isArray(item.altTitles) ? item.altTitles : []),
+      ].filter(Boolean);
+
+      for (const t of titles) {
+        const key = normalizeTitle(t);
+        if (key && !lcSchedule.has(key)) {
+          lcSchedule.set(key, item);
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('[LC] Schedule load failed:', e.message);
+  }
+}
+
+/**
+ * Find matching LC data for a NaJu anime entry.
+ * Tries: exact → word-level substring (longest match wins).
+ */
+function matchLC(anime) {
+  const query = normalizeTitle(anime.title);
+  if (!query) return null;
+
+  // 1. Exact match
+  if (lcSchedule.has(query)) return lcSchedule.get(query);
+
+  // 2. Substring match — pick the longest key that overlaps
+  let best = null;
+  let bestLen = 0;
+  for (const [key, val] of lcSchedule) {
+    if (key.length < 4) continue; // skip very short keys
+    if (key.includes(query) || query.includes(key)) {
+      if (key.length > bestLen) {
+        best    = val;
+        bestLen = key.length;
+      }
+    }
+  }
+  return best;
+}
+
+// ══════════════════════════════════════════════════════
+// ── COUNTDOWN ENGINE ──────────────────────────────────
+// cdTargets: Map<animeId → { nextDate: Date, epNum: number|null }>
+// ══════════════════════════════════════════════════════
+
+const cdTargets = new Map();
+
+/**
+ * Format milliseconds into compact readable string.
+ * > 1 day  →  "2d 3h 14m"
+ * < 1 day  →  "HH:MM:SS"
  */
 function fmtCountdown(ms) {
-  if (ms <= 0) return '00:00:00';
-  const s  = Math.floor(ms / 1000);
-  const m  = Math.floor(s  / 60);
-  const h  = Math.floor(m  / 60);
-  const d  = Math.floor(h  / 24);
-  const ss = String(s  % 60).padStart(2,'0');
-  const mm = String(m  % 60).padStart(2,'0');
-  const hh = String(h  % 24).padStart(2,'0');
+  if (ms <= 0) return '00:00';
+  const totalSec = Math.floor(ms / 1000);
+  const s  = totalSec % 60;
+  const m  = Math.floor(totalSec / 60) % 60;
+  const h  = Math.floor(totalSec / 3600) % 24;
+  const d  = Math.floor(totalSec / 86400);
+  const ss = String(s).padStart(2, '0');
+  const mm = String(m).padStart(2, '0');
+  const hh = String(h).padStart(2, '0');
   if (d > 0) return `${d}d ${hh}h ${mm}m`;
   return `${hh}:${mm}:${ss}`;
 }
 
 /**
- * Returns CSS class based on how close the next episode is.
+ * CSS class for the timer based on how soon it airs.
  */
 function cdClass(ms) {
-  const h = ms / 3600000;
-  if (h < 1)  return 'cd-timer soon';
-  if (h < 3)  return 'cd-timer today';
+  if (ms <= 0)          return 'cd-timer live';
+  if (ms < 3_600_000)   return 'cd-timer soon';  // < 1 hour
   return 'cd-timer';
 }
 
 /**
- * Build the local time label  e.g. "Thu 23:30 (MMT)"
+ * Local time label  e.g. "Thu 23:30 (MMT)"
  */
-function localTimeLabel(nextDate) {
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const tz   = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  // Short TZ name
-  const tzShort = new Intl.DateTimeFormat('en',{timeZoneName:'short'})
-    .formatToParts(nextDate).find(p=>p.type==='timeZoneName')?.value || '';
-  const hhmm = nextDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
-  return `${days[nextDate.getDay()]} ${hhmm} (${tzShort})`;
+function localTimeLabel(date) {
+  const days    = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const hhmm    = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+  const tzShort = new Intl.DateTimeFormat('en', { timeZoneName:'short' })
+    .formatToParts(date).find(p => p.type === 'timeZoneName')?.value || '';
+  return `${days[date.getDay()]} ${hhmm} (${tzShort})`;
 }
 
-// All countdown targets: Map<animeId, {nextDate}>
-const cdTargets = new Map();
+/**
+ * Build the countdown HTML block for the bottom of a card poster.
+ *
+ * Priority order:
+ *  1. LC data with nextAiringAt  →  live countdown + EP number
+ *  2. LC data, ended (no next)   →  Ended badge
+ *  3. No LC match, KV status=finished → Ended badge (fallback)
+ *  4. No LC match, KV broadcastDay   →  JST-based countdown (fallback)
+ *  5. Nothing                        →  empty string
+ */
+function buildCountdownHtml(anime) {
 
+  // ── Priority 1 & 2: LiveChart data ──
+  const lc = matchLC(anime);
+  if (lc) {
+    // Case: upcoming episode known
+    if (lc.nextAiringAt) {
+      const nextDate = new Date(
+        // Handle both ISO string and (rare) Unix timestamp
+        typeof lc.nextAiringAt === 'number'
+          ? lc.nextAiringAt * 1000
+          : lc.nextAiringAt
+      );
+      const epNum = lc.nextEpNumber;
+
+      // Register for the ticker
+      cdTargets.set(anime.id, { nextDate, epNum });
+
+      const ms       = nextDate.getTime() - Date.now();
+      const timerTxt = fmtCountdown(ms);
+      const timerCls = cdClass(ms);
+      const dayLbl   = localTimeLabel(nextDate);
+      const epLabel  = epNum != null ? `EP ${epNum}` : 'Next EP';
+
+      return `<div class="countdown-wrap" id="cd-${anime.id}">
+        <div class="cd-badge">
+          <div class="cd-ep-row">
+            <span class="cd-ep-dot"></span>
+            <span class="cd-ep-label">${epLabel}</span>
+          </div>
+          <div class="${timerCls}">${timerTxt}</div>
+          <div class="cd-day-label">${dayLbl}</div>
+        </div>
+      </div>`;
+    }
+
+    // Case: no next release → ended (or not yet started but no schedule)
+    const epText = lc.totalEpisodes
+      ? `EP ${lc.totalEpisodes}`
+      : (anime.episodes ? `EP ${anime.episodes}` : '');
+    return `<div class="countdown-wrap">
+      <div style="display:flex;justify-content:center">
+        <span class="ended-badge">⏹ Ended${epText ? ' · ' + epText : ''}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── Priority 3 & 4: Fallback to KV-stored data (Jikan) ──
+  const status = (anime.status || '').toLowerCase();
+
+  // Fallback ended badge
+  if (status.includes('finished') || status.includes('ended')) {
+    const epText = anime.episodes ? `EP ${anime.episodes}` : '';
+    return `<div class="countdown-wrap">
+      <div style="display:flex;justify-content:center">
+        <span class="ended-badge">⏹ Ended${epText ? ' · ' + epText : ''}</span>
+      </div>
+    </div>`;
+  }
+
+  // Fallback JST-based countdown (broadcastDay + broadcastTime stored from Jikan)
+  if (anime.broadcastDay && anime.broadcastTime) {
+    const DAY_NUM = {
+      'Sundays':0,'Mondays':1,'Tuesdays':2,'Wednesdays':3,
+      'Thursdays':4,'Fridays':5,'Saturdays':6
+    };
+    const dayNum = DAY_NUM[anime.broadcastDay];
+    if (dayNum !== undefined) {
+      const [hJST, mJST] = anime.broadcastTime.split(':').map(Number);
+      let hUTC   = hJST - 9;
+      let dayUTC = dayNum;
+      if (hUTC < 0)   { hUTC += 24; dayUTC = (dayNum - 1 + 7) % 7; }
+      if (hUTC >= 24) { hUTC -= 24; dayUTC = (dayNum + 1) % 7; }
+
+      const now       = new Date();
+      const candidate = new Date(now);
+      candidate.setUTCHours(hUTC, mJST, 0, 0);
+      const diff = (dayUTC - candidate.getUTCDay() + 7) % 7;
+      candidate.setUTCDate(candidate.getUTCDate() + diff);
+      if (candidate <= now) candidate.setUTCDate(candidate.getUTCDate() + 7);
+
+      cdTargets.set(anime.id, { nextDate: candidate, epNum: null });
+
+      const ms       = candidate.getTime() - Date.now();
+      const timerTxt = fmtCountdown(ms);
+      const timerCls = cdClass(ms);
+      const dayLbl   = localTimeLabel(candidate);
+
+      return `<div class="countdown-wrap" id="cd-${anime.id}">
+        <div class="cd-badge">
+          <div class="cd-ep-row">
+            <span class="cd-ep-dot"></span>
+            <span class="cd-ep-label">Next EP</span>
+          </div>
+          <div class="${timerCls}">${timerTxt}</div>
+          <div class="cd-day-label">${dayLbl}</div>
+        </div>
+      </div>`;
+    }
+  }
+
+  return ''; // No schedule data available
+}
+
+/**
+ * 1-second ticker: updates all visible countdowns in-place.
+ */
 function startCountdownTick() {
   setInterval(() => {
     const now = Date.now();
     cdTargets.forEach((info, id) => {
       const el = document.getElementById(`cd-${id}`);
       if (!el) return;
+
       let ms = info.nextDate.getTime() - now;
-      if (ms <= 0) {
-        // Recalculate — episode just aired, jump 7 days
-        info.nextDate = new Date(info.nextDate.getTime() + 7*24*3600*1000);
-        ms = info.nextDate.getTime() - now;
+
+      // Episode aired > 2 hours ago — stop ticking (fresh data on next page load)
+      if (ms < -7_200_000) {
+        cdTargets.delete(id);
+        return;
       }
+
       const timerEl = el.querySelector('.cd-timer');
       const labelEl = el.querySelector('.cd-day-label');
+      const epEl    = el.querySelector('.cd-ep-label');
+
       if (timerEl) {
-        timerEl.textContent = fmtCountdown(ms);
-        timerEl.className   = cdClass(ms);
+        timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE';
+        timerEl.className   = ms > 0 ? cdClass(ms) : 'cd-timer live';
       }
-      if (labelEl) labelEl.textContent = localTimeLabel(info.nextDate);
+      if (labelEl && ms > 0) {
+        labelEl.textContent = localTimeLabel(info.nextDate);
+      }
+      if (epEl && ms <= 0) {
+        epEl.textContent = info.epNum != null ? `EP ${info.epNum}` : 'AIRING';
+      }
     });
   }, 1000);
 }
 
-// ══ Genre Bar ──────────────────────────────────────────────
+// ══ Genre Bar ══════════════════════════════════════════
 function buildGenreBar(animes) {
   const counts = {};
-  animes.forEach(a=>(a.genres||[]).forEach(g=>{ counts[g]=(counts[g]||0)+1; }));
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([g])=>g);
-  const bar = document.getElementById('genreBar');
+  animes.forEach(a => (a.genres || []).forEach(g => { counts[g] = (counts[g] || 0) + 1; }));
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([g]) => g);
+  const bar    = document.getElementById('genreBar');
   bar.innerHTML = '';
 
   const popBtn = document.createElement('button');
-  popBtn.className = `genre-chip popular${sortMode==='popular'?' active':''}`;
-  popBtn.dataset.mode = 'popular';
-  popBtn.textContent = '🏆 Popular';
-  popBtn.onclick = ()=>setSortMode('popular');
+  popBtn.className      = `genre-chip popular${sortMode === 'popular' ? ' active' : ''}`;
+  popBtn.dataset.mode   = 'popular';
+  popBtn.textContent    = '🏆 Popular';
+  popBtn.onclick        = () => setSortMode('popular');
   bar.appendChild(popBtn);
 
   const allBtn = document.createElement('button');
-  allBtn.className = `genre-chip all${activeGenre==='all'&&sortMode==='default'?' active':''}`;
+  allBtn.className    = `genre-chip all${activeGenre === 'all' && sortMode === 'default' ? ' active' : ''}`;
   allBtn.dataset.genre = 'all';
-  allBtn.textContent = '🎬 အားလုံး';
-  allBtn.onclick = ()=>filterGenre('all');
+  allBtn.textContent   = '🎬 အားလုံး';
+  allBtn.onclick       = () => filterGenre('all');
   bar.appendChild(allBtn);
 
-  sorted.forEach(genre=>{
+  sorted.forEach(genre => {
     const btn = document.createElement('button');
-    btn.className = `genre-chip${activeGenre===genre&&sortMode==='default'?' active':''}`;
+    btn.className    = `genre-chip${activeGenre === genre && sortMode === 'default' ? ' active' : ''}`;
     btn.dataset.genre = genre;
-    btn.textContent = genre;
-    btn.onclick = ()=>filterGenre(genre);
+    btn.textContent   = genre;
+    btn.onclick       = () => filterGenre(genre);
     bar.appendChild(btn);
   });
 }
 
-function setSortMode(mode){
-  sortMode=mode;
-  if(mode==='popular')activeGenre='all';
-  updateChipStates();applyFilters();
+function setSortMode(mode) {
+  sortMode = mode;
+  if (mode === 'popular') activeGenre = 'all';
+  updateChipStates(); applyFilters();
 }
-function filterGenre(genre){
-  sortMode='default';activeGenre=genre;
-  updateChipStates();applyFilters();
+function filterGenre(genre) {
+  sortMode = 'default'; activeGenre = genre;
+  updateChipStates(); applyFilters();
 }
-function updateChipStates(){
-  document.querySelectorAll('[data-genre]').forEach(el=>
-    el.classList.toggle('active',sortMode==='default'&&el.dataset.genre===activeGenre));
-  document.querySelectorAll('[data-mode]').forEach(el=>
-    el.classList.toggle('active',sortMode===el.dataset.mode));
+function updateChipStates() {
+  document.querySelectorAll('[data-genre]').forEach(el =>
+    el.classList.toggle('active', sortMode === 'default' && el.dataset.genre === activeGenre));
+  document.querySelectorAll('[data-mode]').forEach(el =>
+    el.classList.toggle('active', sortMode === el.dataset.mode));
 }
-function applyFilters(){
-  let list=allAnimes;
-  if(activeGenre!=='all') list=list.filter(a=>(a.genres||[]).includes(activeGenre));
-  if(searchTerm) list=list.filter(a=>
-    a.title.toLowerCase().includes(searchTerm)||
-    a.year.includes(searchTerm)||
-    (a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm))
+function applyFilters() {
+  let list = allAnimes;
+  if (activeGenre !== 'all') list = list.filter(a => (a.genres || []).includes(activeGenre));
+  if (searchTerm) list = list.filter(a =>
+    a.title.toLowerCase().includes(searchTerm) ||
+    a.year.includes(searchTerm) ||
+    (a.genres || []).some(g => g.toLowerCase().includes(searchTerm))
   );
-  if(sortMode==='popular') list=[...list].sort((a,b)=>{
-    const ma=reviewsMeta.get(a.id); const mb=reviewsMeta.get(b.id);
-    return(mb?.count||0)-(ma?.count||0);
+  if (sortMode === 'popular') list = [...list].sort((a, b) => {
+    const ma = reviewsMeta.get(a.id);
+    const mb = reviewsMeta.get(b.id);
+    return (mb?.count || 0) - (ma?.count || 0);
   });
   displayAnimes(list);
 }
 
-// ══ Display ────────────────────────────────────────────────
-function buildCountdownHtml(anime) {
-  const status = (anime.status||'').toLowerCase();
-
-  // Finished Airing
-  if (status.includes('finished') || status.includes('ended')) {
-    const epText = anime.episodes ? `EP ${anime.episodes}` : '';
-    return `<div class="countdown-wrap">
-      <div style="display:flex;justify-content:center">
-        <span class="ended-badge">⏹ Ended ${epText}</span>
-      </div>
-    </div>`;
-  }
-
-  // Currently Airing — calculate countdown
-  if (anime.broadcastDay && anime.broadcastTime) {
-    const nextDate = getNextAirTime(anime.broadcastDay, anime.broadcastTime);
-    if (nextDate) {
-      cdTargets.set(anime.id, { nextDate });
-      const ms      = nextDate.getTime() - Date.now();
-      const initial = fmtCountdown(ms);
-      const cls     = cdClass(ms);
-      const label   = localTimeLabel(nextDate);
-      return `<div class="countdown-wrap" id="cd-${anime.id}">
-        <div class="cd-badge">
-          <div class="cd-label"><span class="airing-dot"></span>Next Episode</div>
-          <div class="${cls}">${initial}</div>
-          <div class="cd-day-label">${label}</div>
-        </div>
-      </div>`;
-    }
-  }
-
-  return ''; // No broadcast data
-}
-
+// ══ Display ════════════════════════════════════════════
 function displayAnimes(animes) {
   const grid    = document.getElementById('anime-grid');
   const countEl = document.getElementById('movieCount');
-  grid.innerHTML='';
-  countEl.innerText=`စုစုပေါင်း ${animes.length} ကား`;
+  grid.innerHTML = '';
+  countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
   cdTargets.clear();
 
-  if(!animes.length){
-    grid.innerHTML=`<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;color:#475569"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><p style="font-size:15px;font-weight:600;color:#64748b">ဇာတ်ကား မတွေ့ရှိပါ</p></div>`;
+  if (!animes.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;color:#475569">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <p style="font-size:15px;font-weight:600;color:#64748b">ဇာတ်ကား မတွေ့ရှိပါ</p>
+    </div>`;
     return;
   }
 
-  animes.forEach((anime,index)=>{
-    const card=document.createElement('div');
-    card.className='anime-card';
-    card.style.animationDelay=`${Math.min(index,20)*30}ms`;
+  animes.forEach((anime, index) => {
+    const card = document.createElement('div');
+    card.className           = 'anime-card';
+    card.style.animationDelay = `${Math.min(index, 20) * 30}ms`;
 
-    const meta=reviewsMeta.get(anime.id);
-    const ratingBadge=(meta&&meta.count>0)
-      ?`<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>`:'';
+    const meta        = reviewsMeta.get(anime.id);
+    const ratingBadge = (meta && meta.count > 0)
+      ? `<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>`
+      : '';
 
-    const genrePills=(anime.genres||[]).slice(0,3).map(g=>`<span class="card-genre-pill">${g}</span>`).join('');
-    const countdownHtml=buildCountdownHtml(anime);
+    const genrePills    = (anime.genres || []).slice(0, 3).map(g => `<span class="card-genre-pill">${g}</span>`).join('');
+    const countdownHtml = buildCountdownHtml(anime);
 
-    card.innerHTML=`
+    card.innerHTML = `
       <div class="card-img-wrap">
-        <img src="${anime.image||''}" alt="${anime.title}" loading="lazy">
+        <img src="${anime.image || ''}" alt="${anime.title}" loading="lazy">
         <div class="card-overlay"></div>
-        <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
+        <div class="card-play">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+          </svg>
+        </div>
         <span class="year-badge">${anime.year}</span>
         ${ratingBadge}
         ${countdownHtml}
       </div>
       <div class="card-body">
         <p class="card-title" title="${anime.title}">${anime.title}</p>
-        ${genrePills?`<div class="card-genres">${genrePills}</div>`:''}
+        ${genrePills ? `<div class="card-genres">${genrePills}</div>` : ''}
         <div class="card-actions">
           <a href="/review/?id=${anime.id}" class="btn-review">
-            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
             Review
           </a>
           <a href="${anime.link}" target="_blank" class="btn-watch">
-            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+            </svg>
             ကြည့်ရန်
           </a>
         </div>
@@ -521,50 +687,67 @@ function displayAnimes(animes) {
   });
 }
 
-// ══ Search ─────────────────────────────────────────────────
-function setupSearch(){
-  function handle(e){
-    searchTerm=e.target.value.toLowerCase();
-    const sD=document.getElementById('searchInputDesktop');
-    const sM=document.getElementById('searchInputMobile');
-    if(sD&&e.target!==sD)sD.value=e.target.value;
-    if(sM&&e.target!==sM)sM.value=e.target.value;
+// ══ Search ═════════════════════════════════════════════
+function setupSearch() {
+  function handle(e) {
+    searchTerm = e.target.value.toLowerCase();
+    const sD   = document.getElementById('searchInputDesktop');
+    const sM   = document.getElementById('searchInputMobile');
+    if (sD && e.target !== sD) sD.value = e.target.value;
+    if (sM && e.target !== sM) sM.value = e.target.value;
     applyFilters();
   }
-  document.getElementById('searchInputDesktop')?.addEventListener('input',handle);
-  document.getElementById('searchInputMobile')?.addEventListener('input',handle);
+  document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
+  document.getElementById('searchInputMobile')?.addEventListener('input', handle);
 }
 
-// ══ Load ───────────────────────────────────────────────────
-async function loadFromKV(){
-  try{
-    const [animeRes,lbRes]=await Promise.all([
-      fetch(WORKER_URL+'/anime'),
-      fetch(WORKER_URL+'/reviews/leaderboard'),
+// ══ Bootstrap ══════════════════════════════════════════
+async function loadFromKV() {
+  try {
+    // Fetch anime list, reviews leaderboard, and LC schedule in parallel
+    const [animeRes, lbRes] = await Promise.all([
+      fetch(WORKER_URL + '/anime'),
+      fetch(WORKER_URL + '/reviews/leaderboard'),
     ]);
-    allAnimes=await animeRes.json();
-    const lb=await lbRes.json();
-    reviewsMeta=new Map(Array.isArray(lb)?lb.map(x=>[x.id,x]):[]);
+
+    allAnimes   = await animeRes.json();
+    const lb    = await lbRes.json();
+    reviewsMeta = new Map(Array.isArray(lb) ? lb.map(x => [x.id, x]) : []);
+
+    // Load LiveChart schedule concurrently, then redraw cards with correct countdowns.
+    // We do an optimistic first render (no LC data), then re-render once LC loads.
     buildGenreBar(allAnimes);
-    displayAnimes(allAnimes);
+    displayAnimes(allAnimes);  // first render — countdowns fallback to KV data
     setupSearch();
-    startCountdownTick();  // ← start the 1-second ticker
-  }catch(e){
-    document.getElementById('anime-grid').innerHTML=
-      '<p style="color:#f87171;padding:20px">Loading error: '+e.message+'</p>';
+    startCountdownTick();
+
+    // Now load LC and re-render to apply accurate countdowns
+    await loadLiveChartSchedule();
+    if (lcSchedule.size > 0) {
+      displayAnimes(allAnimes);  // second render — countdowns now use LC data
+    }
+
+  } catch(e) {
+    document.getElementById('anime-grid').innerHTML =
+      `<p style="color:#f87171;padding:20px">Loading error: ${e.message}</p>`;
   }
 }
 
-document.getElementById('mobileMenuBtn')?.addEventListener('click',()=>{
+// ══ Mobile nav scroll highlight ════════════════════════
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
   document.getElementById('mobileDrawer')?.classList.toggle('hidden');
 });
 
-const navItems={home:document.getElementById('navHome'),contact:document.getElementById('navContact')};
-window.addEventListener('scroll',()=>{
-  const y=window.scrollY+100;
-  const contactEl=document.getElementById('contact');
-  const active=(contactEl&&y>=contactEl.offsetTop)?'contact':'home';
-  Object.keys(navItems).forEach(k=>navItems[k]?.classList.toggle('active',k===active));
+const navItems = {
+  home:    document.getElementById('navHome'),
+  contact: document.getElementById('navContact'),
+};
+window.addEventListener('scroll', () => {
+  const y         = window.scrollY + 100;
+  const contactEl = document.getElementById('contact');
+  const active    = (contactEl && y >= contactEl.offsetTop) ? 'contact' : 'home';
+  Object.keys(navItems).forEach(k =>
+    navItems[k]?.classList.toggle('active', k === active));
 });
 
 loadFromKV();
