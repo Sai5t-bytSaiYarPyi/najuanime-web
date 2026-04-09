@@ -89,34 +89,43 @@
     .rating-badge-card{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);color:#fbbf24;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:3px}
     .rating-badge-card .cnt{color:#94a3b8;font-weight:600}
 
-    /* ── Countdown Badge (bottom of poster) ── */
+    /* ── Countdown overlay (bottom of poster) ── */
     .countdown-wrap{
       position:absolute;bottom:0;left:0;right:0;
-      background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 70%,transparent 100%);
-      padding:22px 8px 8px;
-      pointer-events:none;
+      background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 65%,transparent 100%);
+      padding:20px 8px 8px;pointer-events:none;
     }
-    .cd-badge{display:flex;flex-direction:column;align-items:center;gap:2px;}
-    .cd-label{font-size:9px;font-weight:700;color:#4ade80;letter-spacing:.06em;text-transform:uppercase;opacity:.9;}
-    .cd-ep-row{display:flex;align-items:center;gap:4px;justify-content:center;}
-    /* EP number pill */
-    .cd-ep-pill{font-size:10px;font-weight:900;color:#4ade80;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);padding:1px 6px;border-radius:99px;letter-spacing:.03em;flex-shrink:0;}
-    /* countdown timer */
-    .cd-timer{font-size:12px;font-weight:900;color:white;letter-spacing:.04em;font-variant-numeric:tabular-nums;text-shadow:0 1px 4px rgba(0,0,0,.8);}
-    .cd-timer.soon{color:#fbbf24}
-    .cd-timer.today{color:#fb923c}
-    .cd-timer.now{color:#4ade80;animation:cdPulse 1s infinite}
-    @keyframes cdPulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .cd-badge{display:flex;flex-direction:column;align-items:center;gap:1px}
 
-    /* Airing dot */
-    .airing-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:aPulse 1.5s infinite;margin-right:3px;vertical-align:middle;}
-    @keyframes aPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    /* Row 1: green dot + EP label */
+    .cd-ep-row{display:flex;align-items:center;gap:4px}
+    .cd-ep-dot{
+      display:inline-block;width:5px;height:5px;border-radius:50%;
+      background:#4ade80;box-shadow:0 0 5px #4ade80;
+      animation:aPulse 1.5s infinite;flex-shrink:0;
+    }
+    @keyframes aPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+    .cd-ep-label{font-size:10px;font-weight:900;color:#4ade80;letter-spacing:.07em;text-transform:uppercase}
+
+    /* Row 2: countdown timer */
+    .cd-timer{
+      font-size:13px;font-weight:900;color:white;
+      letter-spacing:.04em;font-variant-numeric:tabular-nums;
+      text-shadow:0 1px 4px rgba(0,0,0,.9);line-height:1.2;
+    }
+    .cd-timer.soon{color:#fbbf24}
+    .cd-timer.live{color:#f87171;animation:livePulse 1s ease-in-out infinite}
+    @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+    /* Row 3: local time */
+    .cd-day-label{font-size:9px;font-weight:600;color:#94a3b8;margin-top:1px;letter-spacing:.02em}
 
     /* Ended badge */
-    .ended-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(100,116,139,.25);border:1px solid rgba(100,116,139,.3);color:#94a3b8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
-
-    /* Currently Airing (no schedule data) */
-    .airing-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:#4ade80;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+    .ended-badge{
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(100,116,139,.25);border:1px solid rgba(100,116,139,.3);
+      color:#94a3b8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
+    }
 
     .card-body{padding:12px;flex-grow:1;display:flex;flex-direction:column;gap:8px}
     .card-title{font-size:13px;font-weight:600;color:#e2e8f0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
@@ -149,11 +158,9 @@
       .card-title{font-size:12px;min-height:32px}
       .card-genre-pill{font-size:9px;padding:1px 5px}
       .card-body{padding:10px;gap:6px}
-      .year-badge{font-size:10px;padding:2px 6px}
-      .rating-badge-card{font-size:10px;padding:2px 6px}
+      .year-badge,.rating-badge-card{font-size:10px;padding:2px 6px}
       .cd-timer{font-size:11px}
-      .cd-label{font-size:8px}
-      .cd-ep-pill{font-size:9px}
+      .cd-ep-label,.cd-day-label{font-size:8px}
     }
   </style>
 </head>
@@ -250,241 +257,286 @@
 
 <script>
 const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
+
 let allAnimes   = [];
 let reviewsMeta = new Map();
 let activeGenre = 'all';
 let sortMode    = 'default';
 let searchTerm  = '';
 
-const fmtN = n => n>=1000?(n/1000).toFixed(1).replace('.0','')+'K':String(n);
+const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : String(n);
 
-// ══ SCHEDULE ENGINE (LiveChart) ══════════════════════════════
-// Map<livechartId (string), {airingMs, epNumber}>
-let scheduleMap = new Map();
+// ══════════════════════════════════════════════════════
+// ── LIVECHART LOOKUP MAPS ─────────────────────────────
+//
+// lcById    Map<lcId(string) → LC item>   ← PRIMARY (set by admin)
+// lcByTitle Map<normalizedTitle → LC item> ← FALLBACK
+// ══════════════════════════════════════════════════════
+let lcById    = new Map();
+let lcByTitle = new Map();
 
-async function loadSchedule() {
+function normTitle(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[：:！!？?～~・•]/g, ' ')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function loadLiveChartSchedule() {
   try {
-    const r    = await fetch(WORKER_URL + '/schedule');
-    const list = await r.json();
-    scheduleMap.clear();
-    for (const item of list) {
-      if (item.livechartId != null) {
-        scheduleMap.set(String(item.livechartId), {
-          airingMs: item.airingMs,   // ms timestamp or null
-          epNumber: item.epNumber,   // number or null
-        });
+    const r    = await fetch(WORKER_URL + '/livechart');
+    const data = await r.json();
+    if (!Array.isArray(data)) return;
+
+    lcById.clear();
+    lcByTitle.clear();
+
+    for (const item of data) {
+      // Primary: by numeric LC ID
+      if (item.lcId) lcById.set(String(item.lcId), item);
+
+      // Fallback: by every available title variant
+      for (const t of [item.romajiTitle, item.englishTitle, ...(item.altTitles || [])]) {
+        const k = normTitle(t);
+        if (k.length >= 3 && !lcByTitle.has(k)) lcByTitle.set(k, item);
       }
     }
-  } catch (e) {
-    console.warn('Schedule load failed:', e.message);
+  } catch(e) {
+    console.warn('[LC] load failed:', e.message);
   }
 }
 
-// ── Format countdown milliseconds ──────────────────────────
-function fmtCountdown(ms) {
-  if (ms <= 0) return 'Now';
-  const totalSec = Math.floor(ms / 1000);
-  const d = Math.floor(totalSec / 86400);
-  const h = Math.floor((totalSec % 86400) / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  if (d > 0) return `${d}d ${h}h ${m}m`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m ${String(s).padStart(2,'0')}s`;
+/**
+ * Find LC schedule data for an anime entry.
+ *
+ * Step 1 — Direct ID match  (anime.lcId set in admin = 100% accurate)
+ * Step 2 — Exact title match
+ * Step 3 — Substring match  (picks longest key overlap)
+ */
+function matchLC(anime) {
+  // ── Step 1: lcId (admin-confirmed, most reliable) ──
+  if (anime.lcId) {
+    const hit = lcById.get(String(anime.lcId));
+    if (hit) return hit;
+  }
+
+  // ── Step 2: exact title match ──
+  const q = normTitle(anime.title);
+  if (q && lcByTitle.has(q)) return lcByTitle.get(q);
+
+  // ── Step 3: substring fallback ──
+  let best = null, bestLen = 0;
+  for (const [key, val] of lcByTitle) {
+    if (key.length < 4) continue;
+    if (key.includes(q) || q.includes(key)) {
+      if (key.length > bestLen) { best = val; bestLen = key.length; }
+    }
+  }
+  return best;
 }
 
-function cdUrgencyClass(ms) {
-  if (ms <= 0)          return 'cd-timer now';
-  const h = ms / 3_600_000;
-  if (h < 1)            return 'cd-timer soon';
-  if (h < 3)            return 'cd-timer today';
+// ══════════════════════════════════════════════════════
+// ── COUNTDOWN ENGINE ──────────────────────────────────
+// cdTargets Map<animeId → { nextDate, epNum }>
+// ══════════════════════════════════════════════════════
+const cdTargets = new Map();
+
+function fmtCountdown(ms) {
+  if (ms <= 0) return '00:00';
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60) % 60;
+  const h = Math.floor(s / 3600) % 24;
+  const d = Math.floor(s / 86400);
+  const pad = n => String(n).padStart(2,'0');
+  return d > 0 ? `${d}d ${pad(h)}h ${pad(m)}m` : `${pad(h)}:${pad(m)}:${pad(s%60)}`;
+}
+
+function cdClass(ms) {
+  if (ms <= 0)        return 'cd-timer live';
+  if (ms < 3_600_000) return 'cd-timer soon';
   return 'cd-timer';
 }
 
-// ── Build countdown HTML for a card ────────────────────────
-function buildCountdownHtml(anime) {
-  const status = (anime.status || '').toLowerCase();
-
-  // ── 1. If anime has a livechartId, check scheduleMap ──
-  const lcId = anime.livechartId ? String(anime.livechartId) : null;
-
-  if (lcId) {
-    const entry = scheduleMap.get(lcId);
-
-    // livechartId matched but no airingMs → ended (nextRelease was null)
-    if (entry && entry.airingMs == null) {
-      const epText = anime.episodes ? ` · EP ${anime.episodes}` : '';
-      return `<div class="countdown-wrap">
-        <div style="display:flex;justify-content:center">
-          <span class="ended-badge">⏹ Ended${epText}</span>
-        </div>
-      </div>`;
-    }
-
-    // Has valid airingMs → show live countdown
-    if (entry && entry.airingMs != null) {
-      const now      = Date.now();
-      const ms       = entry.airingMs - now;
-      const timerTxt = ms > 0 ? fmtCountdown(ms) : 'Airing Now!';
-      const cls      = cdUrgencyClass(ms);
-      const epLabel  = entry.epNumber ? `EP ${entry.epNumber}` : 'Next';
-
-      return `<div class="countdown-wrap" id="cd-${anime.id}"
-                data-airing="${entry.airingMs}"
-                data-ep="${entry.epNumber ?? ''}">
-        <div class="cd-badge">
-          <div class="cd-label"><span class="airing-dot"></span>Next Episode</div>
-          <div class="cd-ep-row">
-            <span class="cd-ep-pill">${epLabel}</span>
-            <span class="${cls}" id="cd-timer-${anime.id}">${timerTxt}</span>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    // lcId exists but not yet in scheduleMap (schedule load missed it) → fallback below
-  }
-
-  // ── 2. No livechartId — fall back to status string ──
-  if (status.includes('finished') || status.includes('ended')) {
-    const epText = anime.episodes ? ` · EP ${anime.episodes}` : '';
-    return `<div class="countdown-wrap">
-      <div style="display:flex;justify-content:center">
-        <span class="ended-badge">⏹ Ended${epText}</span>
-      </div>
-    </div>`;
-  }
-
-  if (status.includes('airing') || status.includes('ongoing')) {
-    return `<div class="countdown-wrap">
-      <div style="display:flex;justify-content:center">
-        <span class="airing-badge"><span class="airing-dot"></span>Currently Airing</span>
-      </div>
-    </div>`;
-  }
-
-  return ''; // No badge needed
+function localTimeLabel(date) {
+  const days    = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const hhmm    = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+  const tzShort = new Intl.DateTimeFormat('en',{timeZoneName:'short'})
+    .formatToParts(date).find(p=>p.type==='timeZoneName')?.value || '';
+  return `${days[date.getDay()]} ${hhmm} (${tzShort})`;
 }
 
-// ── 1-second countdown tick ─────────────────────────────────
+function buildCountdownHtml(anime) {
+
+  // ── LC data path ──────────────────────────────────
+  const lc = matchLC(anime);
+
+  if (lc) {
+    // Anime has a confirmed next episode
+    if (lc.nextAiringAt) {
+      const nextDate = new Date(
+        typeof lc.nextAiringAt === 'number' ? lc.nextAiringAt * 1000 : lc.nextAiringAt
+      );
+      if (!isNaN(nextDate)) {
+        const epNum = lc.nextEpNumber;
+        cdTargets.set(anime.id, { nextDate, epNum });
+        const ms  = nextDate.getTime() - Date.now();
+        const lbl = epNum != null ? `EP ${epNum}` : 'NEXT EP';
+        return `<div class="countdown-wrap" id="cd-${anime.id}">
+          <div class="cd-badge">
+            <div class="cd-ep-row">
+              <span class="cd-ep-dot"></span>
+              <span class="cd-ep-label">${lbl}</span>
+            </div>
+            <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
+            <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
+          </div>
+        </div>`;
+      }
+    }
+
+    // No next episode → ended
+    const epTxt = lc.totalEpisodes ? `EP ${lc.totalEpisodes}`
+      : (anime.episodes ? `EP ${anime.episodes}` : '');
+    return `<div class="countdown-wrap">
+      <div style="display:flex;justify-content:center">
+        <span class="ended-badge">⏹ Ended${epTxt ? ' · ' + epTxt : ''}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── Fallback: KV status field ─────────────────────
+  const status = (anime.status || '').toLowerCase();
+  if (status.includes('finished') || status.includes('ended')) {
+    const epTxt = anime.episodes ? `EP ${anime.episodes}` : '';
+    return `<div class="countdown-wrap">
+      <div style="display:flex;justify-content:center">
+        <span class="ended-badge">⏹ Ended${epTxt ? ' · ' + epTxt : ''}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── Fallback: JST broadcastDay/Time (from Jikan) ──
+  if (anime.broadcastDay && anime.broadcastTime) {
+    const DAY_NUM = { Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,Thursdays:4,Fridays:5,Saturdays:6 };
+    const dayNum  = DAY_NUM[anime.broadcastDay];
+    if (dayNum !== undefined) {
+      const [hJST, mJST] = anime.broadcastTime.split(':').map(Number);
+      let hUTC = hJST - 9, dayUTC = dayNum;
+      if (hUTC < 0)   { hUTC += 24; dayUTC = (dayNum+6)%7; }
+      if (hUTC >= 24) { hUTC -= 24; dayUTC = (dayNum+1)%7; }
+      const now = new Date();
+      const c   = new Date(now);
+      c.setUTCHours(hUTC, mJST, 0, 0);
+      const diff = (dayUTC - c.getUTCDay() + 7) % 7;
+      c.setUTCDate(c.getUTCDate() + diff);
+      if (c <= now) c.setUTCDate(c.getUTCDate() + 7);
+      cdTargets.set(anime.id, { nextDate: c, epNum: null });
+      const ms = c.getTime() - Date.now();
+      return `<div class="countdown-wrap" id="cd-${anime.id}">
+        <div class="cd-badge">
+          <div class="cd-ep-row">
+            <span class="cd-ep-dot"></span>
+            <span class="cd-ep-label">NEXT EP</span>
+          </div>
+          <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
+          <div class="cd-day-label">${localTimeLabel(c)}</div>
+        </div>
+      </div>`;
+    }
+  }
+
+  return '';
+}
+
 function startCountdownTick() {
   setInterval(() => {
     const now = Date.now();
-    document.querySelectorAll('[id^="cd-"][data-airing]').forEach(el => {
-      const airingMs = parseInt(el.dataset.airing, 10);
-      const animeId  = el.id.replace('cd-', '');
-      const timerEl  = document.getElementById('cd-timer-' + animeId);
-      if (!timerEl) return;
-      const ms = airingMs - now;
-      if (ms > 0) {
-        timerEl.textContent = fmtCountdown(ms);
-        timerEl.className   = cdUrgencyClass(ms);
-      } else {
-        timerEl.textContent = 'Airing Now!';
-        timerEl.className   = 'cd-timer now';
-      }
+    cdTargets.forEach((info, id) => {
+      const el = document.getElementById(`cd-${id}`);
+      if (!el) { cdTargets.delete(id); return; }
+      const ms = info.nextDate.getTime() - now;
+      if (ms < -7_200_000) { cdTargets.delete(id); return; } // stale >2h ago
+
+      const timerEl = el.querySelector('.cd-timer');
+      const labelEl = el.querySelector('.cd-day-label');
+      if (timerEl) { timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE'; timerEl.className = cdClass(ms); }
+      if (labelEl && ms > 0) labelEl.textContent = localTimeLabel(info.nextDate);
     });
   }, 1000);
 }
 
-// ══ Genre Bar ──────────────────────────────────────────────
+// ══ Genre Bar ══════════════════════════════════════════
 function buildGenreBar(animes) {
   const counts = {};
-  animes.forEach(a=>(a.genres||[]).forEach(g=>{ counts[g]=(counts[g]||0)+1; }));
+  animes.forEach(a => (a.genres||[]).forEach(g => { counts[g]=(counts[g]||0)+1; }));
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([g])=>g);
   const bar = document.getElementById('genreBar');
   bar.innerHTML = '';
 
-  const popBtn = document.createElement('button');
-  popBtn.className = `genre-chip popular${sortMode==='popular'?' active':''}`;
-  popBtn.dataset.mode = 'popular';
-  popBtn.textContent = '🏆 Popular';
-  popBtn.onclick = ()=>setSortMode('popular');
-  bar.appendChild(popBtn);
+  const pop = document.createElement('button');
+  pop.className='genre-chip popular'+(sortMode==='popular'?' active':'');
+  pop.dataset.mode='popular'; pop.textContent='🏆 Popular';
+  pop.onclick=()=>setSortMode('popular'); bar.appendChild(pop);
 
-  const allBtn = document.createElement('button');
-  allBtn.className = `genre-chip all${activeGenre==='all'&&sortMode==='default'?' active':''}`;
-  allBtn.dataset.genre = 'all';
-  allBtn.textContent = '🎬 အားလုံး';
-  allBtn.onclick = ()=>filterGenre('all');
-  bar.appendChild(allBtn);
+  const all = document.createElement('button');
+  all.className='genre-chip all'+(activeGenre==='all'&&sortMode==='default'?' active':'');
+  all.dataset.genre='all'; all.textContent='🎬 အားလုံး';
+  all.onclick=()=>filterGenre('all'); bar.appendChild(all);
 
-  sorted.forEach(genre=>{
+  sorted.forEach(g => {
     const btn = document.createElement('button');
-    btn.className = `genre-chip${activeGenre===genre&&sortMode==='default'?' active':''}`;
-    btn.dataset.genre = genre;
-    btn.textContent = genre;
-    btn.onclick = ()=>filterGenre(genre);
-    bar.appendChild(btn);
+    btn.className='genre-chip'+(activeGenre===g&&sortMode==='default'?' active':'');
+    btn.dataset.genre=g; btn.textContent=g;
+    btn.onclick=()=>filterGenre(g); bar.appendChild(btn);
   });
 }
 
-function setSortMode(mode){
-  sortMode=mode;
-  if(mode==='popular')activeGenre='all';
-  updateChipStates();applyFilters();
-}
-function filterGenre(genre){
-  sortMode='default';activeGenre=genre;
-  updateChipStates();applyFilters();
-}
-function updateChipStates(){
-  document.querySelectorAll('[data-genre]').forEach(el=>
-    el.classList.toggle('active',sortMode==='default'&&el.dataset.genre===activeGenre));
-  document.querySelectorAll('[data-mode]').forEach(el=>
-    el.classList.toggle('active',sortMode===el.dataset.mode));
-}
-function applyFilters(){
-  let list=allAnimes;
-  if(activeGenre!=='all') list=list.filter(a=>(a.genres||[]).includes(activeGenre));
-  if(searchTerm) list=list.filter(a=>
-    a.title.toLowerCase().includes(searchTerm)||
-    a.year.includes(searchTerm)||
-    (a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm))
-  );
-  if(sortMode==='popular') list=[...list].sort((a,b)=>{
-    const ma=reviewsMeta.get(a.id); const mb=reviewsMeta.get(b.id);
-    return(mb?.count||0)-(ma?.count||0);
-  });
+function setSortMode(m)    { sortMode=m; if(m==='popular')activeGenre='all'; updateChipStates(); applyFilters(); }
+function filterGenre(g)    { sortMode='default'; activeGenre=g; updateChipStates(); applyFilters(); }
+function updateChipStates(){ document.querySelectorAll('[data-genre]').forEach(el=>el.classList.toggle('active',sortMode==='default'&&el.dataset.genre===activeGenre)); document.querySelectorAll('[data-mode]').forEach(el=>el.classList.toggle('active',sortMode===el.dataset.mode)); }
+function applyFilters() {
+  let list = allAnimes;
+  if (activeGenre!=='all') list=list.filter(a=>(a.genres||[]).includes(activeGenre));
+  if (searchTerm) list=list.filter(a=>a.title.toLowerCase().includes(searchTerm)||a.year.includes(searchTerm)||(a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm)));
+  if (sortMode==='popular') list=[...list].sort((a,b)=>(reviewsMeta.get(b.id)?.count||0)-(reviewsMeta.get(a.id)?.count||0));
   displayAnimes(list);
 }
 
-// ══ Display ────────────────────────────────────────────────
+// ══ Display ════════════════════════════════════════════
 function displayAnimes(animes) {
-  const grid    = document.getElementById('anime-grid');
-  const countEl = document.getElementById('movieCount');
-  grid.innerHTML='';
-  countEl.innerText=`စုစုပေါင်း ${animes.length} ကား`;
+  const grid = document.getElementById('anime-grid');
+  document.getElementById('movieCount').innerText = `စုစုပေါင်း ${animes.length} ကား`;
+  grid.innerHTML = '';
+  cdTargets.clear();
 
-  if(!animes.length){
+  if (!animes.length) {
     grid.innerHTML=`<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;color:#475569"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><p style="font-size:15px;font-weight:600;color:#64748b">ဇာတ်ကား မတွေ့ရှိပါ</p></div>`;
     return;
   }
 
-  animes.forEach((anime,index)=>{
-    const card=document.createElement('div');
-    card.className='anime-card';
-    card.style.animationDelay=`${Math.min(index,20)*30}ms`;
+  animes.forEach((anime, index) => {
+    const card = document.createElement('div');
+    card.className = 'anime-card';
+    card.style.animationDelay = `${Math.min(index,20)*30}ms`;
 
-    const meta=reviewsMeta.get(anime.id);
-    const ratingBadge=(meta&&meta.count>0)
-      ?`<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>`:'';
+    const meta        = reviewsMeta.get(anime.id);
+    const ratingBadge = (meta&&meta.count>0) ? `<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>` : '';
+    const genrePills  = (anime.genres||[]).slice(0,3).map(g=>`<span class="card-genre-pill">${g}</span>`).join('');
 
-    const genrePills=(anime.genres||[]).slice(0,3).map(g=>`<span class="card-genre-pill">${g}</span>`).join('');
-    const countdownHtml=buildCountdownHtml(anime);
-
-    card.innerHTML=`
+    card.innerHTML = `
       <div class="card-img-wrap">
         <img src="${anime.image||''}" alt="${anime.title}" loading="lazy">
         <div class="card-overlay"></div>
         <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
         <span class="year-badge">${anime.year}</span>
         ${ratingBadge}
-        ${countdownHtml}
+        ${buildCountdownHtml(anime)}
       </div>
       <div class="card-body">
         <p class="card-title" title="${anime.title}">${anime.title}</p>
-        ${genrePills?`<div class="card-genres">${genrePills}</div>`:''}
+        ${genrePills ? `<div class="card-genres">${genrePills}</div>` : ''}
         <div class="card-actions">
           <a href="/review/?id=${anime.id}" class="btn-review">
             <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -500,52 +552,54 @@ function displayAnimes(animes) {
   });
 }
 
-// ══ Search ─────────────────────────────────────────────────
-function setupSearch(){
-  function handle(e){
-    searchTerm=e.target.value.toLowerCase();
-    const sD=document.getElementById('searchInputDesktop');
-    const sM=document.getElementById('searchInputMobile');
-    if(sD&&e.target!==sD)sD.value=e.target.value;
-    if(sM&&e.target!==sM)sM.value=e.target.value;
+// ══ Search ═════════════════════════════════════════════
+function setupSearch() {
+  function handle(e) {
+    searchTerm = e.target.value.toLowerCase();
+    const sD = document.getElementById('searchInputDesktop');
+    const sM = document.getElementById('searchInputMobile');
+    if (sD && e.target!==sD) sD.value = e.target.value;
+    if (sM && e.target!==sM) sM.value = e.target.value;
     applyFilters();
   }
-  document.getElementById('searchInputDesktop')?.addEventListener('input',handle);
-  document.getElementById('searchInputMobile')?.addEventListener('input',handle);
+  document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
+  document.getElementById('searchInputMobile')?.addEventListener('input', handle);
 }
 
-// ══ Load ───────────────────────────────────────────────────
-async function loadFromKV(){
-  try{
-    const [animeRes,lbRes]=await Promise.all([
-      fetch(WORKER_URL+'/anime'),
-      fetch(WORKER_URL+'/reviews/leaderboard'),
+// ══ Bootstrap ══════════════════════════════════════════
+async function loadFromKV() {
+  try {
+    const [animeRes, lbRes] = await Promise.all([
+      fetch(WORKER_URL + '/anime'),
+      fetch(WORKER_URL + '/reviews/leaderboard'),
     ]);
-    allAnimes=await animeRes.json();
-    const lb=await lbRes.json();
-    reviewsMeta=new Map(Array.isArray(lb)?lb.map(x=>[x.id,x]):[]);
-
-    // Load LiveChart schedule (concurrent with anime data)
-    await loadSchedule();
+    allAnimes   = await animeRes.json();
+    const lb    = await lbRes.json();
+    reviewsMeta = new Map(Array.isArray(lb) ? lb.map(x=>[x.id,x]) : []);
 
     buildGenreBar(allAnimes);
-    displayAnimes(allAnimes);
+    displayAnimes(allAnimes);      // first render (fallback countdowns)
     setupSearch();
     startCountdownTick();
-  }catch(e){
-    document.getElementById('anime-grid').innerHTML=
-      '<p style="color:#f87171;padding:20px">Loading error: '+e.message+'</p>';
+
+    // Load LC data and re-render with accurate countdowns
+    await loadLiveChartSchedule();
+    if (lcById.size > 0 || lcByTitle.size > 0) {
+      displayAnimes(allAnimes);    // second render (LC countdowns)
+    }
+  } catch(e) {
+    document.getElementById('anime-grid').innerHTML =
+      `<p style="color:#f87171;padding:20px">Loading error: ${e.message}</p>`;
   }
 }
 
-document.getElementById('mobileMenuBtn')?.addEventListener('click',()=>{
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
   document.getElementById('mobileDrawer')?.classList.toggle('hidden');
 });
 
-const navItems={home:document.getElementById('navHome'),contact:document.getElementById('navContact')};
-window.addEventListener('scroll',()=>{
-  const y=window.scrollY+100;
-  const contactEl=document.getElementById('contact');
+const navItems = { home:document.getElementById('navHome'), contact:document.getElementById('navContact') };
+window.addEventListener('scroll', () => {
+  const y=window.scrollY+100, contactEl=document.getElementById('contact');
   const active=(contactEl&&y>=contactEl.offsetTop)?'contact':'home';
   Object.keys(navItems).forEach(k=>navItems[k]?.classList.toggle('active',k===active));
 });
