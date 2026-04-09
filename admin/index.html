@@ -95,6 +95,29 @@ textarea{resize:vertical;min-height:80px}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
+
+  /* EP Mode Toggle */
+.ep-mode-btn {
+  padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--border); background: var(--bg3);
+  color: #94a3b8; transition: all .15s; font-family: 'Outfit', sans-serif;
+}
+.ep-mode-btn:hover { border-color: rgba(74,222,128,.3); color: white; }
+.ep-mode-btn.active {
+  background: rgba(74,222,128,.15);
+  border-color: rgba(74,222,128,.4);
+  color: #4ade80;
+}
+.ep-mode-btn.active[data-mode="manual"] {
+  background: rgba(59,130,246,.15);
+  border-color: rgba(59,130,246,.4);
+  color: #60a5fa;
+}
+.ep-mode-btn.active[data-mode="off"] {
+  background: rgba(100,116,139,.12);
+  border-color: rgba(100,116,139,.3);
+  color: #94a3b8;
+}
 </style>
 </head>
 <body>
