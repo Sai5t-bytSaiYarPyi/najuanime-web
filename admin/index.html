@@ -1,564 +1,1007 @@
 <!DOCTYPE html>
-<html lang="my" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ</title>
-  <meta name="description" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများကို အခမဲ့ ကြည့်ရှုနိုင်သည်။ Action, Romance, Fantasy Anime ပေါင်း ၁၄၀ ကျော် Telegram တွင် ရှာဖွေကြည့်ရှုနိုင်ပါသည်။">
-  <meta name="keywords" content="NaJu Anime, မြန်မာ Anime, Myanmar Anime, ဘာသာပြန် Anime">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://www.najuanime.com/">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.najuanime.com/">
-  <meta property="og:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ">
-  <meta property="og:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများကို အခမဲ့ ကြည့်ရှုနိုင်သည်။">
-  <meta property="og:image" content="https://www.najuanime.com/images/og-cover.jpg">
-  <meta property="og:site_name" content="NaJu Anime">
-  <meta property="og:locale" content="my_MM">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="NaJu Anime - မြန်မာဘာသာပြန် Anime">
-  <meta name="twitter:description" content="မြန်မာဘာသာပြန် Anime ဇာတ်ကားများကို အခမဲ့ ကြည့်ရှုနိုင်ပါသည်။">
-  <meta name="twitter:image" content="https://www.najuanime.com/images/og-cover.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaJu Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Outfit',sans-serif}
+:root{--blue:#3b82f6;--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+input,textarea,select{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:10px 14px;width:100%;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--blue)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+input[readonly]{opacity:.6;cursor:not-allowed}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:none}
+.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
+.btn-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}.btn-red:hover{background:rgba(239,68,68,.2)}
+.btn-gray{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-gray:hover{background:#263248;color:white}
+.btn-green{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.2)}.btn-green:hover{background:rgba(74,222,128,.2)}
+.btn-purple{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}.btn-purple:hover{background:rgba(168,85,247,.2)}
+.btn-orange{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.2)}.btn-orange:hover{background:rgba(251,146,60,.2)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
+.pill{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
 
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebSite","name":"NaJu Anime","url":"https://www.najuanime.com","description":"မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ Telegram တွင် အခမဲ့ ကြည့်ရှုနိုင်ပါသည်","inLanguage":"my"}
-  </script>
+/* Genre Tags */
+.genre-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+.genre-tag .remove{cursor:pointer;opacity:.6;font-size:13px;line-height:1}.genre-tag .remove:hover{opacity:1;color:#f87171}
+.genre-input-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;min-height:44px;cursor:text;transition:border-color .2s}
+.genre-input-wrap:focus-within{border-color:var(--blue)}
+.genre-text-input{background:none;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;min-width:100px;flex:1;padding:2px 4px}
+.genre-text-input::placeholder{color:var(--muted)}
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBNCZMJS9F"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-NBNCZMJS9F');</script>
+/* Fetch Result Badge */
+.fetch-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.fetch-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.fetch-err{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.fetch-loading{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <style>
-    *{font-family:'Outfit',sans-serif;}
-    :root{
-      --blue:#3b82f6;--blue-dark:#1d4ed8;
-      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
-      --border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;
-    }
-    body{background:var(--bg);color:var(--text);}
-    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
-    header{background:rgba(15,17,23,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
-    .logo-naju{color:var(--blue)}.logo-anime{color:white}
-    .search-wrap{position:relative}
-    .search-wrap input{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:12px;padding:10px 16px 10px 44px;width:100%;font-size:14px;transition:border-color .2s,box-shadow .2s;outline:none;}
-    .search-wrap input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
-    .search-wrap input::placeholder{color:var(--muted)}
-    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-    .nav-link{color:#94a3b8;font-weight:600;font-size:14px;letter-spacing:.02em;transition:color .2s;text-decoration:none}
-    .nav-link:hover{color:white}
-    .ai-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;color:white;background:linear-gradient(135deg,#1e40af 0%,#3b82f6 50%,#06b6d4 100%);box-shadow:0 0 16px rgba(59,130,246,.4),0 2px 8px rgba(0,0,0,.3);transition:box-shadow .25s,transform .15s;position:relative;overflow:hidden}
-    .ai-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.08));opacity:0;transition:opacity .2s}
-    .ai-btn:hover{box-shadow:0 0 28px rgba(59,130,246,.65),0 4px 16px rgba(0,0,0,.4);transform:translateY(-1px)}
-    .ai-btn:hover::before{opacity:1}
-    .ai-btn-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80;animation:aiPulse 2s infinite;flex-shrink:0}
-    @keyframes aiPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-    .ai-btn-mobile{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;font-size:10px;font-weight:700;flex:1;color:#60a5fa}
-    .ai-btn-mobile .icon-wrap{width:28px;height:28px;background:linear-gradient(135deg,#1e40af,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(59,130,246,.45)}
-    .section-title{font-size:18px;font-weight:700;color:white;display:flex;align-items:center;gap:10px}
-    .section-title::before{content:'';display:block;width:4px;height:20px;background:var(--blue);border-radius:99px}
-    .genre-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-    .genre-bar::-webkit-scrollbar{display:none}
-    .genre-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:var(--bg3);color:#94a3b8;flex-shrink:0;font-family:'Outfit',sans-serif}
-    .genre-chip:hover{border-color:rgba(168,85,247,.4);color:#c084fc;background:rgba(168,85,247,.06)}
-    .genre-chip.active{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:#c084fc}
-    .genre-chip.popular{color:#f59e0b;border-color:rgba(245,158,11,.25)}
-    .genre-chip.popular:hover{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07)}
-    .genre-chip.popular.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.45);color:#fbbf24}
-    .genre-chip.all.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#60a5fa}
+/* Auto-fetch Box */
+.fetch-box{background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.12);border-radius:12px;padding:14px;margin-bottom:4px}
+.fetch-row{display:flex;gap:8px;align-items:center}
+.fetch-title-input{flex:1}
 
-    /* ── Cards ── */
-    .anime-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;animation:fadeUp .4s ease both}
-    .anime-card:hover{transform:translateY(-4px);border-color:rgba(59,130,246,.35);box-shadow:0 12px 40px rgba(0,0,0,.5)}
-    .card-img-wrap{position:relative;overflow:hidden;aspect-ratio:3/4}
-    .card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s,opacity .4s}
-    .anime-card:hover .card-img-wrap img{transform:scale(1.07);opacity:.7}
-    .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 50%);pointer-events:none}
-    .card-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
-    .anime-card:hover .card-play{opacity:1}
-    .card-play svg{width:48px;height:48px;color:white;filter:drop-shadow(0 2px 8px rgba(0,0,0,.8))}
-    .year-badge{position:absolute;top:10px;right:10px;background:rgba(59,130,246,.9);backdrop-filter:blur(4px);color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
-    .rating-badge-card{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);color:#fbbf24;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;display:flex;align-items:center;gap:3px}
-    .rating-badge-card .cnt{color:#94a3b8;font-weight:600}
+/* Stat fields */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-item label{font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:5px;display:block}
+.stat-item input{font-size:13px}
 
-    /* ── Countdown bottom overlay ── */
-    .cd-wrap{
-      position:absolute;bottom:0;left:0;right:0;
-      background:linear-gradient(to top,rgba(0,0,0,.93) 0%,rgba(0,0,0,.55) 65%,transparent 100%);
-      padding:28px 10px 9px;
-      pointer-events:none;
-    }
-    /* Airing badge */
-    .cd-inner{display:flex;flex-direction:column;align-items:center;gap:1px}
-    .cd-ep-row{display:flex;align-items:center;gap:5px;margin-bottom:2px}
-    .cd-airing-dot{
-      width:5px;height:5px;border-radius:50%;
-      background:#4ade80;box-shadow:0 0 5px #4ade80;
-      animation:aPulse 1.5s infinite;flex-shrink:0;
-    }
-    @keyframes aPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-    .cd-ep-label{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.05em}
-    .cd-timer{
-      font-size:13px;font-weight:900;color:white;
-      letter-spacing:.05em;font-variant-numeric:tabular-nums;
-      text-shadow:0 1px 6px rgba(0,0,0,.9);
-    }
-    .cd-timer.soon {color:#fbbf24}  /* < 1h */
-    .cd-timer.today{color:#fb923c}  /* < 3h */
-    .cd-approx{font-size:9px;color:#94a3b8;font-style:italic;margin-top:1px}
-    .cd-local{font-size:9px;font-weight:600;color:#64748b;margin-top:1px}
-    /* Ended badge */
-    .cd-ended{
-      display:inline-flex;align-items:center;gap:4px;
-      background:rgba(100,116,139,.22);
-      border:1px solid rgba(100,116,139,.28);
-      color:#94a3b8;font-size:10px;font-weight:700;
-      padding:4px 9px;border-radius:6px;
-    }
+/* Image Upload Zone */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:rgba(59,130,246,.05)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-preview{width:80px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:0 auto 10px;display:block}
+.upload-progress{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:10px}
+.upload-progress-bar{height:100%;background:var(--blue);border-radius:99px;transition:width .3s;width:0%}
+.token-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.token-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.token-missing{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
 
-    .card-body{padding:12px;flex-grow:1;display:flex;flex-direction:column;gap:8px}
-    .card-title{font-size:13px;font-weight:600;color:#e2e8f0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
-    .card-genres{display:flex;flex-wrap:wrap;gap:3px}
-    .card-genre-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#c084fc;white-space:nowrap}
-    .card-actions{display:flex;gap:8px;margin-top:auto}
-    .btn-review,.btn-watch{flex:1;text-align:center;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:600;text-decoration:none;transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:4px}
-    .btn-review{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-review:hover{background:#263248;color:white}
-    .btn-watch{background:var(--blue);color:white}.btn-watch:hover{background:var(--blue-dark)}
-    .btn-review:active,.btn-watch:active{transform:scale(.96)}
+/* Bulk fetch not-found list */
+.notfound-list{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:12px;margin-top:10px}
+.notfound-list h4{font-size:12px;font-weight:700;color:#f87171;margin-bottom:8px}
+.notfound-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;color:#94a3b8}
+.notfound-item:last-child{border-bottom:none}
+.notfound-retry{background:none;border:1px solid rgba(168,85,247,.3);color:#c084fc;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:pointer;font-family:'Outfit',sans-serif}
+.notfound-retry:hover{background:rgba(168,85,247,.1)}
 
-    footer{background:var(--bg);border-top:1px solid var(--border)}
-    .footer-link{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}.footer-link:hover{color:var(--blue)}
-    #mobileDrawer{background:var(--bg2);border-top:1px solid var(--border)}
-    .mobile-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(22,27,39,.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 0;z-index:50}
-    .mobile-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);text-decoration:none;font-size:10px;font-weight:600;transition:color .2s;flex:1}
-    .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--blue)}
-    .mobile-nav-item svg{width:22px;height:22px}
-    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
-    #mobileMenuBtn{color:#94a3b8;background:none;border:none;cursor:pointer}
-    .drawer-link{display:flex;align-items:center;gap:10px;padding:10px 0;color:#94a3b8;text-decoration:none;font-weight:600;font-size:14px;border-bottom:1px solid var(--border);transition:color .2s}
-    .drawer-link:hover{color:white}.drawer-link:last-child{border-bottom:none}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* Progress bar for bulk */
+.bulk-progress-wrap{margin-top:10px;display:none}
+.bulk-progress-bar-bg{height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+.bulk-progress-bar-fill{height:100%;background:var(--blue);border-radius:99px;transition:width .3s;width:0%}
+.bulk-stats{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.bulk-stat{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.bulk-stat-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.bulk-stat-err{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.bulk-stat-total{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
 
-    @media(max-width:640px){
-      .btn-review,.btn-watch{padding:6px 3px;font-size:11px;gap:3px}
-      .btn-review svg,.btn-watch svg{display:none}
-      .genre-chip{font-size:11px;padding:5px 10px}
-      .card-title{font-size:12px;min-height:32px}
-      .card-genre-pill{font-size:9px;padding:1px 5px}
-      .card-body{padding:10px;gap:6px}
-      .year-badge{font-size:10px;padding:2px 6px}
-      .rating-badge-card{font-size:10px;padding:2px 6px}
-      .cd-timer{font-size:12px}
-      .cd-ep-label{font-size:9px}
-    }
-  </style>
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
 </head>
-<body class="min-h-screen pb-20 md:pb-0">
+<body>
 
-<header class="sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 py-3">
-    <div class="flex items-center gap-4">
-      <a href="#" class="flex-shrink-0 text-2xl font-black tracking-tight hover:opacity-80 transition-opacity">
-        <span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span>
-      </a>
-      <div class="flex-grow max-w-lg hidden sm:block search-wrap">
-        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" id="searchInputDesktop" placeholder="ဇာတ်ကားနာမည် ရှာရန်...">
+<!-- Login -->
+<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="card" style="max-width:400px;width:100%">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:28px;font-weight:900;margin-bottom:4px"><span style="color:var(--blue)">NaJu</span><span>Anime</span></div>
+      <div style="color:var(--muted);font-size:13px">Admin Panel</div>
+    </div>
+
+    <label class="label">Admin Password</label>
+    <input type="password" id="tokenInput" placeholder="Admin password ထည့်ပါ..." style="margin-bottom:16px">
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;color:#60a5fa">📸 GitHub Image Upload</span>
+        <span id="ghTokenStatus" class="token-status token-missing">Token မရှိ</span>
       </div>
-      <nav class="hidden md:flex items-center gap-6 ml-auto">
-        <a href="#" class="nav-link">ပင်မစာမျက်နှာ</a>
-        <a href="#contact" class="nav-link">ဆက်သွယ်</a>
-        <a href="/chat/" class="ai-btn">
-          <span class="ai-btn-dot"></span>
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
-          NaJu AI
-        </a>
-      </nav>
-      <button id="mobileMenuBtn" class="md:hidden ml-auto p-1">
-        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <label class="label">GitHub Personal Access Token</label>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="flex:1">
+        <button class="btn btn-green" onclick="saveGhToken()" style="padding:10px 14px;white-space:nowrap">သိမ်း</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Browser မှာပဲ သိမ်းသည် (localStorage)</p>
+    </div>
+
+    <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="login()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+      ဝင်ရောက်မည်
+    </button>
+    <p id="loginErr" style="color:#f87171;font-size:12px;margin-top:10px;text-align:center;display:none">Password မှားနေသည်</p>
+  </div>
+</div>
+
+<!-- Main Panel -->
+<div id="panel" style="display:none">
+  <header style="background:rgba(15,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px">
+    <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+      <span id="ghStatusHeader" class="token-status" style="font-size:11px"></span>
+      <span id="animeCount" class="pill">Loading...</span>
+      <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
+      <button class="btn btn-gray" onclick="logout()">ထွက်မည်</button>
     </div>
-    <div class="mt-3 sm:hidden search-wrap">
-      <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" id="searchInputMobile" placeholder="ဇာတ်ကားရှာရန်...">
-    </div>
-  </div>
-  <div id="mobileDrawer" class="hidden md:hidden">
-    <div class="max-w-7xl mx-auto px-4 py-2">
-      <a href="#" class="drawer-link"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>ပင်မစာမျက်နှာ</a>
-      <a href="#contact" class="drawer-link"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>ဆက်သွယ်ရန်</a>
-      <a href="/chat/" class="drawer-link" style="color:#60a5fa"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>NaJu AI Chat</a>
-    </div>
-  </div>
-</header>
+  </header>
 
-<main class="max-w-7xl mx-auto px-4 md:px-6 mt-8">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="section-title">ဇာတ်ကားစာရင်းများ</h2>
-    <span id="movieCount" style="color:var(--muted);font-size:13px;font-weight:600"></span>
-  </div>
-  <div class="genre-bar mb-5" id="genreBar"></div>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="anime-grid"></div>
-</main>
+  <div style="max-width:1100px;margin:0 auto;padding:24px 16px">
 
-<footer id="contact" style="margin-top:60px">
-  <div class="max-w-7xl mx-auto px-4 md:px-6 py-10">
-    <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8 mb-8">
-      <div class="md:w-1/3 text-center md:text-left">
-        <div class="text-xl font-black mb-3"><span class="logo-naju">NaJu</span><span class="logo-anime">Anime</span></div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.7">"လူတစ်ယောက်တည်းရဲ့ အားမာန်နဲ့ စတင်ခဲ့ပေမယ့် NaJu ဟာ Anime ချစ်သူများ အားလုံးရဲ့ နားခိုရာ ဖြစ်လာခဲ့ပြီ။"</p>
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap">
+      <button class="btn" id="tabList" onclick="showTab('list')" style="background:var(--blue);color:white">📋 Anime စာရင်း</button>
+      <button class="btn btn-gray" id="tabAdd" onclick="showTab('add')">➕ အသစ်ထည့်</button>
+      <button class="btn btn-gray" id="tabMigrate" onclick="showTab('migrate')">📦 Migrate</button>
+      <button class="btn btn-gray" id="tabSettings" onclick="showTab('settings')">⚙️ Settings</button>
+    </div>
+
+    <!-- Anime List Tab -->
+    <div id="tabListContent">
+      <div style="margin-bottom:16px">
+        <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:320px">
       </div>
-      <div class="flex flex-col items-center gap-3">
-        <h3 style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase">Follow Us</h3>
-        <a href="https://www.facebook.com/profile.php?id=61577006233895" target="_blank" class="footer-link">Facebook Page</a>
-        <a href="https://www.tiktok.com/@najuanime23" target="_blank" class="footer-link">TikTok</a>
-      </div>
-      <div class="flex flex-col items-center md:items-end gap-3">
-        <h3 style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase">ဆက်သွယ်ရန်</h3>
-        <a href="https://t.me/NaJu_New" target="_blank" class="footer-link">Telegram: @NaJu_New</a>
-        <a href="mailto:najuanimevipweb@gmail.com" class="footer-link">najuanimevipweb@gmail.com</a>
+      <div id="animeList" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <!-- Add Tab -->
+    <div id="tabAddContent" style="display:none">
+      <div class="card" style="max-width:700px">
+        <h2 style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:20px">Anime အသစ်ထည့်ရန်</h2>
+
+        <!-- AUTO-FETCH (Jikan only) -->
+        <div class="fetch-box" style="margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:700;color:#c084fc">🔍 Jikan (MAL) မှ Auto-fetch</span>
+            <span id="addFetchBadge" style="display:none" class="fetch-badge"></span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Anime title ရိုက်ပြီး Fetch နှိပ်ရင် Genre, Year, Episodes, Score, Broadcast တွေ အလိုအလျောက် ဖြည့်ပေးမည်</p>
+          <div class="fetch-row">
+            <input type="text" id="addFetchTitle" class="fetch-title-input" placeholder="Anime title (English) ဥပမာ: Fullmetal Alchemist">
+            <button class="btn btn-purple" onclick="autoFetch('add')" id="addFetchBtn" style="white-space:nowrap;padding:10px 16px">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Fetch
+            </button>
+          </div>
+          <div id="addFetchResult" style="display:none;margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:12px;color:#94a3b8"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label class="label">ID (English, no space)</label><input type="text" id="addId" placeholder="SnowballEarth"></div>
+          <div><label class="label">Year</label><input type="text" id="addYear" placeholder="2026"></div>
+          <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="addTitle" placeholder="Snowball Earth"></div>
+
+          <!-- Image Upload -->
+          <div style="grid-column:span 2">
+            <label class="label">အပုံ (GitHub သို့ Upload)</label>
+            <div class="upload-zone" id="addUploadZone" ondragover="handleDrag(event,'addUploadZone')" ondragleave="handleDragLeave('addUploadZone')" ondrop="handleDrop(event,'add')">
+              <input type="file" id="addImageFile" accept="image/*" onchange="handleFileSelect(event,'add')">
+              <img id="addImagePreview" class="upload-preview" style="display:none">
+              <div id="addUploadPlaceholder">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p style="font-size:13px;color:var(--muted)">အပုံဖိုင် ရွေးပါ သို့မဟုတ် ဆွဲချပါ</p>
+                <p style="font-size:11px;color:#475569;margin-top:4px">JPG, PNG — GitHub images/ folder သို့ upload မည်</p>
+              </div>
+              <div class="upload-progress" id="addUploadProgress" style="display:none">
+                <div class="upload-progress-bar" id="addUploadProgressBar"></div>
+              </div>
+            </div>
+            <input type="text" id="addImage" placeholder="./images/SnowballEarth.jpg" style="margin-top:8px">
+            <p id="addUploadMsg" style="font-size:12px;margin-top:6px;display:none"></p>
+          </div>
+
+          <!-- Genres -->
+          <div style="grid-column:span 2">
+            <label class="label">Genres / Tags <span style="color:#475569;font-weight:400">(Enter နှိပ်ပါ)</span></label>
+            <div class="genre-input-wrap" id="addGenreWrap" onclick="document.getElementById('addGenreText').focus()">
+              <input type="text" id="addGenreText" class="genre-text-input" placeholder="Genre ထည့်ပါ...">
+            </div>
+            <input type="hidden" id="addGenres">
+          </div>
+
+          <!-- Stats -->
+          <div style="grid-column:span 2">
+            <div class="stat-grid">
+              <div class="stat-item"><label>Episodes</label><input type="text" id="addEpisodes" placeholder="12"></div>
+              <div class="stat-item"><label>MAL Score</label><input type="text" id="addScore" placeholder="8.5"></div>
+            </div>
+          </div>
+
+          <!-- Broadcast info (new) -->
+          <div style="grid-column:span 2">
+            <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.12);border-radius:10px;padding:12px">
+              <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info (Jikan မှ Auto-fill ဖြစ်မည်)</div>
+              <div class="stat-grid">
+                <div class="stat-item"><label>Airing Day</label><input type="text" id="addBroadcastDay" placeholder="Thursdays"></div>
+                <div class="stat-item"><label>Airing Time (JST)</label><input type="text" id="addBroadcastTime" placeholder="20:00"></div>
+                <div class="stat-item"><label>Status</label><input type="text" id="addStatus" placeholder="Currently Airing"></div>
+                <div class="stat-item"><label>Season</label><input type="text" id="addSeason" placeholder="spring"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="addLink" placeholder="https://t.me/..."></div>
+          <div style="grid-column:span 2"><label class="label">Review (မြန်မာဘာသာ)</label><textarea id="addReview" style="min-height:160px" placeholder="ဇာတ်ကားအကြောင်း..."></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-blue" onclick="addAnime()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            ထည့်မည်
+          </button>
+          <button class="btn btn-gray" onclick="clearAdd()">ရှင်းမည်</button>
+        </div>
+        <p id="addMsg" style="font-size:13px;margin-top:10px;display:none"></p>
       </div>
     </div>
-    <div style="border-top:1px solid var(--border);padding-top:20px;text-align:center">
-      <p style="font-size:12px;color:var(--muted)">© 2026 NaJu Anime. All Rights Reserved.</p>
+
+    <!-- Migrate Tab -->
+    <div id="tabMigrateContent" style="display:none">
+      <div class="card" style="max-width:700px">
+        <h2 style="font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:8px">⚠️ Data.js မှ KV သို့ Migrate</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
+          data.js ထဲက <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">animeData</code> array ကို paste လုပ်ပြီး KV ထဲကို တစ်ကြိမ်တည်း import လုပ်နိုင်သည်။<br>
+          ⚠️ လက်ရှိ KV data အကုန် overwrite ဖြစ်မည်!
+        </p>
+
+        <!-- Bulk Jikan Fetch (updated) -->
+        <div class="fetch-box" style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px">🔍 Bulk Jikan Fetch — Genres, Score, Broadcast Update</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Import ပြီးတဲ့နောက် ဒီခလုတ်နှိပ်ရင် anime တိုင်းအတွက် Jikan မှ genres, score, broadcast တွေ auto-fetch လုပ်ပြီး KV update မည်။</p>
+          <p style="font-size:12px;color:#fbbf24;margin-bottom:10px">⏱ Rate limit ကြောင့် anime တစ်ကားကို 400ms စောင့်သည် — anime 100 ကား = ~40 စက္ကန့်</p>
+          <button class="btn btn-purple" onclick="bulkFetchGenres()" id="bulkFetchBtn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Bulk Fetch (Jikan)
+          </button>
+
+          <!-- Progress -->
+          <div class="bulk-progress-wrap" id="bulkProgressWrap">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;color:#60a5fa;font-weight:600" id="bulkProgressLabel">Fetching...</span>
+              <span style="font-size:12px;color:var(--muted)" id="bulkProgressPct">0%</span>
+            </div>
+            <div class="bulk-progress-bar-bg">
+              <div class="bulk-progress-bar-fill" id="bulkProgressFill"></div>
+            </div>
+            <div class="bulk-stats" id="bulkStatsRow" style="display:none"></div>
+          </div>
+
+          <!-- Not Found List -->
+          <div id="bulkNotFoundWrap" style="display:none" class="notfound-list">
+            <h4>❌ Jikan တွင် မတွေ့သော Anime (<span id="bulkNotFoundCount">0</span> ကား)</h4>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:8px">ဒီ Anime တွေကို ကိုယ်တိုင် manual ထည့်ပေးပါ သို့မဟုတ် Title ပြင်ပြီး Retry နှိပ်ပါ</p>
+            <div id="bulkNotFoundList"></div>
+          </div>
+        </div>
+
+        <label class="label">animeData array (JSON format)</label>
+        <textarea id="migrateData" style="min-height:200px;font-size:12px" placeholder='[{"id":"SnowballEarth","title":"Snowball Earth",...}]'></textarea>
+        <button class="btn btn-blue" style="margin-top:12px" onclick="migrateData()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          KV ထဲ Import မည်
+        </button>
+        <p id="migrateMsg" style="font-size:13px;margin-top:10px;display:none"></p>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tabSettingsContent" style="display:none">
+      <div class="card" style="max-width:600px">
+        <h2 style="font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:20px">⚙️ GitHub Token Settings</h2>
+        <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:16px;margin-bottom:20px">
+          <div style="font-size:13px;color:#93c5fd;line-height:1.7">
+            <strong>GitHub Personal Access Token</strong> ကို browser localStorage မှာ သိမ်းသည်။<br>
+            Token က repo scope ရှိရမည်။ Images တွေကို <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Sai5t-bytSaiYarPyi/najuanime-web</code> repo ရဲ့ <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">images/</code> folder ထဲ upload မည်။
+          </div>
+        </div>
+        <label class="label">GitHub Personal Access Token</label>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input type="password" id="ghTokenSetting" placeholder="ghp_xxxxxxxxxxxx" style="flex:1">
+          <button class="btn btn-green" onclick="saveGhTokenFromSettings()">သိမ်း</button>
+          <button class="btn btn-red" onclick="clearGhToken()">ဖျက်</button>
+        </div>
+        <div id="settingsTokenStatus" style="font-size:13px;padding:10px;border-radius:10px;display:none"></div>
+
+        <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
+          <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">GitHub Config</h3>
+          <div style="display:grid;gap:10px">
+            <div><label class="label">GitHub Username</label><input type="text" value="Sai5t-bytSaiYarPyi" readonly></div>
+            <div><label class="label">Repository</label><input type="text" value="najuanime-web" readonly></div>
+            <div><label class="label">Branch</label><input type="text" value="main" readonly></div>
+            <div><label class="label">Images Folder</label><input type="text" value="images" readonly></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;padding:20px;overflow-y:auto">
+  <div style="max-width:700px;margin:40px auto">
+    <div class="card">
+      <div style="display:flex;align-items:center;margin-bottom:20px">
+        <h2 style="font-size:16px;font-weight:700;color:var(--blue);flex:1">Anime ပြင်ရန်</h2>
+        <button class="btn btn-gray" onclick="closeEdit()" style="padding:6px 12px">✕</button>
+      </div>
+
+      <!-- Edit Auto-fetch (Jikan only) -->
+      <div class="fetch-box" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:700;color:#c084fc">🔍 Jikan Auto-fetch (Data ပြင်ချင်ရင်)</span>
+          <span id="editFetchBadge" style="display:none" class="fetch-badge"></span>
+        </div>
+        <div class="fetch-row">
+          <input type="text" id="editFetchTitle" class="fetch-title-input" placeholder="Anime title (English)...">
+          <button class="btn btn-purple" onclick="autoFetch('edit')" id="editFetchBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Fetch
+          </button>
+        </div>
+        <div id="editFetchResult" style="display:none;margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:12px;color:#94a3b8"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><label class="label">ID</label><input type="text" id="editId" disabled style="opacity:.5"></div>
+        <div><label class="label">Year</label><input type="text" id="editYear"></div>
+        <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="editTitle"></div>
+
+        <!-- Edit Image -->
+        <div style="grid-column:span 2">
+          <label class="label">အပုံ (GitHub သို့ Upload)</label>
+          <div class="upload-zone" id="editUploadZone" ondragover="handleDrag(event,'editUploadZone')" ondragleave="handleDragLeave('editUploadZone')" ondrop="handleDrop(event,'edit')">
+            <input type="file" id="editImageFile" accept="image/*" onchange="handleFileSelect(event,'edit')">
+            <img id="editImagePreview" class="upload-preview" style="display:none">
+            <div id="editUploadPlaceholder">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 6px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <p style="font-size:12px;color:var(--muted)">အပုံသစ် ရွေးပါ</p>
+            </div>
+            <div class="upload-progress" id="editUploadProgress" style="display:none">
+              <div class="upload-progress-bar" id="editUploadProgressBar"></div>
+            </div>
+          </div>
+          <p id="editUploadMsg" style="font-size:12px;margin-top:6px;display:none"></p>
+          <label class="label" style="margin-top:10px">Image path</label>
+          <input type="text" id="editImage">
+        </div>
+
+        <!-- Edit Genres -->
+        <div style="grid-column:span 2">
+          <label class="label">Genres / Tags</label>
+          <div class="genre-input-wrap" id="editGenreWrap" onclick="document.getElementById('editGenreText').focus()">
+            <input type="text" id="editGenreText" class="genre-text-input" placeholder="Genre ထည့်ပါ...">
+          </div>
+          <input type="hidden" id="editGenres">
+        </div>
+
+        <!-- Edit Stats -->
+        <div style="grid-column:span 2">
+          <div class="stat-grid">
+            <div class="stat-item"><label>Episodes</label><input type="text" id="editEpisodes" placeholder="12"></div>
+            <div class="stat-item"><label>MAL Score</label><input type="text" id="editScore" placeholder="8.5"></div>
+          </div>
+        </div>
+
+        <!-- Edit Broadcast -->
+        <div style="grid-column:span 2">
+          <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.12);border-radius:10px;padding:12px">
+            <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info</div>
+            <div class="stat-grid">
+              <div class="stat-item"><label>Airing Day</label><input type="text" id="editBroadcastDay" placeholder="Thursdays"></div>
+              <div class="stat-item"><label>Airing Time (JST)</label><input type="text" id="editBroadcastTime" placeholder="20:00"></div>
+              <div class="stat-item"><label>Status</label><input type="text" id="editStatus" placeholder="Currently Airing"></div>
+              <div class="stat-item"><label>Season</label><input type="text" id="editSeason" placeholder="spring"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column:span 2"><label class="label">Telegram link</label><input type="text" id="editLink"></div>
+        <div style="grid-column:span 2"><label class="label">Review</label><textarea id="editReview" style="min-height:200px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-blue" onclick="saveEdit()">💾 သိမ်းမည်</button>
+        <button class="btn btn-gray" onclick="closeEdit()">မလုပ်တော့ပါ</button>
+      </div>
+      <p id="editMsg" style="font-size:13px;margin-top:10px;display:none"></p>
     </div>
   </div>
-</footer>
+</div>
 
-<nav class="mobile-nav md:hidden">
-  <div style="display:flex;justify-content:space-around;align-items:center">
-    <a href="#" class="mobile-nav-item active" id="navHome">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      Home
-    </a>
-    <a href="#contact" class="mobile-nav-item" id="navContact">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      Contact
-    </a>
-    <a href="/chat/" class="ai-btn-mobile">
-      <div class="icon-wrap">
-        <svg width="15" height="15" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
-      </div>
-      NaJu AI
-    </a>
+<!-- Retry Modal (not-found single retry) -->
+<div id="retryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
+  <div class="card" style="max-width:400px;width:100%">
+    <h3 style="font-size:14px;font-weight:700;color:#c084fc;margin-bottom:12px">🔁 Retry Fetch</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px" id="retryAnimeTitle"></p>
+    <label class="label">Title ပြင်ပြီး Retry လုပ်ပါ</label>
+    <input type="text" id="retryTitleInput" placeholder="English title..." style="margin-bottom:12px">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-purple" onclick="doRetry()" style="flex:1;justify-content:center">Retry Fetch</button>
+      <button class="btn btn-gray" onclick="closeRetry()">မလုပ်တော့ပါ</button>
+    </div>
+    <p id="retryMsg" style="font-size:12px;margin-top:8px;display:none"></p>
   </div>
-</nav>
+</div>
 
 <script>
 const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
-let allAnimes    = [];
-let reviewsMeta  = new Map();
-let lcSchedule   = {};     // normalizedTitle → LiveChart entry
-let activeGenre  = 'all';
-let sortMode     = 'default';
-let searchTerm   = '';
+const JIKAN_URL  = 'https://api.jikan.moe/v4';
 
-const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','')+'K' : String(n);
+const GH_USER   = 'Sai5t-bytSaiYarPyi';
+const GH_REPO   = 'najuanime-web';
+const GH_BRANCH = 'main';
+const GH_FOLDER = 'images';
 
-// ══ LiveChart countdown helpers ════════════════════════════
+let TOKEN     = '';
+let allAnimes = [];
+let editingId = '';
+let retryAnimeId = '';
 
-function normTitle(t) {
-  return (t || '')
-    .toLowerCase()
-    .replace(/[:\-–—!?.,'"()\[\]]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// ══ Genre Tag UI ══════════════════════════════════════
+function initGenreInput(context) {
+  const wrap     = document.getElementById(`${context}GenreWrap`);
+  const textIn   = document.getElementById(`${context}GenreText`);
+  const hiddenIn = document.getElementById(`${context}Genres`);
 
-/** Look up a NaJu anime in the LiveChart schedule map */
-function findLCEntry(anime) {
-  // Try exact normalized title first
-  const n1 = normTitle(anime.title);
-  if (lcSchedule[n1]) return lcSchedule[n1];
-  // Try partial match (LC title contained in ours or vice versa)
-  for (const [key, entry] of Object.entries(lcSchedule)) {
-    if (key && n1 && (key.includes(n1) || n1.includes(key))) return entry;
+  function getTags() {
+    return hiddenIn.value ? hiddenIn.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
   }
-  return null;
-}
-
-/** Format ms into countdown string */
-function fmtMs(ms) {
-  if (ms <= 0) return '00:00:00';
-  const s  = Math.floor(ms / 1000);
-  const m  = Math.floor(s  / 60);
-  const h  = Math.floor(m  / 60);
-  const d  = Math.floor(h  / 24);
-  const ss = String(s % 60).padStart(2, '0');
-  const mm = String(m % 60).padStart(2, '0');
-  const hh = String(h % 24).padStart(2, '0');
-  if (d >= 7)  return `${d}d ${hh}h`;
-  if (d > 0)   return `${d}d ${hh}h ${mm}m`;
-  return `${hh}:${mm}:${ss}`;
-}
-
-function cdClass(ms) {
-  const h = ms / 3_600_000;
-  if (h < 1) return 'cd-timer soon';
-  if (h < 3) return 'cd-timer today';
-  return 'cd-timer';
-}
-
-/** Build short local time label e.g. "Thu 23:30" */
-function localLabel(msUtc) {
-  const d    = new Date(msUtc);
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const hhmm = d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
-  return `${days[d.getDay()]} ${hhmm}`;
-}
-
-// Live tick registry  animeId → { airingAt (ms), epLabel, timeApprox }
-const cdRegistry = new Map();
-
-function startTicker() {
-  setInterval(() => {
-    const now = Date.now();
-    cdRegistry.forEach((info, id) => {
-      const el = document.getElementById(`cd-${id}`);
-      if (!el) return;
-      let ms = info.airingAt - now;
-      // Episode aired — show "just aired" briefly then hide countdown
-      if (ms <= 0) {
-        const timerEl = el.querySelector('.cd-timer');
-        if (timerEl) { timerEl.textContent = 'ထွက်ပြီ!'; timerEl.className='cd-timer soon'; }
-        return;
-      }
-      const timerEl = el.querySelector('.cd-timer');
-      if (timerEl) { timerEl.textContent = fmtMs(ms); timerEl.className = cdClass(ms); }
+  function setTags(arr) {
+    hiddenIn.value = arr.join(',');
+    renderTags();
+  }
+  function renderTags() {
+    wrap.querySelectorAll('.genre-tag').forEach(el=>el.remove());
+    getTags().forEach(tag=>{
+      const span = document.createElement('span');
+      span.className = 'genre-tag';
+      span.innerHTML = `${tag}<span class="remove" data-tag="${tag}">×</span>`;
+      span.querySelector('.remove').onclick = e=>{
+        e.stopPropagation();
+        setTags(getTags().filter(t=>t!==tag));
+      };
+      wrap.insertBefore(span, textIn);
     });
-  }, 1000);
-}
-
-/** Build the countdown HTML for one card */
-function buildCountdownHtml(anime) {
-  const entry = findLCEntry(anime);
-
-  // ── Case 1: LiveChart says ended (no nextRelease) ──
-  if (entry && entry.airingAt === null) {
-    const ep = entry.totalEpisodes || anime.episodes || '';
-    return `<div class="cd-wrap">
-      <div style="display:flex;justify-content:center">
-        <span class="cd-ended">⏹ Ended${ep ? ' · EP '+ep : ''}</span>
-      </div>
-    </div>`;
   }
-
-  // ── Case 2: LiveChart has next episode time ──
-  if (entry && entry.airingAt != null) {
-    const ms        = entry.airingAt - Date.now();
-    const epLabel   = entry.nextEpLabel || (entry.nextEpNum != null ? `EP ${entry.nextEpNum}` : '');
-    const isApprox  = entry.timeApprox;
-    const isLast    = entry.nextEpLast;
-
-    cdRegistry.set(anime.id, { airingAt: entry.airingAt });
-
-    const timerCls  = cdClass(ms);
-    const timeLabel = localLabel(entry.airingAt);
-
-    return `<div class="cd-wrap" id="cd-${anime.id}">
-      <div class="cd-inner">
-        <div class="cd-ep-row">
-          <span class="cd-airing-dot"></span>
-          <span class="cd-ep-label">${epLabel ? epLabel + (isLast ? ' (Last)' : '') + ' · Next' : 'Next Episode'}</span>
-        </div>
-        <div class="${timerCls}">${fmtMs(Math.max(0, ms))}</div>
-        ${isApprox ? '<div class="cd-approx">~ Approximate time</div>' : ''}
-        <div class="cd-local">${timeLabel}</div>
-      </div>
-    </div>`;
+  function addTag(val) {
+    const tags = val.split(',').map(s=>s.trim()).filter(Boolean);
+    setTags([...new Set([...getTags(),...tags])]);
+    textIn.value = '';
   }
-
-  // ── Case 3: No LiveChart match — fall back to KV status ──
-  const st = (anime.status || '').toLowerCase();
-  if (st.includes('finish') || st.includes('ended')) {
-    const ep = anime.episodes || '';
-    return `<div class="cd-wrap">
-      <div style="display:flex;justify-content:center">
-        <span class="cd-ended">⏹ Ended${ep ? ' · EP '+ep : ''}</span>
-      </div>
-    </div>`;
-  }
-
-  return ''; // no badge
-}
-
-// ══ Genre Bar ══════════════════════════════════════════════
-function buildGenreBar(animes) {
-  const counts = {};
-  animes.forEach(a => (a.genres||[]).forEach(g => { counts[g] = (counts[g]||0)+1; }));
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).map(([g]) => g);
-  const bar = document.getElementById('genreBar');
-  bar.innerHTML = '';
-
-  const popBtn = document.createElement('button');
-  popBtn.className = `genre-chip popular${sortMode==='popular'?' active':''}`;
-  popBtn.dataset.mode = 'popular';
-  popBtn.textContent = '🏆 Popular';
-  popBtn.onclick = () => setSortMode('popular');
-  bar.appendChild(popBtn);
-
-  const allBtn = document.createElement('button');
-  allBtn.className = `genre-chip all${activeGenre==='all'&&sortMode==='default'?' active':''}`;
-  allBtn.dataset.genre = 'all';
-  allBtn.textContent = '🎬 အားလုံး';
-  allBtn.onclick = () => filterGenre('all');
-  bar.appendChild(allBtn);
-
-  sorted.forEach(genre => {
-    const btn = document.createElement('button');
-    btn.className = `genre-chip${activeGenre===genre&&sortMode==='default'?' active':''}`;
-    btn.dataset.genre = genre;
-    btn.textContent = genre;
-    btn.onclick = () => filterGenre(genre);
-    bar.appendChild(btn);
+  textIn.addEventListener('keydown', e=>{
+    if ((e.key==='Enter'||e.key===',') && textIn.value.trim()){ e.preventDefault(); addTag(textIn.value); }
+    if (e.key==='Backspace' && !textIn.value){ const t=getTags(); if(t.length) setTags(t.slice(0,-1)); }
   });
+  textIn.addEventListener('blur', ()=>{ if(textIn.value.trim()) addTag(textIn.value); });
+  window[`${context}GenreSet`] = setTags;
 }
 
-function setSortMode(mode) {
-  sortMode = mode;
-  if (mode==='popular') activeGenre = 'all';
-  updateChipStates(); applyFilters();
-}
-function filterGenre(genre) {
-  sortMode = 'default'; activeGenre = genre;
-  updateChipStates(); applyFilters();
-}
-function updateChipStates() {
-  document.querySelectorAll('[data-genre]').forEach(el =>
-    el.classList.toggle('active', sortMode==='default' && el.dataset.genre===activeGenre));
-  document.querySelectorAll('[data-mode]').forEach(el =>
-    el.classList.toggle('active', sortMode===el.dataset.mode));
-}
-
-function applyFilters() {
-  let list = allAnimes;
-  if (activeGenre !== 'all') list = list.filter(a => (a.genres||[]).includes(activeGenre));
-  if (searchTerm) list = list.filter(a =>
-    a.title.toLowerCase().includes(searchTerm) ||
-    a.year.includes(searchTerm) ||
-    (a.genres||[]).some(g => g.toLowerCase().includes(searchTerm))
-  );
-  if (sortMode === 'popular') list = [...list].sort((a,b) => {
-    const ma = reviewsMeta.get(a.id); const mb = reviewsMeta.get(b.id);
-    return (mb?.count||0) - (ma?.count||0);
-  });
-  displayAnimes(list);
+// ══ Jikan API (only) ══════════════════════════════════
+async function fetchJikan(title) {
+  const url = `${JIKAN_URL}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Jikan ${res.status}`);
+  const data = await res.json();
+  const a = data.data?.[0];
+  if (!a) throw new Error('Jikan တွင် ရှာမတွေ့ပါ');
+  return {
+    year:          String(a.year || a.aired?.prop?.from?.year || ''),
+    genres:        [...(a.genres||[]),(a.themes||[]),(a.demographics||[])].flat().map(g=>g.name),
+    episodes:      String(a.episodes || ''),
+    score:         String(a.score || ''),
+    broadcastDay:  a.broadcast?.day   || '',
+    broadcastTime: a.broadcast?.time  || '',
+    status:        a.status           || '',
+    season:        a.season           || '',
+    source:        'Jikan (MAL)',
+    title:         a.title_english || a.title || '',
+  };
 }
 
-// ══ Display ════════════════════════════════════════════════
-function displayAnimes(animes) {
-  const grid    = document.getElementById('anime-grid');
-  const countEl = document.getElementById('movieCount');
-  grid.innerHTML = '';
-  cdRegistry.clear();
-  countEl.innerText = `စုစုပေါင်း ${animes.length} ကား`;
+// ══ Auto-fetch (single) ═══════════════════════════════
+async function autoFetch(context) {
+  const titleInput = document.getElementById(`${context}FetchTitle`);
+  const btn        = document.getElementById(`${context}FetchBtn`);
+  const badge      = document.getElementById(`${context}FetchBadge`);
+  const resultBox  = document.getElementById(`${context}FetchResult`);
+  const title      = titleInput.value.trim();
+  if (!title) { titleInput.focus(); return; }
 
-  if (!animes.length) {
-    grid.innerHTML = `<div class="empty-state">
-      <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;color:#475569">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <p style="font-size:15px;font-weight:600;color:#64748b">ဇာတ်ကား မတွေ့ရှိပါ</p>
-    </div>`;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span> Fetching...`;
+  badge.className = 'fetch-badge fetch-loading';
+  badge.textContent = '⏳ Searching...';
+  badge.style.display = 'inline-flex';
+  resultBox.style.display = 'none';
+
+  let result = null;
+  let errMsg = '';
+
+  try {
+    result = await fetchJikan(title);
+  } catch(e) {
+    errMsg = e.message;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Fetch`;
+
+  if (!result) {
+    badge.className = 'fetch-badge fetch-err';
+    badge.textContent = '❌ ရှာမတွေ့ပါ';
+    resultBox.style.display = 'block';
+    resultBox.textContent = errMsg;
     return;
   }
 
-  animes.forEach((anime, index) => {
-    const card = document.createElement('div');
-    card.className = 'anime-card';
-    card.style.animationDelay = `${Math.min(index, 20) * 30}ms`;
+  // Fill fields
+  if (result.year)          document.getElementById(`${context}Year`).value          = result.year;
+  if (result.episodes)      document.getElementById(`${context}Episodes`).value      = result.episodes;
+  if (result.score)         document.getElementById(`${context}Score`).value         = result.score;
+  if (result.broadcastDay)  document.getElementById(`${context}BroadcastDay`).value  = result.broadcastDay;
+  if (result.broadcastTime) document.getElementById(`${context}BroadcastTime`).value = result.broadcastTime;
+  if (result.status)        document.getElementById(`${context}Status`).value        = result.status;
+  if (result.season)        document.getElementById(`${context}Season`).value        = result.season;
+  if (result.genres?.length && window[`${context}GenreSet`]) {
+    window[`${context}GenreSet`](result.genres);
+  }
 
-    const meta         = reviewsMeta.get(anime.id);
-    const ratingBadge  = (meta && meta.count > 0)
-      ? `<div class="rating-badge-card">⭐ ${meta.avg} <span class="cnt">(${fmtN(meta.count)})</span></div>` : '';
-    const genrePills   = (anime.genres||[]).slice(0,3).map(g =>
-      `<span class="card-genre-pill">${g}</span>`).join('');
-    const countdownHtml = buildCountdownHtml(anime);
+  badge.className = 'fetch-badge fetch-ok';
+  badge.textContent = `✓ Jikan (MAL)`;
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = `
+    <strong style="color:white">${result.title}</strong><br>
+    📅 Year: ${result.year||'—'} &nbsp; 🎬 Episodes: ${result.episodes||'—'} &nbsp; ⭐ Score: ${result.score||'—'}<br>
+    📡 Broadcast: ${result.broadcastDay||'—'} ${result.broadcastTime||''} (JST) &nbsp; 🌸 Season: ${result.season||'—'}<br>
+    📺 Status: ${result.status||'—'}<br>
+    🏷️ Genres: ${result.genres?.join(', ')||'—'}
+  `;
+}
 
-    card.innerHTML = `
-      <div class="card-img-wrap">
-        <img src="${anime.image||''}" alt="${anime.title}" loading="lazy">
-        <div class="card-overlay"></div>
-        <div class="card-play"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
-        <span class="year-badge">${anime.year}</span>
-        ${ratingBadge}
-        ${countdownHtml}
-      </div>
-      <div class="card-body">
-        <p class="card-title" title="${anime.title}">${anime.title}</p>
-        ${genrePills ? `<div class="card-genres">${genrePills}</div>` : ''}
-        <div class="card-actions">
-          <a href="/review/?id=${anime.id}" class="btn-review">
-            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Review
-          </a>
-          <a href="${anime.link}" target="_blank" class="btn-watch">
-            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-            ကြည့်ရန်
-          </a>
+// ══ Bulk Fetch (Jikan only, with not-found list) ══════
+async function bulkFetchGenres() {
+  const btn = document.getElementById('bulkFetchBtn');
+  if (!allAnimes.length) { alert('先 Anime list ကို load လုပ်ပါ'); return; }
+  if (!confirm(`Anime ${allAnimes.length} ကားအတွက် Jikan fetch မည်။ ကြာနိုင်ပါတယ်။`)) return;
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span> Fetching...`;
+
+  // Show progress
+  const progressWrap = document.getElementById('bulkProgressWrap');
+  const progressLabel = document.getElementById('bulkProgressLabel');
+  const progressPct   = document.getElementById('bulkProgressPct');
+  const progressFill  = document.getElementById('bulkProgressFill');
+  const statsRow      = document.getElementById('bulkStatsRow');
+  progressWrap.style.display = 'block';
+  statsRow.style.display = 'none';
+  document.getElementById('bulkNotFoundWrap').style.display = 'none';
+
+  const total = allAnimes.length;
+  let doneOk  = 0;
+  let doneFail = 0;
+  const notFound = [];   // [{id, title}]
+  const updated  = [];
+
+  for (let i = 0; i < allAnimes.length; i++) {
+    const anime = allAnimes[i];
+    const pct = Math.round(((i+1)/total)*100);
+    progressLabel.textContent = `(${i+1}/${total}) ${anime.title}`;
+    progressPct.textContent   = pct + '%';
+    progressFill.style.width  = pct + '%';
+
+    let result = null;
+    try {
+      result = await fetchJikan(anime.title);
+    } catch(e) {
+      // title မတွေ့ → not found list ထည့်
+    }
+
+    if (result && result.genres?.length) {
+      updated.push({
+        ...anime,
+        genres:        result.genres,
+        episodes:      anime.episodes      || result.episodes,
+        score:         anime.score         || result.score,
+        year:          anime.year          || result.year,
+        broadcastDay:  result.broadcastDay  || anime.broadcastDay  || '',
+        broadcastTime: result.broadcastTime || anime.broadcastTime || '',
+        status:        result.status        || anime.status        || '',
+        season:        result.season        || anime.season        || '',
+      });
+      doneOk++;
+    } else {
+      updated.push(anime);  // မပြောင်းဘဲ ထားသည်
+      notFound.push({ id: anime.id, title: anime.title });
+      doneFail++;
+    }
+
+    await new Promise(r=>setTimeout(r, 400));
+  }
+
+  // Save to KV
+  progressLabel.textContent = 'KV သို့ သိမ်းနေသည်...';
+  try {
+    const r = await fetch(WORKER_URL+'/admin/migrate', {
+      method:  'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:    JSON.stringify({animeList: updated}),
+    });
+    const d = await r.json();
+
+    progressLabel.textContent = d.success ? '✓ ပြီးပါပြီ!' : '❌ Save မအောင်မြင်ပါ';
+    progressFill.style.background = d.success ? '#4ade80' : '#f87171';
+
+    statsRow.style.display = 'flex';
+    statsRow.innerHTML = `
+      <span class="bulk-stat bulk-stat-total">📊 Total: ${total}</span>
+      <span class="bulk-stat bulk-stat-ok">✓ Updated: ${doneOk}</span>
+      <span class="bulk-stat bulk-stat-err">❌ Not Found: ${doneFail}</span>
+    `;
+
+    if (notFound.length) {
+      renderNotFoundList(notFound);
+    }
+
+    if (d.success) loadAnimes();
+  } catch(e) {
+    progressLabel.textContent = '❌ Network error: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Bulk Fetch (Jikan)`;
+}
+
+function renderNotFoundList(list) {
+  const wrap      = document.getElementById('bulkNotFoundWrap');
+  const countEl   = document.getElementById('bulkNotFoundCount');
+  const listEl    = document.getElementById('bulkNotFoundList');
+  countEl.textContent = list.length;
+  listEl.innerHTML = list.map(a => `
+    <div class="notfound-item">
+      <span style="flex:1">${a.title}</span>
+      <span style="color:var(--muted);font-size:10px;margin-right:8px">${a.id}</span>
+      <button class="notfound-retry" onclick="openRetry('${a.id}','${a.title.replace(/'/g,"\\'")}')">Retry</button>
+    </div>
+  `).join('');
+  wrap.style.display = 'block';
+}
+
+// ══ Retry Modal ════════════════════════════════════════
+function openRetry(id, title) {
+  retryAnimeId = id;
+  document.getElementById('retryAnimeTitle').textContent = `Anime: ${title}`;
+  document.getElementById('retryTitleInput').value = title;
+  document.getElementById('retryMsg').style.display = 'none';
+  document.getElementById('retryModal').style.display = 'flex';
+}
+function closeRetry() {
+  document.getElementById('retryModal').style.display = 'none';
+}
+async function doRetry() {
+  const title = document.getElementById('retryTitleInput').value.trim();
+  const msgEl = document.getElementById('retryMsg');
+  if (!title) return;
+  msgEl.style.display = 'block';
+  msgEl.style.color = '#60a5fa';
+  msgEl.textContent = '⏳ Fetching...';
+
+  let result = null;
+  try { result = await fetchJikan(title); } catch(e) {
+    msgEl.style.color = '#f87171';
+    msgEl.textContent = '❌ ' + e.message;
+    return;
+  }
+
+  if (!result) { msgEl.style.color='#f87171'; msgEl.textContent='❌ မတွေ့ပါ'; return; }
+
+  // Update single anime in KV
+  const anime = allAnimes.find(a=>a.id===retryAnimeId);
+  if (!anime) { msgEl.style.color='#f87171'; msgEl.textContent='❌ Anime ရှာမတွေ့'; return; }
+
+  const updated = {
+    ...anime,
+    genres:        result.genres       || anime.genres       || [],
+    episodes:      result.episodes     || anime.episodes     || '',
+    score:         result.score        || anime.score        || '',
+    year:          result.year         || anime.year         || '',
+    broadcastDay:  result.broadcastDay  || anime.broadcastDay  || '',
+    broadcastTime: result.broadcastTime || anime.broadcastTime || '',
+    status:        result.status        || anime.status        || '',
+    season:        result.season        || anime.season        || '',
+  };
+
+  try {
+    const r = await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(retryAnimeId)}`, {
+      method:  'PUT',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:    JSON.stringify(updated),
+    });
+    const d = await r.json();
+    if (d.success) {
+      msgEl.style.color = '#4ade80';
+      msgEl.textContent = `✓ Update ပြီး — ${result.title}`;
+      loadAnimes();
+      // Remove from not-found list UI
+      setTimeout(()=>{ closeRetry(); }, 1200);
+    } else {
+      msgEl.style.color='#f87171'; msgEl.textContent='❌ Save error: '+d.error;
+    }
+  } catch(e) {
+    msgEl.style.color='#f87171'; msgEl.textContent='❌ '+e.message;
+  }
+}
+
+// ══ GitHub Token ══════════════════════════════════════
+function getGhToken() { return localStorage.getItem('naju_gh_token')||''; }
+function saveGhToken() {
+  const t=document.getElementById('ghTokenInput').value.trim();
+  if(!t)return;
+  localStorage.setItem('naju_gh_token',t);
+  updateGhTokenUI();
+  alert('✓ GitHub Token သိမ်းပြီးပါပြီ');
+}
+function saveGhTokenFromSettings() {
+  const t=document.getElementById('ghTokenSetting').value.trim();
+  if(!t)return;
+  localStorage.setItem('naju_gh_token',t);
+  updateGhTokenUI();
+  const el=document.getElementById('settingsTokenStatus');
+  el.style.display='block';el.style.background='rgba(74,222,128,.08)';
+  el.style.border='1px solid rgba(74,222,128,.2)';el.style.color='#4ade80';
+  el.textContent='✓ Token သိမ်းပြီးပါပြီ';
+  setTimeout(()=>el.style.display='none',3000);
+}
+function clearGhToken() {
+  localStorage.removeItem('naju_gh_token');
+  document.getElementById('ghTokenSetting').value='';
+  updateGhTokenUI();
+  const el=document.getElementById('settingsTokenStatus');
+  el.style.display='block';el.style.background='rgba(248,113,113,.08)';
+  el.style.border='1px solid rgba(248,113,113,.2)';el.style.color='#f87171';
+  el.textContent='Token ဖျက်ပြီးပါပြီ';
+  setTimeout(()=>el.style.display='none',3000);
+}
+function updateGhTokenUI() {
+  const has=!!getGhToken();
+  const ls=document.getElementById('ghTokenStatus');
+  if(ls){ls.textContent=has?'✓ Token ရှိပြီ':'Token မရှိ';ls.className='token-status '+(has?'token-ok':'token-missing');}
+  const hs=document.getElementById('ghStatusHeader');
+  if(hs){hs.textContent=has?'📸 GitHub ✓':'📸 Token မရှိ';hs.className='token-status '+(has?'token-ok':'token-missing');}
+  const si=document.getElementById('ghTokenSetting');
+  if(si&&has)si.value='••••••••••••••••';
+}
+
+// ══ GitHub Upload ══════════════════════════════════════
+async function uploadToGitHub(file,ctx) {
+  const ghToken=getGhToken();
+  if(!ghToken){showUploadMsg(ctx,'❌ GitHub Token မရှိ','error');return null;}
+  const filePath=`${GH_FOLDER}/${file.name}`;
+  const apiUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${filePath}`;
+  setUploadProgress(ctx,true,0);
+  showUploadMsg(ctx,'⏳ GitHub သို့ upload...','info');
+  const base64=await fileToBase64(file);
+  setUploadProgress(ctx,true,30);
+  let sha=null;
+  try{const cr=await fetch(apiUrl,{headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json'}});if(cr.ok){const cd=await cr.json();sha=cd.sha;}}catch{}
+  setUploadProgress(ctx,true,50);
+  const body={message:`Upload image: ${file.name}`,content:base64,branch:GH_BRANCH};
+  if(sha)body.sha=sha;
+  try{
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    setUploadProgress(ctx,true,90);
+    if(!res.ok){const err=await res.json();throw new Error(err.message||'Upload failed');}
+    setUploadProgress(ctx,true,100);
+    setTimeout(()=>setUploadProgress(ctx,false,0),1000);
+    const imagePath=`./images/${file.name}`;
+    showUploadMsg(ctx,`✓ Upload ပြီး — ${file.name}`,'success');
+    return imagePath;
+  }catch(err){setUploadProgress(ctx,false,0);showUploadMsg(ctx,`❌ ${err.message}`,'error');return null;}
+}
+function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);});}
+function setUploadProgress(ctx,show,pct){const bar=document.getElementById(`${ctx}UploadProgressBar`);const p=document.getElementById(`${ctx}UploadProgress`);if(!bar||!p)return;p.style.display=show?'block':'none';bar.style.width=pct+'%';}
+function showUploadMsg(ctx,txt,type){const el=document.getElementById(`${ctx}UploadMsg`);if(!el)return;el.textContent=txt;el.style.color=type==='success'?'#4ade80':type==='error'?'#f87171':'#60a5fa';el.style.display=txt?'block':'none';}
+function handleFileSelect(e,ctx){const f=e.target.files[0];if(!f)return;previewImage(f,ctx);handleAutoUpload(f,ctx);}
+function handleDrag(e,zoneId){e.preventDefault();document.getElementById(zoneId)?.classList.add('drag');}
+function handleDragLeave(zoneId){document.getElementById(zoneId)?.classList.remove('drag');}
+function handleDrop(e,ctx){e.preventDefault();document.getElementById(`${ctx}UploadZone`)?.classList.remove('drag');const f=e.dataTransfer?.files[0];if(!f||!f.type.startsWith('image/'))return;previewImage(f,ctx);handleAutoUpload(f,ctx);}
+function previewImage(file,ctx){const pr=document.getElementById(`${ctx}ImagePreview`);const pl=document.getElementById(`${ctx}UploadPlaceholder`);const r=new FileReader();r.onload=e=>{if(pr){pr.src=e.target.result;pr.style.display='block';}if(pl)pl.style.display='none';};r.readAsDataURL(file);}
+async function handleAutoUpload(file,ctx){const path=await uploadToGitHub(file,ctx);if(path){const id=ctx==='add'?'addImage':'editImage';const inp=document.getElementById(id);if(inp)inp.value=path;}}
+
+// ══ Auth ══════════════════════════════════════════════
+function login(){const t=document.getElementById('tokenInput').value.trim();if(!t)return;TOKEN=t;testLogin();}
+async function testLogin(){
+  try{
+    const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:null})});
+    if(r.status===401){document.getElementById('loginErr').style.display='block';return;}
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
+    updateGhTokenUI();
+    initGenreInput('add');
+    initGenreInput('edit');
+    loadAnimes();
+  }catch(e){document.getElementById('loginErr').style.display='block';}
+}
+function logout(){TOKEN='';document.getElementById('loginScreen').style.display='flex';document.getElementById('panel').style.display='none';}
+
+// ══ CRUD ══════════════════════════════════════════════
+async function loadAnimes(){
+  document.getElementById('animeList').innerHTML='<p style="color:var(--muted);font-size:13px">Loading...</p>';
+  const r=await fetch(WORKER_URL+'/anime');
+  allAnimes=await r.json();
+  document.getElementById('animeCount').textContent=`${allAnimes.length} ကား`;
+  renderList(allAnimes);
+}
+
+function renderList(list){
+  const el=document.getElementById('animeList');
+  if(!list.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">Anime မရှိသေးပါ</p>';return;}
+  el.innerHTML=list.map(a=>`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
+      <img src="${a.image||''}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
+          <span class="pill">${a.year}</span>
+          <span style="font-size:11px;color:var(--muted)">${a.id}</span>
+          ${a.episodes?`<span style="font-size:11px;color:#94a3b8">🎬 ${a.episodes} eps</span>`:''}
+          ${a.score?`<span style="font-size:11px;color:#fbbf24">⭐ ${a.score}</span>`:''}
+          ${a.broadcastDay?`<span style="font-size:11px;color:#c084fc">📡 ${a.broadcastDay} ${a.broadcastTime||''}</span>`:''}
+          ${a.status?`<span style="font-size:10px;color:${a.status==='Currently Airing'?'#4ade80':'#64748b'};border:1px solid ${a.status==='Currently Airing'?'rgba(74,222,128,.2)':'var(--border)'};padding:1px 7px;border-radius:99px">${a.status}</span>`:''}
         </div>
-      </div>`;
-    grid.appendChild(card);
+        ${a.genres?.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${a.genres.slice(0,4).map(g=>`<span class="genre-tag" style="font-size:10px;padding:2px 8px">${g}</span>`).join('')}${a.genres.length>4?`<span style="font-size:10px;color:var(--muted)">+${a.genres.length-4}</span>`:''}</div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-gray" style="padding:7px 12px;font-size:12px" onclick="openEdit('${a.id}')">✏️ ပြင်</button>
+        <button class="btn btn-red"  style="padding:7px 12px;font-size:12px" onclick="deleteAnime('${a.id}','${a.title.replace(/'/g,"\\'")}')">🗑️ ဖျက်</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterList(){
+  const q=document.getElementById('searchAdmin').value.toLowerCase();
+  renderList(allAnimes.filter(a=>
+    a.title.toLowerCase().includes(q)||
+    a.year.includes(q)||
+    (a.genres||[]).some(g=>g.toLowerCase().includes(q))||
+    (a.status||'').toLowerCase().includes(q)
+  ));
+}
+
+function showTab(t){
+  ['list','add','migrate','settings'].forEach(n=>{
+    document.getElementById(`tab${n.charAt(0).toUpperCase()+n.slice(1)}Content`).style.display=n===t?'block':'none';
+    const btn=document.getElementById(`tab${n.charAt(0).toUpperCase()+n.slice(1)}`);
+    if(btn){btn.style.background=n===t?'var(--blue)':'var(--bg3)';btn.style.color=n===t?'white':'#94a3b8';}
   });
 }
 
-// ══ Search ══════════════════════════════════════════════════
-function setupSearch() {
-  function handle(e) {
-    searchTerm = e.target.value.toLowerCase();
-    const sD = document.getElementById('searchInputDesktop');
-    const sM = document.getElementById('searchInputMobile');
-    if (sD && e.target !== sD) sD.value = e.target.value;
-    if (sM && e.target !== sM) sM.value = e.target.value;
-    applyFilters();
-  }
-  document.getElementById('searchInputDesktop')?.addEventListener('input', handle);
-  document.getElementById('searchInputMobile')?.addEventListener('input', handle);
+async function addAnime(){
+  const id       = document.getElementById('addId').value.trim();
+  const title    = document.getElementById('addTitle').value.trim();
+  const year     = document.getElementById('addYear').value.trim();
+  const image    = document.getElementById('addImage').value.trim();
+  const link     = document.getElementById('addLink').value.trim();
+  const review   = document.getElementById('addReview').value.trim();
+  const genres   = document.getElementById('addGenres').value.trim().split(',').map(s=>s.trim()).filter(Boolean);
+  const episodes = document.getElementById('addEpisodes').value.trim();
+  const score    = document.getElementById('addScore').value.trim();
+  const broadcastDay  = document.getElementById('addBroadcastDay').value.trim();
+  const broadcastTime = document.getElementById('addBroadcastTime').value.trim();
+  const status   = document.getElementById('addStatus').value.trim();
+  const season   = document.getElementById('addSeason').value.trim();
+  if(!id||!title||!year){showMsg('addMsg','ID, Title, Year ထည့်ပါ','error');return;}
+  const r=await fetch(WORKER_URL+'/admin/anime',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body:JSON.stringify({id,title,year,image,link,review,genres,episodes,score,broadcastDay,broadcastTime,status,season})
+  });
+  const d=await r.json();
+  if(d.success){showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success');clearAdd();loadAnimes();showTab('list');}
+  else showMsg('addMsg','❌ '+d.error,'error');
 }
 
-// ══ Load ═══════════════════════════════════════════════════
-async function loadFromKV() {
-  try {
-    // Fetch anime list, leaderboard and LiveChart schedule in parallel
-    const [animeRes, lbRes, lcRes] = await Promise.all([
-      fetch(WORKER_URL + '/anime'),
-      fetch(WORKER_URL + '/reviews/leaderboard'),
-      fetch(WORKER_URL + '/livechart/chart'),
-    ]);
-
-    allAnimes   = await animeRes.json();
-    const lb    = await lbRes.json();
-    reviewsMeta = new Map(Array.isArray(lb) ? lb.map(x => [x.id, x]) : []);
-
-    // Parse LiveChart schedule
-    const lcData = await lcRes.json();
-    lcSchedule   = lcData?.schedule || {};
-
-    buildGenreBar(allAnimes);
-    displayAnimes(allAnimes);
-    setupSearch();
-    startTicker();
-
-  } catch (e) {
-    document.getElementById('anime-grid').innerHTML =
-      '<p style="color:#f87171;padding:20px">Loading error: ' + e.message + '</p>';
-  }
+function clearAdd(){
+  ['addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore',
+   'addFetchTitle','addBroadcastDay','addBroadcastTime','addStatus','addSeason'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  if(window.addGenreSet)window.addGenreSet([]);
+  const pr=document.getElementById('addImagePreview');const pl=document.getElementById('addUploadPlaceholder');
+  if(pr){pr.style.display='none';pr.src='';}if(pl)pl.style.display='block';
+  showUploadMsg('add','','');
+  const badge=document.getElementById('addFetchBadge');if(badge)badge.style.display='none';
+  const res=document.getElementById('addFetchResult');if(res)res.style.display='none';
 }
 
-document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-  document.getElementById('mobileDrawer')?.classList.toggle('hidden');
-});
+function openEdit(id){
+  const a=allAnimes.find(x=>x.id===id);if(!a)return;
+  editingId=id;
+  document.getElementById('editId').value         = a.id;
+  document.getElementById('editTitle').value      = a.title;
+  document.getElementById('editYear').value       = a.year;
+  document.getElementById('editImage').value      = a.image||'';
+  document.getElementById('editLink').value       = a.link||'';
+  document.getElementById('editReview').value     = a.review||'';
+  document.getElementById('editEpisodes').value   = a.episodes||'';
+  document.getElementById('editScore').value      = a.score||'';
+  document.getElementById('editBroadcastDay').value  = a.broadcastDay||'';
+  document.getElementById('editBroadcastTime').value = a.broadcastTime||'';
+  document.getElementById('editStatus').value    = a.status||'';
+  document.getElementById('editSeason').value    = a.season||'';
+  document.getElementById('editFetchTitle').value = a.title;
+  if(window.editGenreSet)window.editGenreSet(a.genres||[]);
+  const pr=document.getElementById('editImagePreview');const pl=document.getElementById('editUploadPlaceholder');
+  if(a.image){pr.src=a.image;pr.style.display='block';if(pl)pl.style.display='none';}
+  else{pr.style.display='none';if(pl)pl.style.display='block';}
+  showUploadMsg('edit','','');
+  document.getElementById('editFetchBadge').style.display='none';
+  document.getElementById('editFetchResult').style.display='none';
+  document.getElementById('editModal').style.display='block';
+}
 
-const navItems = { home: document.getElementById('navHome'), contact: document.getElementById('navContact') };
-window.addEventListener('scroll', () => {
-  const y = window.scrollY + 100;
-  const contactEl = document.getElementById('contact');
-  const active = (contactEl && y >= contactEl.offsetTop) ? 'contact' : 'home';
-  Object.keys(navItems).forEach(k => navItems[k]?.classList.toggle('active', k === active));
-});
+function closeEdit(){document.getElementById('editModal').style.display='none';}
 
-loadFromKV();
+async function saveEdit(){
+  const genres = document.getElementById('editGenres').value.trim().split(',').map(s=>s.trim()).filter(Boolean);
+  const r=await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(editingId)}`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+    body:JSON.stringify({
+      title:    document.getElementById('editTitle').value,
+      year:     document.getElementById('editYear').value,
+      image:    document.getElementById('editImage').value,
+      link:     document.getElementById('editLink').value,
+      review:   document.getElementById('editReview').value,
+      episodes: document.getElementById('editEpisodes').value,
+      score:    document.getElementById('editScore').value,
+      broadcastDay:  document.getElementById('editBroadcastDay').value,
+      broadcastTime: document.getElementById('editBroadcastTime').value,
+      status:   document.getElementById('editStatus').value,
+      season:   document.getElementById('editSeason').value,
+      genres,
+    })
+  });
+  const d=await r.json();
+  if(d.success){showMsg('editMsg','✓ သိမ်းပြီးပါပြီ','success');loadAnimes();setTimeout(closeEdit,1200);}
+  else showMsg('editMsg','❌ '+d.error,'error');
+}
+
+async function deleteAnime(id,title){
+  if(!confirm(`"${title}" ကို တကယ် ဖျက်မည်လား?`))return;
+  const r=await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}});
+  const d=await r.json();
+  if(d.success)loadAnimes();else alert('ဖျက်မရပါ: '+d.error);
+}
+
+async function migrateData(){
+  let raw=document.getElementById('migrateData').value.trim().replace(/\r?\n/g,' ');
+  let parsed;
+  try{parsed=Function('"use strict";return('+raw+')')();}catch(e){showMsg('migrateMsg','❌ Parse error: '+e.message,'error');return;}
+  if(!Array.isArray(parsed)){showMsg('migrateMsg','❌ Array [] ဖြစ်ရမည်','error');return;}
+  if(!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`))return;
+  const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:parsed})});
+  const d=await r.json();
+  if(d.success){showMsg('migrateMsg',`✓ ${d.count} ကား import ပြီးပါပြီ`,'success');loadAnimes();}
+  else showMsg('migrateMsg','❌ '+d.error,'error');
+}
+
+function showMsg(id,txt,type){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=txt;el.style.color=type==='success'?'#4ade80':'#f87171';
+  el.style.display=txt?'block':'none';
+  if(txt)setTimeout(()=>el.style.display='none',3000);
+}
+
+// Init
+document.getElementById('tokenInput').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+updateGhTokenUI();
 </script>
 </body>
 </html>
