@@ -378,22 +378,38 @@ function buildCountdownHtml(anime) {
       const nextDate = new Date(
         typeof lc.nextAiringAt === 'number' ? lc.nextAiringAt * 1000 : lc.nextAiringAt
       );
+
       if (!isNaN(nextDate)) {
-        const epNum = lc.nextEpNumber;
-        cdTargets.set(anime.id, { nextDate, epNum });
-        const ms  = nextDate.getTime() - Date.now();
-        const lbl = epNum != null ? `EP ${epNum}` : 'NEXT EP';
-        return `<div class="countdown-wrap" id="cd-${anime.id}">
-          <div class="cd-badge">
-            <div class="cd-ep-row">
-              <span class="cd-ep-dot"></span>
-              <span class="cd-ep-label">${lbl}</span>
-            </div>
-            <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
-            <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
-          </div>
-        </div>`;
-      }
+  // ── EP label ──
+  const epNum   = lc.nextEpNumber;
+  const total   = lc.totalEpisodes;
+  const epLabel = lc.nextEpLabel;
+
+  let lbl;
+  if (epNum != null) {
+    lbl = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
+  } else if (epLabel) {
+    lbl = epLabel;
+  } else {
+    lbl = 'NEXT EP';
+  }
+
+  // ── ဒီ ၂ ကြောင်း မပါမဖြစ် ──
+  cdTargets.set(anime.id, { nextDate, epNum, lbl });
+  const ms = nextDate.getTime() - Date.now();
+
+  return `<div class="countdown-wrap" id="cd-${anime.id}">
+    <div class="cd-badge">
+      <div class="cd-ep-row">
+        <span class="cd-ep-dot"></span>
+        <span class="cd-ep-label">${lbl}</span>
+      </div>
+      <div class="${cdClass(ms)}">${fmtCountdown(ms)}</div>
+      <div class="cd-day-label">${localTimeLabel(nextDate)}</div>
+    </div>
+  </div>`;
+}
+
     }
 
     // No next episode → ended
