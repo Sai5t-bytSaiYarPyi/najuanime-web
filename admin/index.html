@@ -15,6 +15,7 @@ input,textarea,select{background:var(--bg3);border:1px solid var(--border);color
 input:focus,textarea:focus{border-color:var(--blue)}
 input::placeholder,textarea::placeholder{color:var(--muted)}
 input[readonly]{opacity:.6;cursor:not-allowed}
+input[type=datetime-local]{color-scheme:dark}
 textarea{resize:vertical;min-height:80px}
 .btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:none}
 .btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
@@ -47,20 +48,11 @@ textarea{resize:vertical;min-height:80px}
 .stat-item label{font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:5px;display:block}
 .stat-item input{font-size:13px}
 
-.lc-box{background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px}
-.lc-match-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.lc-match-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s,background .2s}
-.lc-match-item:hover{border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.06)}
-.lc-match-item.selected{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.06)}
-.lc-match-poster{width:30px;height:42px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--bg2)}
-.lc-match-info{flex:1;min-width:0}
-.lc-match-title{font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lc-match-sub{font-size:10px;color:var(--muted);margin-top:2px}
-.lc-match-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;flex-shrink:0}
-.lc-match-airing{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
-.lc-match-ended{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.2)}
-.lc-id-confirmed{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
-.lc-id-missing{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(251,146,60,.08);color:#fb923c;border:1px solid rgba(251,146,60,.2)}
+/* Manual EP Override box */
+.ep-override-box{background:rgba(74,222,128,.04);border:1px solid rgba(74,222,128,.15);border-radius:12px;padding:14px}
+.ep-override-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
+.ep-override-clear{background:none;border:1px solid rgba(248,113,113,.3);color:#f87171;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .15s}
+.ep-override-clear:hover{background:rgba(248,113,113,.1)}
 
 .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:rgba(59,130,246,.05)}
@@ -88,7 +80,6 @@ textarea{resize:vertical;min-height:80px}
 .notfound-retry{background:none;border:1px solid rgba(168,85,247,.3);color:#c084fc;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:pointer;font-family:'Outfit',sans-serif}
 .notfound-retry:hover{background:rgba(168,85,247,.1)}
 
-/* ── Completeness Filter ── */
 .filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .fchip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:#94a3b8;transition:all .15s;font-family:'Outfit',sans-serif}
 .fchip:hover{border-color:rgba(59,130,246,.3);color:white}
@@ -98,11 +89,8 @@ textarea{resize:vertical;min-height:80px}
 .fchip.green.active{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:#4ade80}
 .fchip .cnt{opacity:.7;font-size:10px}
 
-/* Completeness stats bar */
 .stats-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:12px}
 .stats-bar-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
-
-/* Missing badge on card */
 .missing-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
 
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -146,8 +134,6 @@ textarea{resize:vertical;min-height:80px}
     <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <span id="ghStatusHeader" class="token-status" style="font-size:11px"></span>
-      <!-- LC data status in header -->
-      <span id="lcHeaderStatus" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(168,85,247,.1);color:#c084fc;border:1px solid rgba(168,85,247,.2);display:none" title="Click to refresh LC data" onclick="refreshLCData()" style="cursor:pointer">LC: ...</span>
       <span id="animeCount" class="pill">Loading...</span>
       <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">
         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -157,7 +143,6 @@ textarea{resize:vertical;min-height:80px}
   </header>
 
   <div style="max-width:1100px;margin:0 auto;padding:24px 16px">
-
     <!-- Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap">
       <button class="btn" id="tabList" onclick="showTab('list')" style="background:var(--blue);color:white">📋 Anime စာရင်း</button>
@@ -168,37 +153,28 @@ textarea{resize:vertical;min-height:80px}
 
     <!-- LIST TAB -->
     <div id="tabListContent">
-
-      <!-- Search row -->
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:280px;flex:1">
-        <button class="btn btn-gray" onclick="refreshLCData()" id="lcRefreshBtn" title="LC Data Refresh">
-          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          LC Data
-        </button>
       </div>
 
-      <!-- ══ COMPLETENESS STATS BAR ══ -->
       <div class="stats-bar" id="statsBar" style="display:none">
         <span style="font-size:11px;font-weight:700;color:#475569;margin-right:4px">Completeness:</span>
         <span class="stats-bar-item" id="statTotal" style="color:#60a5fa"></span>
         <span style="color:#334155">|</span>
-        <span class="stats-bar-item" id="statNoLC"    style="color:#fb923c"></span>
-        <span class="stats-bar-item" id="statAiringNoLC" style="color:#f87171"></span>
+        <span class="stats-bar-item" id="statNoEP"    style="color:#4ade80"></span>
         <span class="stats-bar-item" id="statNoImg"   style="color:#fbbf24"></span>
         <span class="stats-bar-item" id="statNoRev"   style="color:#94a3b8"></span>
         <span class="stats-bar-item" id="statNoGenre" style="color:#c084fc"></span>
       </div>
 
-      <!-- ══ COMPLETENESS FILTER CHIPS ══ -->
       <div class="filter-chips" id="filterChips">
-        <button class="fchip active" id="fchip-all"        onclick="setAdminFilter('all')">📋 All <span class="cnt" id="fcount-all"></span></button>
-        <button class="fchip red"   id="fchip-airing-nolc" onclick="setAdminFilter('airing-nolc')">🔥 Airing + No LC <span class="cnt" id="fcount-airing-nolc"></span></button>
-        <button class="fchip warn"  id="fchip-nolc"        onclick="setAdminFilter('nolc')">⚠️ No LC ID <span class="cnt" id="fcount-nolc"></span></button>
-        <button class="fchip warn"  id="fchip-noimg"       onclick="setAdminFilter('noimg')">📷 No Image <span class="cnt" id="fcount-noimg"></span></button>
-        <button class="fchip"       id="fchip-norev"       onclick="setAdminFilter('norev')">📝 No Review <span class="cnt" id="fcount-norev"></span></button>
-        <button class="fchip"       id="fchip-nogenre"     onclick="setAdminFilter('nogenre')">🏷️ No Genres <span class="cnt" id="fcount-nogenre"></span></button>
-        <button class="fchip green" id="fchip-airing"      onclick="setAdminFilter('airing')">🟢 Airing <span class="cnt" id="fcount-airing"></span></button>
+        <button class="fchip active" id="fchip-all"    onclick="setAdminFilter('all')">📋 All <span class="cnt" id="fcount-all"></span></button>
+        <button class="fchip green" id="fchip-hasep"   onclick="setAdminFilter('hasep')">✅ EP Set <span class="cnt" id="fcount-hasep"></span></button>
+        <button class="fchip warn"  id="fchip-noep"    onclick="setAdminFilter('noep')">⚠️ No EP <span class="cnt" id="fcount-noep"></span></button>
+        <button class="fchip warn"  id="fchip-noimg"   onclick="setAdminFilter('noimg')">📷 No Image <span class="cnt" id="fcount-noimg"></span></button>
+        <button class="fchip"       id="fchip-norev"   onclick="setAdminFilter('norev')">📝 No Review <span class="cnt" id="fcount-norev"></span></button>
+        <button class="fchip"       id="fchip-nogenre" onclick="setAdminFilter('nogenre')">🏷️ No Genres <span class="cnt" id="fcount-nogenre"></span></button>
+        <button class="fchip green" id="fchip-airing"  onclick="setAdminFilter('airing')">🟢 Airing <span class="cnt" id="fcount-airing"></span></button>
       </div>
 
       <div id="animeList" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -216,7 +192,7 @@ textarea{resize:vertical;min-height:80px}
           </div>
           <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Anime title ရိုက်ပြီး Fetch နှိပ်ရင် Genre, Year, Episodes, Score, Broadcast တွေ အလိုအလျောက် ဖြည့်ပေးမည်</p>
           <div class="fetch-row">
-            <input type="text" id="addFetchTitle" class="fetch-title-input" placeholder="Anime title (English) ဥပမာ: Fullmetal Alchemist">
+            <input type="text" id="addFetchTitle" class="fetch-title-input" placeholder="Anime title (English)">
             <button class="btn btn-purple" onclick="autoFetch('add')" id="addFetchBtn" style="white-space:nowrap;padding:10px 16px">
               <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               Fetch
@@ -238,7 +214,6 @@ textarea{resize:vertical;min-height:80px}
               <div id="addUploadPlaceholder">
                 <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <p style="font-size:13px;color:var(--muted)">အပုံဖိုင် ရွေးပါ သို့မဟုတ် ဆွဲချပါ</p>
-                <p style="font-size:11px;color:#475569;margin-top:4px">JPG, PNG — GitHub images/ folder သို့ upload မည်</p>
               </div>
               <div class="upload-progress" id="addUploadProgress" style="display:none"><div class="upload-progress-bar" id="addUploadProgressBar"></div></div>
             </div>
@@ -263,7 +238,7 @@ textarea{resize:vertical;min-height:80px}
 
           <div style="grid-column:span 2">
             <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.12);border-radius:10px;padding:12px">
-              <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info (Jikan မှ Auto-fill ဖြစ်မည်)</div>
+              <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info</div>
               <div class="stat-grid">
                 <div class="stat-item"><label>Airing Day</label><input type="text" id="addBroadcastDay" placeholder="Thursdays"></div>
                 <div class="stat-item"><label>Airing Time (JST)</label><input type="text" id="addBroadcastTime" placeholder="20:00"></div>
@@ -273,24 +248,24 @@ textarea{resize:vertical;min-height:80px}
             </div>
           </div>
 
-          <!-- LC ID box -->
+          <!-- ══ Manual EP Override (ADD) ══ -->
           <div style="grid-column:span 2">
-            <div class="lc-box">
+            <div class="ep-override-box">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-                <span style="font-size:12px;font-weight:700;color:#c084fc">🟢 LiveChart ID</span>
-                <span style="font-size:11px;color:var(--muted)">— countdown တိကျမှုအတွက် သတ်မှတ်ပေးပါ</span>
-                <span id="addLcStatus" style="display:none" class="fetch-badge"></span>
+                <span style="font-size:12px;font-weight:700;color:#4ade80">✏️ Manual EP Override</span>
+                <span style="font-size:11px;color:var(--muted)">— EP အပိုင်းနံပါတ်နဲ့ အချိန် ကိုယ်တိုင်ထည့်မည်</span>
               </div>
-              <div class="fetch-row" style="margin-bottom:8px">
-                <input type="text" id="addLcId" placeholder="LiveChart databaseId ဥပမာ: 13402" style="flex:1">
-                <button class="btn btn-purple" onclick="autoMatchLC('add')" id="addLcMatchBtn" style="white-space:nowrap;padding:10px 14px;font-size:12px">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                  Auto Match
-                </button>
-                <button class="btn btn-green" onclick="verifyLCId('add')" id="addLcVerifyBtn" style="white-space:nowrap;padding:10px 14px;font-size:12px">✓ Verify</button>
+              <div class="stat-grid">
+                <div class="stat-item">
+                  <label>Next EP Number</label>
+                  <input type="number" id="addNextEpNumber" placeholder="3" min="1">
+                </div>
+                <div class="stat-item">
+                  <label>Next Airing Time (UTC)</label>
+                  <input type="datetime-local" id="addNextAiringAt">
+                </div>
               </div>
-              <p style="font-size:11px;color:#475569">Title ဖြင့် Auto Match နှိပ်ပါ သို့မဟုတ် livechart.me/anime/XXXXX ID ကို ကိုယ်တိုင်ထည့်ပြီး Verify နှိပ်ပါ</p>
-              <div id="addLcMatchList" class="lc-match-list" style="display:none"></div>
+              <p style="font-size:10px;color:#475569;margin-top:8px">⚠️ Broadcast ပြီးရင် EP number +1 လုပ်ပြီး အချိန်သစ် ထပ်ထည့်ပေးပါ</p>
             </div>
           </div>
 
@@ -318,8 +293,8 @@ textarea{resize:vertical;min-height:80px}
         </p>
 
         <div class="fetch-box" style="margin-bottom:12px">
-          <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px">🔍 Bulk Jikan Fetch — Genres, Score, Broadcast Update</div>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Import ပြီးတဲ့နောက် ဒီခလုတ်နှိပ်ရင် anime တိုင်းအတွက် Jikan မှ genres, score, broadcast တွေ auto-fetch လုပ်ပြီး KV update မည်။</p>
+          <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px">🔍 Bulk Jikan Fetch</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Import ပြီးတဲ့နောက် genres, score, broadcast တွေ auto-fetch လုပ်မည်</p>
           <p style="font-size:12px;color:#fbbf24;margin-bottom:10px">⏱ Rate limit ကြောင့် anime တစ်ကားကို 400ms စောင့်သည်</p>
           <button class="btn btn-purple" onclick="bulkFetchGenres()" id="bulkFetchBtn">
             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -339,23 +314,6 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px;margin-bottom:16px">
-          <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:6px">🟢 Bulk LC Auto-Match — Countdown ID သတ်မှတ်ရန်</div>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Anime တိုင်းကို LC chart ထဲမှ title ဖြင့် ရှာပြီး lcId သတ်မှတ်မည်။ Match ဖြစ်ရင် countdown တိကျသွားမည်။</p>
-          <button class="btn btn-purple" onclick="bulkLCMatch()" id="bulkLCBtn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            Bulk LC Match
-          </button>
-          <div class="bulk-progress-wrap" id="bulkLCProgressWrap">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:12px;color:#c084fc;font-weight:600" id="bulkLCLabel">Matching...</span>
-              <span style="font-size:12px;color:var(--muted)" id="bulkLCPct">0%</span>
-            </div>
-            <div class="bulk-progress-bar-bg"><div class="bulk-progress-bar-fill" id="bulkLCFill" style="background:#a855f7"></div></div>
-            <div class="bulk-stats" id="bulkLCStats" style="display:none"></div>
-          </div>
-        </div>
-
         <label class="label">animeData array (JSON format)</label>
         <textarea id="migrateData" style="min-height:200px;font-size:12px" placeholder='[{"id":"SnowballEarth","title":"Snowball Earth",...}]'></textarea>
         <button class="btn btn-blue" style="margin-top:12px" onclick="migrateData()">
@@ -369,11 +327,11 @@ textarea{resize:vertical;min-height:80px}
     <!-- SETTINGS TAB -->
     <div id="tabSettingsContent" style="display:none">
       <div class="card" style="max-width:600px">
-        <h2 style="font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:20px">⚙️ GitHub Token Settings</h2>
+        <h2 style="font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:20px">⚙️ Settings</h2>
         <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:16px;margin-bottom:20px">
           <div style="font-size:13px;color:#93c5fd;line-height:1.7">
             <strong>GitHub Personal Access Token</strong> ကို browser localStorage မှာ သိမ်းသည်။<br>
-            Token က repo scope ရှိရမည်။ Images တွေကို <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Sai5t-bytSaiYarPyi/najuanime-web</code> repo ရဲ့ <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">images/</code> folder ထဲ upload မည်။
+            Images တွေကို <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">Sai5t-bytSaiYarPyi/najuanime-web</code> repo ရဲ့ <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">images/</code> folder ထဲ upload မည်။
           </div>
         </div>
         <label class="label">GitHub Personal Access Token</label>
@@ -393,14 +351,14 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
         <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
-          <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">LiveChart Cache</h3>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">LC schedule ကို KV ထဲ 1hr cache သိမ်းသည်။ Force refresh လုပ်ချင်ရင်:</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-red" onclick="purgeLCCache()">🗑️ LC Cache Purge</button>
-            <button class="btn btn-purple" onclick="debugLCFetch()">🔍 LC Debug Fetch</button>
+          <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">✏️ Manual EP Guide</h3>
+          <div style="background:rgba(74,222,128,.04);border:1px solid rgba(74,222,128,.15);border-radius:12px;padding:14px;font-size:13px;color:#94a3b8;line-height:1.8">
+            Anime ကို Edit ပြီး <strong style="color:#4ade80">Manual EP Override</strong> section မှာ:<br>
+            1. <strong>Next EP Number</strong> — ဥပမာ: <code style="background:var(--bg3);padding:1px 6px;border-radius:4px">5</code><br>
+            2. <strong>Next Airing Time</strong> — UTC time ထည့်ပါ (JST -9h = UTC)<br>
+            3. Save နှိပ်ပါ<br>
+            4. Broadcast ပြီးရင် EP+1, အချိန်သစ် ပြန်ထည့်ပေးပါ
           </div>
-          <p id="lcCacheMsg" style="font-size:12px;margin-top:8px;display:none"></p>
-          <pre id="lcDebugOutput" style="display:none;margin-top:10px;background:var(--bg3);padding:12px;border-radius:8px;font-size:11px;color:#94a3b8;overflow-x:auto;white-space:pre-wrap;max-height:300px;overflow-y:auto"></pre>
         </div>
       </div>
     </div>
@@ -480,23 +438,27 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <!-- Edit LC ID -->
+        <!-- ══ Manual EP Override (EDIT) ══ -->
         <div style="grid-column:span 2">
-          <div class="lc-box">
+          <div class="ep-override-box">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-              <span style="font-size:12px;font-weight:700;color:#c084fc">🟢 LiveChart ID</span>
-              <span id="editLcStatus" style="display:none" class="fetch-badge"></span>
+              <span style="font-size:12px;font-weight:700;color:#4ade80">✏️ Manual EP Override</span>
+              <span id="editEpStatus" style="display:none" class="ep-override-badge"></span>
+              <button class="ep-override-clear" onclick="clearEpOverride()" title="EP data ဖျက်မည်">✕ Clear</button>
             </div>
-            <div class="fetch-row" style="margin-bottom:8px">
-              <input type="text" id="editLcId" placeholder="LiveChart databaseId ဥပမာ: 13402" style="flex:1">
-              <button class="btn btn-purple" onclick="autoMatchLC('edit')" id="editLcMatchBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">
-                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                Auto Match
-              </button>
-              <button class="btn btn-green" onclick="verifyLCId('edit')" id="editLcVerifyBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">✓ Verify</button>
+            <div class="stat-grid">
+              <div class="stat-item">
+                <label>Next EP Number</label>
+                <input type="number" id="editNextEpNumber" placeholder="3" min="1">
+              </div>
+              <div class="stat-item">
+                <label>Next Airing Time (UTC)</label>
+                <input type="datetime-local" id="editNextAiringAt">
+              </div>
             </div>
-            <p style="font-size:11px;color:#475569">ID ကိုယ်တိုင်ထည့်ပြီး Verify နှိပ်ပါ သို့မဟုတ် Auto Match ဖြင့် title ပေါ်မူတည်ပြီး ရှာပေးမည်</p>
-            <div id="editLcMatchList" class="lc-match-list" style="display:none"></div>
+            <p style="font-size:10px;color:#475569;margin-top:8px">
+              ⚠️ Broadcast ပြီးရင် EP number +1 လုပ်ပြီး အချိန်သစ် ပြန်ထည့်ပေးပါ
+            </p>
           </div>
         </div>
 
@@ -535,329 +497,72 @@ const GH_USER='Sai5t-bytSaiYarPyi', GH_REPO='najuanime-web', GH_BRANCH='main', G
 let TOKEN='', allAnimes=[], editingId='', retryAnimeId='';
 let currentAdminFilter = 'all';
 
-// ══ LC Data — FIX: don't cache empty results, allow retry ══
-let lcData = null;
-
-async function getLCData(forceRefresh = false) {
-  if (lcData && lcData.length > 0 && !forceRefresh) return lcData;
-  try {
-    const r    = await fetch(WORKER_URL + '/livechart');
-    const data = await r.json();
-    const arr  = Array.isArray(data) ? data : (data.data || []);
-    // Only store if we got actual results
-    if (arr.length > 0) {
-      lcData = arr;
-      // Update header status
-      const hdr = document.getElementById('lcHeaderStatus');
-      if (hdr) { hdr.textContent = `LC: ${arr.length} anime`; hdr.style.display = 'inline-flex'; hdr.style.cursor = 'pointer'; }
-    } else {
-      lcData = [];
-      const hdr = document.getElementById('lcHeaderStatus');
-      if (hdr) { hdr.textContent = `LC: 0 (fetch failed)`; hdr.style.display = 'inline-flex'; hdr.style.color = '#f87171'; }
-    }
-  } catch(e) {
-    lcData = [];
-    console.warn('[Admin] LC load failed:', e.message);
-  }
-  return lcData || [];
-}
-
-async function refreshLCData() {
-  const btn = document.getElementById('lcRefreshBtn');
-  if (btn) { btn.innerHTML = `<span class="spin">⟳</span> Loading...`; btn.disabled = true; }
-  lcData = null;
-  await getLCData(true);
-  if (btn) { btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> LC Data`; btn.disabled = false; }
-  const count = lcData ? lcData.length : 0;
-  alert(count > 0 ? `✓ LC Data loaded: ${count} anime` : `❌ LC Data fetch မအောင်မြင်ပါ — Worker /livechart/debug စစ်ကြည့်ပါ`);
-}
-
-function normT(s) {
-  return String(s||'').toLowerCase().replace(/[^\w\s]/g,' ').replace(/\s+/g,' ').trim();
-}
-
-function titleScore(a, b) {
-  const na = normT(a), nb = normT(b);
-  if (!na || !nb) return 0;
-  if (na === nb) return 1;
-  if (na.includes(nb) || nb.includes(na)) return 0.85;
-  const wa = new Set(na.split(' ')), wb = nb.split(' ');
-  const overlap = wb.filter(w => w.length>2 && wa.has(w)).length;
-  return overlap / Math.max(wa.size, wb.length);
-}
-
-function findLCMatches(title) {
-  if (!lcData?.length) return [];
-  return lcData.map(item => {
-    const scores = [
-      titleScore(title, item.romajiTitle),
-      titleScore(title, item.englishTitle),
-      ...(item.altTitles||[]).map(t => titleScore(title, t)),
-    ];
-    return { item, score: Math.max(...scores) };
-  })
-  .filter(x => x.score > 0.3)
-  .sort((a,b) => b.score - a.score)
-  .slice(0, 4)
-  .map(x => x.item);
-}
-
-// ── FIX: Verify a manually typed LC ID ────────────────
-async function verifyLCId(ctx) {
-  const lcIdEl   = document.getElementById(`${ctx}LcId`);
-  const statusEl = document.getElementById(`${ctx}LcStatus`);
-  const listEl   = document.getElementById(`${ctx}LcMatchList`);
-  const id       = lcIdEl.value.trim();
-  if (!id) { lcIdEl.focus(); return; }
-
-  statusEl.className = 'fetch-badge fetch-loading'; statusEl.textContent = '⏳ Verifying...'; statusEl.style.display = 'inline-flex';
-  listEl.style.display = 'none';
-
-  await getLCData();
-  const found = lcData?.find(item => String(item.lcId) === String(id));
-
-  if (found) {
-    const isAiring = !!found.nextAiringAt;
-    const ep   = found.nextEpNumber != null ? `EP ${found.nextEpNumber}` : '';
-    const sub  = [found.englishTitle || found.romajiTitle, isAiring ? (ep ? `🟢 ${ep} upcoming` : '🟢 Airing') : '⏹ Ended', `ID: ${found.lcId}`].filter(Boolean).join(' · ');
-    statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ Found: ${found.romajiTitle || found.englishTitle}`;
-    listEl.style.display = 'flex';
-    listEl.innerHTML = `<div class="lc-match-item selected">
-      <div class="lc-match-info">
-        <div class="lc-match-title">${found.romajiTitle || found.englishTitle}</div>
-        <div class="lc-match-sub">${sub}</div>
-      </div>
-      <span class="lc-match-badge ${isAiring?'lc-match-airing':'lc-match-ended'}">${isAiring?'Airing':'Ended'}</span>
-    </div>`;
-  } else if (lcData && lcData.length > 0) {
-    // LC data loaded but ID not found in current season — might be valid for older anime
-    statusEl.className = 'fetch-badge fetch-err';
-    statusEl.textContent = `⚠️ ID ${id} — current season data မှာ မတွေ့ (older anime ဆိုရင် OK)`;
-  } else {
-    statusEl.className = 'fetch-badge fetch-err';
-    statusEl.textContent = `❌ LC data မရသေးပါ — Worker စစ်ပါ`;
-  }
-}
-
-// ── Auto-Match by title ────────────────────────────────
-async function autoMatchLC(ctx) {
-  const titleEl  = document.getElementById(ctx === 'add' ? 'addTitle' : 'editTitle');
-  const lcIdEl   = document.getElementById(`${ctx}LcId`);
-  const listEl   = document.getElementById(`${ctx}LcMatchList`);
-  const statusEl = document.getElementById(`${ctx}LcStatus`);
-  const btnEl    = document.getElementById(`${ctx}LcMatchBtn`);
-  const title    = titleEl.value.trim();
-  if (!title) { titleEl.focus(); return; }
-
-  btnEl.disabled  = true;
-  btnEl.innerHTML = `<span class="spin">⟳</span>`;
-  statusEl.className = 'fetch-badge fetch-loading'; statusEl.textContent = '⏳ Loading LC data...'; statusEl.style.display = 'inline-flex';
-  listEl.style.display = 'none'; listEl.innerHTML = '';
-
-  await getLCData();
-
-  btnEl.disabled  = false;
-  btnEl.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Auto Match`;
-
-  if (!lcData || lcData.length === 0) {
-    statusEl.className = 'fetch-badge fetch-err';
-    statusEl.textContent = `❌ LC Data မရပါ — Worker /livechart စစ်ပါ`;
-    return;
-  }
-
-  const matches = findLCMatches(title);
-
-  if (!matches.length) {
-    statusEl.className = 'fetch-badge fetch-err'; statusEl.textContent = `❌ Match မတွေ့ (LC: ${lcData.length} loaded)`;
-    return;
-  }
-
-  statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ ${matches.length} match — LC: ${lcData.length} loaded`;
-  listEl.style.display = 'flex';
-  listEl.innerHTML = matches.map(m => {
-    const isAiring = m.nextAiringAt;
-    const ep   = m.nextEpNumber != null ? `EP ${m.nextEpNumber}` : '';
-    const sub  = [m.englishTitle||m.romajiTitle, isAiring ? (ep ? `🟢 ${ep} upcoming` : '🟢 Airing') : '⏹ Ended', `ID: ${m.lcId}`].filter(Boolean).join(' · ');
-    return `<div class="lc-match-item" onclick="selectLCMatch('${ctx}','${m.lcId}',this)">
-      <div class="lc-match-info">
-        <div class="lc-match-title">${m.romajiTitle || m.englishTitle}</div>
-        <div class="lc-match-sub">${sub}</div>
-      </div>
-      <span class="lc-match-badge ${isAiring?'lc-match-airing':'lc-match-ended'}">${isAiring?'Airing':'Ended'}</span>
-    </div>`;
-  }).join('');
-}
-
-function selectLCMatch(ctx, lcId, el) {
-  document.getElementById(`${ctx}LcId`).value = lcId;
-  el.parentElement.querySelectorAll('.lc-match-item').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  const statusEl = document.getElementById(`${ctx}LcStatus`);
-  statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ ID: ${lcId}`;
-}
-
-// ══ Completeness Filter Logic ══════════════════════════
+// ══ Completeness ═══════════════════════════════════════
 function calcCompleteness(list) {
-  const counts = {
-    total:      list.length,
-    noLC:       list.filter(a => !a.lcId).length,
-    airingNoLC: list.filter(a => !a.lcId && (a.status||'').toLowerCase().includes('airing')).length,
-    noImg:      list.filter(a => !a.image || a.image.trim() === '').length,
-    noRev:      list.filter(a => !a.review || a.review.trim() === '').length,
-    noGenre:    list.filter(a => !a.genres || a.genres.length === 0).length,
-    airing:     list.filter(a => (a.status||'').toLowerCase().includes('airing')).length,
+  return {
+    total:   list.length,
+    hasEP:   list.filter(a => a.nextEpNumber != null && a.nextAiringAt).length,
+    noEP:    list.filter(a => !a.nextEpNumber || !a.nextAiringAt).length,
+    noImg:   list.filter(a => !a.image || !a.image.trim()).length,
+    noRev:   list.filter(a => !a.review || !a.review.trim()).length,
+    noGenre: list.filter(a => !a.genres || !a.genres.length).length,
+    airing:  list.filter(a => (a.status||'').toLowerCase().includes('airing')).length,
   };
-  return counts;
 }
 
 function updateCompletenessUI(list) {
   const c = calcCompleteness(list);
-
-  // Stats bar
-  document.getElementById('statTotal').textContent    = `📋 Total: ${c.total}`;
-  document.getElementById('statNoLC').textContent     = `⚠️ No LC: ${c.noLC}`;
-  document.getElementById('statAiringNoLC').textContent = `🔥 Airing+NoLC: ${c.airingNoLC}`;
-  document.getElementById('statNoImg').textContent    = `📷 No Img: ${c.noImg}`;
-  document.getElementById('statNoRev').textContent    = `📝 No Review: ${c.noRev}`;
-  document.getElementById('statNoGenre').textContent  = `🏷️ No Genre: ${c.noGenre}`;
-  document.getElementById('statsBar').style.display   = 'flex';
-
-  // Filter chip counts
-  document.getElementById('fcount-all').textContent        = `(${c.total})`;
-  document.getElementById('fcount-nolc').textContent       = `(${c.noLC})`;
-  document.getElementById('fcount-airing-nolc').textContent= `(${c.airingNoLC})`;
-  document.getElementById('fcount-noimg').textContent      = `(${c.noImg})`;
-  document.getElementById('fcount-norev').textContent      = `(${c.noRev})`;
-  document.getElementById('fcount-nogenre').textContent    = `(${c.noGenre})`;
-  document.getElementById('fcount-airing').textContent     = `(${c.airing})`;
+  document.getElementById('statTotal').textContent   = `📋 Total: ${c.total}`;
+  document.getElementById('statNoEP').textContent    = `✅ EP Set: ${c.hasEP}`;
+  document.getElementById('statNoImg').textContent   = `📷 No Img: ${c.noImg}`;
+  document.getElementById('statNoRev').textContent   = `📝 No Review: ${c.noRev}`;
+  document.getElementById('statNoGenre').textContent = `🏷️ No Genre: ${c.noGenre}`;
+  document.getElementById('statsBar').style.display  = 'flex';
+  document.getElementById('fcount-all').textContent     = `(${c.total})`;
+  document.getElementById('fcount-hasep').textContent   = `(${c.hasEP})`;
+  document.getElementById('fcount-noep').textContent    = `(${c.noEP})`;
+  document.getElementById('fcount-noimg').textContent   = `(${c.noImg})`;
+  document.getElementById('fcount-norev').textContent   = `(${c.noRev})`;
+  document.getElementById('fcount-nogenre').textContent = `(${c.noGenre})`;
+  document.getElementById('fcount-airing').textContent  = `(${c.airing})`;
 }
 
 function setAdminFilter(f) {
   currentAdminFilter = f;
   document.querySelectorAll('.fchip').forEach(el => el.classList.remove('active'));
-  const chip = document.getElementById(`fchip-${f}`);
-  if (chip) chip.classList.add('active');
+  document.getElementById(`fchip-${f}`)?.classList.add('active');
   applyAdminFilter();
 }
 
 function applyAdminFilter() {
-  const q    = (document.getElementById('searchAdmin')?.value || '').toLowerCase();
-  let list   = allAnimes;
-
-  // Apply completeness filter
+  const q = (document.getElementById('searchAdmin')?.value || '').toLowerCase();
+  let list = allAnimes;
   switch (currentAdminFilter) {
-    case 'nolc':       list = list.filter(a => !a.lcId); break;
-    case 'airing-nolc':list = list.filter(a => !a.lcId && (a.status||'').toLowerCase().includes('airing')); break;
-    case 'noimg':      list = list.filter(a => !a.image || !a.image.trim()); break;
-    case 'norev':      list = list.filter(a => !a.review || !a.review.trim()); break;
-    case 'nogenre':    list = list.filter(a => !a.genres || a.genres.length === 0); break;
-    case 'airing':     list = list.filter(a => (a.status||'').toLowerCase().includes('airing')); break;
+    case 'hasep':   list = list.filter(a => a.nextEpNumber != null && a.nextAiringAt); break;
+    case 'noep':    list = list.filter(a => !a.nextEpNumber || !a.nextAiringAt); break;
+    case 'noimg':   list = list.filter(a => !a.image || !a.image.trim()); break;
+    case 'norev':   list = list.filter(a => !a.review || !a.review.trim()); break;
+    case 'nogenre': list = list.filter(a => !a.genres || !a.genres.length); break;
+    case 'airing':  list = list.filter(a => (a.status||'').toLowerCase().includes('airing')); break;
   }
-
-  // Apply search
   if (q) list = list.filter(a =>
     a.title.toLowerCase().includes(q) ||
     a.year.includes(q) ||
     (a.genres||[]).some(g => g.toLowerCase().includes(q)) ||
-    (a.status||'').toLowerCase().includes(q) ||
-    (a.lcId||'').includes(q)
+    (a.status||'').toLowerCase().includes(q)
   );
-
   renderList(list);
 }
 
-// ══ Bulk LC Match ══════════════════════════════════════
-async function bulkLCMatch() {
-  const btn  = document.getElementById('bulkLCBtn');
-  if (!allAnimes.length) { alert('先 Anime list ကို load လုပ်ပါ'); return; }
-  if (!confirm(`Anime ${allAnimes.length} ကားအတွက် LC match လုပ်မည်။`)) return;
-
-  btn.disabled = true; btn.innerHTML = `<span class="spin">⟳</span> Matching...`;
-  const pw = document.getElementById('bulkLCProgressWrap');
-  const pl = document.getElementById('bulkLCLabel');
-  const pp = document.getElementById('bulkLCPct');
-  const pf = document.getElementById('bulkLCFill');
-  const ps = document.getElementById('bulkLCStats');
-  pw.style.display = 'block'; ps.style.display = 'none';
-
-  await getLCData();
-
-  if (!lcData || lcData.length === 0) {
-    pl.textContent = '❌ LC data မရပါ — Worker /livechart စစ်ပါ';
-    btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Bulk LC Match`;
-    return;
-  }
-
-  pl.textContent = `LC data loaded: ${lcData.length} anime — Matching...`;
-
-  const total = allAnimes.length;
-  let matched = 0, skipped = 0;
-  const updated = [];
-
-  for (let i = 0; i < allAnimes.length; i++) {
-    const anime = allAnimes[i];
-    const pct = Math.round(((i+1)/total)*100);
-    pl.textContent = `(${i+1}/${total}) ${anime.title}`;
-    pp.textContent = pct+'%'; pf.style.width = pct+'%';
-
-    if (anime.lcId) { updated.push(anime); skipped++; continue; }
-
-    const hits = findLCMatches(anime.title);
-    if (hits.length && titleScore(anime.title, hits[0].romajiTitle || hits[0].englishTitle) >= 0.7) {
-      updated.push({ ...anime, lcId: hits[0].lcId });
-      matched++;
-    } else {
-      updated.push(anime);
-    }
-  }
-
-  pl.textContent = 'KV သို့ သိမ်းနေသည်...';
-  try {
-    const r = await fetch(WORKER_URL+'/admin/migrate', {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-      body: JSON.stringify({ animeList: updated }),
-    });
-    const d = await r.json();
-    pl.textContent = d.success ? '✓ ပြီးပါပြီ!' : '❌ Save မအောင်မြင်ပါ';
-    pf.style.background = d.success ? '#4ade80' : '#f87171';
-    ps.style.display = 'flex';
-    ps.innerHTML = `<span class="bulk-stat bulk-stat-total">Total: ${total}</span><span class="bulk-stat bulk-stat-ok">✓ Matched: ${matched}</span><span class="bulk-stat" style="background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⏭ Skipped: ${skipped}</span><span class="bulk-stat bulk-stat-err">❌ No match: ${total-matched-skipped}</span>`;
-    if (d.success) { loadAnimes(); allAnimes = updated; lcData = null; }
-  } catch(e) { pl.textContent = '❌ '+e.message; }
-
-  btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Bulk LC Match`;
+// ══ EP Override clear button ════════════════════════════
+function clearEpOverride() {
+  document.getElementById('editNextEpNumber').value = '';
+  document.getElementById('editNextAiringAt').value  = '';
+  const st = document.getElementById('editEpStatus');
+  st.style.display = 'none';
 }
 
-// ══ LC Cache Purge + Debug ═════════════════════════════
-async function purgeLCCache() {
-  try {
-    const r = await fetch(WORKER_URL+'/admin/livechart-cache',{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}});
-    const d = await r.json();
-    const el = document.getElementById('lcCacheMsg');
-    el.style.display='block'; el.style.color = d.success?'#4ade80':'#f87171';
-    el.textContent = d.success ? `✓ Cache purged: ${d.purged}` : '❌ '+d.error;
-    lcData = null;
-    setTimeout(()=>el.style.display='none',4000);
-  } catch(e) { alert('Purge failed: '+e.message); }
-}
-
-async function debugLCFetch() {
-  const out = document.getElementById('lcDebugOutput');
-  const msg = document.getElementById('lcCacheMsg');
-  out.style.display = 'block'; out.textContent = '⏳ Fetching debug info...';
-  msg.style.display = 'block'; msg.style.color = '#60a5fa'; msg.textContent = 'Fetching...';
-  try {
-    const r = await fetch(WORKER_URL+'/livechart/debug', {headers:{'Authorization':'Bearer '+TOKEN}});
-    const d = await r.json();
-    out.textContent = JSON.stringify(d, null, 2);
-    msg.textContent = `Debug complete — see output below`;
-  } catch(e) {
-    out.textContent = 'Error: '+e.message;
-    msg.style.color = '#f87171'; msg.textContent = '❌ '+e.message;
-  }
-}
-
-// ══ Genre Tag UI ═══════════════════════════════════════
+// ══ Genre Tag UI ════════════════════════════════════════
 function initGenreInput(ctx) {
   const wrap=document.getElementById(`${ctx}GenreWrap`), textIn=document.getElementById(`${ctx}GenreText`), hiddenIn=document.getElementById(`${ctx}Genres`);
   function getTags(){return hiddenIn.value?hiddenIn.value.split(',').map(s=>s.trim()).filter(Boolean):[]}
@@ -869,12 +574,12 @@ function initGenreInput(ctx) {
   window[`${ctx}GenreSet`]=setTags;
 }
 
-// ══ Jikan ═══════════════════════════════════════════════
+// ══ Jikan ════════════════════════════════════════════════
 async function fetchJikan(title) {
   const url=`${JIKAN_URL}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`;
   const res=await fetch(url); if(!res.ok)throw new Error(`Jikan ${res.status}`);
   const data=await res.json(); const a=data.data?.[0]; if(!a)throw new Error('Jikan တွင် ရှာမတွေ့ပါ');
-  return { year:String(a.year||a.aired?.prop?.from?.year||''), genres:[...(a.genres||[]),(a.themes||[]),(a.demographics||[])].flat().map(g=>g.name), episodes:String(a.episodes||''), score:String(a.score||''), broadcastDay:a.broadcast?.day||'', broadcastTime:a.broadcast?.time||'', status:a.status||'', season:a.season||'', source:'Jikan (MAL)', title:a.title_english||a.title||'' };
+  return { year:String(a.year||a.aired?.prop?.from?.year||''), genres:[...(a.genres||[]),(a.themes||[]),(a.demographics||[])].flat().map(g=>g.name), episodes:String(a.episodes||''), score:String(a.score||''), broadcastDay:a.broadcast?.day||'', broadcastTime:a.broadcast?.time||'', status:a.status||'', season:a.season||'', title:a.title_english||a.title||'' };
 }
 
 async function autoFetch(ctx) {
@@ -896,13 +601,13 @@ async function autoFetch(ctx) {
   if(result.genres?.length&&window[`${ctx}GenreSet`])window[`${ctx}GenreSet`](result.genres);
   badge.className='fetch-badge fetch-ok'; badge.textContent='✓ Jikan (MAL)';
   resultBox.style.display='block';
-  resultBox.innerHTML=`<strong style="color:white">${result.title}</strong><br>📅 Year: ${result.year||'—'} &nbsp; 🎬 Eps: ${result.episodes||'—'} &nbsp; ⭐ Score: ${result.score||'—'}<br>📡 Broadcast: ${result.broadcastDay||'—'} ${result.broadcastTime||''} (JST) &nbsp; 🌸 Season: ${result.season||'—'}<br>🏷️ Genres: ${result.genres?.join(', ')||'—'}`;
+  resultBox.innerHTML=`<strong style="color:white">${result.title}</strong><br>📅 Year: ${result.year||'—'} &nbsp; 🎬 Eps: ${result.episodes||'—'} &nbsp; ⭐ Score: ${result.score||'—'}<br>📡 Broadcast: ${result.broadcastDay||'—'} ${result.broadcastTime||''} (JST)<br>🏷️ Genres: ${result.genres?.join(', ')||'—'}`;
 }
 
 // ══ Bulk Jikan ═══════════════════════════════════════════
 async function bulkFetchGenres() {
   const btn=document.getElementById('bulkFetchBtn'); if(!allAnimes.length){alert('先 Anime list ကို load လုပ်ပါ');return;}
-  if(!confirm(`Anime ${allAnimes.length} ကားအတွက် Jikan fetch မည်။ ကြာနိုင်ပါတယ်။`))return;
+  if(!confirm(`Anime ${allAnimes.length} ကားအတွက် Jikan fetch မည်။`))return;
   btn.disabled=true; btn.innerHTML=`<span class="spin">⟳</span> Fetching...`;
   const pw=document.getElementById('bulkProgressWrap'),pl=document.getElementById('bulkProgressLabel'),pp=document.getElementById('bulkProgressPct'),pf=document.getElementById('bulkProgressFill'),ps=document.getElementById('bulkStatsRow');
   pw.style.display='block'; ps.style.display='none'; document.getElementById('bulkNotFoundWrap').style.display='none';
@@ -947,7 +652,7 @@ async function doRetry(){
   try{
     const r=await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(retryAnimeId)}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(updated)});
     const d=await r.json();
-    if(d.success){msgEl.style.color='#4ade80';msgEl.textContent=`✓ Update ပြီး — ${result.title}`;loadAnimes();setTimeout(closeRetry,1200);}
+    if(d.success){msgEl.style.color='#4ade80';msgEl.textContent=`✓ Update ပြီး`;loadAnimes();setTimeout(closeRetry,1200);}
     else{msgEl.style.color='#f87171';msgEl.textContent='❌ '+d.error;}
   }catch(e){msgEl.style.color='#f87171';msgEl.textContent='❌ '+e.message;}
 }
@@ -989,10 +694,9 @@ async function testLogin(){
   try{
     const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:null})});
     if(r.status===401){document.getElementById('loginErr').style.display='block';return;}
-    document.getElementById('loginScreen').style.display='none'; document.getElementById('panel').style.display='block';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
     updateGhTokenUI(); initGenreInput('add'); initGenreInput('edit'); loadAnimes();
-    // Pre-load LC data in background
-    getLCData();
   }catch(e){document.getElementById('loginErr').style.display='block'}
 }
 function logout(){TOKEN='';document.getElementById('loginScreen').style.display='flex';document.getElementById('panel').style.display='none'}
@@ -1009,32 +713,33 @@ async function loadAnimes(){
 function renderList(list){
   const el=document.getElementById('animeList');
   if(!list.length){
-    el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px;text-align:center">မတွေ့ပါ ✓ (filter ပြောင်းကြည့်ပါ)</p>';
+    el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px;text-align:center">မတွေ့ပါ (filter ပြောင်းကြည့်ပါ)</p>';
     return;
   }
   el.innerHTML=list.map(a=>{
-    // Missing badges
-    const missing = [];
-    if (!a.lcId)                                missing.push(`<span class="missing-badge" style="background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⚠️ No LC</span>`);
-    if (!a.image||!a.image.trim())              missing.push(`<span class="missing-badge" style="background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)">📷 No Image</span>`);
-    if (!a.review||!a.review.trim())            missing.push(`<span class="missing-badge" style="background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2)">📝 No Review</span>`);
-    if (!a.genres||!a.genres.length)            missing.push(`<span class="missing-badge" style="background:rgba(168,85,247,.08);color:#c084fc;border:1px solid rgba(168,85,247,.2)">🏷️ No Genre</span>`);
+    const missing=[];
+    if(!a.image||!a.image.trim()) missing.push(`<span class="missing-badge" style="background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)">📷 No Image</span>`);
+    if(!a.review||!a.review.trim()) missing.push(`<span class="missing-badge" style="background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2)">📝 No Review</span>`);
+    if(!a.genres||!a.genres.length) missing.push(`<span class="missing-badge" style="background:rgba(168,85,247,.08);color:#c084fc;border:1px solid rgba(168,85,247,.2)">🏷️ No Genre</span>`);
+    const epBadge = (a.nextEpNumber != null && a.nextAiringAt)
+      ? `<span class="missing-badge" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)">✅ EP ${a.nextEpNumber}</span>`
+      : `<span class="missing-badge" style="background:rgba(251,146,60,.08);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⚠️ No EP</span>`;
 
     return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
       <img src="${a.image||''}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)" onerror="this.style.display='none'">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
-          <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</span>
+          <span style="font-weight:700;font-size:14px">${a.title}</span>
+          ${epBadge}
           ${missing.join('')}
         </div>
         <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
           <span class="pill">${a.year}</span>
           <span style="font-size:11px;color:var(--muted)">${a.id}</span>
           ${a.episodes?`<span style="font-size:11px;color:#94a3b8">🎬 ${a.episodes} eps</span>`:''}
-          ${a.score?`<span style="font-size:11px;color:#fbbf24">⭐ ${a.score}</span>`:''}
           ${a.broadcastDay?`<span style="font-size:11px;color:#c084fc">📡 ${a.broadcastDay} ${a.broadcastTime||''}</span>`:''}
           ${a.status?`<span style="font-size:10px;color:${a.status==='Currently Airing'?'#4ade80':'#64748b'};border:1px solid ${a.status==='Currently Airing'?'rgba(74,222,128,.2)':'var(--border)'};padding:1px 7px;border-radius:99px">${a.status}</span>`:''}
-          ${a.lcId ? `<span class="lc-id-confirmed">🟢 LC:${a.lcId}</span>` : `<span class="lc-id-missing">⚠️ No LC ID</span>`}
+          ${a.nextAiringAt?`<span style="font-size:10px;color:#4ade80;border:1px solid rgba(74,222,128,.2);padding:1px 7px;border-radius:99px">⏰ ${new Date(a.nextAiringAt).toLocaleDateString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Rangoon'})} MMT</span>`:''}
         </div>
         ${a.genres?.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${a.genres.slice(0,4).map(g=>`<span class="genre-tag" style="font-size:10px;padding:2px 8px">${g}</span>`).join('')}${a.genres.length>4?`<span style="font-size:10px;color:var(--muted)">+${a.genres.length-4}</span>`:''}</div>`:''}
       </div>
@@ -1046,8 +751,7 @@ function renderList(list){
   }).join('');
 }
 
-// filterList now delegates to applyAdminFilter
-function filterList() { applyAdminFilter(); }
+function filterList(){ applyAdminFilter(); }
 
 function showTab(t){
   ['list','add','migrate','settings'].forEach(n=>{
@@ -1060,6 +764,8 @@ function showTab(t){
 async function addAnime(){
   const id=document.getElementById('addId').value.trim(), title=document.getElementById('addTitle').value.trim(), year=document.getElementById('addYear').value.trim();
   if(!id||!title||!year){showMsg('addMsg','ID, Title, Year ထည့်ပါ','error');return}
+  const nextEpRaw    = document.getElementById('addNextEpNumber').value.trim();
+  const nextAiringRaw = document.getElementById('addNextAiringAt').value;
   const r=await fetch(WORKER_URL+'/admin/anime',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({
     id, title, year,
     image:    document.getElementById('addImage').value.trim(),
@@ -1072,7 +778,8 @@ async function addAnime(){
     broadcastTime: document.getElementById('addBroadcastTime').value.trim(),
     status:   document.getElementById('addStatus').value.trim(),
     season:   document.getElementById('addSeason').value.trim(),
-    lcId:     document.getElementById('addLcId').value.trim(),
+    nextEpNumber: nextEpRaw ? Number(nextEpRaw) : null,
+    nextAiringAt: nextAiringRaw ? new Date(nextAiringRaw).toISOString() : null,
   })});
   const d=await r.json();
   if(d.success){showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success');clearAdd();loadAnimes();showTab('list')}
@@ -1080,41 +787,54 @@ async function addAnime(){
 }
 
 function clearAdd(){
-  ['addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore','addFetchTitle','addBroadcastDay','addBroadcastTime','addStatus','addSeason','addLcId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore','addFetchTitle',
+   'addBroadcastDay','addBroadcastTime','addStatus','addSeason','addNextEpNumber','addNextAiringAt'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.value='';
+  });
   if(window.addGenreSet)window.addGenreSet([]);
   const pr=document.getElementById('addImagePreview'),pl=document.getElementById('addUploadPlaceholder');
   if(pr){pr.style.display='none';pr.src=''}if(pl)pl.style.display='block';
   showUploadMsg('add','','');
-  ['addFetchBadge','addLcStatus'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});
-  ['addFetchResult','addLcMatchList'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});
+  document.getElementById('addFetchBadge').style.display='none';
+  document.getElementById('addFetchResult').style.display='none';
 }
 
 function openEdit(id){
   const a=allAnimes.find(x=>x.id===id); if(!a)return;
   editingId=id;
-  document.getElementById('editId').value          = a.id;
-  document.getElementById('editTitle').value       = a.title;
-  document.getElementById('editYear').value        = a.year;
-  document.getElementById('editImage').value       = a.image||'';
-  document.getElementById('editLink').value        = a.link||'';
-  document.getElementById('editReview').value      = a.review||'';
-  document.getElementById('editEpisodes').value    = a.episodes||'';
-  document.getElementById('editScore').value       = a.score||'';
-  document.getElementById('editBroadcastDay').value  = a.broadcastDay||'';
-  document.getElementById('editBroadcastTime').value = a.broadcastTime||'';
-  document.getElementById('editStatus').value      = a.status||'';
-  document.getElementById('editSeason').value      = a.season||'';
-  document.getElementById('editFetchTitle').value  = a.title;
-  document.getElementById('editLcId').value        = a.lcId||'';
+  document.getElementById('editId').value             = a.id;
+  document.getElementById('editTitle').value          = a.title;
+  document.getElementById('editYear').value           = a.year;
+  document.getElementById('editImage').value          = a.image||'';
+  document.getElementById('editLink').value           = a.link||'';
+  document.getElementById('editReview').value         = a.review||'';
+  document.getElementById('editEpisodes').value       = a.episodes||'';
+  document.getElementById('editScore').value          = a.score||'';
+  document.getElementById('editBroadcastDay').value   = a.broadcastDay||'';
+  document.getElementById('editBroadcastTime').value  = a.broadcastTime||'';
+  document.getElementById('editStatus').value         = a.status||'';
+  document.getElementById('editSeason').value         = a.season||'';
+  document.getElementById('editFetchTitle').value     = a.title;
+  document.getElementById('editNextEpNumber').value   = a.nextEpNumber != null ? a.nextEpNumber : '';
+  document.getElementById('editNextAiringAt').value   = a.nextAiringAt
+    ? new Date(a.nextAiringAt).toISOString().slice(0,16) : '';
   if(window.editGenreSet)window.editGenreSet(a.genres||[]);
   const pr=document.getElementById('editImagePreview'),pl=document.getElementById('editUploadPlaceholder');
-  if(a.image){pr.src=a.image;pr.style.display='block';if(pl)pl.style.display='none'}else{pr.style.display='none';if(pl)pl.style.display='block'}
+  if(a.image){pr.src=a.image;pr.style.display='block';if(pl)pl.style.display='none'}
+  else{pr.style.display='none';if(pl)pl.style.display='block'}
   showUploadMsg('edit','','');
-  const lcSt=document.getElementById('editLcStatus');
-  if(a.lcId){lcSt.className='fetch-badge fetch-ok';lcSt.textContent=`✓ LC:${a.lcId}`;lcSt.style.display='inline-flex'}else{lcSt.style.display='none'}
+
+  // EP status badge
+  const epSt = document.getElementById('editEpStatus');
+  if(a.nextEpNumber != null && a.nextAiringAt){
+    epSt.textContent = `✅ EP ${a.nextEpNumber} set`;
+    epSt.style.display='inline-flex';
+  } else {
+    epSt.style.display='none';
+  }
+
   document.getElementById('editFetchBadge').style.display='none';
   document.getElementById('editFetchResult').style.display='none';
-  document.getElementById('editLcMatchList').style.display='none';
   document.getElementById('editModal').style.display='block';
 }
 
@@ -1122,19 +842,22 @@ function closeEdit(){document.getElementById('editModal').style.display='none'}
 
 async function saveEdit(){
   const genres=document.getElementById('editGenres').value.trim().split(',').map(s=>s.trim()).filter(Boolean);
+  const nextEpRaw    = document.getElementById('editNextEpNumber').value.trim();
+  const nextAiringRaw = document.getElementById('editNextAiringAt').value;
   const r=await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(editingId)}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({
-    title:    document.getElementById('editTitle').value,
-    year:     document.getElementById('editYear').value,
-    image:    document.getElementById('editImage').value,
-    link:     document.getElementById('editLink').value,
-    review:   document.getElementById('editReview').value,
-    episodes: document.getElementById('editEpisodes').value,
-    score:    document.getElementById('editScore').value,
+    title:         document.getElementById('editTitle').value,
+    year:          document.getElementById('editYear').value,
+    image:         document.getElementById('editImage').value,
+    link:          document.getElementById('editLink').value,
+    review:        document.getElementById('editReview').value,
+    episodes:      document.getElementById('editEpisodes').value,
+    score:         document.getElementById('editScore').value,
     broadcastDay:  document.getElementById('editBroadcastDay').value,
     broadcastTime: document.getElementById('editBroadcastTime').value,
-    status:   document.getElementById('editStatus').value,
-    season:   document.getElementById('editSeason').value,
-    lcId:     document.getElementById('editLcId').value.trim()||null,
+    status:        document.getElementById('editStatus').value,
+    season:        document.getElementById('editSeason').value,
+    nextEpNumber:  nextEpRaw ? Number(nextEpRaw) : null,
+    nextAiringAt:  nextAiringRaw ? new Date(nextAiringRaw).toISOString() : null,
     genres,
   })});
   const d=await r.json();
@@ -1152,7 +875,7 @@ async function migrateData(){
   let raw=document.getElementById('migrateData').value.trim().replace(/\r?\n/g,' ');
   let parsed; try{parsed=Function('"use strict";return('+raw+')')()}catch(e){showMsg('migrateMsg','❌ Parse error: '+e.message,'error');return}
   if(!Array.isArray(parsed)){showMsg('migrateMsg','❌ Array [] ဖြစ်ရမည်','error');return}
-  if(!confirm(`Anime ${parsed.length} ကားကို import မည်။ KV data အကုန် replace ဖြစ်မည်။`))return;
+  if(!confirm(`Anime ${parsed.length} ကားကို import မည်။`))return;
   const r=await fetch(WORKER_URL+'/admin/migrate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({animeList:parsed})});
   const d=await r.json();
   if(d.success){showMsg('migrateMsg',`✓ ${d.count} ကား import ပြီးပါပြီ`,'success');loadAnimes()}
