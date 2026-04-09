@@ -23,6 +23,7 @@ textarea{resize:vertical;min-height:80px}
 .btn-green{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.2)}.btn-green:hover{background:rgba(74,222,128,.2)}
 .btn-purple{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}.btn-purple:hover{background:rgba(168,85,247,.2)}
 .btn-orange{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.2)}.btn-orange:hover{background:rgba(251,146,60,.2)}
+.btn-yellow{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}.btn-yellow:hover{background:rgba(251,191,36,.2)}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
 .pill{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
 .label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
@@ -46,7 +47,6 @@ textarea{resize:vertical;min-height:80px}
 .stat-item label{font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:5px;display:block}
 .stat-item input{font-size:13px}
 
-/* ── LC ID box ── */
 .lc-box{background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px}
 .lc-match-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .lc-match-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s,background .2s}
@@ -72,7 +72,6 @@ textarea{resize:vertical;min-height:80px}
 .token-ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)}
 .token-missing{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
 
-/* Bulk LC match progress */
 .bulk-progress-wrap{margin-top:10px;display:none}
 .bulk-progress-bar-bg{height:6px;background:var(--border);border-radius:99px;overflow:hidden}
 .bulk-progress-bar-fill{height:100%;background:var(--blue);border-radius:99px;transition:width .3s;width:0%}
@@ -88,6 +87,23 @@ textarea{resize:vertical;min-height:80px}
 .notfound-item:last-child{border-bottom:none}
 .notfound-retry{background:none;border:1px solid rgba(168,85,247,.3);color:#c084fc;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:pointer;font-family:'Outfit',sans-serif}
 .notfound-retry:hover{background:rgba(168,85,247,.1)}
+
+/* ── Completeness Filter ── */
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.fchip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:#94a3b8;transition:all .15s;font-family:'Outfit',sans-serif}
+.fchip:hover{border-color:rgba(59,130,246,.3);color:white}
+.fchip.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#60a5fa}
+.fchip.warn.active{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.35);color:#fb923c}
+.fchip.red.active{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#f87171}
+.fchip.green.active{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:#4ade80}
+.fchip .cnt{opacity:.7;font-size:10px}
+
+/* Completeness stats bar */
+.stats-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:12px}
+.stats-bar-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
+
+/* Missing badge on card */
+.missing-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
@@ -130,6 +146,8 @@ textarea{resize:vertical;min-height:80px}
     <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <span id="ghStatusHeader" class="token-status" style="font-size:11px"></span>
+      <!-- LC data status in header -->
+      <span id="lcHeaderStatus" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(168,85,247,.1);color:#c084fc;border:1px solid rgba(168,85,247,.2);display:none" title="Click to refresh LC data" onclick="refreshLCData()" style="cursor:pointer">LC: ...</span>
       <span id="animeCount" class="pill">Loading...</span>
       <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">
         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -150,9 +168,39 @@ textarea{resize:vertical;min-height:80px}
 
     <!-- LIST TAB -->
     <div id="tabListContent">
-      <div style="margin-bottom:16px">
-        <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:320px">
+
+      <!-- Search row -->
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:280px;flex:1">
+        <button class="btn btn-gray" onclick="refreshLCData()" id="lcRefreshBtn" title="LC Data Refresh">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          LC Data
+        </button>
       </div>
+
+      <!-- ══ COMPLETENESS STATS BAR ══ -->
+      <div class="stats-bar" id="statsBar" style="display:none">
+        <span style="font-size:11px;font-weight:700;color:#475569;margin-right:4px">Completeness:</span>
+        <span class="stats-bar-item" id="statTotal" style="color:#60a5fa"></span>
+        <span style="color:#334155">|</span>
+        <span class="stats-bar-item" id="statNoLC"    style="color:#fb923c"></span>
+        <span class="stats-bar-item" id="statAiringNoLC" style="color:#f87171"></span>
+        <span class="stats-bar-item" id="statNoImg"   style="color:#fbbf24"></span>
+        <span class="stats-bar-item" id="statNoRev"   style="color:#94a3b8"></span>
+        <span class="stats-bar-item" id="statNoGenre" style="color:#c084fc"></span>
+      </div>
+
+      <!-- ══ COMPLETENESS FILTER CHIPS ══ -->
+      <div class="filter-chips" id="filterChips">
+        <button class="fchip active" id="fchip-all"        onclick="setAdminFilter('all')">📋 All <span class="cnt" id="fcount-all"></span></button>
+        <button class="fchip red"   id="fchip-airing-nolc" onclick="setAdminFilter('airing-nolc')">🔥 Airing + No LC <span class="cnt" id="fcount-airing-nolc"></span></button>
+        <button class="fchip warn"  id="fchip-nolc"        onclick="setAdminFilter('nolc')">⚠️ No LC ID <span class="cnt" id="fcount-nolc"></span></button>
+        <button class="fchip warn"  id="fchip-noimg"       onclick="setAdminFilter('noimg')">📷 No Image <span class="cnt" id="fcount-noimg"></span></button>
+        <button class="fchip"       id="fchip-norev"       onclick="setAdminFilter('norev')">📝 No Review <span class="cnt" id="fcount-norev"></span></button>
+        <button class="fchip"       id="fchip-nogenre"     onclick="setAdminFilter('nogenre')">🏷️ No Genres <span class="cnt" id="fcount-nogenre"></span></button>
+        <button class="fchip green" id="fchip-airing"      onclick="setAdminFilter('airing')">🟢 Airing <span class="cnt" id="fcount-airing"></span></button>
+      </div>
+
       <div id="animeList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
@@ -161,7 +209,6 @@ textarea{resize:vertical;min-height:80px}
       <div class="card" style="max-width:700px">
         <h2 style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:20px">Anime အသစ်ထည့်ရန်</h2>
 
-        <!-- Jikan auto-fetch -->
         <div class="fetch-box" style="margin-bottom:18px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
             <span style="font-size:13px;font-weight:700;color:#c084fc">🔍 Jikan (MAL) မှ Auto-fetch</span>
@@ -183,7 +230,6 @@ textarea{resize:vertical;min-height:80px}
           <div><label class="label">Year</label><input type="text" id="addYear" placeholder="2026"></div>
           <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="addTitle" placeholder="Snowball Earth"></div>
 
-          <!-- Image -->
           <div style="grid-column:span 2">
             <label class="label">အပုံ (GitHub သို့ Upload)</label>
             <div class="upload-zone" id="addUploadZone" ondragover="handleDrag(event,'addUploadZone')" ondragleave="handleDragLeave('addUploadZone')" ondrop="handleDrop(event,'add')">
@@ -200,7 +246,6 @@ textarea{resize:vertical;min-height:80px}
             <p id="addUploadMsg" style="font-size:12px;margin-top:6px;display:none"></p>
           </div>
 
-          <!-- Genres -->
           <div style="grid-column:span 2">
             <label class="label">Genres / Tags <span style="color:#475569;font-weight:400">(Enter နှိပ်ပါ)</span></label>
             <div class="genre-input-wrap" id="addGenreWrap" onclick="document.getElementById('addGenreText').focus()">
@@ -209,7 +254,6 @@ textarea{resize:vertical;min-height:80px}
             <input type="hidden" id="addGenres">
           </div>
 
-          <!-- Stats -->
           <div style="grid-column:span 2">
             <div class="stat-grid">
               <div class="stat-item"><label>Episodes</label><input type="text" id="addEpisodes" placeholder="12"></div>
@@ -217,7 +261,6 @@ textarea{resize:vertical;min-height:80px}
             </div>
           </div>
 
-          <!-- Broadcast -->
           <div style="grid-column:span 2">
             <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.12);border-radius:10px;padding:12px">
               <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info (Jikan မှ Auto-fill ဖြစ်မည်)</div>
@@ -230,7 +273,7 @@ textarea{resize:vertical;min-height:80px}
             </div>
           </div>
 
-          <!-- ══ LC ID ══════════════════════════════════════ -->
+          <!-- LC ID box -->
           <div style="grid-column:span 2">
             <div class="lc-box">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
@@ -239,13 +282,14 @@ textarea{resize:vertical;min-height:80px}
                 <span id="addLcStatus" style="display:none" class="fetch-badge"></span>
               </div>
               <div class="fetch-row" style="margin-bottom:8px">
-                <input type="text" id="addLcId" placeholder="LiveChart databaseId ဥပမာ: 14846" style="flex:1">
+                <input type="text" id="addLcId" placeholder="LiveChart databaseId ဥပမာ: 13402" style="flex:1">
                 <button class="btn btn-purple" onclick="autoMatchLC('add')" id="addLcMatchBtn" style="white-space:nowrap;padding:10px 14px;font-size:12px">
                   <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                   Auto Match
                 </button>
+                <button class="btn btn-green" onclick="verifyLCId('add')" id="addLcVerifyBtn" style="white-space:nowrap;padding:10px 14px;font-size:12px">✓ Verify</button>
               </div>
-              <p style="font-size:11px;color:#475569">Title ပေါ်မူတည်ပြီး LC chart ထဲကို ရှာပေးမည်။ မတွေ့ရင် livechart.me/anime/XXXXX URL ထဲက ID ကို ကိုယ်တိုင်ထည့်ပါ။</p>
+              <p style="font-size:11px;color:#475569">Title ဖြင့် Auto Match နှိပ်ပါ သို့မဟုတ် livechart.me/anime/XXXXX ID ကို ကိုယ်တိုင်ထည့်ပြီး Verify နှိပ်ပါ</p>
               <div id="addLcMatchList" class="lc-match-list" style="display:none"></div>
             </div>
           </div>
@@ -273,7 +317,6 @@ textarea{resize:vertical;min-height:80px}
           ⚠️ လက်ရှိ KV data အကုန် overwrite ဖြစ်မည်!
         </p>
 
-        <!-- Bulk Jikan Fetch -->
         <div class="fetch-box" style="margin-bottom:12px">
           <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px">🔍 Bulk Jikan Fetch — Genres, Score, Broadcast Update</div>
           <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Import ပြီးတဲ့နောက် ဒီခလုတ်နှိပ်ရင် anime တိုင်းအတွက် Jikan မှ genres, score, broadcast တွေ auto-fetch လုပ်ပြီး KV update မည်။</p>
@@ -296,7 +339,6 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <!-- ══ Bulk LC Match ═════════════════════════════ -->
         <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:14px;margin-bottom:16px">
           <div style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:6px">🟢 Bulk LC Auto-Match — Countdown ID သတ်မှတ်ရန်</div>
           <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Anime တိုင်းကို LC chart ထဲမှ title ဖြင့် ရှာပြီး lcId သတ်မှတ်မည်။ Match ဖြစ်ရင် countdown တိကျသွားမည်။</p>
@@ -351,10 +393,14 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
         <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
-          <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">LiveChart Cache</h3>
+          <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">LiveChart Cache</h3>
           <p style="font-size:12px;color:var(--muted);margin-bottom:10px">LC schedule ကို KV ထဲ 1hr cache သိမ်းသည်။ Force refresh လုပ်ချင်ရင်:</p>
-          <button class="btn btn-red" onclick="purgeLCCache()">🗑️ LC Cache Purge</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-red" onclick="purgeLCCache()">🗑️ LC Cache Purge</button>
+            <button class="btn btn-purple" onclick="debugLCFetch()">🔍 LC Debug Fetch</button>
+          </div>
           <p id="lcCacheMsg" style="font-size:12px;margin-top:8px;display:none"></p>
+          <pre id="lcDebugOutput" style="display:none;margin-top:10px;background:var(--bg3);padding:12px;border-radius:8px;font-size:11px;color:#94a3b8;overflow-x:auto;white-space:pre-wrap;max-height:300px;overflow-y:auto"></pre>
         </div>
       </div>
     </div>
@@ -371,7 +417,6 @@ textarea{resize:vertical;min-height:80px}
         <button class="btn btn-gray" onclick="closeEdit()" style="padding:6px 12px">✕</button>
       </div>
 
-      <!-- Edit Jikan fetch -->
       <div class="fetch-box" style="margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
           <span style="font-size:12px;font-weight:700;color:#c084fc">🔍 Jikan Auto-fetch</span>
@@ -392,7 +437,6 @@ textarea{resize:vertical;min-height:80px}
         <div><label class="label">Year</label><input type="text" id="editYear"></div>
         <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="editTitle"></div>
 
-        <!-- Edit image -->
         <div style="grid-column:span 2">
           <label class="label">အပုံ (GitHub သို့ Upload)</label>
           <div class="upload-zone" id="editUploadZone" ondragover="handleDrag(event,'editUploadZone')" ondragleave="handleDragLeave('editUploadZone')" ondrop="handleDrop(event,'edit')">
@@ -409,7 +453,6 @@ textarea{resize:vertical;min-height:80px}
           <input type="text" id="editImage">
         </div>
 
-        <!-- Edit Genres -->
         <div style="grid-column:span 2">
           <label class="label">Genres / Tags</label>
           <div class="genre-input-wrap" id="editGenreWrap" onclick="document.getElementById('editGenreText').focus()">
@@ -418,7 +461,6 @@ textarea{resize:vertical;min-height:80px}
           <input type="hidden" id="editGenres">
         </div>
 
-        <!-- Edit Stats -->
         <div style="grid-column:span 2">
           <div class="stat-grid">
             <div class="stat-item"><label>Episodes</label><input type="text" id="editEpisodes" placeholder="12"></div>
@@ -426,7 +468,6 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <!-- Edit Broadcast -->
         <div style="grid-column:span 2">
           <div style="background:rgba(168,85,247,.04);border:1px solid rgba(168,85,247,.12);border-radius:10px;padding:12px">
             <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px">📡 Broadcast Info</div>
@@ -439,7 +480,7 @@ textarea{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <!-- ══ Edit LC ID ════════════════════════════════ -->
+        <!-- Edit LC ID -->
         <div style="grid-column:span 2">
           <div class="lc-box">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
@@ -447,12 +488,14 @@ textarea{resize:vertical;min-height:80px}
               <span id="editLcStatus" style="display:none" class="fetch-badge"></span>
             </div>
             <div class="fetch-row" style="margin-bottom:8px">
-              <input type="text" id="editLcId" placeholder="LiveChart databaseId ဥပမာ: 14846" style="flex:1">
+              <input type="text" id="editLcId" placeholder="LiveChart databaseId ဥပမာ: 13402" style="flex:1">
               <button class="btn btn-purple" onclick="autoMatchLC('edit')" id="editLcMatchBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">
                 <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 Auto Match
               </button>
+              <button class="btn btn-green" onclick="verifyLCId('edit')" id="editLcVerifyBtn" style="white-space:nowrap;padding:9px 14px;font-size:12px">✓ Verify</button>
             </div>
+            <p style="font-size:11px;color:#475569">ID ကိုယ်တိုင်ထည့်ပြီး Verify နှိပ်ပါ သို့မဟုတ် Auto Match ဖြင့် title ပေါ်မူတည်ပြီး ရှာပေးမည်</p>
             <div id="editLcMatchList" class="lc-match-list" style="display:none"></div>
           </div>
         </div>
@@ -490,37 +533,59 @@ const JIKAN_URL  = 'https://api.jikan.moe/v4';
 const GH_USER='Sai5t-bytSaiYarPyi', GH_REPO='najuanime-web', GH_BRANCH='main', GH_FOLDER='images';
 
 let TOKEN='', allAnimes=[], editingId='', retryAnimeId='';
+let currentAdminFilter = 'all';
 
-// ── Cached LC data for Auto-Match ──────────────────────
-let lcData = null;  // Array<LC item> from /livechart
+// ══ LC Data — FIX: don't cache empty results, allow retry ══
+let lcData = null;
 
-async function getLCData() {
-  if (lcData) return lcData;
+async function getLCData(forceRefresh = false) {
+  if (lcData && lcData.length > 0 && !forceRefresh) return lcData;
   try {
-    const r = await fetch(WORKER_URL + '/livechart');
-    lcData = await r.json();
-    if (!Array.isArray(lcData)) lcData = [];
-  } catch(e) { lcData = []; }
-  return lcData;
+    const r    = await fetch(WORKER_URL + '/livechart');
+    const data = await r.json();
+    const arr  = Array.isArray(data) ? data : (data.data || []);
+    // Only store if we got actual results
+    if (arr.length > 0) {
+      lcData = arr;
+      // Update header status
+      const hdr = document.getElementById('lcHeaderStatus');
+      if (hdr) { hdr.textContent = `LC: ${arr.length} anime`; hdr.style.display = 'inline-flex'; hdr.style.cursor = 'pointer'; }
+    } else {
+      lcData = [];
+      const hdr = document.getElementById('lcHeaderStatus');
+      if (hdr) { hdr.textContent = `LC: 0 (fetch failed)`; hdr.style.display = 'inline-flex'; hdr.style.color = '#f87171'; }
+    }
+  } catch(e) {
+    lcData = [];
+    console.warn('[Admin] LC load failed:', e.message);
+  }
+  return lcData || [];
+}
+
+async function refreshLCData() {
+  const btn = document.getElementById('lcRefreshBtn');
+  if (btn) { btn.innerHTML = `<span class="spin">⟳</span> Loading...`; btn.disabled = true; }
+  lcData = null;
+  await getLCData(true);
+  if (btn) { btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> LC Data`; btn.disabled = false; }
+  const count = lcData ? lcData.length : 0;
+  alert(count > 0 ? `✓ LC Data loaded: ${count} anime` : `❌ LC Data fetch မအောင်မြင်ပါ — Worker /livechart/debug စစ်ကြည့်ပါ`);
 }
 
 function normT(s) {
   return String(s||'').toLowerCase().replace(/[^\w\s]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-// Score how well two titles match (0-1)
 function titleScore(a, b) {
   const na = normT(a), nb = normT(b);
   if (!na || !nb) return 0;
   if (na === nb) return 1;
   if (na.includes(nb) || nb.includes(na)) return 0.85;
-  // Word overlap
   const wa = new Set(na.split(' ')), wb = nb.split(' ');
   const overlap = wb.filter(w => w.length>2 && wa.has(w)).length;
   return overlap / Math.max(wa.size, wb.length);
 }
 
-// Find top 4 LC matches for a given anime title
 function findLCMatches(title) {
   if (!lcData?.length) return [];
   return lcData.map(item => {
@@ -537,33 +602,77 @@ function findLCMatches(title) {
   .map(x => x.item);
 }
 
-// ── Auto-Match LC (single anime) ───────────────────────
+// ── FIX: Verify a manually typed LC ID ────────────────
+async function verifyLCId(ctx) {
+  const lcIdEl   = document.getElementById(`${ctx}LcId`);
+  const statusEl = document.getElementById(`${ctx}LcStatus`);
+  const listEl   = document.getElementById(`${ctx}LcMatchList`);
+  const id       = lcIdEl.value.trim();
+  if (!id) { lcIdEl.focus(); return; }
+
+  statusEl.className = 'fetch-badge fetch-loading'; statusEl.textContent = '⏳ Verifying...'; statusEl.style.display = 'inline-flex';
+  listEl.style.display = 'none';
+
+  await getLCData();
+  const found = lcData?.find(item => String(item.lcId) === String(id));
+
+  if (found) {
+    const isAiring = !!found.nextAiringAt;
+    const ep   = found.nextEpNumber != null ? `EP ${found.nextEpNumber}` : '';
+    const sub  = [found.englishTitle || found.romajiTitle, isAiring ? (ep ? `🟢 ${ep} upcoming` : '🟢 Airing') : '⏹ Ended', `ID: ${found.lcId}`].filter(Boolean).join(' · ');
+    statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ Found: ${found.romajiTitle || found.englishTitle}`;
+    listEl.style.display = 'flex';
+    listEl.innerHTML = `<div class="lc-match-item selected">
+      <div class="lc-match-info">
+        <div class="lc-match-title">${found.romajiTitle || found.englishTitle}</div>
+        <div class="lc-match-sub">${sub}</div>
+      </div>
+      <span class="lc-match-badge ${isAiring?'lc-match-airing':'lc-match-ended'}">${isAiring?'Airing':'Ended'}</span>
+    </div>`;
+  } else if (lcData && lcData.length > 0) {
+    // LC data loaded but ID not found in current season — might be valid for older anime
+    statusEl.className = 'fetch-badge fetch-err';
+    statusEl.textContent = `⚠️ ID ${id} — current season data မှာ မတွေ့ (older anime ဆိုရင် OK)`;
+  } else {
+    statusEl.className = 'fetch-badge fetch-err';
+    statusEl.textContent = `❌ LC data မရသေးပါ — Worker စစ်ပါ`;
+  }
+}
+
+// ── Auto-Match by title ────────────────────────────────
 async function autoMatchLC(ctx) {
-  const titleEl   = document.getElementById(`${ctx === 'add' ? 'addTitle' : 'editTitle'}`);
-  const lcIdEl    = document.getElementById(`${ctx}LcId`);
-  const listEl    = document.getElementById(`${ctx}LcMatchList`);
-  const statusEl  = document.getElementById(`${ctx}LcStatus`);
-  const btnEl     = document.getElementById(`${ctx}LcMatchBtn`);
-  const title     = titleEl.value.trim();
+  const titleEl  = document.getElementById(ctx === 'add' ? 'addTitle' : 'editTitle');
+  const lcIdEl   = document.getElementById(`${ctx}LcId`);
+  const listEl   = document.getElementById(`${ctx}LcMatchList`);
+  const statusEl = document.getElementById(`${ctx}LcStatus`);
+  const btnEl    = document.getElementById(`${ctx}LcMatchBtn`);
+  const title    = titleEl.value.trim();
   if (!title) { titleEl.focus(); return; }
 
   btnEl.disabled  = true;
   btnEl.innerHTML = `<span class="spin">⟳</span>`;
-  statusEl.className = 'fetch-badge fetch-loading'; statusEl.textContent = '⏳ Searching LC...'; statusEl.style.display = 'inline-flex';
+  statusEl.className = 'fetch-badge fetch-loading'; statusEl.textContent = '⏳ Loading LC data...'; statusEl.style.display = 'inline-flex';
   listEl.style.display = 'none'; listEl.innerHTML = '';
 
   await getLCData();
-  const matches = findLCMatches(title);
 
   btnEl.disabled  = false;
   btnEl.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Auto Match`;
 
-  if (!matches.length) {
-    statusEl.className = 'fetch-badge fetch-err'; statusEl.textContent = '❌ Match မတွေ့ပါ';
+  if (!lcData || lcData.length === 0) {
+    statusEl.className = 'fetch-badge fetch-err';
+    statusEl.textContent = `❌ LC Data မရပါ — Worker /livechart စစ်ပါ`;
     return;
   }
 
-  statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ ${matches.length} match တွေ့`;
+  const matches = findLCMatches(title);
+
+  if (!matches.length) {
+    statusEl.className = 'fetch-badge fetch-err'; statusEl.textContent = `❌ Match မတွေ့ (LC: ${lcData.length} loaded)`;
+    return;
+  }
+
+  statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ ${matches.length} match — LC: ${lcData.length} loaded`;
   listEl.style.display = 'flex';
   listEl.innerHTML = matches.map(m => {
     const isAiring = m.nextAiringAt;
@@ -581,14 +690,83 @@ async function autoMatchLC(ctx) {
 
 function selectLCMatch(ctx, lcId, el) {
   document.getElementById(`${ctx}LcId`).value = lcId;
-  // Visual feedback
   el.parentElement.querySelectorAll('.lc-match-item').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
   const statusEl = document.getElementById(`${ctx}LcStatus`);
   statusEl.className = 'fetch-badge fetch-ok'; statusEl.textContent = `✓ ID: ${lcId}`;
 }
 
-// ── Bulk LC Match (all anime) ──────────────────────────
+// ══ Completeness Filter Logic ══════════════════════════
+function calcCompleteness(list) {
+  const counts = {
+    total:      list.length,
+    noLC:       list.filter(a => !a.lcId).length,
+    airingNoLC: list.filter(a => !a.lcId && (a.status||'').toLowerCase().includes('airing')).length,
+    noImg:      list.filter(a => !a.image || a.image.trim() === '').length,
+    noRev:      list.filter(a => !a.review || a.review.trim() === '').length,
+    noGenre:    list.filter(a => !a.genres || a.genres.length === 0).length,
+    airing:     list.filter(a => (a.status||'').toLowerCase().includes('airing')).length,
+  };
+  return counts;
+}
+
+function updateCompletenessUI(list) {
+  const c = calcCompleteness(list);
+
+  // Stats bar
+  document.getElementById('statTotal').textContent    = `📋 Total: ${c.total}`;
+  document.getElementById('statNoLC').textContent     = `⚠️ No LC: ${c.noLC}`;
+  document.getElementById('statAiringNoLC').textContent = `🔥 Airing+NoLC: ${c.airingNoLC}`;
+  document.getElementById('statNoImg').textContent    = `📷 No Img: ${c.noImg}`;
+  document.getElementById('statNoRev').textContent    = `📝 No Review: ${c.noRev}`;
+  document.getElementById('statNoGenre').textContent  = `🏷️ No Genre: ${c.noGenre}`;
+  document.getElementById('statsBar').style.display   = 'flex';
+
+  // Filter chip counts
+  document.getElementById('fcount-all').textContent        = `(${c.total})`;
+  document.getElementById('fcount-nolc').textContent       = `(${c.noLC})`;
+  document.getElementById('fcount-airing-nolc').textContent= `(${c.airingNoLC})`;
+  document.getElementById('fcount-noimg').textContent      = `(${c.noImg})`;
+  document.getElementById('fcount-norev').textContent      = `(${c.noRev})`;
+  document.getElementById('fcount-nogenre').textContent    = `(${c.noGenre})`;
+  document.getElementById('fcount-airing').textContent     = `(${c.airing})`;
+}
+
+function setAdminFilter(f) {
+  currentAdminFilter = f;
+  document.querySelectorAll('.fchip').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById(`fchip-${f}`);
+  if (chip) chip.classList.add('active');
+  applyAdminFilter();
+}
+
+function applyAdminFilter() {
+  const q    = (document.getElementById('searchAdmin')?.value || '').toLowerCase();
+  let list   = allAnimes;
+
+  // Apply completeness filter
+  switch (currentAdminFilter) {
+    case 'nolc':       list = list.filter(a => !a.lcId); break;
+    case 'airing-nolc':list = list.filter(a => !a.lcId && (a.status||'').toLowerCase().includes('airing')); break;
+    case 'noimg':      list = list.filter(a => !a.image || !a.image.trim()); break;
+    case 'norev':      list = list.filter(a => !a.review || !a.review.trim()); break;
+    case 'nogenre':    list = list.filter(a => !a.genres || a.genres.length === 0); break;
+    case 'airing':     list = list.filter(a => (a.status||'').toLowerCase().includes('airing')); break;
+  }
+
+  // Apply search
+  if (q) list = list.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    a.year.includes(q) ||
+    (a.genres||[]).some(g => g.toLowerCase().includes(q)) ||
+    (a.status||'').toLowerCase().includes(q) ||
+    (a.lcId||'').includes(q)
+  );
+
+  renderList(list);
+}
+
+// ══ Bulk LC Match ══════════════════════════════════════
 async function bulkLCMatch() {
   const btn  = document.getElementById('bulkLCBtn');
   if (!allAnimes.length) { alert('先 Anime list ကို load လုပ်ပါ'); return; }
@@ -603,6 +781,15 @@ async function bulkLCMatch() {
   pw.style.display = 'block'; ps.style.display = 'none';
 
   await getLCData();
+
+  if (!lcData || lcData.length === 0) {
+    pl.textContent = '❌ LC data မရပါ — Worker /livechart စစ်ပါ';
+    btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Bulk LC Match`;
+    return;
+  }
+
+  pl.textContent = `LC data loaded: ${lcData.length} anime — Matching...`;
+
   const total = allAnimes.length;
   let matched = 0, skipped = 0;
   const updated = [];
@@ -613,7 +800,7 @@ async function bulkLCMatch() {
     pl.textContent = `(${i+1}/${total}) ${anime.title}`;
     pp.textContent = pct+'%'; pf.style.width = pct+'%';
 
-    if (anime.lcId) { updated.push(anime); skipped++; continue; } // already set
+    if (anime.lcId) { updated.push(anime); skipped++; continue; }
 
     const hits = findLCMatches(anime.title);
     if (hits.length && titleScore(anime.title, hits[0].romajiTitle || hits[0].englishTitle) >= 0.7) {
@@ -624,7 +811,6 @@ async function bulkLCMatch() {
     }
   }
 
-  // Save to KV
   pl.textContent = 'KV သို့ သိမ်းနေသည်...';
   try {
     const r = await fetch(WORKER_URL+'/admin/migrate', {
@@ -635,14 +821,14 @@ async function bulkLCMatch() {
     pl.textContent = d.success ? '✓ ပြီးပါပြီ!' : '❌ Save မအောင်မြင်ပါ';
     pf.style.background = d.success ? '#4ade80' : '#f87171';
     ps.style.display = 'flex';
-    ps.innerHTML = `<span class="bulk-stat bulk-stat-total">Total: ${total}</span><span class="bulk-stat bulk-stat-ok">✓ Matched: ${matched}</span><span class="bulk-stat" style="background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⏭ Skipped(already set): ${skipped}</span><span class="bulk-stat bulk-stat-err">❌ No match: ${total-matched-skipped}</span>`;
+    ps.innerHTML = `<span class="bulk-stat bulk-stat-total">Total: ${total}</span><span class="bulk-stat bulk-stat-ok">✓ Matched: ${matched}</span><span class="bulk-stat" style="background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⏭ Skipped: ${skipped}</span><span class="bulk-stat bulk-stat-err">❌ No match: ${total-matched-skipped}</span>`;
     if (d.success) { loadAnimes(); allAnimes = updated; lcData = null; }
   } catch(e) { pl.textContent = '❌ '+e.message; }
 
   btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Bulk LC Match`;
 }
 
-// ── LC Cache Purge ─────────────────────────────────────
+// ══ LC Cache Purge + Debug ═════════════════════════════
 async function purgeLCCache() {
   try {
     const r = await fetch(WORKER_URL+'/admin/livechart-cache',{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}});
@@ -650,9 +836,25 @@ async function purgeLCCache() {
     const el = document.getElementById('lcCacheMsg');
     el.style.display='block'; el.style.color = d.success?'#4ade80':'#f87171';
     el.textContent = d.success ? `✓ Cache purged: ${d.purged}` : '❌ '+d.error;
-    lcData = null; // reset local cache too
+    lcData = null;
     setTimeout(()=>el.style.display='none',4000);
   } catch(e) { alert('Purge failed: '+e.message); }
+}
+
+async function debugLCFetch() {
+  const out = document.getElementById('lcDebugOutput');
+  const msg = document.getElementById('lcCacheMsg');
+  out.style.display = 'block'; out.textContent = '⏳ Fetching debug info...';
+  msg.style.display = 'block'; msg.style.color = '#60a5fa'; msg.textContent = 'Fetching...';
+  try {
+    const r = await fetch(WORKER_URL+'/livechart/debug', {headers:{'Authorization':'Bearer '+TOKEN}});
+    const d = await r.json();
+    out.textContent = JSON.stringify(d, null, 2);
+    msg.textContent = `Debug complete — see output below`;
+  } catch(e) {
+    out.textContent = 'Error: '+e.message;
+    msg.style.color = '#f87171'; msg.textContent = '❌ '+e.message;
+  }
 }
 
 // ══ Genre Tag UI ═══════════════════════════════════════
@@ -789,6 +991,8 @@ async function testLogin(){
     if(r.status===401){document.getElementById('loginErr').style.display='block';return;}
     document.getElementById('loginScreen').style.display='none'; document.getElementById('panel').style.display='block';
     updateGhTokenUI(); initGenreInput('add'); initGenreInput('edit'); loadAnimes();
+    // Pre-load LC data in background
+    getLCData();
   }catch(e){document.getElementById('loginErr').style.display='block'}
 }
 function logout(){TOKEN='';document.getElementById('loginScreen').style.display='flex';document.getElementById('panel').style.display='none'}
@@ -798,17 +1002,31 @@ async function loadAnimes(){
   document.getElementById('animeList').innerHTML='<p style="color:var(--muted);font-size:13px">Loading...</p>';
   const r=await fetch(WORKER_URL+'/anime'); allAnimes=await r.json();
   document.getElementById('animeCount').textContent=`${allAnimes.length} ကား`;
-  renderList(allAnimes);
+  updateCompletenessUI(allAnimes);
+  applyAdminFilter();
 }
 
 function renderList(list){
   const el=document.getElementById('animeList');
-  if(!list.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">Anime မရှိသေးပါ</p>';return}
-  el.innerHTML=list.map(a=>`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
-      <img src="${a.image||''}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px;text-align:center">မတွေ့ပါ ✓ (filter ပြောင်းကြည့်ပါ)</p>';
+    return;
+  }
+  el.innerHTML=list.map(a=>{
+    // Missing badges
+    const missing = [];
+    if (!a.lcId)                                missing.push(`<span class="missing-badge" style="background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2)">⚠️ No LC</span>`);
+    if (!a.image||!a.image.trim())              missing.push(`<span class="missing-badge" style="background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)">📷 No Image</span>`);
+    if (!a.review||!a.review.trim())            missing.push(`<span class="missing-badge" style="background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2)">📝 No Review</span>`);
+    if (!a.genres||!a.genres.length)            missing.push(`<span class="missing-badge" style="background:rgba(168,85,247,.08);color:#c084fc;border:1px solid rgba(168,85,247,.2)">🏷️ No Genre</span>`);
+
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px">
+      <img src="${a.image||''}" style="width:40px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)" onerror="this.style.display='none'">
       <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+          <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</span>
+          ${missing.join('')}
+        </div>
         <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
           <span class="pill">${a.year}</span>
           <span style="font-size:11px;color:var(--muted)">${a.id}</span>
@@ -824,13 +1042,12 @@ function renderList(list){
         <button class="btn btn-gray" style="padding:7px 12px;font-size:12px" onclick="openEdit('${a.id}')">✏️ ပြင်</button>
         <button class="btn btn-red"  style="padding:7px 12px;font-size:12px" onclick="deleteAnime('${a.id}','${a.title.replace(/'/g,"\\'")}')">🗑️ ဖျက်</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function filterList(){
-  const q=document.getElementById('searchAdmin').value.toLowerCase();
-  renderList(allAnimes.filter(a=>a.title.toLowerCase().includes(q)||a.year.includes(q)||(a.genres||[]).some(g=>g.toLowerCase().includes(q))||(a.status||'').toLowerCase().includes(q)||(a.lcId||'').includes(q)));
-}
+// filterList now delegates to applyAdminFilter
+function filterList() { applyAdminFilter(); }
 
 function showTab(t){
   ['list','add','migrate','settings'].forEach(n=>{
