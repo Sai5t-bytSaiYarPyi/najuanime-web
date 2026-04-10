@@ -383,6 +383,20 @@ textarea{resize:vertical;min-height:80px}
             4. Broadcast ပြီးရင် EP+1, အချိန်သစ် ပြန်ထည့်ပေးပါ
           </div>
         </div>
+        <!-- Settings tab ထဲ၊ Manual EP Guide div အောက်မှာ ထည့် -->
+<div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
+  <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">
+    🔄 Manual Cron Test
+  </h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.7">
+    EP Auto-increment ကို လက်နဲ့ ခေါ်ကြည့်နိုင်သည်။<br>
+    Broadcast ပြီးသော Anime ရှိရင် EP+1, Date+7 days ဖြစ်သွားမည်။
+  </p>
+  <button class="btn btn-green" onclick="testCron()">
+    ▶ Cron ခေါ်ကြည့်မည်
+  </button>
+  <p id="cronMsg" style="font-size:13px;margin-top:10px;display:none"></p>
+</div>
       </div>
     </div>
 
@@ -909,6 +923,33 @@ function showMsg(id,txt,type){const el=document.getElementById(id);if(!el)return
 
 document.getElementById('tokenInput').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 updateGhTokenUI();
+
+async function testCron() {
+  const msg = document.getElementById('cronMsg');
+  msg.style.display = 'block';
+  msg.style.color = '#60a5fa';
+  msg.textContent = '⏳ Running...';
+  try {
+    const r = await fetch(WORKER_URL + '/admin/cron/ep-increment', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN }
+    });
+    const d = await r.json();
+    if (d.success) {
+      msg.style.color = '#4ade80';
+      msg.textContent = d.changed
+        ? '✓ EP တိုးပြီးပါပြီ! Anime list ကို refresh ကြည့်ပါ။'
+        : '✓ Run ပြီး — ယခု broadcast ပြီးသော Anime မရှိပါ။';
+      if (d.changed) loadAnimes();
+    } else {
+      msg.style.color = '#f87171';
+      msg.textContent = '❌ ' + (d.error || 'Error');
+    }
+  } catch(e) {
+    msg.style.color = '#f87171';
+    msg.textContent = '❌ ' + e.message;
+  }
+}
 </script>
 </body>
 </html>
