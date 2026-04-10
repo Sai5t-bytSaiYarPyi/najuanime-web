@@ -454,11 +454,18 @@ function applyFilters() {
   }
 
   // 🔜 Soon sort — nextAiringAt ရှိတာပဲ ပြ၊ countdown အနည်းဆုံးကနေ စီ
-  if (sortMode==='soon') {
-    list = [...list]
-      .filter(a => a.nextAiringAt)
-      .sort((a, b) => new Date(a.nextAiringAt) - new Date(b.nextAiringAt));
-  }
+if (sortMode === 'soon') {
+  list = [...list]
+    .filter(a => a.nextAiringAt || (a.broadcastDay && a.broadcastTime))
+    .map(a => {
+      // nextAiringAt ရှိရင် အဲ့ကိုသုံး၊ မရှိရင် broadcastDay/Time ကနေ တွက်
+      let t = a.nextAiringAt
+        ? new Date(a.nextAiringAt).getTime()
+        : (calcNextBroadcast(a.broadcastDay, a.broadcastTime)?.getTime() || Infinity);
+      return { ...a, _sortTime: t };
+    })
+    .sort((a, b) => a._sortTime - b._sortTime);
+}
 
   displayAnimes(list);
 }
