@@ -73,6 +73,10 @@
     .genre-chip.popular{color:#f59e0b;border-color:rgba(245,158,11,.25);background:var(--bg3)}
     .genre-chip.popular:hover{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07)}
     .genre-chip.popular.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.45);color:#fbbf24}
+    /* ══ Soon chip ══ */
+    .genre-chip.soon{color:#34d399;border-color:rgba(52,211,153,.25);background:var(--bg3)}
+    .genre-chip.soon:hover{border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.07)}
+    .genre-chip.soon.active{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.45);color:#34d399}
     .genre-chip.all{color:#94a3b8}
     .genre-chip.all.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#60a5fa}
 
@@ -259,21 +263,6 @@ const fmtN = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'K' : Strin
 
 // ══ COUNTDOWN ENGINE ══════════════════════════════════
 
-/*
-  cdTargets Map stores per-anime countdown state:
-  {
-    nextDate : Date,       — next broadcast time
-    epNum    : number|null — current EP number (null = unknown)
-    total    : string      — total episodes (from anime.episodes)
-    lbl      : string      — label shown e.g. "EP 3 / 12"
-    mode     : 'manual'|'schedule'
-                 manual   = nextAiringAt set in KV (admin ထည့်ထားတာ)
-                 schedule = broadcastDay/Time ကနေ တွက်ထားတာ
-  }
-
-  mode='schedule' အတွက် countdown ကုန်ပြီး 5 မိနစ်ကျော်ရင်
-  client-side မှာ epNum++ နဲ့ nextDate += 7days auto လုပ်တယ်
-*/
 const cdTargets = new Map();
 
 function fmtCountdown(ms) {
@@ -300,7 +289,6 @@ function localTimeLabel(date) {
   return `${days[date.getDay()]} ${hhmm} (${tzShort})`;
 }
 
-// ── broadcastDay/Time (JST) → next UTC Date ────────────
 const DAY_NUM = { Sundays:0,Mondays:1,Tuesdays:2,Wednesdays:3,Thursdays:4,Fridays:5,Saturdays:6 };
 
 function calcNextBroadcast(broadcastDay, broadcastTime) {
@@ -319,7 +307,6 @@ function calcNextBroadcast(broadcastDay, broadcastTime) {
   return c;
 }
 
-// ── Shared HTML builder ────────────────────────────────
 function makeCountdownHtml(id, lbl, ms, nextDate) {
   return `<div class="countdown-wrap" id="cd-${id}">
     <div class="cd-badge">
@@ -333,49 +320,29 @@ function makeCountdownHtml(id, lbl, ms, nextDate) {
   </div>`;
 }
 
-// ── Main countdown HTML builder ────────────────────────
 function buildCountdownHtml(anime) {
-
-  // ═══════════════════════════════════════════════════════
-  // Priority 1 — Manual: nextEpNumber + nextAiringAt (KV)
-  //   Admin မှာ EP number နဲ့ time နှစ်ခုလုံး ကိုယ်တိုင်ထည့်ထားတာ
-  // ═══════════════════════════════════════════════════════
   if (anime.nextAiringAt && anime.nextEpNumber != null) {
     const nextDate = new Date(anime.nextAiringAt);
     if (!isNaN(nextDate) && nextDate > new Date(Date.now() - 7_200_000)) {
       const epNum = anime.nextEpNumber;
       const total = anime.episodes;
       const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
-      cdTargets.set(anime.id, {
-        nextDate, epNum, total, lbl,
-        mode: 'manual',  // ← manual mode: auto-increment မလုပ်
-      });
+      cdTargets.set(anime.id, { nextDate, epNum, total, lbl, mode: 'manual' });
       return makeCountdownHtml(anime.id, lbl, nextDate.getTime() - Date.now(), nextDate);
     }
   }
 
-  // ═══════════════════════════════════════════════════════
-  // Priority 2 — Schedule + EP: nextEpNumber + broadcastDay/Time
-  //   Admin မှာ EP number ပဲထည့်၊ Time ကို Jikan schedule ကနေ တွက်
-  //   Broadcast ကုန်ရင် client-side မှာ EP auto +1, next week auto
-  // ═══════════════════════════════════════════════════════
   if (anime.nextEpNumber != null && anime.broadcastDay && anime.broadcastTime) {
     const nextDate = calcNextBroadcast(anime.broadcastDay, anime.broadcastTime);
     if (nextDate) {
       const epNum = anime.nextEpNumber;
       const total = anime.episodes;
       const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
-      cdTargets.set(anime.id, {
-        nextDate, epNum, total, lbl,
-        mode: 'schedule',  // ← schedule mode: auto-increment ON
-      });
+      cdTargets.set(anime.id, { nextDate, epNum, total, lbl, mode: 'schedule' });
       return makeCountdownHtml(anime.id, lbl, nextDate.getTime() - Date.now(), nextDate);
     }
   }
 
-  // ═══════════════════════════════════════════════════════
-  // Priority 3 — Status: Finished / Ended
-  // ═══════════════════════════════════════════════════════
   const status = (anime.status || '').toLowerCase();
   if (status.includes('finished') || status.includes('ended') || status.includes('complete')) {
     const epTxt = anime.episodes ? `EP ${anime.episodes}` : '';
@@ -386,17 +353,10 @@ function buildCountdownHtml(anime) {
     </div>`;
   }
 
-  // ═══════════════════════════════════════════════════════
-  // Priority 4 — Schedule only: broadcastDay/Time (EP number မပြ)
-  //   nextEpNumber မထည့်ထားရင် "NEXT EP" ပဲပြ
-  // ═══════════════════════════════════════════════════════
   if (anime.broadcastDay && anime.broadcastTime) {
     const nextDate = calcNextBroadcast(anime.broadcastDay, anime.broadcastTime);
     if (nextDate) {
-      cdTargets.set(anime.id, {
-        nextDate, epNum: null, total: anime.episodes, lbl: 'NEXT EP',
-        mode: 'schedule',
-      });
+      cdTargets.set(anime.id, { nextDate, epNum: null, total: anime.episodes, lbl: 'NEXT EP', mode: 'schedule' });
       return makeCountdownHtml(anime.id, 'NEXT EP', nextDate.getTime() - Date.now(), nextDate);
     }
   }
@@ -404,60 +364,32 @@ function buildCountdownHtml(anime) {
   return '';
 }
 
-// ── Countdown tick (1s) ────────────────────────────────
 function startCountdownTick() {
   setInterval(() => {
     const now = Date.now();
-
     cdTargets.forEach((info, id) => {
       const el = document.getElementById(`cd-${id}`);
       if (!el) { cdTargets.delete(id); return; }
-
       let ms = info.nextDate.getTime() - now;
-
-      // ════════════════════════════════════════════════
-      // AUTO-INCREMENT (schedule mode only)
-      //   Broadcast ကုန်ပြီး 5 မိနစ်ကျော်ရင်:
-      //     epNum += 1
-      //     nextDate += 7 ရက် (next week)
-      //   Manual mode မှာတော့ auto မလုပ် (admin ကိုယ်တိုင်ပြင်)
-      // ════════════════════════════════════════════════
       if (ms < -300_000 && info.mode === 'schedule') {
         const newNextDate = new Date(info.nextDate.getTime() + 7 * 24 * 3600 * 1000);
         const newEpNum    = info.epNum != null ? info.epNum + 1 : null;
         const newLbl      = newEpNum != null
           ? (info.total ? `EP ${newEpNum} / ${info.total}` : `EP ${newEpNum}`)
           : 'NEXT EP';
-
         const newInfo = { ...info, nextDate: newNextDate, epNum: newEpNum, lbl: newLbl };
         cdTargets.set(id, newInfo);
-
-        // DOM update
         const epLabelEl = el.querySelector('.cd-ep-label');
         if (epLabelEl) epLabelEl.textContent = newLbl;
-
         ms = newNextDate.getTime() - now;
         Object.assign(info, newInfo);
       }
-
-      // manual mode에서 2시간 지나면 삭제
-      if (ms < -7_200_000 && info.mode === 'manual') {
-        cdTargets.delete(id);
-        return;
-      }
-
-      // Timer + day label update
+      if (ms < -7_200_000 && info.mode === 'manual') { cdTargets.delete(id); return; }
       const timerEl    = el.querySelector('.cd-timer');
       const dayLabelEl = el.querySelector('.cd-day-label');
       const cur        = cdTargets.get(id) || info;
-
-      if (timerEl) {
-        timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE';
-        timerEl.className   = cdClass(ms);
-      }
-      if (dayLabelEl && ms > 0) {
-        dayLabelEl.textContent = localTimeLabel(cur.nextDate);
-      }
+      if (timerEl) { timerEl.textContent = ms > 0 ? fmtCountdown(ms) : 'LIVE'; timerEl.className = cdClass(ms); }
+      if (dayLabelEl && ms > 0) dayLabelEl.textContent = localTimeLabel(cur.nextDate);
     });
   }, 1000);
 }
@@ -470,11 +402,19 @@ function buildGenreBar(animes) {
   const bar = document.getElementById('genreBar');
   bar.innerHTML = '';
 
+  // 🏆 Popular
   const pop = document.createElement('button');
   pop.className='genre-chip popular'+(sortMode==='popular'?' active':'');
   pop.dataset.mode='popular'; pop.textContent='🏆 Popular';
   pop.onclick=()=>setSortMode('popular'); bar.appendChild(pop);
 
+  // 🔜 မကြာမီထွက် ← အသစ်
+  const soon = document.createElement('button');
+  soon.className='genre-chip soon'+(sortMode==='soon'?' active':'');
+  soon.dataset.mode='soon'; soon.textContent='🔜 မကြာမီထွက်';
+  soon.onclick=()=>setSortMode('soon'); bar.appendChild(soon);
+
+  // 🎬 အားလုံး
   const all = document.createElement('button');
   all.className='genre-chip all'+(activeGenre==='all'&&sortMode==='default'?' active':'');
   all.dataset.genre='all'; all.textContent='🎬 အားလုံး';
@@ -488,7 +428,12 @@ function buildGenreBar(animes) {
   });
 }
 
-function setSortMode(m)    { sortMode=m; if(m==='popular')activeGenre='all'; updateChipStates(); applyFilters(); }
+function setSortMode(m) {
+  sortMode = m;
+  if (m === 'popular' || m === 'soon') activeGenre = 'all';
+  updateChipStates();
+  applyFilters();
+}
 function filterGenre(g)    { sortMode='default'; activeGenre=g; updateChipStates(); applyFilters(); }
 function updateChipStates(){
   document.querySelectorAll('[data-genre]').forEach(el=>el.classList.toggle('active',sortMode==='default'&&el.dataset.genre===activeGenre));
@@ -502,7 +447,19 @@ function applyFilters() {
     a.year.includes(searchTerm)||
     (a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm))
   );
-  if (sortMode==='popular') list=[...list].sort((a,b)=>(reviewsMeta.get(b.id)?.count||0)-(reviewsMeta.get(a.id)?.count||0));
+
+  // 🏆 Popular sort
+  if (sortMode==='popular') {
+    list=[...list].sort((a,b)=>(reviewsMeta.get(b.id)?.count||0)-(reviewsMeta.get(a.id)?.count||0));
+  }
+
+  // 🔜 Soon sort — nextAiringAt ရှိတာပဲ ပြ၊ countdown အနည်းဆုံးကနေ စီ
+  if (sortMode==='soon') {
+    list = [...list]
+      .filter(a => a.nextAiringAt)
+      .sort((a, b) => new Date(a.nextAiringAt) - new Date(b.nextAiringAt));
+  }
+
   displayAnimes(list);
 }
 
