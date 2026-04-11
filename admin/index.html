@@ -700,21 +700,40 @@ function saveGhToken(){const t=document.getElementById('ghTokenInput').value.tri
 function saveGhTokenFromSettings(){const t=document.getElementById('ghTokenSetting').value.trim();if(!t)return;localStorage.setItem('naju_gh_token',t);updateGhTokenUI();const el=document.getElementById('settingsTokenStatus');el.style.display='block';el.style.background='rgba(74,222,128,.08)';el.style.border='1px solid rgba(74,222,128,.2)';el.style.color='#4ade80';el.textContent='✓ Token သိမ်းပြီးပါပြီ';setTimeout(()=>el.style.display='none',3000)}
 function clearGhToken(){localStorage.removeItem('naju_gh_token');document.getElementById('ghTokenSetting').value='';updateGhTokenUI();const el=document.getElementById('settingsTokenStatus');el.style.display='block';el.style.background='rgba(248,113,113,.08)';el.style.border='1px solid rgba(248,113,113,.2)';el.style.color='#f87171';el.textContent='Token ဖျက်ပြီးပါပြီ';setTimeout(()=>el.style.display='none',3000)}
 function updateGhTokenUI(){const has=!!getGhToken();const ls=document.getElementById('ghTokenStatus');if(ls){ls.textContent=has?'✓ Token ရှိပြီ':'Token မရှိ';ls.className='token-status '+(has?'token-ok':'token-missing')}const hs=document.getElementById('ghStatusHeader');if(hs){hs.textContent=has?'📸 GitHub ✓':'📸 Token မရှိ';hs.className='token-status '+(has?'token-ok':'token-missing')}const si=document.getElementById('ghTokenSetting');if(si&&has)si.value='••••••••••••••••'}
-async function uploadToGitHub(file,ctx){
-  const ghToken=getGhToken(); if(!ghToken){showUploadMsg(ctx,'❌ GitHub Token မရှိ','error');return null;}
-  const filePath=`${GH_FOLDER}/${file.name}`, apiUrl=`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${filePath}`;
-  setUploadProgress(ctx,true,0); showUploadMsg(ctx,'⏳ GitHub သို့ upload...','info');
-  const base64=await fileToBase64(file); setUploadProgress(ctx,true,30);
-  let sha=null; try{const cr=await fetch(apiUrl,{headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json'}});if(cr.ok){const cd=await cr.json();sha=cd.sha;}}catch{}
-  setUploadProgress(ctx,true,50);
-  const body={message:`Upload image: ${file.name}`,content:base64,branch:GH_BRANCH}; if(sha)body.sha=sha;
-  try{
-    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':`Bearer ${ghToken}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-    setUploadProgress(ctx,true,90); if(!res.ok){const err=await res.json();throw new Error(err.message||'Upload failed');}
-    setUploadProgress(ctx,true,100); setTimeout(()=>setUploadProgress(ctx,false,0),1000);
-    const imagePath=`./images/${file.name}`; showUploadMsg(ctx,`✓ Upload ပြီး — ${file.name}`,'success'); return imagePath;
-  }catch(err){setUploadProgress(ctx,false,0);showUploadMsg(ctx,`❌ ${err.message}`,'error');return null;}
+
+async function uploadToR2(file, ctx) {
+  showUploadMsg(ctx, '⏳ R2 သို့ upload...', 'info');
+  setUploadProgress(ctx, true, 20);
+
+  try {
+    const filename  = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const formData  = new FormData();
+    formData.append('file', file);
+    formData.append('filename', filename);
+
+    setUploadProgress(ctx, true, 50);
+
+    const res = await fetch(WORKER_URL + '/admin/upload', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN },
+      body:    formData,
+    });
+
+    setUploadProgress(ctx, true, 90);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Upload failed');
+
+    setUploadProgress(ctx, true, 100);
+    setTimeout(() => setUploadProgress(ctx, false, 0), 800);
+    showUploadMsg(ctx, `✓ Upload ပြီး — ${filename}`, 'success');
+    return data.url;   // https://pub-xxx.r2.dev/filename.jpg
+  } catch (err) {
+    setUploadProgress(ctx, false, 0);
+    showUploadMsg(ctx, `❌ ${err.message}`, 'error');
+    return null;
+  }
 }
+
 function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file)})}
 function setUploadProgress(ctx,show,pct){const bar=document.getElementById(`${ctx}UploadProgressBar`),p=document.getElementById(`${ctx}UploadProgress`);if(!bar||!p)return;p.style.display=show?'block':'none';bar.style.width=pct+'%'}
 function showUploadMsg(ctx,txt,type){const el=document.getElementById(`${ctx}UploadMsg`);if(!el)return;el.textContent=txt;el.style.color=type==='success'?'#4ade80':type==='error'?'#f87171':'#60a5fa';el.style.display=txt?'block':'none'}
