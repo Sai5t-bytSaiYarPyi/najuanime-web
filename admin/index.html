@@ -742,7 +742,7 @@ function handleDrag(e,zoneId){e.preventDefault();document.getElementById(zoneId)
 function handleDragLeave(zoneId){document.getElementById(zoneId)?.classList.remove('drag')}
 function handleDrop(e,ctx){e.preventDefault();document.getElementById(`${ctx}UploadZone`)?.classList.remove('drag');const f=e.dataTransfer?.files[0];if(!f||!f.type.startsWith('image/'))return;previewImage(f,ctx);handleAutoUpload(f,ctx)}
 function previewImage(file,ctx){const pr=document.getElementById(`${ctx}ImagePreview`),pl=document.getElementById(`${ctx}UploadPlaceholder`),r=new FileReader();r.onload=e=>{if(pr){pr.src=e.target.result;pr.style.display='block'}if(pl)pl.style.display='none'};r.readAsDataURL(file)}
-async function handleAutoUpload(file,ctx){const path=await uploadToGitHub(file,ctx);if(path){const id=ctx==='add'?'addImage':'editImage';const inp=document.getElementById(id);if(inp)inp.value=path}}
+async function handleAutoUpload(file,ctx){const path=await uploadToR2(file,ctx);if(path){const id=ctx==='add'?'addImage':'editImage';const inp=document.getElementById(id);if(inp)inp.value=path}}
 
 // ══ Auth ════════════════════════════════════════════════
 function login(){const t=document.getElementById('tokenInput').value.trim();if(!t)return;TOKEN=t;testLogin()}
