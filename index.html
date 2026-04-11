@@ -371,6 +371,8 @@ function startCountdownTick() {
       const el = document.getElementById(`cd-${id}`);
       if (!el) { cdTargets.delete(id); return; }
       let ms = info.nextDate.getTime() - now;
+
+      // ── schedule mode: broadcast ပြီး 5 မိနစ်မှ EP+1, +7 days ──
       if (ms < -300_000 && info.mode === 'schedule') {
         const newNextDate = new Date(info.nextDate.getTime() + 7 * 24 * 3600 * 1000);
         const newEpNum    = info.epNum != null ? info.epNum + 1 : null;
@@ -384,7 +386,22 @@ function startCountdownTick() {
         ms = newNextDate.getTime() - now;
         Object.assign(info, newInfo);
       }
-      if (ms < -7_200_000 && info.mode === 'manual') { cdTargets.delete(id); return; }
+
+      // ── manual mode: broadcast ပြီး 5 မိနစ်မှ EP+1, +7 days ──
+      if (ms < -300_000 && info.mode === 'manual') {
+        const newNextDate = new Date(info.nextDate.getTime() + 7 * 24 * 3600 * 1000);
+        const newEpNum    = info.epNum != null ? info.epNum + 1 : null;
+        const newLbl      = newEpNum != null
+          ? (info.total ? `EP ${newEpNum} / ${info.total}` : `EP ${newEpNum}`)
+          : 'NEXT EP';
+        const newInfo = { ...info, nextDate: newNextDate, epNum: newEpNum, lbl: newLbl };
+        cdTargets.set(id, newInfo);
+        const epLabelEl = el.querySelector('.cd-ep-label');
+        if (epLabelEl) epLabelEl.textContent = newLbl;
+        ms = newNextDate.getTime() - now;
+        Object.assign(info, newInfo);
+      }
+
       const timerEl    = el.querySelector('.cd-timer');
       const dayLabelEl = el.querySelector('.cd-day-label');
       const cur        = cdTargets.get(id) || info;
