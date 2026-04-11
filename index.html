@@ -332,10 +332,18 @@ function buildCountdownHtml(anime) {
     }
   }
 
-  if (anime.nextEpNumber != null && anime.broadcastDay && anime.broadcastTime) {
+if (anime.nextEpNumber != null && anime.broadcastDay && anime.broadcastTime) {
     const nextDate = calcNextBroadcast(anime.broadcastDay, anime.broadcastTime);
     if (nextDate) {
-      const epNum = anime.nextEpNumber;
+      // nextAiringAt က 2 နာရီကျော် ကြာပြီဆိုရင် EP တစ်ပိုင်း ထွက်ပြီးသား
+      // ဆိုတော့ +1 တိုးပြီး next ep ကိုပြပေးရမည်
+      let epNum = anime.nextEpNumber;
+      if (anime.nextAiringAt) {
+        const storedMs = new Date(anime.nextAiringAt).getTime();
+        if (Date.now() > storedMs + 2 * 3600 * 1000) {
+          epNum = epNum + 1;
+        }
+      }
       const total = anime.episodes;
       const lbl   = total ? `EP ${epNum} / ${total}` : `EP ${epNum}`;
       cdTargets.set(anime.id, { nextDate, epNum, total, lbl, mode: 'schedule' });
