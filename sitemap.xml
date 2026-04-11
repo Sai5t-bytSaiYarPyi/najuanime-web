@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- ပင်မစာမျက်နှာ -->
+  <url>
+    <loc>https://www.najuanime.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- AI Chat -->
+  <url>
+    <loc>https://www.najuanime.com/chat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Review page (dynamic ဆိုတော့ main page ပဲ ထည့်) -->
+  <url>
+    <loc>https://www.najuanime.com/review/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
