@@ -551,7 +551,7 @@ function displayAnimes(animes) {
 // ══ Search ═════════════════════════════════════════════
 function setupSearch() {
   function handle(e) {
-    searchTerm = e.target.value.toLowerCase();
+    searchTerm = e.target.value.toLowerCase().trim().replace(/\s+/g, ' ');
     const sD = document.getElementById('searchInputDesktop');
     const sM = document.getElementById('searchInputMobile');
     if (sD && e.target!==sD) sD.value = e.target.value;
