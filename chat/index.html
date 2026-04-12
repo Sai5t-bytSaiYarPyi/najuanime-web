@@ -209,7 +209,19 @@ function linkify(text) {
 function formatAI(text) {
   return linkify(
     escHtml(text)
+      // ### Header
+      .replace(/^###\s+(.+)$/gm, '<strong style="color:#60a5fa;font-size:14px">$1</strong>')
+      // ## Header  
+      .replace(/^##\s+(.+)$/gm, '<strong style="font-size:15px">$1</strong>')
+      // **bold**
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // * bullet point
+      .replace(/^\*\s+(.+)$/gm, '• $1')
+      // numbered list: 1. 2. 3.
+      .replace(/^(\d+)\.\s+(.+)$/gm, '<strong style="color:#c084fc">$1.</strong> $2')
+      // --- divider
+      .replace(/^---$/gm, '<hr style="border-color:rgba(255,255,255,.08);margin:8px 0">')
+      // newline
       .replace(/\n/g, '<br>')
   );
 }
