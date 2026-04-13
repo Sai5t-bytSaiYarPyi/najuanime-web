@@ -193,8 +193,14 @@
   </div>
 
   <div style="margin-bottom:14px">
+  <input id="rName" class="form-input" 
+    placeholder="နာမည် (ထည့်ချင်ထည့်မထည့်ချင်နေ)" 
+    maxlength="40">
+  </div>
+
+  <div style="margin-bottom:14px">
     <textarea id="rText" class="form-textarea" style="min-height:70px"
-      placeholder="တိုတိုလေး ရေးချင်ရင်... (မဖြစ်မနေမဟုတ်)"></textarea>
+      placeholder="တိုတိုလေး ရေးချင်ရင်... (ထည့်ချင်ထည့်မထည့်ချင်နေ)"></textarea>
   </div>
 
   <button id="submitBtn" class="submit-btn" onclick="submitRating()">
@@ -203,6 +209,8 @@
     </svg>
     Rating ပေးမည်
   </button>
+
+
 </div>
 
   <!-- Reviews list -->
@@ -438,16 +446,23 @@ async function submitRating() {
   if (!selRating) { showToast('⚠️ Star နှိပ်ပြီး Rating ပေးပါ!', false); return; }
   const btn  = document.getElementById('submitBtn');
   const text = document.getElementById('rText').value.trim();
+  
+  // ══ ဒီကြောင်း အသစ်ထည့် ══
+  const name = document.getElementById('rName').value.trim();
+  
   btn.disabled = true;
   btn.innerHTML = '<span class="sm-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"></span> ပေးပို့နေသည်...';
   try {
     const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(currentAnimeId)}`,
       { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating: selRating, text }) });
+        // ══ body ကို ဒီအတိုင်း အစားထိုး ══
+        body: JSON.stringify({ rating: selRating, text, name }) });
     const d = await r.json();
     if (!d.success) throw new Error(d.error || 'Error');
     showToast('✓ Rating ပေးပြီးပါပြီ! ကျေးဇူးပဲ 🙏');
     document.getElementById('rText').value = '';
+    // ══ ဒီကြောင်း အသစ်ထည့် ══
+    document.getElementById('rName').value = '';
     selRating = 0; hlStars(0);
     document.getElementById('rLabel').textContent = '';
     loadReviews(true);
