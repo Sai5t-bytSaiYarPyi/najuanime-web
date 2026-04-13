@@ -227,6 +227,10 @@ textarea{resize:vertical;min-height:80px}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div><label class="label">ID (English, no space)</label><input type="text" id="addId" placeholder="SnowballEarth"></div>
           <div><label class="label">Year</label><input type="text" id="addYear" placeholder="2026"></div>
+          <div style="grid-column:span 2">
+            <label class="label">Japanese / Alt Title (ရှာဖွေရေး)</label>
+            <input type="text" id="addTitleJP" placeholder="Kuroneko to Majo no Kyoushitsu">
+          </div>
           <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="addTitle" placeholder="Snowball Earth"></div>
 
           <div style="grid-column:span 2">
@@ -430,6 +434,10 @@ textarea{resize:vertical;min-height:80px}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div><label class="label">ID</label><input type="text" id="editId" disabled style="opacity:.5"></div>
         <div><label class="label">Year</label><input type="text" id="editYear"></div>
+        <div style="grid-column:span 2">
+          <label class="label">Japanese / Alt Title (ရှာဖွေရေး)</label>
+          <input type="text" id="editTitleJP" placeholder="Kuroneko to Majo no Kyoushitsu">
+        </div>
         <div style="grid-column:span 2"><label class="label">Title</label><input type="text" id="editTitle"></div>
 
         <div style="grid-column:span 2">
@@ -836,6 +844,7 @@ async function addAnime(){
     season:   document.getElementById('addSeason').value.trim(),
     nextEpNumber: nextEpRaw ? Number(nextEpRaw) : null,
     nextAiringAt: nextAiringRaw ? new Date(nextAiringRaw).toISOString() : null,
+    titleJP: document.getElementById('addTitleJP').value.trim(),
   })});
   const d=await r.json();
   if(d.success){showMsg('addMsg','✓ ထည့်ပြီးပါပြီ','success');clearAdd();loadAnimes();showTab('list')}
@@ -843,7 +852,7 @@ async function addAnime(){
 }
 
 function clearAdd(){
-  ['addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore','addFetchTitle',
+  ['addTitleJP','addId','addTitle','addYear','addImage','addLink','addReview','addEpisodes','addScore','addFetchTitle',
    'addBroadcastDay','addBroadcastTime','addStatus','addSeason','addNextEpNumber','addNextAiringAt'].forEach(id=>{
     const el=document.getElementById(id); if(el)el.value='';
   });
@@ -860,6 +869,7 @@ function openEdit(id){
   editingId=id;
   document.getElementById('editId').value             = a.id;
   document.getElementById('editTitle').value          = a.title;
+  document.getElementById('editTitleJP').value        = a.titleJP || '';
   document.getElementById('editYear').value           = a.year;
   document.getElementById('editImage').value          = a.image||'';
   document.getElementById('editLink').value           = a.link||'';
@@ -901,6 +911,7 @@ async function saveEdit(){
   const nextEpRaw    = document.getElementById('editNextEpNumber').value.trim();
   const nextAiringRaw = document.getElementById('editNextAiringAt').value;
   const r=await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(editingId)}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({
+    titleJP:       document.getElementById('editTitleJP').value.trim(),
     title:         document.getElementById('editTitle').value,
     year:          document.getElementById('editYear').value,
     image:         document.getElementById('editImage').value,
