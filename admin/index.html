@@ -178,6 +178,8 @@ textarea{resize:vertical;min-height:80px}
     <div id="tabListContent">
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="text" id="searchAdmin" placeholder="🔍 ရှာရန်..." oninput="filterList()" style="max-width:280px;flex:1">
+        <button class="btn btn-yellow" onclick="exportPythonList()">🐍 Python List ထုတ်</button>
+        <p id="listCopyMsg" style="font-size:13px;margin-top:8px;display:none"></p>
       </div>
 
       <div class="stats-bar" id="statsBar" style="display:none">
@@ -1011,6 +1013,50 @@ async function testCron() {
     msg.style.color = '#f87171';
     msg.textContent = '❌ ' + e.message;
   }
+}
+
+function exportPythonList() {
+  if (!allAnimes.length) { alert('Anime list load မရသေးပါ'); return; }
+
+  const lines = allAnimes.map(a => `  "${a.title.replace(/"/g, '\\"')}",`).join('\n');
+  const output = `en_names = [\n${lines}\n]`;
+
+  // Clipboard ကို copy
+  navigator.clipboard.writeText(output).then(() => {
+    showMsg('listCopyMsg', '✓ Clipboard မှာ copy ပြီးပါပြီ', 'success');
+  }).catch(() => {
+    // Fallback — textarea ပြပြီး manual copy
+    showExportModal(output);
+  });
+}
+
+function showExportModal(text) {
+  let modal = document.getElementById('exportModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'exportModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+    modal.innerHTML = `
+      <div class="card" style="max-width:600px;width:100%">
+        <div style="display:flex;align-items:center;margin-bottom:12px">
+          <span style="font-size:14px;font-weight:700;color:#fbbf24;flex:1">🐍 Python List</span>
+          <button class="btn btn-gray" onclick="document.getElementById('exportModal').style.display='none'" style="padding:5px 10px">✕</button>
+        </div>
+        <textarea id="exportText" style="min-height:300px;font-size:12px;font-family:monospace;width:100%;background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:12px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-yellow" style="flex:1;justify-content:center" onclick="
+            document.getElementById('exportText').select();
+            document.execCommand('copy');
+            this.textContent='✓ Copied!';
+            setTimeout(()=>this.textContent='📋 Copy',1500)
+          ">📋 Copy</button>
+          <button class="btn btn-gray" onclick="document.getElementById('exportModal').style.display='none'">ပိတ်မည်</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('exportText').value = text;
+  modal.style.display = 'flex';
 }
 </script>
 </body>
