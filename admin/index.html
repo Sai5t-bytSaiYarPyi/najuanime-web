@@ -318,6 +318,43 @@ textarea{resize:vertical;min-height:80px}
         </button>
         <p id="migrateMsg" style="font-size:13px;margin-top:10px;display:none"></p>
       </div>
+
+      <!-- ══ BULK ROMAJI IMPORT ══ -->
+<div class="card" style="max-width:700px;margin-bottom:20px">
+  <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:8px">🔤 Bulk Romaji Import</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+    Anime ID နဲ့ Romaji တွေကို JSON format နဲ့ paste လုပ်ပြီး တစ်ကြိမ်တည်း update လုပ်နိုင်သည်။
+  </p>
+
+  <label class="label">Format: <code style="background:var(--bg3);padding:2px 7px;border-radius:5px">{"AnimeID": "Romaji Title", ...}</code></label>
+  <textarea id="romajiJson" style="min-height:160px;font-size:12px;font-family:monospace"
+    placeholder='{
+  "TheClassroomofaBlackCatandaWitch": "Kuroneko to Majo no Kyoushitsu",
+  "SnowballEarth": "Yukibana no Tesla"
+}'></textarea>
+
+  <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-purple" onclick="bulkImportRomaji()" id="romajiImportBtn">
+      <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+      </svg>
+      Romaji Import မည်
+    </button>
+    <button class="btn btn-gray" onclick="generateRomajiTemplate()">📋 ID List ကူးယူ</button>
+    <span id="romajiImportMsg" style="font-size:13px;display:none"></span>
+  </div>
+
+  <div id="romajiProgressWrap" style="display:none;margin-top:12px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:12px;color:#60a5fa;font-weight:600" id="romajiProgressLabel">Updating...</span>
+      <span style="font-size:12px;color:var(--muted)" id="romajiProgressPct">0%</span>
+    </div>
+    <div class="bulk-progress-bar-bg">
+      <div class="bulk-progress-bar-fill" id="romajiProgressFill"></div>
+    </div>
+    <div id="romajiResultList" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto"></div>
+  </div>
+</div>
     </div>
 
     <!-- ══ JP MATCHER TAB ══ -->
@@ -1085,6 +1122,95 @@ async function testCron(){
     if(d.success){msg.style.color='#4ade80';msg.textContent=d.changed?'✓ EP တိုးပြီးပါပြီ! Anime list ကို refresh ကြည့်ပါ။':'✓ Run ပြီး — ယခု broadcast ပြီးသော Anime မရှိပါ။';if(d.changed)loadAnimes();}
     else{msg.style.color='#f87171';msg.textContent='❌ '+(d.error||'Error');}
   }catch(e){msg.style.color='#f87171';msg.textContent='❌ '+e.message;}
+}
+
+// ══ Bulk Romaji Import ════════════════════════════════
+async function bulkImportRomaji() {
+  const raw = document.getElementById('romajiJson').value.trim();
+  if (!raw) { showRomajiMsg('JSON ထည့်ပါ', 'error'); return; }
+
+  let map;
+  try { map = JSON.parse(raw); } 
+  catch(e) { showRomajiMsg('❌ JSON format မှားနေသည်: ' + e.message, 'error'); return; }
+
+  const entries = Object.entries(map);
+  if (!entries.length) { showRomajiMsg('❌ Entry မရှိပါ', 'error'); return; }
+  if (!allAnimes.length) { showRomajiMsg('❌ Anime list load မရသေးပါ', 'error'); return; }
+
+  // ID validation
+  const notFound = entries.filter(([id]) => !allAnimes.find(a => a.id === id));
+  if (notFound.length) {
+    const ids = notFound.map(([id]) => id).join(', ');
+    if (!confirm(`ဒီ ID တွေ မတွေ့ပါ:\n${ids}\n\nဆက်လုပ်မည်လား?`)) return;
+  }
+
+  const btn = document.getElementById('romajiImportBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⟳</span> Updating...';
+
+  const pw   = document.getElementById('romajiProgressWrap');
+  const pl   = document.getElementById('romajiProgressLabel');
+  const pp   = document.getElementById('romajiProgressPct');
+  const pf   = document.getElementById('romajiProgressFill');
+  const rl   = document.getElementById('romajiResultList');
+  pw.style.display = 'block';
+  rl.innerHTML = '';
+
+  const toUpdate = entries.filter(([id]) => allAnimes.find(a => a.id === id));
+  let doneOk = 0, doneFail = 0;
+
+  for (let i = 0; i < toUpdate.length; i++) {
+    const [id, romaji] = toUpdate[i];
+    const anime = allAnimes.find(a => a.id === id);
+    const pct   = Math.round(((i + 1) / toUpdate.length) * 100);
+    pl.textContent = `(${i+1}/${toUpdate.length}) ${anime.title}`;
+    pp.textContent = pct + '%';
+    pf.style.width = pct + '%';
+
+    try {
+      const r = await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+        body: JSON.stringify({ ...anime, titleJP: romaji }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        doneOk++;
+        rl.innerHTML += `<div style="font-size:11px;color:#4ade80;padding:3px 8px;background:rgba(74,222,128,.05);border-radius:6px">✅ ${anime.title} → <span style="color:#c084fc">${romaji}</span></div>`;
+      } else {
+        doneFail++;
+        rl.innerHTML += `<div style="font-size:11px;color:#f87171;padding:3px 8px;background:rgba(248,113,113,.05);border-radius:6px">❌ ${id}: ${d.error}</div>`;
+      }
+    } catch(e) {
+      doneFail++;
+      rl.innerHTML += `<div style="font-size:11px;color:#f87171;padding:3px 8px">❌ ${id}: ${e.message}</div>`;
+    }
+    rl.scrollTop = rl.scrollHeight;
+  }
+
+  pl.textContent      = `✓ ပြီးပါပြီ! (✅ ${doneOk} | ❌ ${doneFail})`;
+  pf.style.background = doneFail === 0 ? '#4ade80' : '#fbbf24';
+  btn.disabled  = false;
+  btn.innerHTML = '🔤 Romaji Import မည်';
+  if (doneOk > 0) loadAnimes();
+}
+
+function generateRomajiTemplate() {
+  if (!allAnimes.length) { alert('Anime list load မရသေးပါ'); return; }
+  const obj = {};
+  allAnimes.forEach(a => { obj[a.id] = a.titleJP || ''; });
+  const text = JSON.stringify(obj, null, 2);
+  navigator.clipboard.writeText(text)
+    .then(() => showRomajiMsg('✓ ID List copy ပြီး — ထည့်ချင်တာတွေ ဖြည့်ပြီး paste ပြန်ပါ', 'success'))
+    .catch(() => alert(text));
+}
+
+function showRomajiMsg(txt, type) {
+  const el = document.getElementById('romajiImportMsg');
+  el.textContent = txt;
+  el.style.color  = type === 'success' ? '#4ade80' : '#f87171';
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
 }
 </script>
 </body>
