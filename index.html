@@ -464,14 +464,27 @@ function updateChipStates(){
   document.querySelectorAll('[data-genre]').forEach(el=>el.classList.toggle('active',sortMode==='default'&&el.dataset.genre===activeGenre));
   document.querySelectorAll('[data-mode]').forEach(el=>el.classList.toggle('active',sortMode===el.dataset.mode));
 }
+
+// ဒီ function ကို applyFilters function အပေါ်မှာ ထည့်ပါ
+function normalizeStr(s) {
+  return s.toLowerCase()
+    .replace(/[\s:'"\/.,\\()\-\[\]]+/g, ' ') // special chars → space
+    .trim()
+    .replace(/\s+/g, ' '); // multiple spaces → single
+}
+
 function applyFilters() {
+
   let list = allAnimes;
   if (activeGenre!=='all') list=list.filter(a=>(a.genres||[]).includes(activeGenre));
-  if (searchTerm) list=list.filter(a=>
-    a.title.toLowerCase().includes(searchTerm)||
-    a.year.includes(searchTerm)||
-    (a.genres||[]).some(g=>g.toLowerCase().includes(searchTerm))
+if (searchTerm) {
+  const q = normalizeStr(searchTerm);
+  list = list.filter(a =>
+    normalizeStr(a.title).includes(q) ||
+    a.year.includes(q) ||
+    (a.genres||[]).some(g => normalizeStr(g).includes(q))
   );
+}
 
   // 🏆 Popular sort
   if (sortMode==='popular') {
@@ -551,7 +564,7 @@ function displayAnimes(animes) {
 // ══ Search ═════════════════════════════════════════════
 function setupSearch() {
   function handle(e) {
-    searchTerm = e.target.value.toLowerCase().trim().replace(/\s+/g, ' ');
+    searchTerm = e.target.value; // .trim() .toLowerCase() ဖြုတ်လိုက် — normalizeStr မှာ ပါပြီ
     const sD = document.getElementById('searchInputDesktop');
     const sM = document.getElementById('searchInputMobile');
     if (sD && e.target!==sD) sD.value = e.target.value;
