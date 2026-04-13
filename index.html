@@ -468,9 +468,10 @@ function updateChipStates(){
 // ဒီ function ကို applyFilters function အပေါ်မှာ ထည့်ပါ
 function normalizeStr(s) {
   return s.toLowerCase()
-    .replace(/[\s:'"\/.,\\()\-\[\]]+/g, ' ') // special chars → space
+    .replace(/[\-]+/g, ' ')              // hyphen → space (kaya-chan → kaya chan)
+    .replace(/[^a-z0-9\u1000-\u109f\s]/g, '') // အခြား special chars ဖြုတ်ပစ် (space မဟုတ်)
     .trim()
-    .replace(/\s+/g, ' '); // multiple spaces → single
+    .replace(/\s+/g, ' ');
 }
 
 function applyFilters() {
