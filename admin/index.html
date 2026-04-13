@@ -672,7 +672,19 @@ async function bulkFetchGenres() {
     const anime=allAnimes[i]; const pct=Math.round(((i+1)/total)*100);
     pl.textContent=`(${i+1}/${total}) ${anime.title}`; pp.textContent=pct+'%'; pf.style.width=pct+'%';
     let result=null; try{result=await fetchJikan(anime.title)}catch(e){}
-    if(result&&result.genres?.length){updated.push({...anime,genres:result.genres,episodes:anime.episodes||result.episodes,score:anime.score||result.score,year:anime.year||result.year,broadcastDay:result.broadcastDay||anime.broadcastDay||'',broadcastTime:result.broadcastTime||anime.broadcastTime||'',status:result.status||anime.status||'',season:result.season||anime.season||''});doneOk++;}
+    if(result && result.genres?.length) {
+  updated.push({
+    ...anime,
+    genres:       result.genres,
+    episodes:     anime.episodes || result.episodes,
+    score:        anime.score    || result.score,
+    year:         anime.year     || result.year,
+    broadcastDay: result.broadcastDay  || anime.broadcastDay  || '',
+    broadcastTime:result.broadcastTime || anime.broadcastTime || '',
+    status:       result.status  || anime.status  || '',
+    season:       result.season  || anime.season  || '',
+    titleJP:      result.titleJP || anime.titleJP || '', // ← ဒီကြောင်းထည့်
+    });doneOk++;}
     else{updated.push(anime);notFound.push({id:anime.id,title:anime.title});doneFail++;}
     await new Promise(r=>setTimeout(r,400));
   }
