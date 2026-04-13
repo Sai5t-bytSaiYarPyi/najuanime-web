@@ -466,10 +466,36 @@ function updateChipStates(){
 }
 
 // ဒီ function ကို applyFilters function အပေါ်မှာ ထည့်ပါ
+function fancyToPlain(str) {
+  let s = str.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  s = s.replace(/[\uff01-\uff5e]/g, c =>
+    String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  const upRanges = [
+    0x1D400,0x1D434,0x1D468,0x1D49C,0x1D4D0,
+    0x1D504,0x1D538,0x1D56C,0x1D5A0,0x1D5D4,
+    0x1D608,0x1D63C,0x1D670,
+  ];
+  const loRanges = [
+    0x1D41A,0x1D44E,0x1D482,0x1D4B6,0x1D4EA,
+    0x1D51E,0x1D552,0x1D586,0x1D5BA,0x1D5EE,
+    0x1D622,0x1D656,0x1D68A,
+  ];
+  s = [...s].map(c => {
+    const cp = c.codePointAt(0);
+    for (const base of upRanges)
+      if (cp >= base && cp < base+26) return String.fromCharCode(65+(cp-base));
+    for (const base of loRanges)
+      if (cp >= base && cp < base+26) return String.fromCharCode(97+(cp-base));
+    return c;
+  }).join('');
+  return s;
+}
+
 function normalizeStr(s) {
-  return s.toLowerCase()
-    .replace(/[\-]+/g, ' ')              // hyphen → space (kaya-chan → kaya chan)
-    .replace(/[^a-z0-9\u1000-\u109f\s]/g, '') // အခြား special chars ဖြုတ်ပစ် (space မဟုတ်)
+  return fancyToPlain(s)
+    .toLowerCase()
+    .replace(/[-]+/g, ' ')
+    .replace(/[^a-z0-9\u1000-\u109f\s]/g, '')
     .trim()
     .replace(/\s+/g, ' ');
 }
