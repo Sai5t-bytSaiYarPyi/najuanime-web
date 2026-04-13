@@ -482,6 +482,7 @@ if (searchTerm) {
   const q = normalizeStr(searchTerm);
   list = list.filter(a =>
     normalizeStr(a.title).includes(q) ||
+    normalizeStr(a.titleJP || '').includes(q) ||
     a.year.includes(q) ||
     (a.genres||[]).some(g => normalizeStr(g).includes(q))
   );
