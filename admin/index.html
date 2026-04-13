@@ -319,42 +319,55 @@ textarea{resize:vertical;min-height:80px}
         <p id="migrateMsg" style="font-size:13px;margin-top:10px;display:none"></p>
       </div>
 
-      <!-- ══ BULK ROMAJI IMPORT ══ -->
+<!-- ══ BULK ROMAJI IMPORT ══ -->
 <div class="card" style="max-width:700px;margin-bottom:20px">
   <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:8px">🔤 Bulk Romaji Import</h2>
   <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.7">
-    Anime ID နဲ့ Romaji တွေကို JSON format နဲ့ paste လုပ်ပြီး တစ်ကြိမ်တည်း update လုပ်နိုင်သည်။
+    Script output ကို တိုက်ရိုက် paste လုပ်ပါ — Anime title နဲ့ auto-match လုပ်ပြီး titleJP update မည်။
   </p>
 
-  <label class="label">Format: <code style="background:var(--bg3);padding:2px 7px;border-radius:5px">{"AnimeID": "Romaji Title", ...}</code></label>
-  <textarea id="romajiJson" style="min-height:160px;font-size:12px;font-family:monospace"
-    placeholder='{
-  "TheClassroomofaBlackCatandaWitch": "Kuroneko to Majo no Kyoushitsu",
-  "SnowballEarth": "Yukibana no Tesla"
-}'></textarea>
+  <label class="label">Script Output Paste ရန်</label>
+  <textarea id="romajiRaw" style="min-height:200px;font-size:12px;font-family:monospace"
+    placeholder="🔍 Searching: Sword of the Demon Hunter
+  ✅ [ANIME] Kijin Gentoushou
+──────────
+🔍 Searching: Lazarus
+  ✅ [ANIME] Lazarus
+──────────"></textarea>
 
-  <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
-    <button class="btn btn-purple" onclick="bulkImportRomaji()" id="romajiImportBtn">
+  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+    <button class="btn btn-purple" onclick="parseAndPreviewRomaji()">
       <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
       </svg>
-      Romaji Import မည်
+      Preview & Match
     </button>
-    <button class="btn btn-gray" onclick="generateRomajiTemplate()">📋 ID List ကူးယူ</button>
-    <span id="romajiImportMsg" style="font-size:13px;display:none"></span>
+    <button class="btn btn-green" onclick="saveRomajiMatches()" id="romajiSaveBtn" style="display:none">
+      💾 Match ရတာတွေ Save မည်
+    </button>
+    <span id="romajiImportMsg" style="font-size:13px;display:none;align-self:center"></span>
   </div>
 
+  <!-- Preview Table -->
+  <div id="romajiPreview" style="display:none;margin-top:16px">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="romajiStatRow"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto" id="romajiMatchList"></div>
+  </div>
+
+  <!-- Save Progress -->
   <div id="romajiProgressWrap" style="display:none;margin-top:12px">
     <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-      <span style="font-size:12px;color:#60a5fa;font-weight:600" id="romajiProgressLabel">Updating...</span>
+      <span style="font-size:12px;color:#60a5fa;font-weight:600" id="romajiProgressLabel">Saving...</span>
       <span style="font-size:12px;color:var(--muted)" id="romajiProgressPct">0%</span>
     </div>
     <div class="bulk-progress-bar-bg">
       <div class="bulk-progress-bar-fill" id="romajiProgressFill"></div>
     </div>
-    <div id="romajiResultList" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto"></div>
   </div>
 </div>
+
+
     </div>
 
     <!-- ══ JP MATCHER TAB ══ -->
@@ -1210,6 +1223,178 @@ function showRomajiMsg(txt, type) {
   el.textContent = txt;
   el.style.color  = type === 'success' ? '#4ade80' : '#f87171';
   el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+// ══ Bulk Romaji — Parse + Match + Save ══════════════════
+
+let romajiMatchResults = [];
+
+function normalizeTitle(s) {
+  return s.toLowerCase()
+    .replace(/[:\-\.]/g, ' ')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function titleSimilarity(a, b) {
+  const na = normalizeTitle(a), nb = normalizeTitle(b);
+  if (na === nb) return 1.0;
+  if (na.includes(nb) || nb.includes(na)) return 0.85;
+  // word overlap score
+  const wa = new Set(na.split(' ')), wb = new Set(nb.split(' '));
+  const inter = [...wa].filter(w => wb.has(w)).length;
+  const union = new Set([...wa, ...wb]).size;
+  return inter / union;
+}
+
+function findBestMatch(searchTitle, animes) {
+  let best = null, bestScore = 0;
+  for (const a of animes) {
+    // title နဲ့ id နှစ်ခုလုံး compare
+    const s1 = titleSimilarity(searchTitle, a.title);
+    const s2 = titleSimilarity(searchTitle, a.id);
+    const score = Math.max(s1, s2);
+    if (score > bestScore) { bestScore = score; best = a; }
+  }
+  return { anime: best, score: bestScore };
+}
+
+function parseRomajiReport(raw) {
+  // parse pairs: Searching line → ANIME line
+  const pairs = [];
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  let currentSearch = null;
+  for (const line of lines) {
+    const searchMatch = line.match(/🔍\s*Searching:\s*(.+)/);
+    const animeMatch  = line.match(/✅\s*\[ANIME\]\s*(.+)/);
+    if (searchMatch) { currentSearch = searchMatch[1].trim(); }
+    else if (animeMatch && currentSearch) {
+      pairs.push({ searchTitle: currentSearch, romaji: animeMatch[1].trim() });
+      currentSearch = null;
+    }
+  }
+  return pairs;
+}
+
+function parseAndPreviewRomaji() {
+  if (!allAnimes.length) { showRomajiMsg('❌ Anime list load မရသေးပါ', 'error'); return; }
+  const raw = document.getElementById('romajiRaw').value.trim();
+  if (!raw) { showRomajiMsg('❌ Data ထည့်ပါ', 'error'); return; }
+
+  const pairs = parseRomajiReport(raw);
+  if (!pairs.length) { showRomajiMsg('❌ Format မမှန်ပါ — 🔍 Searching နဲ့ ✅ [ANIME] lines ရှိရမည်', 'error'); return; }
+
+  // Match each pair
+  romajiMatchResults = pairs.map(p => {
+    const { anime, score } = findBestMatch(p.searchTitle, allAnimes);
+    const status = score >= 0.8 ? 'matched' : score >= 0.4 ? 'weak' : 'nomatch';
+    return { ...p, anime, score, status };
+  });
+
+  renderRomajiPreview();
+}
+
+function renderRomajiPreview() {
+  const preview  = document.getElementById('romajiPreview');
+  const statRow  = document.getElementById('romajiStatRow');
+  const list     = document.getElementById('romajiMatchList');
+  const saveBtn  = document.getElementById('romajiSaveBtn');
+  preview.style.display = 'block';
+
+  const cMatched = romajiMatchResults.filter(r => r.status === 'matched').length;
+  const cWeak    = romajiMatchResults.filter(r => r.status === 'weak').length;
+  const cNo      = romajiMatchResults.filter(r => r.status === 'nomatch').length;
+
+  statRow.innerHTML = `
+    <span class="bulk-stat bulk-stat-total">Total: ${romajiMatchResults.length}</span>
+    <span class="bulk-stat bulk-stat-ok">✅ Matched: ${cMatched}</span>
+    ${cWeak ? `<span class="bulk-stat" style="background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)">⚠️ Weak: ${cWeak}</span>` : ''}
+    ${cNo   ? `<span class="bulk-stat bulk-stat-err">❌ No match: ${cNo}</span>` : ''}`;
+
+  list.innerHTML = romajiMatchResults.map((r, i) => {
+    const color  = r.status === 'matched' ? '#4ade80' : r.status === 'weak' ? '#fbbf24' : '#f87171';
+    const icon   = r.status === 'matched' ? '✅' : r.status === 'weak' ? '⚠️' : '❌';
+    const pct    = Math.round(r.score * 100);
+    const canEdit = r.status !== 'nomatch';
+
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-size:12px;color:${color};font-weight:700">${icon} ${pct}%</span>
+        <span style="font-size:12px;color:white;font-weight:600">${r.searchTitle}</span>
+        <span style="font-size:10px;color:var(--muted)">→</span>
+        <span style="font-size:12px;color:${canEdit ? '#60a5fa' : '#475569'}">${r.anime?.title || 'မတွေ့ပါ'}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--muted)">Romaji:</span>
+        <input type="text" value="${r.romaji}" 
+          style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--border);color:#c084fc;border-radius:7px;padding:5px 10px;font-size:12px;outline:none;font-family:'Outfit',sans-serif"
+          oninput="romajiMatchResults[${i}].romaji = this.value"
+          ${r.status === 'nomatch' ? 'disabled' : ''}>
+        ${r.status === 'nomatch' ? '' : `
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--muted)">
+            <input type="checkbox" ${r.status === 'matched' ? 'checked' : ''} 
+              onchange="romajiMatchResults[${i}].include = this.checked"
+              style="width:auto;accent-color:var(--blue)">
+            Include
+          </label>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  // default include flag
+  romajiMatchResults.forEach(r => {
+    if (r.include === undefined) r.include = r.status === 'matched';
+  });
+
+  saveBtn.style.display = cMatched > 0 ? 'inline-flex' : 'none';
+}
+
+async function saveRomajiMatches() {
+  const toSave = romajiMatchResults.filter(r => r.include && r.anime && r.romaji.trim());
+  if (!toSave.length) { showRomajiMsg('❌ Save မည့် item မရှိပါ', 'error'); return; }
+  if (!confirm(`Anime ${toSave.length} ကားကို titleJP update မည်။`)) return;
+
+  const btn = document.getElementById('romajiSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin">⟳</span> Saving...';
+
+  const pw = document.getElementById('romajiProgressWrap');
+  const pl = document.getElementById('romajiProgressLabel');
+  const pp = document.getElementById('romajiProgressPct');
+  const pf = document.getElementById('romajiProgressFill');
+  pw.style.display = 'block';
+
+  let ok = 0, fail = 0;
+  for (let i = 0; i < toSave.length; i++) {
+    const r   = toSave[i];
+    const pct = Math.round(((i + 1) / toSave.length) * 100);
+    pl.textContent = `(${i+1}/${toSave.length}) ${r.anime.title}`;
+    pp.textContent = pct + '%'; pf.style.width = pct + '%';
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/anime/${encodeURIComponent(r.anime.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+        body: JSON.stringify({ ...r.anime, titleJP: r.romaji.trim() }),
+      });
+      const d = await res.json();
+      d.success ? ok++ : fail++;
+    } catch { fail++; }
+  }
+
+  pl.textContent      = `✓ ပြီးပါပြီ! ✅ ${ok} | ❌ ${fail}`;
+  pf.style.background = fail === 0 ? '#4ade80' : '#fbbf24';
+  btn.disabled  = false;
+  btn.innerHTML = '💾 Match ရတာတွေ Save မည်';
+  showRomajiMsg(`✓ ${ok} ကား update ပြီးပါပြီ`, 'success');
+  if (ok > 0) loadAnimes();
+}
+
+function showRomajiMsg(txt, type) {
+  const el = document.getElementById('romajiImportMsg');
+  el.textContent = txt;
+  el.style.color   = type === 'success' ? '#4ade80' : '#f87171';
+  el.style.display = 'inline-block';
   setTimeout(() => el.style.display = 'none', 4000);
 }
 </script>
