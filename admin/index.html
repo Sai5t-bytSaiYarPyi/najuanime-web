@@ -621,10 +621,21 @@ function initGenreInput(ctx) {
 
 // ══ Jikan ════════════════════════════════════════════════
 async function fetchJikan(title) {
-  const url=`${JIKAN_URL}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`;
-  const res=await fetch(url); if(!res.ok)throw new Error(`Jikan ${res.status}`);
-  const data=await res.json(); const a=data.data?.[0]; if(!a)throw new Error('Jikan တွင် ရှာမတွေ့ပါ');
-  return { year:String(a.year||a.aired?.prop?.from?.year||''), genres:[...(a.genres||[]),(a.themes||[]),(a.demographics||[])].flat().map(g=>g.name), episodes:String(a.episodes||''), score:String(a.score||''), broadcastDay:a.broadcast?.day||'', broadcastTime:a.broadcast?.time||'', status:a.status||'', season:a.season||'', title:a.title_english||a.title||'' };
+  const url = `${JIKAN_URL}/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`;
+  const res = await fetch(url); if(!res.ok) throw new Error(`Jikan ${res.status}`);
+  const data = await res.json(); const a = data.data?.[0]; if(!a) throw new Error('မတွေ့ပါ');
+  return {
+    year:         String(a.year||a.aired?.prop?.from?.year||''),
+    genres:       [...(a.genres||[]),(a.themes||[]),(a.demographics||[])].flat().map(g=>g.name),
+    episodes:     String(a.episodes||''),
+    score:        String(a.score||''),
+    broadcastDay: a.broadcast?.day||'',
+    broadcastTime:a.broadcast?.time||'',
+    status:       a.status||'',
+    season:       a.season||'',
+    title:        a.title_english||a.title||'',
+    titleJP:      a.title_japanese||'',   // ← ဒီကြောင်းပဲ ထည့်
+  };
 }
 
 async function autoFetch(ctx) {
