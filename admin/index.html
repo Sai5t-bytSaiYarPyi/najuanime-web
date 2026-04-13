@@ -155,7 +155,7 @@ textarea{resize:vertical;min-height:80px}
       <button class="btn" id="tabList"     onclick="showTab('list')"     style="background:var(--blue);color:white">📋 Anime စာရင်း</button>
       <button class="btn btn-gray" id="tabAdd"      onclick="showTab('add')">➕ အသစ်ထည့်</button>
       <button class="btn btn-gray" id="tabMigrate"  onclick="showTab('migrate')">📦 Migrate</button>
-      <button class="btn btn-gray" id="tabJp"       onclick="showTab('jp')">🔍 JP Matcher</button>
+      <button class="btn btn-gray" id="tabJp"       onclick="showTab('jp')">🔤 Romaji Matcher</button>
       <button class="btn btn-gray" id="tabSettings" onclick="showTab('settings')">⚙️ Settings</button>
     </div>
 
@@ -323,10 +323,10 @@ textarea{resize:vertical;min-height:80px}
     <!-- ══ JP MATCHER TAB ══ -->
     <div id="tabJpContent" style="display:none">
       <div class="card" style="max-width:800px">
-        <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:6px">🔍 JP Title Matcher</h2>
+        <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:6px">🔤 Romaji Matcher</h2>
         <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
           Anime တစ်ကားချင်း Jikan မှာ ရှာပြီး Japanese Title ရတာ မရတာ စစ်သည်။<br>
-          ✅ JP Title ရပြီ &nbsp;|&nbsp; ⚠️ Genres ရပေမဲ့ JP မရ &nbsp;|&nbsp; ❌ Jikan မတွေ့
+          ✅ Romaji ရပြီ &nbsp;|&nbsp; ⚠️ Genres ရပေမဲ့ Romaji မရ &nbsp;|&nbsp; ❌ Jikan မတွေ့
         </p>
 
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
@@ -335,7 +335,7 @@ textarea{resize:vertical;min-height:80px}
             Matcher စတင်မည်
           </button>
           <button class="btn btn-green" onclick="saveAllJP()" id="jpSaveBtn" style="display:none">
-            💾 JP Title အားလုံး KV မှာ Save မည်
+            💾 Romaji Title အားလုံး KV မှာ Save မည်
           </button>
           <button class="btn btn-yellow" onclick="copyJPReport()" id="jpCopyBtn" style="display:none">
             📋 Report Copy
@@ -613,7 +613,7 @@ async function fetchJikan(title) {
     status:        a.status||'',
     season:        a.season||'',
     title:         a.title_english||a.title||'',
-    titleJP:       a.title_japanese||'',
+    titleJP:       a.title||'',
   };
 }
 
@@ -637,7 +637,7 @@ async function autoFetch(ctx) {
   if(result.genres?.length&&window[`${ctx}GenreSet`])window[`${ctx}GenreSet`](result.genres);
   badge.className='fetch-badge fetch-ok'; badge.textContent='✓ Jikan (MAL)';
   resultBox.style.display='block';
-  resultBox.innerHTML=`<strong style="color:white">${result.title}</strong><br>📅 Year: ${result.year||'—'} &nbsp; 🎬 Eps: ${result.episodes||'—'} &nbsp; ⭐ Score: ${result.score||'—'}<br>📡 Broadcast: ${result.broadcastDay||'—'} ${result.broadcastTime||''} (JST)<br>🇯🇵 JP: ${result.titleJP||'—'}<br>🏷️ Genres: ${result.genres?.join(', ')||'—'}`;
+  resultBox.innerHTML=`<strong style="color:white">${result.title}</strong><br>📅 Year: ${result.year||'—'} &nbsp; 🎬 Eps: ${result.episodes||'—'} &nbsp; ⭐ Score: ${result.score||'—'}<br>📡 Broadcast: ${result.broadcastDay||'—'} ${result.broadcastTime||''} (JST)<br>🔤 Romaji: ${result.titleJP||'—'}<br>🏷️ Genres: ${result.genres?.join(', ')||'—'}`;
 }
 
 // ══ Bulk Jikan ═══════════════════════════════════════════
@@ -789,7 +789,7 @@ async function runJPMatcher() {
 async function saveAllJP() {
   const toUpdate = jpMatchResults.filter(r => r.status === 'found' && r.jpTitle);
   if (!toUpdate.length) { alert('Save မည့် JP Title မရှိပါ'); return; }
-  if (!confirm(`JP Title ရတသော Anime ${toUpdate.length} ကားကို KV မှာ update မည်။`)) return;
+  if (!confirm(`Romaji Title ရတသော Anime ${toUpdate.length} ကားကို KV မှာ update မည်။`)) return;
 
   const btn = document.getElementById('jpSaveBtn');
   btn.disabled = true;
