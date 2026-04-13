@@ -136,6 +136,27 @@
   .avg-num{font-size:32px}
   .avg-wrap{padding:12px 14px;gap:10px}
   }
+
+  /* Reply styles */
+.reply-thread{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.reply-item{display:flex;gap:8px;align-items:flex-start}
+.reply-avatar{width:22px;height:22px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px}
+.reply-bubble{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px 11px}
+.reply-text{font-size:12px;color:#94a3b8;line-height:1.6;word-break:break-word}
+.reply-date{font-size:10px;color:#475569;margin-top:3px}
+.reply-form{margin-top:10px;display:none}
+.reply-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:9px 13px;font-size:12px;font-family:'Outfit',sans-serif;resize:none;outline:none;min-height:60px;transition:border-color .2s;box-sizing:border-box}
+.reply-input:focus{border-color:var(--blue)}
+.reply-input::placeholder{color:#475569}
+.reply-actions{display:flex;gap:7px;margin-top:7px}
+.reply-btn-open{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--border);color:#64748b;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;margin-top:8px}
+.reply-btn-open:hover{border-color:rgba(59,130,246,.35);color:#60a5fa}
+.reply-send{padding:7px 14px;background:var(--blue);color:white;font-size:12px;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.reply-send:hover{background:var(--blue-dark)}
+.reply-send:disabled{opacity:.5;cursor:not-allowed}
+.reply-cancel{padding:7px 12px;background:var(--bg3);color:#94a3b8;font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif}
+.del-btn{background:none;border:none;color:#475569;font-size:10px;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:'Outfit',sans-serif;transition:color .15s;margin-left:auto}
+.del-btn:hover{color:#f87171}
   </style>
 </head>
 <body>
@@ -161,29 +182,28 @@
 <!-- Rating + Reviews section -->
 <section class="max-w-4xl mx-auto px-4 pb-16" id="ratingsSection" style="display:none">
 
-  <!-- Submit form -->
-  <div class="rating-card" style="margin-bottom:24px">
-    <h2 style="font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:4px">⭐ Rating နှင့် Review ပေးရန်</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">ဇာတ်ကားကို ကြည့်ပြီးသွားရင် Rating နဲ့ Review ပေးသွားပါ ✨</p>
+<!-- Rating + Reviews section — ဒီ rating-card div ကို replace ပါ -->
+<div class="rating-card" style="margin-bottom:24px">
+  <h2 style="font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:4px">⭐ Rating ပေးရန်</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Star နှိပ်ပြီး Rating ပေးသွားပါ ✨</p>
 
-    <div style="margin-bottom:16px">
-      <label class="form-label">⭐ Rating (1–10) ရွေးပါ</label>
-      <div class="star-row" id="starRow"></div>
-      <p id="rLabel" style="font-size:12px;color:#fbbf24;margin-top:7px;font-weight:700;min-height:18px"></p>
-    </div>
-    <div style="margin-bottom:12px">
-      <label class="form-label">အမည် (မဖြစ်မနေမဟုတ်)</label>
-      <input type="text" id="rName" class="form-input" placeholder="မင်းနာမည် သို့မဟုတ် username...">
-    </div>
-    <div style="margin-bottom:18px">
-      <label class="form-label">Review (မဖြစ်မနေမဟုတ်)</label>
-      <textarea id="rText" class="form-textarea" placeholder="ဇာတ်ကားအကြောင်း ထင်မြင်ချက်..."></textarea>
-    </div>
-    <button id="submitBtn" class="submit-btn" onclick="submitRating()">
-      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-      Rating ပေးမည်
-    </button>
+  <div style="margin-bottom:16px">
+    <div class="star-row" id="starRow"></div>
+    <p id="rLabel" style="font-size:13px;color:#fbbf24;margin-top:8px;font-weight:700;min-height:20px"></p>
   </div>
+
+  <div style="margin-bottom:14px">
+    <textarea id="rText" class="form-textarea" style="min-height:70px"
+      placeholder="တိုတိုလေး ရေးချင်ရင်... (မဖြစ်မနေမဟုတ်)"></textarea>
+  </div>
+
+  <button id="submitBtn" class="submit-btn" onclick="submitRating()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+    </svg>
+    Rating ပေးမည်
+  </button>
+</div>
 
   <!-- Reviews list -->
   <div id="reviewsPanel"></div>
@@ -253,20 +273,47 @@ function saveVoted() { localStorage.setItem('naju_voted', JSON.stringify([...vot
 function reviewCardHtml(rv) {
   const voted    = votedSet.has(rv.id);
   const longText = rv.text && rv.text.length > 180;
+  const repliesHtml = (rv.replies || []).map(rep => `
+    <div class="reply-item">
+      <div class="reply-avatar">💬</div>
+      <div class="reply-bubble">
+        <div class="reply-text">${esc(rep.text)}</div>
+        <div class="reply-date">${rep.date || ''}</div>
+      </div>
+    </div>`).join('');
+
   return `
     <div class="rev-card" id="rc-${rv.id}">
       <div class="rev-meta">
-        <span class="rev-name">👤 ${esc(rv.name||'Anonymous')}</span>
+        <span class="rev-name">👤 ${esc(rv.name || 'Anonymous')}</span>
         <span class="rating-pill">⭐ ${rv.rating}/10</span>
-        <span class="rev-date">${rv.date||''}</span>
+        <span class="rev-date">${rv.date || ''}</span>
+        <button class="del-btn" onclick="deleteReview('${rv.id}')" title="Report/Delete">🗑</button>
       </div>
       ${rv.text ? `
-        <p class="rev-text${longText?' clamped':''}" id="rt-${rv.id}">${esc(rv.text)}</p>
-        ${longText?`<button class="read-more-btn" id="rm-${rv.id}" onclick="toggleRead('${rv.id}')">▼ ဆက်ဖတ်ရန်</button>`:''}
+        <p class="rev-text${longText ? ' clamped' : ''}" id="rt-${rv.id}">${esc(rv.text)}</p>
+        ${longText ? `<button class="read-more-btn" id="rm-${rv.id}" onclick="toggleRead('${rv.id}')">▼ ဆက်ဖတ်ရန်</button>` : ''}
       ` : ''}
-      <button class="helpful-btn${voted?' voted':''}" id="hb-${rv.id}" onclick="upvote('${rv.id}','${currentAnimeId}')" ${voted?'disabled':''}>
-        👍 Helpful &nbsp;<span id="hc-${rv.id}">${fmtN(rv.helpful||0)}</span>
-      </button>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="helpful-btn${voted ? ' voted' : ''}" id="hb-${rv.id}"
+          onclick="upvote('${rv.id}','${currentAnimeId}')" ${voted ? 'disabled' : ''}>
+          👍 Helpful &nbsp;<span id="hc-${rv.id}">${fmtN(rv.helpful || 0)}</span>
+        </button>
+        <button class="reply-btn-open" onclick="toggleReplyForm('${rv.id}')">
+          💬 Reply ${(rv.replies || []).length > 0 ? `(${rv.replies.length})` : ''}
+        </button>
+      </div>
+
+      ${repliesHtml ? `<div class="reply-thread">${repliesHtml}</div>` : ''}
+
+      <div class="reply-form" id="rf-${rv.id}">
+        <textarea class="reply-input" id="ri-${rv.id}" placeholder="Reply ရေးပါ..."></textarea>
+        <div class="reply-actions">
+          <button class="reply-send" onclick="submitReply('${rv.id}')">Send</button>
+          <button class="reply-cancel" onclick="toggleReplyForm('${rv.id}')">Cancel</button>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -388,27 +435,102 @@ function loadMore() {
 
 // ── Submit Rating ─────────────────────────────────────
 async function submitRating() {
-  if (!selRating) { showToast('⚠️ Star နှိပ်ပြီး Rating ပေးပါ!',false); return; }
+  if (!selRating) { showToast('⚠️ Star နှိပ်ပြီး Rating ပေးပါ!', false); return; }
   const btn  = document.getElementById('submitBtn');
-  const name = document.getElementById('rName').value.trim();
   const text = document.getElementById('rText').value.trim();
-  btn.disabled=true;
-  btn.innerHTML='<span class="sm-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"></span> ပေးပို့နေသည်...';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sm-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"></span> ပေးပို့နေသည်...';
   try {
     const r = await fetch(`${WORKER_URL}/reviews/${encodeURIComponent(currentAnimeId)}`,
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,rating:selRating,text}) });
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: selRating, text }) });
     const d = await r.json();
-    if (!d.success) throw new Error(d.error||'Error');
+    if (!d.success) throw new Error(d.error || 'Error');
     showToast('✓ Rating ပေးပြီးပါပြီ! ကျေးဇူးပဲ 🙏');
-    document.getElementById('rName').value='';
-    document.getElementById('rText').value='';
-    selRating=0; hlStars(0);
-    document.getElementById('rLabel').textContent='';
+    document.getElementById('rText').value = '';
+    selRating = 0; hlStars(0);
+    document.getElementById('rLabel').textContent = '';
     loadReviews(true);
-  } catch { showToast('❌ ချိတ်ဆက်မှု မအောင်မြင်ပါ',false); }
-  btn.disabled=false;
-  btn.innerHTML='<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Rating ပေးမည်';
+  } catch { showToast('❌ ချိတ်ဆက်မှု မအောင်မြင်ပါ', false); }
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Rating ပေးမည်';
+}
+
+// ── Reply ──────────────────────────────────────────────
+function toggleReplyForm(revId) {
+  const form = document.getElementById(`rf-${revId}`);
+  if (!form) return;
+  const isOpen = form.style.display === 'block';
+  form.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) document.getElementById(`ri-${revId}`)?.focus();
+}
+
+async function submitReply(revId) {
+  const input = document.getElementById(`ri-${revId}`);
+  const text  = input?.value.trim();
+  if (!text) return;
+
+  const btn = input.closest('.reply-form').querySelector('.reply-send');
+  btn.disabled = true; btn.textContent = '...';
+
+  try {
+    const r = await fetch(
+      `${WORKER_URL}/reviews/${encodeURIComponent(currentAnimeId)}/${encodeURIComponent(revId)}/reply`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }) }
+    );
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    // UI ထဲ reply ထည့်
+    let thread = document.querySelector(`#rc-${revId} .reply-thread`);
+    if (!thread) {
+      thread = document.createElement('div');
+      thread.className = 'reply-thread';
+      document.getElementById(`rf-${revId}`).before(thread);
+    }
+    thread.insertAdjacentHTML('beforeend', `
+      <div class="reply-item">
+        <div class="reply-avatar">💬</div>
+        <div class="reply-bubble">
+          <div class="reply-text">${esc(text)}</div>
+          <div class="reply-date">${d.date || 'ယခု'}</div>
+        </div>
+      </div>`);
+
+    input.value = '';
+    toggleReplyForm(revId);
+    showToast('✓ Reply ပေးပြီးပါပြီ!');
+  } catch(e) {
+    showToast('❌ Reply မပို့ရပါ', false);
+  }
+  btn.disabled = false; btn.textContent = 'Send';
+}
+
+// ── Delete Review (Admin or Report) ────────────────────
+async function deleteReview(revId) {
+  // Admin token မေးမည်
+  const token = prompt('Admin password ထည့်ပါ (Report လုပ်ရန်ဆိုရင် Cancel နှိပ်ပါ):');
+  if (!token) {
+    // Report mode — admin ဆီ တိုင်ကြားရုံ toast ပြမည်
+    showToast('📩 Report လက်ခံပြီး Admin စစ်ဆေးမည်', true);
+    // Optional: report endpoint ခေါ်နိုင်
+    return;
+  }
+  if (!confirm('Review ကို ဖျက်မည်လား?')) return;
+  try {
+    const r = await fetch(
+      `${WORKER_URL}/reviews/${encodeURIComponent(currentAnimeId)}/${encodeURIComponent(revId)}`,
+      { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const d = await r.json();
+    if (d.success) {
+      document.getElementById(`rc-${revId}`)?.remove();
+      showToast('✓ ဖျက်ပြီးပါပြီ');
+    } else {
+      showToast('❌ Password မှားနေသည်', false);
+    }
+  } catch { showToast('❌ မဖြစ်မြောက်ပါ', false); }
 }
 
 function showToast(msg,ok=true) {
