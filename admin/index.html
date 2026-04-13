@@ -667,12 +667,15 @@ async function bulkFetchGenres() {
   btn.disabled=true; btn.innerHTML=`<span class="spin">⟳</span> Fetching...`;
   const pw=document.getElementById('bulkProgressWrap'),pl=document.getElementById('bulkProgressLabel'),pp=document.getElementById('bulkProgressPct'),pf=document.getElementById('bulkProgressFill'),ps=document.getElementById('bulkStatsRow');
   pw.style.display='block'; ps.style.display='none'; document.getElementById('bulkNotFoundWrap').style.display='none';
-  const total=allAnimes.length; let doneOk=0,doneFail=0; const notFound=[],updated=[];
+  const total=allAnimes.length; let doneOk=0,doneFail=0; 
+  const notFound=[], updated=[];
+  const noJP=[];
+
   for(let i=0;i<allAnimes.length;i++){
     const anime=allAnimes[i]; const pct=Math.round(((i+1)/total)*100);
     pl.textContent=`(${i+1}/${total}) ${anime.title}`; pp.textContent=pct+'%'; pf.style.width=pct+'%';
     let result=null; try{result=await fetchJikan(anime.title)}catch(e){}
-    if(result && result.genres?.length) {
+if(result && result.genres?.length) {
   updated.push({
     ...anime,
     genres:       result.genres,
@@ -683,9 +686,15 @@ async function bulkFetchGenres() {
     broadcastTime:result.broadcastTime || anime.broadcastTime || '',
     status:       result.status  || anime.status  || '',
     season:       result.season  || anime.season  || '',
-    titleJP:      result.titleJP || anime.titleJP || '', // ← ဒီကြောင်းထည့်
-    });doneOk++;}
-    else{updated.push(anime);notFound.push({id:anime.id,title:anime.title});doneFail++;}
+    titleJP:      result.titleJP || anime.titleJP || '',
+  });
+  if (!result.titleJP) noJP.push({id: anime.id, title: anime.title}); // ← ထည့်
+  doneOk++;
+} else {
+  updated.push(anime);
+  notFound.push({id:anime.id, title:anime.title});
+  doneFail++;
+}
     await new Promise(r=>setTimeout(r,400));
   }
   pl.textContent='KV သို့ သိမ်းနေသည်...';
