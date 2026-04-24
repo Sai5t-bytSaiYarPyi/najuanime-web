@@ -1,0 +1,4 @@
+/manhwa/:id         /manhwa/[id]/index.html  200
+/manhwa/:id/        /manhwa/[id]/index.html  200
+/manhwa/:id/:ch     /manhwa/[id]/[ch]/index.html  200
+/manhwa/:id/:ch/    /manhwa/[id]/[ch]/index.html  200
