@@ -346,9 +346,9 @@ const SAVE_THROTTLE = 2000; // ms — history save throttle
 
 // ── URL parsing ────────────────────────────────────────
 // /manhwa/solo-leveling/1/  →  ['manhwa','solo-leveling','1']
-const _parts   = location.pathname.split('/').filter(Boolean);
-const MANHWA_ID = _parts[1] || '';
-const CH_NUM    = parseInt(_parts[2] || '1', 10);
+const _params = new URLSearchParams(location.search);
+const MANHWA_ID = _params.get('id') || '';
+const CH_NUM = parseInt(_params.get('ch') || '1', 10);
 
 if (!MANHWA_ID || isNaN(CH_NUM)) location.href = '/manhwa/';
 
@@ -475,7 +475,7 @@ document.addEventListener('click', e => {
 // ── Chapter jump (select dropdown) ───────────────────
 function jumpToChapter(ch) {
   if (ch && parseInt(ch) !== CH_NUM) {
-    location.href = `/manhwa/${MANHWA_ID}/${ch}/`;
+    location.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${ch}`;
   }
 }
 
@@ -497,13 +497,13 @@ function buildNav(chapters) {
   const nextBtn = document.getElementById('nextBtn');
 
   if (prevCh !== null) {
-    prevBtn.href = `/manhwa/${MANHWA_ID}/${prevCh}/`;
+    prevBtn.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${prevCh}`;
     prevBtn.classList.remove('disabled');
     prevBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Ch.${prevCh}`;
   }
 
   if (nextCh !== null) {
-    nextBtn.href = `/manhwa/${MANHWA_ID}/${nextCh}/`;
+    nextBtn.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${nextCh}`;
     nextBtn.classList.remove('disabled');
     nextBtn.innerHTML = `Ch.${nextCh} <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`;
   } else {
@@ -598,8 +598,8 @@ async function load() {
 
     // ── Top bar ──
     document.getElementById('tbTitle').textContent = pageTitle;
-    document.getElementById('backBtn').href = `/manhwa/${MANHWA_ID}/`;
-    document.getElementById('chListBtn').href = `/manhwa/${MANHWA_ID}/`;
+    document.getElementById('backBtn').href    = `/manhwa/detail/?id=${MANHWA_ID}`;
+    document.getElementById('chListBtn').href  = `/manhwa/detail/?id=${MANHWA_ID}`;
 
     // ── Chapter dropdown ──
     buildChapterSelect(allChapters);
