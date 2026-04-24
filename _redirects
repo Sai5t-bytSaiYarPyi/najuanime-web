@@ -1,3 +1,8 @@
 /review  /review/index.html  200
 /chat    /chat/index.html    200
 /admin   /admin/index.html   200
+/manhwa/:id  /manhwa/[id]/index.html  200
+/manhwa/:id/  /manhwa/[id]/index.html  200
+/manhwa/:id/:ch  /manhwa/[id]/[ch]/index.html  200
+/manhwa/:id/:ch/  /manhwa/[id]/[ch]/index.html  200
+/review/  /review/index.html  200
