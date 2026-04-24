@@ -251,8 +251,7 @@ const WORKER_URL = 'https://steep-poetry-db37.izo52928.workers.dev';
 
 // ── Extract manhwa ID from URL ────────────────────────
 // URL: /manhwa/solo-leveling/ → id = 'solo-leveling'
-const pathParts = window.location.pathname.split('/').filter(Boolean);
-const MANHWA_ID = pathParts[1] || '';
+const MANHWA_ID = new URLSearchParams(window.location.search).get('id') || '';
 
 if (!MANHWA_ID) {
   window.location.href = '/manhwa/';
