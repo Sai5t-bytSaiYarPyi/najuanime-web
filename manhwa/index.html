@@ -364,7 +364,7 @@ function renderGrid(list) {
   list.forEach((manhwa, index) => {
     const card = document.createElement('a');
     card.className   = 'manhwa-card';
-    card.href        = `/manhwa/${manhwa.id}/`;
+    card.href        = `/manhwa/detail/?id=${manhwa.id}`;
     card.style.animationDelay = `${Math.min(index, 20) * 30}ms`;
 
     const statusCls  = (manhwa.status || '').toLowerCase();
