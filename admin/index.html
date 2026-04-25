@@ -140,14 +140,20 @@ textarea{resize:vertical;min-height:80px}
 <div id="panel" style="display:none">
   <header style="background:rgba(15,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px">
     <div style="font-size:20px;font-weight:900"><span style="color:var(--blue)">NaJu</span><span>Anime</span> <span style="color:var(--muted);font-size:13px;font-weight:600">Admin</span></div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-      <span id="ghStatusHeader" class="token-status" style="font-size:11px"></span>
-      <span id="animeCount" class="pill">Loading...</span>
-      <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      </button>
-      <button class="btn btn-gray" onclick="logout()">ထွက်မည်</button>
-    </div>
+<!-- Header right side -->
+<div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+  <span id="ghStatusHeader" class="token-status" style="font-size:11px"></span>
+  <span id="animeCount" class="pill">Loading...</span>
+  <button class="btn btn-gray" onclick="loadAnimes()" title="Refresh">...</button>
+  
+  <!-- ← ထည့် -->
+  <a href="/admin/manhwa.html" class="btn btn-purple" 
+     style="padding:8px 14px;font-size:12px;text-decoration:none">
+    📚 Manhwa Admin
+  </a>
+  
+  <button class="btn btn-gray" onclick="logout()">ထွက်မည်</button>
+</div>
   </header>
 
   <div style="max-width:1100px;margin:0 auto;padding:24px 16px">
