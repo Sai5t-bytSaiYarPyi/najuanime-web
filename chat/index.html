@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="my" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ═══ SEO Meta Tags ═══ -->
+  <title>NaJu AI - မြန်မာ Anime AI Assistant</title>
+  <meta name="description" content="NaJu AI - မြန်မာဘာသာပြန် Anime ဇာတ်ကားများ ရှာဖွေရန်၊ Recommend ရယူရန်နှင့် Review မေးမြန်းရန် AI Assistant">
+  <meta name="keywords" content="NaJu AI, မြန်မာ Anime AI, Anime Recommendation Myanmar, NaJu Anime Chat">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.najuanime.com/chat.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.najuanime.com/chat.html">
+  <meta property="og:title" content="NaJu AI - မြန်မာ Anime AI Assistant">
+  <meta property="og:description" content="Anime ဇာတ်ကားများ ရှာဖွေ၊ Recommend ရယူ၊ Review မေးမြန်းနိုင်သည့် AI Assistant">
+  <meta property="og:site_name" content="NaJu Anime">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="NaJu AI - Anime Assistant">
+  <meta name="twitter:description" content="မြန်မာ Anime AI Assistant - ဇာတ်ကားများ ရှာဖွေ Recommend ရယူနိုင်သည်">
+
+  <!-- ═══ Google Analytics 4 — G-XXXXXXXXXX ကို သင့် Measurement ID နဲ့ အစားထိုးပါ ═══ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBNCZMJS9F"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-NBNCZMJS9F');
+  </script>
+
+  <link rel="stylesheet" href="/css/tailwind.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Outfit',sans-serif;box-sizing:border-box}
+    :root{
+      --blue:#3b82f6;--blue-dark:#1d4ed8;
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+      --border:rgba(255,255,255,0.07);
+      --text:#e2e8f0;--muted:#64748b;
+    }
+    body{background:var(--bg);color:var(--text);min-height:100vh;margin:0}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:var(--bg2)}
+    ::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+
+    .hdr{background:rgba(15,17,23,.97);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);padding:12px 18px;
+      display:flex;align-items:center;gap:12px;
+      position:sticky;top:0;z-index:50}
+    .back{display:flex;align-items:center;gap:5px;color:var(--muted);
+      text-decoration:none;font-size:13px;font-weight:600;transition:color .2s}
+    .back:hover{color:var(--blue)}
+    .aav{width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,#1e3a8a,#3b82f6);
+      display:flex;align-items:center;justify-content:center;
+      font-size:15px;flex-shrink:0;box-shadow:0 0 14px rgba(59,130,246,.35)}
+    .anm{font-size:14px;font-weight:700;color:white}
+    .asb{font-size:11px;color:#4ade80;display:flex;align-items:center;gap:4px}
+    .dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:bl 2s infinite}
+    @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+
+    #msgs{padding:18px 18px 120px;display:flex;flex-direction:column;gap:14px;
+      max-width:720px;margin:0 auto}
+    .row{display:flex;gap:9px;align-items:flex-end;animation:fu .25s ease both}
+    .row.u{flex-direction:row-reverse}
+    @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .av{width:26px;height:26px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+    .av.b{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white}
+    .av.u{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+
+    .bbl{max-width:82%;padding:11px 15px;border-radius:18px;
+      font-size:13.5px;line-height:1.7;word-break:break-word}
+    .bbl.b{background:var(--bg2);border:1px solid var(--border);
+      border-bottom-left-radius:4px;color:var(--text)}
+    .bbl.u{background:var(--blue);color:white;border-bottom-right-radius:4px}
+
+    .bbl a{color:#60a5fa;text-decoration:underline;text-underline-offset:2px}
+    .bbl a:hover{color:#93c5fd}
+
+    .typ{background:var(--bg2);border:1px solid var(--border);
+      border-radius:18px;border-bottom-left-radius:4px;
+      padding:13px 16px;display:flex;gap:4px;align-items:center}
+    .td{width:6px;height:6px;border-radius:50%;background:var(--muted);
+      animation:tb 1.2s infinite}
+    .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+    @keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    .err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);
+      border-radius:12px;padding:10px 14px;font-size:12.5px;color:#fca5a5;margin-top:4px}
+
+    .ibar{position:fixed;bottom:0;left:0;right:0;
+      background:rgba(15,17,23,.98);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);padding:11px 18px;z-index:40}
+    .inn{max-width:720px;margin:0 auto;display:flex;gap:9px;align-items:flex-end}
+    #inp{flex:1;background:var(--bg3);border:1px solid var(--border);
+      color:white;border-radius:13px;padding:11px 15px;font-size:13.5px;
+      font-family:'Outfit',sans-serif;resize:none;outline:none;
+      transition:border-color .2s,box-shadow .2s;
+      max-height:120px;min-height:44px;line-height:1.5}
+    #inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+    #inp::placeholder{color:var(--muted)}
+    #inp:disabled{opacity:.5;cursor:not-allowed}
+    #snd{width:44px;height:44px;border-radius:13px;background:var(--blue);
+      border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:background .2s,transform .15s,opacity .2s;flex-shrink:0}
+    #snd:hover{background:var(--blue-dark)}
+    #snd:active{transform:scale(.93)}
+    #snd:disabled{opacity:.45;cursor:not-allowed}
+    #snd svg{width:17px;height:17px;fill:white}
+
+    .qr{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .qb{font-size:12px;padding:6px 12px;border:1px solid var(--border);
+      border-radius:99px;background:var(--bg3);color:#94a3b8;
+      cursor:pointer;transition:all .15s;white-space:nowrap}
+    .qb:hover{border-color:rgba(59,130,246,.4);color:white;background:rgba(59,130,246,.08)}
+
+    .logo-naju{color:var(--blue)}.logo-anime{color:white}
+    @media(max-width:640px){
+      #msgs{padding:13px 13px 110px}
+      .bbl{max-width:88%;font-size:13px}
+    }
+
+    @media(max-width:640px){
+  .qb{font-size:11px;padding:5px 10px}
+  .qr{gap:5px;margin-top:8px}
+  .bbl{font-size:13px;padding:9px 12px}
+  #inp{font-size:13px;padding:9px 13px}
+   }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <a href="/" class="back">
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  </a>
+  <div class="aav">🤖</div>
+  <div style="flex:1">
+    <div class="anm"><span class="logo-naju">NaJu</span><span class="logo-anime"> AI</span></div>
+    <div class="asb"><span class="dot"></span><span id="stxt">ချိတ်ဆက်နေသည်...</span></div>
+  </div>
+</div>
+
+<!-- Messages -->
+<div id="msgs"></div>
+
+<!-- Input -->
+<div class="ibar">
+  <div class="inn">
+    <textarea id="inp" placeholder="မေးလိုတာ မေးလိုက်ပေါ့ဗျ..." rows="1" disabled></textarea>
+    <button id="snd" onclick="send()" disabled>
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="../data.js"></script>
+<script>
+const WORKER_URL = 'https://api.najuanime.com';
+
+const ANIME_LIST = animeData.map(a => ({
+  title:   a.title,
+  year:    a.year,
+  link:    a.link,
+  snippet: (a.review || '').replace(/\s+/g, ' ').trim().slice(0, 180) || '',
+}));
+
+let history = [];
+let busy    = false;
+
+const msgsEl = document.getElementById('msgs');
+const inpEl  = document.getElementById('inp');
+const sndEl  = document.getElementById('snd');
+
+const scrollEnd = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+function setReady(ready) {
+  inpEl.disabled = !ready;
+  sndEl.disabled = !ready;
+  if (ready) inpEl.focus();
+}
+
+function addRow(html, isUser) {
+  const row = document.createElement('div');
+  row.className = `row${isUser ? ' u' : ''}`;
+  row.innerHTML = isUser
+    ? `<div class="av u">👤</div><div class="bbl u">${escHtml(html)}</div>`
+    : `<div class="av b">🤖</div><div class="bbl b">${html}</div>`;
+  msgsEl.appendChild(row);
+  scrollEnd();
+  return row;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function linkify(text) {
+  return text.replace(
+    /(https?:\/\/[^\s<>"'）]+)/g,
+    '<a href="$1" target="_blank" rel="noopener">$1</a>'
+  );
+}
+
+function formatAI(text) {
+  return linkify(
+    escHtml(text)
+      // ### Header
+      .replace(/^###\s+(.+)$/gm, '<strong style="color:#60a5fa;font-size:14px">$1</strong>')
+      // ## Header  
+      .replace(/^##\s+(.+)$/gm, '<strong style="font-size:15px">$1</strong>')
+      // **bold**
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // * bullet point
+      .replace(/^\*\s+(.+)$/gm, '• $1')
+      // numbered list: 1. 2. 3.
+      .replace(/^(\d+)\.\s+(.+)$/gm, '<strong style="color:#c084fc">$1.</strong> $2')
+      // --- divider
+      .replace(/^---$/gm, '<hr style="border-color:rgba(255,255,255,.08);margin:8px 0">')
+      // newline
+      .replace(/\n/g, '<br>')
+  );
+}
+
+function showTyping() {
+  const r = document.createElement('div');
+  r.className = 'row'; r.id = 'typr';
+  r.innerHTML = `<div class="av b">🤖</div><div class="typ"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  msgsEl.appendChild(r); scrollEnd();
+}
+const hideTyping = () => document.getElementById('typr')?.remove();
+
+function showError(msg) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<div class="av b">🤖</div><div class="bbl b"><div class="err">⚠️ ${msg}</div></div>`;
+  msgsEl.appendChild(row); scrollEnd();
+}
+
+function addQuickReplies(arr) {
+  const last = msgsEl.lastElementChild;
+  if (!last) return;
+  const bubble = last.querySelector('.bbl.b');
+  if (!bubble) return;
+  const div = document.createElement('div');
+  div.className = 'qr';
+  arr.forEach(txt => {
+    const btn = document.createElement('button');
+    btn.className = 'qb';
+    btn.textContent = txt;
+    btn.onclick = () => submitMsg(txt);
+    div.appendChild(btn);
+  });
+  bubble.appendChild(div);
+  scrollEnd();
+}
+
+async function callWorker(userMsg) {
+  history.push({ role: 'user', content: userMsg });
+
+  const resp = await fetch(WORKER_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: history, animeList: ANIME_LIST }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Worker error ${resp.status}: ${err}`);
+  }
+
+  const data  = await resp.json();
+  if (data.error) throw new Error(data.error);
+  const reply = data.reply || '';
+
+  history.push({ role: 'assistant', content: reply });
+  if (history.length > 40) history = history.slice(-40);
+  return reply;
+}
+
+async function submitMsg(text) {
+  if (busy || !text.trim()) return;
+  busy = true;
+  setReady(false);
+  addRow(text, true);
+  showTyping();
+
+  try {
+    const reply = await callWorker(text);
+    hideTyping();
+    addRow(formatAI(reply), false);
+  } catch (err) {
+    hideTyping();
+    showError(`AI ကို ဆက်သွယ်မရဘူးဗျ — ${err.message}`);
+    if (history[history.length - 1]?.role === 'user') history.pop();
+  }
+
+  busy = false;
+  setReady(true);
+}
+
+function send() {
+  const t = inpEl.value.trim();
+  if (!t) return;
+  inpEl.value = '';
+  inpEl.style.height = 'auto';
+  submitMsg(t);
+}
+
+inpEl.addEventListener('input', () => {
+  inpEl.style.height = 'auto';
+  inpEl.style.height = Math.min(inpEl.scrollHeight, 120) + 'px';
+});
+inpEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+window.addEventListener('load', async () => {
+  try {
+    const r = await fetch(WORKER_URL + '/anime');
+    const list = await r.json();
+    const count = Array.isArray(list) ? list.length : '...';
+
+    document.getElementById('stxt').textContent = `Anime ${count} ကား သိပါတယ်`;
+    setReady(true);
+
+    const welcomeHtml = `မင်္ဂလာပါ! ကျွန်တော်က <strong>NaJu AI</strong> ပါ 🎌<br>
+NaJu Channel ထဲက Anime <strong>${count} ကား</strong>ကို သိပါတယ်ဗျ။<br>
+ဘာမဆို မေးလိုက်ပေါ့ — ကားရှာပေးတာ၊ Recommend ပေးတာ၊ Review ပြောပြတာ ကူညီနိုင်ပါတယ်။`;
+
+    addRow(welcomeHtml, false);
+    addQuickReplies([
+      'ဝမ်းနည်းစရာ ကောင်းတဲ့ ကား ညွှန်းပေး',
+      'Action ကားတွေ ဘာဘာရှိလဲ',
+      'Snowball Earth အကြောင်း ပြောပြပေး',
+      'Random Recommend ပေး',
+      'နောက်ဆုံးထွက် ကားတွေ ဘာတွေလဲ',
+    ]);
+  } catch(e) {
+    document.getElementById('stxt').textContent = 'AI အသင့်ရှိပါတယ်';
+    setReady(true);
+  }
+});
+</script>
+</body>

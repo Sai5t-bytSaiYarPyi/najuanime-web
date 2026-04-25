@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="my" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ═══ Dynamic SEO (JS မှ set မည်) ═══ -->
+  <title>NaJu Manhwa</title>
+  <meta id="metaDesc" name="description" content="">
+  <meta id="metaOgTitle" property="og:title" content="">
+  <meta id="metaOgDesc" property="og:description" content="">
+  <meta id="metaOgImage" property="og:image" content="">
+  <meta property="og:site_name" content="NaJu Anime">
+  <meta property="og:locale" content="my_MM">
+  <meta name="robots" content="index, follow">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBNCZMJS9F"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-NBNCZMJS9F');</script>
+
+  <link rel="stylesheet" href="/css/tailwind.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{font-family:'Outfit',sans-serif;box-sizing:border-box}
+    :root{
+      --blue:#3b82f6;--blue-dark:#1d4ed8;
+      --purple:#a855f7;--purple-light:#c084fc;
+      --green:#4ade80;
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+      --border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;
+    }
+    body{background:var(--bg);color:var(--text);min-height:100vh}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+
+    /* ── Header ── */
+    header{background:rgba(15,17,23,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+    .back-btn{display:flex;align-items:center;gap:6px;color:#94a3b8;text-decoration:none;font-size:14px;font-weight:600;transition:color .2s}
+    .back-btn:hover{color:var(--purple-light)}
+    .logo-naju{color:var(--blue)}.logo-manhwa{color:var(--purple-light)}
+
+    /* ── Hero ── */
+    .hero-wrap{position:relative;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(24px) brightness(.25);transform:scale(1.1);z-index:0}
+    .hero-content{position:relative;z-index:1;padding:32px 0 0}
+    .cover-img{width:140px;height:200px;object-fit:cover;border-radius:14px;border:2px solid rgba(168,85,247,.3);box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05);flex-shrink:0}
+    @media(max-width:640px){.cover-img{width:110px;height:158px;border-radius:10px}}
+    .genre-pill{display:inline-flex;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.2);color:var(--purple-light)}
+    .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .status-dot.ongoing{background:#4ade80;box-shadow:0 0 6px #4ade80}
+    .status-dot.completed{background:#60a5fa;box-shadow:0 0 6px #60a5fa}
+    .stat-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#94a3b8}
+
+    /* ── Continue Reading Button ── */
+    .continue-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 24px;background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;transition:opacity .2s,transform .15s,box-shadow .2s;box-shadow:0 6px 24px rgba(168,85,247,.35)}
+    .continue-btn:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 10px 32px rgba(168,85,247,.45)}
+    .continue-btn:active{transform:scale(.97)}
+    .start-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 24px;background:var(--bg3);color:#c084fc;font-size:15px;font-weight:700;border-radius:14px;text-decoration:none;border:1px solid rgba(168,85,247,.3);transition:all .2s}
+    .start-btn:hover{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.5)}
+
+    /* ── Tabs ── */
+    .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border)}
+    .tab-btn{padding:12px 20px;font-size:13px;font-weight:700;color:var(--muted);border:none;background:none;cursor:pointer;font-family:'Outfit',sans-serif;border-bottom:2px solid transparent;transition:all .15s;position:relative;bottom:-1px}
+    .tab-btn.active{color:var(--purple-light);border-bottom-color:var(--purple)}
+    .tab-btn:hover:not(.active){color:#e2e8f0}
+
+    /* ── Chapter List ── */
+    .ch-list{display:flex;flex-direction:column;gap:0}
+    .ch-item{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid var(--border);text-decoration:none;transition:background .15s;position:relative}
+    .ch-item:hover{background:rgba(168,85,247,.05)}
+    .ch-item:last-child{border-bottom:none}
+    .ch-item.read{opacity:.7}
+    .ch-num{font-size:15px;font-weight:900;color:var(--purple-light);flex-shrink:0;width:42px;text-align:center}
+    .ch-info{flex:1;min-width:0}
+    .ch-title{font-size:13px;font-weight:600;color:#e2e8f0;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ch-meta{display:flex;align-items:center;gap:8px;margin-top:3px}
+    .ch-pages{font-size:11px;color:var(--muted)}
+    .ch-date{font-size:11px;color:#334155}
+    .ch-read-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);color:#4ade80;flex-shrink:0}
+    .ch-new-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:#c084fc;flex-shrink:0}
+    .ch-arrow{color:#334155;flex-shrink:0;transition:color .15s,transform .15s}
+    .ch-item:hover .ch-arrow{color:#c084fc;transform:translateX(3px)}
+
+    /* ── Sort ── */
+    .sort-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+    .sort-label{font-size:12px;font-weight:700;color:var(--muted)}
+    .sort-toggle{display:flex;gap:1px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+    .sort-btn{padding:5px 12px;font-size:11px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+    .sort-btn.active{background:rgba(168,85,247,.15);color:#c084fc}
+
+    /* ── Description section ── */
+    .desc-text{font-size:14px;color:#94a3b8;line-height:1.8}
+    .desc-text.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    .read-more{background:none;border:none;color:#c084fc;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;padding:6px 0;transition:color .15s}
+    .read-more:hover{color:#e9d5ff}
+
+    /* ── Loading ── */
+    .skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skel-line{border-radius:6px}
+
+    /* ── Mobile Nav ── */
+    .mobile-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(22,27,39,.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 0;z-index:50}
+    .mobile-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);text-decoration:none;font-size:10px;font-weight:600;transition:color .2s;flex:1}
+    .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--purple-light)}
+    .mobile-nav-item svg{width:22px;height:22px}
+
+    /* ── Floating Action Button (Continue Reading) ── */
+    .fab{position:fixed;bottom:72px;right:18px;background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:700;text-decoration:none;display:none;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(168,85,247,.5);z-index:40;transition:transform .15s,box-shadow .2s;animation:fabIn .3s ease}
+    .fab:hover{transform:scale(1.05);box-shadow:0 12px 36px rgba(168,85,247,.6)}
+    @media(min-width:768px){.fab{bottom:24px}}
+    @keyframes fabIn{from{opacity:0;transform:translateY(12px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .35s ease both}
+
+    @media(max-width:640px){
+      .hero-content{padding:20px 0 0}
+      .tab-btn{padding:10px 14px;font-size:12px}
+      .ch-num{width:34px;font-size:13px}
+      .ch-title{font-size:12px}
+      .continue-btn,.start-btn{font-size:14px;padding:12px 18px}
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20 md:pb-0">
+
+<!-- ── Header ── -->
+<header>
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
+    <a href="/manhwa/" class="back-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    </a>
+    <a href="/" class="text-lg font-black tracking-tight">
+      <span class="logo-naju">NaJu</span><span style="color:white">Anime</span>
+    </a>
+    <span style="color:#334155;font-size:18px;font-weight:300">/</span>
+    <a href="/manhwa/" class="text-lg font-black">
+      <span class="logo-manhwa">Manhwa</span>
+    </a>
+    <div style="flex:1"></div>
+    <!-- Share button -->
+    <button id="shareBtn" onclick="sharePage()" title="Share"
+      style="width:36px;height:36px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main id="mainContainer">
+  <!-- Loading skeleton -->
+  <div id="loadingSkeleton" class="max-w-4xl mx-auto px-4">
+    <div style="padding:32px 0 24px;display:flex;gap:20px;align-items:flex-start">
+      <div class="skeleton" style="width:140px;height:200px;border-radius:14px;flex-shrink:0"></div>
+      <div style="flex:1;padding-top:8px;display:flex;flex-direction:column;gap:12px">
+        <div class="skeleton skel-line" style="height:28px;width:80%"></div>
+        <div class="skeleton skel-line" style="height:14px;width:50%"></div>
+        <div class="skeleton skel-line" style="height:14px;width:60%"></div>
+        <div class="skeleton skel-line" style="height:48px;width:100%;border-radius:14px;margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Content (hidden until loaded) ── -->
+<div id="content" style="display:none">
+
+  <!-- Hero -->
+  <div class="hero-wrap" id="heroWrap">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-content max-w-4xl mx-auto px-4">
+      <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:nowrap">
+        <img id="coverImg" class="cover-img" src="" alt="">
+        <div style="flex:1;min-width:0;padding-bottom:20px;display:flex;flex-direction:column;gap:10px">
+          <!-- Status -->
+          <div style="display:flex;align-items:center;gap:6px" id="statusRow"></div>
+          <!-- Title -->
+          <h1 id="manhwaTitle" style="font-size:24px;font-weight:900;color:white;line-height:1.2;letter-spacing:-.01em"></h1>
+          <!-- Author -->
+          <p id="manhwaAuthor" style="font-size:13px;color:#64748b;font-weight:600;display:none"></p>
+          <!-- Genres -->
+          <div id="genreRow" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+          <!-- Stats -->
+          <div id="statsRow" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div id="actionBtns" style="padding:20px 0 24px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+
+  <!-- Tabs + Chapter List -->
+  <div class="max-w-4xl mx-auto" style="background:var(--bg2);border:1px solid var(--border);border-radius:0;margin-top:0" id="chapterSection">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabChapters" onclick="switchTab('chapters')">📋 Chapter များ <span id="chCount" style="color:var(--muted);font-weight:600;font-size:11px"></span></button>
+      <button class="tab-btn" id="tabInfo" onclick="switchTab('info')">ℹ️ အချက်အလက်</button>
+    </div>
+
+    <!-- Chapters Panel -->
+    <div id="panelChapters">
+      <div class="sort-wrap">
+        <span class="sort-label" id="readProgressLabel"></span>
+        <div class="sort-toggle">
+          <button class="sort-btn active" id="sortDesc" onclick="setSort('desc')">နောက်ဆုံး အပေါ်</button>
+          <button class="sort-btn" id="sortAsc" onclick="setSort('asc')">Chapter 1 ကနေ</button>
+        </div>
+      </div>
+      <div class="ch-list" id="chList"></div>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="panelInfo" style="display:none;padding:20px 16px">
+      <h3 style="font-size:13px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">ဇာတ်ကားအကြောင်း</h3>
+      <p class="desc-text clamped" id="descText">အချက်အလက် မရှိသေးပါ</p>
+      <button class="read-more" id="descToggle" onclick="toggleDesc()" style="display:none">▼ ဆက်ဖတ်ရန်</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FAB (floating continue button) ── -->
+<a id="fabBtn" href="#" class="fab">
+  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+  <span id="fabLabel">ဆက်ဖတ်မည်</span>
+</a>
+
+<!-- ── Mobile Nav ── -->
+<nav class="mobile-nav md:hidden">
+  <div style="display:flex;justify-content:space-around;align-items:center">
+    <a href="/" class="mobile-nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.361a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+      Anime
+    </a>
+    <a href="/manhwa/" class="mobile-nav-item active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      Manhwa
+    </a>
+    <a href="/chat/" class="mobile-nav-item" style="color:#60a5fa">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
+      NaJu AI
+    </a>
+  </div>
+</nav>
+
+<!-- ── Toast ── -->
+<div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:99;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;background:#1a2e1a;border:1px solid rgba(74,222,128,.3);color:#4ade80;box-shadow:0 8px 32px rgba(0,0,0,.5)"></div>
+
+<script>
+const WORKER_URL = 'https://api.najuanime.com';
+
+// ── Extract manhwa ID from URL ────────────────────────
+// URL: /manhwa/solo-leveling/ → id = 'solo-leveling'
+const MANHWA_ID = new URLSearchParams(window.location.search).get('id') || '';
+
+if (!MANHWA_ID) {
+  window.location.href = '/manhwa/';
+}
+
+// ── State ─────────────────────────────────────────────
+let manhwaData  = null;
+let chapters    = [];
+let sortOrder   = 'desc';   // 'desc' | 'asc'
+let activeTab   = 'chapters';
+
+// ── Reading History ───────────────────────────────────
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('naju_read_history') || '{}'); } catch { return {}; }
+}
+function getLastRead(id) {
+  return getHistory()[id] || null;
+}
+function isChRead(ch) {
+  const h = getLastRead(MANHWA_ID);
+  return h && h.lastChapter >= ch;
+}
+
+// ── Date Formatter ────────────────────────────────────
+function fmtDate(str) {
+  if (!str) return '';
+  const d = new Date(str), now = new Date();
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff === 0) return 'ယနေ့';
+  if (diff === 1) return 'မနေ့က';
+  if (diff < 7)  return `${diff} ရက်က`;
+  if (diff < 30) return `${Math.floor(diff/7)} ပတ်က`;
+  return d.toLocaleDateString('my-MM', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// ── Render Chapters ───────────────────────────────────
+function renderChapters() {
+  const list = document.getElementById('chList');
+  const sorted = sortOrder === 'desc' ? [...chapters].reverse() : [...chapters];
+  const history = getLastRead(MANHWA_ID);
+  const lastCh  = history?.lastChapter || 0;
+
+  // Progress label
+  const progLabel = document.getElementById('readProgressLabel');
+  if (lastCh && chapters.length) {
+    const pct = Math.round((lastCh / chapters.length) * 100);
+    progLabel.innerHTML = `<span style="color:#4ade80;font-weight:700">📖 ${lastCh}/${chapters.length}</span> <span style="color:var(--muted)">(${pct}%)</span>`;
+  } else {
+    progLabel.textContent = `${chapters.length} chapters`;
+  }
+
+  if (!sorted.length) {
+    list.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:10px">📭</div>
+      <p style="font-size:14px;font-weight:600">Chapter မရှိသေးပါ</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  sorted.forEach((ch, i) => {
+    const read     = isChRead(ch.ch);
+    const isNew    = !read && (i < 3 && sortOrder === 'desc');
+    const item     = document.createElement('a');
+    item.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${ch.ch}`;
+    item.className = `ch-item${read ? ' read' : ''}`;
+    item.style.animationDelay = `${Math.min(i, 30) * 20}ms`;
+
+    item.innerHTML = `
+      <div class="ch-num">${ch.ch}</div>
+      <div class="ch-info">
+        <div class="ch-title">${ch.title || `Chapter ${ch.ch}`}</div>
+        <div class="ch-meta">
+          ${ch.pageCount ? `<span class="ch-pages">🖼 ${ch.pageCount} ပုံ</span>` : ''}
+          ${ch.uploadedAt ? `<span class="ch-date">${fmtDate(ch.uploadedAt)}</span>` : ''}
+        </div>
+      </div>
+      ${read ? `<span class="ch-read-badge">✓ ဖတ်ပြီး</span>` : ''}
+      ${isNew ? `<span class="ch-new-badge">✨ NEW</span>` : ''}
+      <svg class="ch-arrow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`;
+    list.appendChild(item);
+  });
+}
+
+// ── Sort ──────────────────────────────────────────────
+function setSort(order) {
+  sortOrder = order;
+  document.getElementById('sortDesc').classList.toggle('active', order === 'desc');
+  document.getElementById('sortAsc').classList.toggle('active', order === 'asc');
+  renderChapters();
+}
+
+// ── Tabs ──────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('panelChapters').style.display = tab === 'chapters' ? 'block' : 'none';
+  document.getElementById('panelInfo').style.display     = tab === 'info' ? 'block' : 'none';
+  document.getElementById('tabChapters').classList.toggle('active', tab === 'chapters');
+  document.getElementById('tabInfo').classList.toggle('active', tab === 'info');
+}
+
+// ── Description Toggle ────────────────────────────────
+function toggleDesc() {
+  const el  = document.getElementById('descText');
+  const btn = document.getElementById('descToggle');
+  const clamped = el.classList.toggle('clamped');
+  btn.textContent = clamped ? '▼ ဆက်ဖတ်ရန်' : '▲ ခဲ့ပြန်ပြ';
+}
+
+// ── Share ─────────────────────────────────────────────
+function sharePage() {
+  if (navigator.share) {
+    navigator.share({ title: manhwaData?.title || 'NaJu Manhwa', url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => showToast('✓ Link copy ပြီး'));
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(16px)'; }, 2500);
+}
+
+// ── Build Action Buttons ──────────────────────────────
+function buildActionBtns(lastRead, firstCh, lastChNum) {
+  const wrap = document.getElementById('actionBtns');
+  wrap.innerHTML = '';
+
+  if (lastRead && lastRead.lastChapter) {
+    const nextCh = Math.min(lastRead.lastChapter + 1, lastChNum);
+    // Continue reading
+    const cont = document.createElement('a');
+    cont.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${nextCh}`;
+    cont.className = 'continue-btn';
+    cont.innerHTML = `<svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg> ဆက်ဖတ်ရန် — Ch.${nextCh}`;
+    wrap.appendChild(cont);
+
+    // FAB
+    const fab = document.getElementById('fabBtn');
+    fab.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${nextCh}`;
+    document.getElementById('fabLabel').textContent = `ဆက်ဖတ်ရန် Ch.${nextCh}`;
+    fab.style.display = 'flex';
+  } else {
+    // Start reading
+    const start = document.createElement('a');
+    start.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${firstCh}`;
+    start.className = 'continue-btn';
+    start.innerHTML = `<svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Chapter 1 ကနေ စတင်ဖတ်မည်`;
+    wrap.appendChild(start);
+  }
+}
+
+// ── Load & Render ─────────────────────────────────────
+async function load() {
+  try {
+    const r    = await fetch(`${WORKER_URL}/manhwa/${encodeURIComponent(MANHWA_ID)}`);
+    if (!r.ok) throw new Error('Manhwa မတွေ့ပါ');
+    manhwaData = await r.json();
+    chapters   = manhwaData.chapters || [];
+
+    // ── SEO ──
+    const desc = manhwaData.description
+      ? manhwaData.description.slice(0, 155) + '…'
+      : `${manhwaData.title} ကို NaJu Manhwa တွင် အခမဲ့ ဖတ်ရှုနိုင်ပါသည်`;
+    document.title = `${manhwaData.title} — NaJu Manhwa`;
+    document.getElementById('metaDesc').content    = desc;
+    document.getElementById('metaOgTitle').content = `${manhwaData.title} — NaJu Manhwa`;
+    document.getElementById('metaOgDesc').content  = desc;
+    document.getElementById('metaOgImage').content = manhwaData.cover || '';
+
+    // ── Hero ──
+    const heroBg = document.getElementById('heroBg');
+    if (manhwaData.cover) heroBg.style.backgroundImage = `url(${manhwaData.cover})`;
+
+    const coverImg = document.getElementById('coverImg');
+    coverImg.src = manhwaData.cover || '';
+    coverImg.alt = manhwaData.title;
+
+    // Status
+    const statusRow = document.getElementById('statusRow');
+    const st = (manhwaData.status || '').toLowerCase();
+    const stLabel = { ongoing:'Ongoing', completed:'Completed', hiatus:'Hiatus' }[st] || manhwaData.status || '';
+    const stColor = st === 'ongoing' ? '#4ade80' : st === 'completed' ? '#60a5fa' : '#fb923c';
+    statusRow.innerHTML = `<span class="status-dot ${st}"></span><span style="font-size:12px;font-weight:700;color:${stColor}">${stLabel}</span>`;
+
+    // Title
+    document.getElementById('manhwaTitle').textContent = manhwaData.title;
+
+    // Author
+    if (manhwaData.author) {
+      const authEl = document.getElementById('manhwaAuthor');
+      authEl.textContent = `✍️ ${manhwaData.author}`;
+      authEl.style.display = 'block';
+    }
+
+    // Genres
+    const genreRow = document.getElementById('genreRow');
+    (manhwaData.genres || []).forEach(g => {
+      const span = document.createElement('span');
+      span.className = 'genre-pill';
+      span.textContent = g;
+      genreRow.appendChild(span);
+    });
+
+    // Stats
+    const statsRow = document.getElementById('statsRow');
+    const stats = [
+      chapters.length ? `📚 ${chapters.length} chapters` : null,
+    ].filter(Boolean);
+    statsRow.innerHTML = stats.map(s =>
+      `<span class="stat-chip">${s}</span>`
+    ).join('');
+
+    // Action Buttons
+    const lastRead = getLastRead(MANHWA_ID);
+    const firstCh  = chapters[0]?.ch || 1;
+    const lastChNum = chapters[chapters.length - 1]?.ch || 1;
+    if (chapters.length) buildActionBtns(lastRead, firstCh, lastChNum);
+
+    // Description
+    if (manhwaData.description) {
+      const descEl = document.getElementById('descText');
+      descEl.textContent = manhwaData.description;
+      if (manhwaData.description.length > 200) {
+        document.getElementById('descToggle').style.display = 'block';
+      }
+    }
+
+    // Chapter count badge
+    document.getElementById('chCount').textContent = `(${chapters.length})`;
+
+    // Render chapters
+    renderChapters();
+
+    // ── Show content ──
+    document.getElementById('loadingSkeleton').style.display = 'none';
+    const contentEl = document.getElementById('content');
+    contentEl.style.display = 'block';
+    contentEl.classList.add('fade-up');
+
+  } catch (err) {
+    document.getElementById('loadingSkeleton').innerHTML = `
+      <div style="text-align:center;padding:80px 20px;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <p style="font-size:15px;font-weight:700;color:#f87171">Load မရပါ</p>
+        <p style="font-size:13px;margin-top:6px">${err.message}</p>
+        <a href="/manhwa/" style="display:inline-block;margin-top:16px;color:#c084fc;font-weight:700;text-decoration:none;font-size:13px">← Manhwa List ကို ပြန်သွားမည်</a>
+      </div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>

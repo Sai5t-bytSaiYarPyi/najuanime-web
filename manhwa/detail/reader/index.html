@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NaJu Manhwa Reader</title>
+  <meta name="robots" content="noindex"><!-- Reader page ကို search index မလုပ်ပါ -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NBNCZMJS9F"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-NBNCZMJS9F');</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+    :root{
+      --blue:#3b82f6;
+      --purple:#a855f7;--purple-light:#c084fc;
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+      --border:rgba(255,255,255,0.07);--text:#e2e8f0;--muted:#64748b;
+      --bar-h:52px;
+    }
+
+    /* ══ BASE ══ */
+    html,body{min-height:100vh}
+    body{background:var(--reader-bg,#111);transition:background .25s}
+    body.light-mode{--reader-bg:#f8f8f8;background:#f8f8f8}
+
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+
+    /* ══ TOP BAR ══ */
+    #topBar{
+      position:fixed;top:0;left:0;right:0;z-index:60;
+      height:var(--bar-h);
+      background:rgba(15,17,23,.97);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:0;
+      padding:0 12px;
+      transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;
+      will-change:transform;
+    }
+    #topBar.hidden{transform:translateY(-100%);opacity:0}
+    body.light-mode #topBar{background:rgba(248,248,248,.97);border-color:rgba(0,0,0,.08)}
+
+    .tb-btn{
+      width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      background:transparent;color:#94a3b8;transition:all .15s;flex-shrink:0;
+    }
+    .tb-btn:hover{background:var(--bg3);color:white}
+    body.light-mode .tb-btn{color:#64748b}
+    body.light-mode .tb-btn:hover{background:#e2e8f0;color:#1e293b}
+
+    .tb-title{
+      flex:1;min-width:0;text-align:center;
+      font-size:13px;font-weight:700;color:white;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      padding:0 8px;
+    }
+    body.light-mode .tb-title{color:#1e293b}
+
+    /* Chapter selector */
+    #chSel{
+      background:var(--bg3);border:1px solid var(--border);color:#c084fc;
+      border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;
+      font-family:'Outfit',sans-serif;cursor:pointer;outline:none;
+      max-width:130px;
+    }
+    body.light-mode #chSel{background:#e2e8f0;border-color:#cbd5e1;color:#7e22ce}
+
+    /* ══ PROGRESS BAR (top thin line) ══ */
+    #progressBar{
+      position:fixed;top:var(--bar-h);left:0;right:0;z-index:59;
+      height:3px;background:rgba(168,85,247,.15);
+    }
+    #progressFill{
+      height:100%;
+      background:linear-gradient(90deg,#7e22ce,#a855f7,#c084fc);
+      width:0%;transition:width .15s;
+      border-radius:0 2px 2px 0;
+    }
+
+    /* ══ SIDE PROGRESS ══ */
+    #sideProgress{
+      position:fixed;right:0;top:50%;transform:translateY(-50%);
+      width:3px;height:120px;background:rgba(255,255,255,.06);
+      border-radius:3px;z-index:58;
+    }
+    #sideProgressFill{
+      width:100%;background:linear-gradient(180deg,#7e22ce,#c084fc);
+      border-radius:3px;transition:height .2s;height:0%;
+    }
+    .side-pct{
+      position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      font-size:10px;font-weight:700;color:rgba(255,255,255,.35);
+      writing-mode:vertical-rl;white-space:nowrap;
+    }
+    body.light-mode #sideProgress{background:rgba(0,0,0,.08)}
+    body.light-mode .side-pct{color:rgba(0,0,0,.25)}
+
+    /* ══ PAGES CONTAINER ══ */
+    #pagesWrap{
+      display:flex;flex-direction:column;align-items:center;
+      padding-top:var(--bar-h);
+      max-width:720px;margin:0 auto;
+    }
+    .page-img{
+      display:block;
+      width:100%;height:auto;
+      margin:0;padding:0;
+      /* no gap between pages */
+    }
+    /* loading placeholder before image loads */
+    .page-wrap{
+      width:100%;position:relative;
+      background:var(--bg2);
+    }
+    body.light-mode .page-wrap{background:#e8e8e8}
+    .page-wrap.loaded{background:transparent}
+    .page-skeleton{
+      width:100%;aspect-ratio:2/3;
+      background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+      background-size:200% 100%;
+      animation:shimmer 1.4s infinite;
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .page-num-badge{
+      position:absolute;bottom:6px;right:6px;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+      color:rgba(255,255,255,.5);font-size:10px;font-weight:700;
+      padding:2px 7px;border-radius:4px;pointer-events:none;
+    }
+
+    /* ══ BOTTOM NAV (prev/next) ══ */
+    #bottomNav{
+      max-width:720px;margin:0 auto;
+      padding:24px 16px 40px;
+      display:flex;flex-direction:column;gap:12px;
+      align-items:center;
+    }
+    .nav-ch-btns{
+      display:flex;gap:10px;width:100%;
+    }
+    .nav-prev,.nav-next{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:14px 12px;border-radius:14px;font-size:14px;font-weight:700;
+      text-decoration:none;transition:all .2s;
+    }
+    .nav-prev{
+      background:var(--bg2);border:1px solid var(--border);color:#94a3b8;
+    }
+    .nav-prev:hover{background:var(--bg3);border-color:rgba(168,85,247,.3);color:#c084fc}
+    .nav-next{
+      background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;
+      box-shadow:0 4px 20px rgba(168,85,247,.35);
+    }
+    .nav-next:hover{box-shadow:0 6px 28px rgba(168,85,247,.5);transform:translateY(-1px)}
+    .nav-next:active,.nav-prev:active{transform:scale(.97)}
+    .nav-next.disabled,.nav-prev.disabled{
+      opacity:.35;pointer-events:none;
+    }
+
+    .ch-list-btn{
+      display:flex;align-items:center;gap:7px;
+      padding:11px 20px;border-radius:12px;
+      background:transparent;border:1px solid var(--border);
+      color:#94a3b8;font-size:13px;font-weight:700;
+      text-decoration:none;transition:all .15s;
+      font-family:'Outfit',sans-serif;cursor:pointer;
+    }
+    .ch-list-btn:hover{border-color:rgba(168,85,247,.3);color:#c084fc;background:rgba(168,85,247,.05)}
+
+    /* ══ LOADING / ERROR STATES ══ */
+    #loadingScreen{
+      position:fixed;inset:0;background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:16px;z-index:100;
+    }
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:#a855f7;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .load-title{font-size:14px;font-weight:600;color:var(--muted)}
+    .load-sub{font-size:12px;color:#334155}
+
+    /* ══ TOAST ══ */
+    #toast{
+      position:fixed;bottom:24px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      padding:9px 18px;border-radius:99px;
+      font-size:12px;font-weight:700;z-index:99;
+      opacity:0;transition:all .3s;pointer-events:none;
+      white-space:nowrap;
+      background:#161b27;border:1px solid var(--border);color:#94a3b8;
+      box-shadow:0 8px 32px rgba(0,0,0,.5);
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    #toast.ok{background:#1a2e1a;border-color:rgba(74,222,128,.3);color:#4ade80}
+    #toast.info{background:#1a1f2e;border-color:rgba(59,130,246,.3);color:#60a5fa}
+
+    /* ══ BACK-TO-TOP ══ */
+    #btt{
+      position:fixed;bottom:24px;right:16px;
+      width:40px;height:40px;border-radius:12px;
+      background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);
+      color:#c084fc;display:none;align-items:center;justify-content:center;
+      cursor:pointer;transition:all .2s;z-index:50;
+    }
+    #btt:hover{background:rgba(168,85,247,.25);transform:translateY(-2px)}
+    #btt.visible{display:flex}
+
+    /* ══ SETTINGS PANEL ══ */
+    #settingsPanel{
+      position:fixed;top:calc(var(--bar-h) + 8px);right:10px;
+      background:var(--bg2);border:1px solid var(--border);
+      border-radius:14px;padding:14px;z-index:70;
+      min-width:180px;display:none;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+      animation:settIn .15s ease;
+    }
+    @keyframes settIn{from{opacity:0;transform:scale(.95) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .sett-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:#94a3b8}
+    .sett-item:last-child{border-bottom:none;padding-bottom:0}
+    .sett-item label{font-weight:600}
+    body.light-mode #settingsPanel{background:#f0f0f0;border-color:#e2e8f0}
+    body.light-mode .sett-item{color:#475569;border-color:#e2e8f0}
+
+    /* Toggle switch */
+    .toggle{position:relative;width:38px;height:22px;cursor:pointer}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-track{position:absolute;inset:0;background:#334155;border-radius:99px;transition:background .2s}
+    .toggle input:checked ~ .toggle-track{background:#a855f7}
+    .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s}
+    .toggle input:checked ~ .toggle-track ~ .toggle-thumb{transform:translateX(16px)}
+
+    /* ══ MOBILE: safe area ══ */
+    @supports(padding-bottom:env(safe-area-inset-bottom)){
+      #bottomNav{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+    }
+
+    @media(max-width:640px){
+      .tb-title{font-size:12px}
+      #chSel{max-width:100px;font-size:11px}
+      .nav-prev,.nav-next{font-size:13px;padding:12px 10px}
+      #sideProgress{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOADING SCREEN ══ -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="load-title">Chapter တင်နေသည်...</div>
+  <div class="load-sub" id="loadSub"></div>
+</div>
+
+<!-- ══ TOP BAR ══ -->
+<div id="topBar">
+  <!-- Back to chapter list -->
+  <a id="backBtn" href="#" class="tb-btn" title="Chapter List">
+    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+  </a>
+
+  <!-- Title -->
+  <div class="tb-title" id="tbTitle">Loading...</div>
+
+  <!-- Chapter selector -->
+  <select id="chSel" onchange="jumpToChapter(this.value)" title="Chapter ရွေး"></select>
+
+  <!-- Settings toggle -->
+  <button class="tb-btn" onclick="toggleSettings()" title="Settings">
+    <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+  </button>
+</div>
+
+<!-- Progress Bar -->
+<div id="progressBar"><div id="progressFill"></div></div>
+
+<!-- Side Progress -->
+<div id="sideProgress">
+  <div id="sideProgressFill"></div>
+  <div class="side-pct" id="sidePct">0%</div>
+</div>
+
+<!-- ══ SETTINGS PANEL ══ -->
+<div id="settingsPanel">
+  <div class="sett-item">
+    <label>☀️ Light Mode</label>
+    <label class="toggle">
+      <input type="checkbox" id="bgToggle" onchange="toggleBg(this.checked)">
+      <span class="toggle-track"></span>
+      <span class="toggle-thumb"></span>
+    </label>
+  </div>
+  <div class="sett-item" style="padding-top:10px">
+    <label style="font-size:11px;color:#475569">Reading Progress</label>
+    <span id="settProgress" style="font-size:12px;font-weight:700;color:#c084fc">0%</span>
+  </div>
+</div>
+
+<!-- ══ PAGES ══ -->
+<div id="pagesWrap"></div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<div id="bottomNav">
+  <div class="nav-ch-btns">
+    <a id="prevBtn" href="#" class="nav-prev disabled">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Prev
+    </a>
+    <a id="nextBtn" href="#" class="nav-next disabled">
+      Next
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  <a id="chListBtn" href="#" class="ch-list-btn">
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+    Chapter List သို့
+  </a>
+</div>
+
+<!-- ══ BACK TO TOP ══ -->
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="အပေါ်ကို ပြန်">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+</button>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG — R2 Public Base URL ကို ဤနေရာမှာ ထည့်ပါ
+// (Worker /admin/upload မှ return လာတဲ့ URL base)
+// Example: 'https://pub-xxxx.r2.dev'
+// ══════════════════════════════════════════════════════
+const R2_BASE_URL   = 'https://images.najuanime.com';   // ← ပြင်ပါ
+const WORKER_URL    = 'https://api.najuanime.com';
+const IMG_PADDING   = 3;   // 001.webp, 002.webp … (zero-pad digits)
+const IMG_EXT       = 'webp';
+const HISTORY_KEY   = 'naju_read_history';
+const SETTINGS_KEY  = 'naju_reader_settings';
+const SAVE_THROTTLE = 2000; // ms — history save throttle
+
+// ── URL parsing ────────────────────────────────────────
+// /manhwa/solo-leveling/1/  →  ['manhwa','solo-leveling','1']
+const _params = new URLSearchParams(location.search);
+const MANHWA_ID = _params.get('id') || '';
+const CH_NUM = parseInt(_params.get('ch') || '1', 10);
+
+if (!MANHWA_ID || isNaN(CH_NUM)) location.href = '/manhwa/';
+
+// ── State ──────────────────────────────────────────────
+let manhwaData   = null;
+let curChapter   = null;
+let allChapters  = [];
+let totalPages   = 0;
+let loadedCount  = 0;
+let lastSaveTime = 0;
+let settingsOpen = false;
+
+// ── Settings (localStorage) ────────────────────────────
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { return {}; }
+}
+function saveSettings(obj) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({...loadSettings(),...obj}));
+}
+
+// ── Reading History ────────────────────────────────────
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); } catch { return {}; }
+}
+function saveProgress(chapter) {
+  const now = Date.now();
+  if (now - lastSaveTime < SAVE_THROTTLE) return;
+  lastSaveTime = now;
+  const h = getHistory();
+  const existing = h[MANHWA_ID]?.lastChapter || 0;
+  if (chapter > existing) {
+    h[MANHWA_ID] = { lastChapter: chapter, updatedAt: new Date().toISOString() };
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  }
+}
+
+// ── Pad number ────────────────────────────────────────
+function pad(n, digits) { return String(n).padStart(digits, '0'); }
+
+// ── Image URL builder ─────────────────────────────────
+function imgUrl(folder, pageNum) {
+  // folder: 'manhwa/solo-leveling/ch1/'
+  // → https://r2.../manhwa/solo-leveling/ch1/001.webp
+  const base = R2_BASE_URL.replace(/\/$/, '');
+  const f    = folder.replace(/\/$/, '');
+  return `${base}/${f}/${pad(pageNum, IMG_PADDING)}.${IMG_EXT}`;
+}
+
+// ── Toast ──────────────────────────────────────────────
+function toast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.className = '', 2500);
+}
+
+// ── Update progress ────────────────────────────────────
+function updateProgress() {
+  const scrollTop  = window.scrollY;
+  const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+  const pct        = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+  const clamped    = Math.min(100, Math.max(0, pct));
+
+  document.getElementById('progressFill').style.width     = clamped + '%';
+  document.getElementById('sideProgressFill').style.height = clamped + '%';
+  document.getElementById('sidePct').textContent          = clamped + '%';
+  document.getElementById('settProgress').textContent     = clamped + '%';
+
+  // Back-to-top button
+  const btt = document.getElementById('btt');
+  btt.classList.toggle('visible', scrollTop > 400);
+
+  // Auto-save progress when user has read at least 50%
+  if (clamped >= 50) saveProgress(CH_NUM);
+  // Save when reaching bottom
+  if (clamped >= 95) saveProgress(CH_NUM);
+}
+
+// ── Auto-hide top bar on scroll ────────────────────────
+let lastScrollY = 0;
+let ticking     = false;
+function handleScroll() {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      const cur = window.scrollY;
+      const bar = document.getElementById('topBar');
+      // Hide on scroll down > 80px, show on scroll up
+      if (cur > lastScrollY + 5 && cur > 120) {
+        bar.classList.add('hidden');
+        if (settingsOpen) closeSettings();
+      } else if (cur < lastScrollY - 5 || cur < 80) {
+        bar.classList.remove('hidden');
+      }
+      lastScrollY = cur;
+      updateProgress();
+      ticking = false;
+    });
+    ticking = true;
+  }
+}
+
+// ── BG toggle ─────────────────────────────────────────
+function toggleBg(isLight) {
+  document.body.classList.toggle('light-mode', isLight);
+  saveSettings({ lightMode: isLight });
+}
+
+// ── Settings panel ────────────────────────────────────
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('settingsPanel').style.display = settingsOpen ? 'block' : 'none';
+}
+function closeSettings() {
+  settingsOpen = false;
+  document.getElementById('settingsPanel').style.display = 'none';
+}
+document.addEventListener('click', e => {
+  if (settingsOpen && !e.target.closest('#settingsPanel') && !e.target.closest('.tb-btn')) {
+    closeSettings();
+  }
+});
+
+// ── Chapter jump (select dropdown) ───────────────────
+function jumpToChapter(ch) {
+  if (ch && parseInt(ch) !== CH_NUM) {
+    location.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${ch}`;
+  }
+}
+
+// ── Build chapter dropdown ─────────────────────────────
+function buildChapterSelect(chapters) {
+  const sel = document.getElementById('chSel');
+  sel.innerHTML = chapters.map(c =>
+    `<option value="${c.ch}" ${c.ch === CH_NUM ? 'selected' : ''}>Ch.${c.ch}${c.title ? ` — ${c.title}` : ''}</option>`
+  ).join('');
+}
+
+// ── Build nav buttons ─────────────────────────────────
+function buildNav(chapters) {
+  const idx     = chapters.findIndex(c => c.ch === CH_NUM);
+  const prevCh  = idx > 0 ? chapters[idx - 1].ch : null;
+  const nextCh  = idx < chapters.length - 1 ? chapters[idx + 1].ch : null;
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if (prevCh !== null) {
+    prevBtn.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${prevCh}`;
+    prevBtn.classList.remove('disabled');
+    prevBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Ch.${prevCh}`;
+  }
+
+  if (nextCh !== null) {
+    nextBtn.href = `/manhwa/detail/reader/?id=${MANHWA_ID}&ch=${nextCh}`;
+    nextBtn.classList.remove('disabled');
+    nextBtn.innerHTML = `Ch.${nextCh} <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`;
+  } else {
+    nextBtn.innerHTML = `✅ နောက်ဆုံး Chapter`;
+  }
+}
+
+// ── Render pages ──────────────────────────────────────
+function renderPages(chapter) {
+  const wrap     = document.getElementById('pagesWrap');
+  totalPages     = chapter.pageCount || 0;
+  loadedCount    = 0;
+
+  if (!totalPages) {
+    wrap.innerHTML = `<div style="text-align:center;padding:80px 20px;color:#64748b">
+      <div style="font-size:40px;margin-bottom:12px">📭</div>
+      <p style="font-size:14px;font-weight:600">Chapter images မတွေ့ပါ</p>
+    </div>`;
+    return;
+  }
+
+  // Generate image elements
+  for (let i = 1; i <= totalPages; i++) {
+    const pageDiv = document.createElement('div');
+    pageDiv.className = 'page-wrap';
+    pageDiv.id = `pg-${i}`;
+
+    // Skeleton placeholder (shown until image loads)
+    const skel = document.createElement('div');
+    skel.className = 'page-skeleton';
+    pageDiv.appendChild(skel);
+
+    // Actual image
+    const img = document.createElement('img');
+    img.className = 'page-img';
+    img.loading   = 'lazy'; // browser-native lazy load
+    img.decoding  = 'async';
+    img.alt       = `Page ${i}`;
+    img.src       = imgUrl(chapter.folder, i);
+
+    img.onload = () => {
+      skel.remove();
+      pageDiv.classList.add('loaded');
+      loadedCount++;
+      updateLoadProgress();
+    };
+    img.onerror = () => {
+      skel.remove();
+      pageDiv.classList.add('loaded');
+      pageDiv.innerHTML = `<div style="aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:var(--bg2);flex-direction:column;gap:8px">
+        <span style="font-size:28px">🖼️</span>
+        <span style="font-size:11px;color:#475569">Image load မရပါ (${i})</span>
+      </div>`;
+      loadedCount++;
+    };
+
+    // Page number badge
+    const badge = document.createElement('div');
+    badge.className = 'page-num-badge';
+    badge.textContent = `${i} / ${totalPages}`;
+    pageDiv.appendChild(img);
+    pageDiv.appendChild(badge);
+
+    wrap.appendChild(pageDiv);
+  }
+}
+
+// ── Loading progress ──────────────────────────────────
+function updateLoadProgress() {
+  const sub = document.getElementById('loadSub');
+  if (sub) sub.textContent = `(${loadedCount} / ${totalPages})`;
+}
+
+// ── Main Load ─────────────────────────────────────────
+async function load() {
+  document.getElementById('loadSub').textContent = 'Data ရယူနေသည်...';
+
+  try {
+    const r = await fetch(`${WORKER_URL}/manhwa/${encodeURIComponent(MANHWA_ID)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    manhwaData  = await r.json();
+    allChapters = (manhwaData.chapters || []);
+    curChapter  = allChapters.find(c => c.ch === CH_NUM);
+
+    if (!curChapter) {
+      throw new Error(`Chapter ${CH_NUM} မတွေ့ပါ`);
+    }
+
+    // ── Set page title & meta ──
+    const pageTitle = `${manhwaData.title} Ch.${CH_NUM}${curChapter.title ? ` — ${curChapter.title}` : ''}`;
+    document.title  = `${pageTitle} | NaJu Manhwa`;
+
+    // ── Top bar ──
+    document.getElementById('tbTitle').textContent = pageTitle;
+    document.getElementById('backBtn').href    = `/manhwa/detail/?id=${MANHWA_ID}`;
+    document.getElementById('chListBtn').href  = `/manhwa/detail/?id=${MANHWA_ID}`;
+
+    // ── Chapter dropdown ──
+    buildChapterSelect(allChapters);
+
+    // ── Nav buttons ──
+    buildNav(allChapters);
+
+    // ── Restore settings ──
+    const sett = loadSettings();
+    if (sett.lightMode) {
+      document.body.classList.add('light-mode');
+      document.getElementById('bgToggle').checked = true;
+    }
+
+    // ── Render pages ──
+    document.getElementById('loadSub').textContent = 'ပုံတင်နေသည်...';
+    renderPages(curChapter);
+
+    // ── Save progress (mark chapter as started) ──
+    // Save after 5s of opening (user actually opened it)
+    setTimeout(() => saveProgress(CH_NUM), 5000);
+
+    // ── Hide loading screen ──
+    document.getElementById('loadingScreen').style.display = 'none';
+
+    // ── Announce chapter ──
+    toast(`📖 Chapter ${CH_NUM}${curChapter.title ? ' — ' + curChapter.title : ''} — ပုံ ${curChapter.pageCount} ပုံ`, 'info');
+
+  } catch (err) {
+    document.getElementById('loadingScreen').innerHTML = `
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <p style="font-size:15px;font-weight:700;color:#f87171;margin-bottom:6px">Load မရပါ</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:20px">${err.message}</p>
+        <a href="/manhwa/${MANHWA_ID}/" style="display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">
+          ← Chapter List ကို ပြန်သွားမည်
+        </a>
+      </div>`;
+  }
+}
+
+// ── Keyboard shortcuts ────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft'  && !document.getElementById('prevBtn').classList.contains('disabled'))
+    location.href = document.getElementById('prevBtn').href;
+  if (e.key === 'ArrowRight' && !document.getElementById('nextBtn').classList.contains('disabled'))
+    location.href = document.getElementById('nextBtn').href;
+  if (e.key === 'Escape') closeSettings();
+});
+
+// ── Scroll listener ───────────────────────────────────
+window.addEventListener('scroll', handleScroll, { passive: true });
+
+// ── Init ──────────────────────────────────────────────
+load();
+</script>
+</body>
+</html>
