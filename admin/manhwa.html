@@ -935,7 +935,8 @@ async function uploadBlobs(blobsOrFiles, folder, onProgress) {
 // ─────────────────── MAIN UPLOAD FLOW ──────────────────
 async function startUpload() {
   const manhwaId = document.getElementById('uploadManhwaId').value;
-  const chNum    = parseInt(document.getElementById('uploadChNum').value);
+  const chNum = document.getElementById('uploadChNum').value;
+  const chNumInt = parseInt(chNum);
   const chTitle  = document.getElementById('uploadChTitle').value.trim();
   const folder   = document.getElementById('uploadFolderPath').value;
 
