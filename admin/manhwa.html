@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex">
 
   <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="/admin/js/pdf.js"></script>
   <link rel="stylesheet" href="/css/tailwind.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/fonts.css">
@@ -451,7 +451,7 @@ const WORKER_URL = 'https://api.najuanime.com';
 
 // PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  '/admin/js/pdf.worker.js';
 
 // ─────────────────── STATE ─────────────────────────────
 let TOKEN       = '';
