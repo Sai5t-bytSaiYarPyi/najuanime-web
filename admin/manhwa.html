@@ -204,7 +204,7 @@
             </div>
             <div>
               <label class="label">Chapter နံပါတ်</label>
-              <input type="number" id="uploadChNum" placeholder="1" min="1" oninput="updateFolderPath()">
+              <input type="number" id="uploadChNum" placeholder="0" min="0" oninput="updateFolderPath()">
             </div>
             <div>
               <label class="label">Chapter Title <span style="color:#475569;font-weight:400">(ချန်လှပ်လို့ရ)</span></label>
@@ -941,7 +941,7 @@ async function startUpload() {
 
   // Validation
   if (!manhwaId) { toast('Manhwa ရွေးပါ', 'err'); return; }
-  if (!chNum || chNum < 1) { toast('Chapter နံပါတ် ထည့်ပါ', 'err'); return; }
+  if (chNum == null || isNaN(chNum) || chNum < 0) { toast('Chapter နံပါတ် ထည့်ပါ', 'err'); return; }
   if (uploadMode === 'pdf' && !pdfFile)         { toast('PDF ဖိုင် ရွေးပါ', 'err'); return; }
   if (uploadMode === 'img' && !imgFileList.length) { toast('ပုံဖိုင်တွေ ရွေးပါ', 'err'); return; }
 
