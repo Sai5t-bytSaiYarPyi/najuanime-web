@@ -863,26 +863,62 @@ async function convertPdfToWebP(file, onProgress) {
   const total   = pdf.numPages;
   const width   = parseInt(document.getElementById('renderWidth').value)  || 1200;
   const quality = parseFloat(document.getElementById('webpQuality').value) || 0.85;
+  const MAX_SIZE = 4 * 1024 * 1024; // 4MB max per image (Cloudflare safe limit)
   const blobs   = [];
-
+ 
   for (let i = 1; i <= total; i++) {
     if (cancelFlag) break;
+ 
     const page = await pdf.getPage(i);
     const vp0  = page.getViewport({ scale: 1 });
     const sc   = width / vp0.width;
     const vp   = page.getViewport({ scale: sc });
-
+ 
     const canvas    = document.createElement('canvas');
     canvas.width    = Math.round(vp.width);
     canvas.height   = Math.round(vp.height);
     await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', quality));
+ 
+    // ── First attempt with selected quality ──
+    let blob = await new Promise(res => canvas.toBlob(res, 'image/webp', quality));
+    let usedQ = quality;
+ 
+    // ── Auto-reduce quality if too large ──
+    if (blob && blob.size > MAX_SIZE) {
+      let q = quality - 0.1;
+      while (blob.size > MAX_SIZE && q >= 0.55) {
+        blob  = await new Promise(res => canvas.toBlob(res, 'image/webp', q));
+        usedQ = q;
+        q    -= 0.1;
+      }
+ 
+      // ── Last resort: scale down canvas ──
+      if (blob.size > MAX_SIZE) {
+        const sc2 = document.createElement('canvas');
+        sc2.width  = Math.round(canvas.width  * 0.75);
+        sc2.height = Math.round(canvas.height * 0.75);
+        sc2.getContext('2d').drawImage(canvas, 0, 0, sc2.width, sc2.height);
+        blob  = await new Promise(res => sc2.toBlob(res, 'image/webp', 0.75));
+        usedQ = -1; // marker for "scaled down"
+      }
+    }
+ 
     blobs.push(blob);
+ 
+    // ── Show size info in log ──
+    const sizeMB = blob ? (blob.size / 1024 / 1024).toFixed(2) : '?';
+    const qInfo  = usedQ === -1
+      ? ' ⬇ 75% scale'
+      : usedQ < quality
+        ? ` ⬇ q=${Math.round(usedQ * 100)}%`
+        : '';
+    addLog(blob && blob.size > MAX_SIZE ? 'err' : 'dim',
+      `p${i}: ${sizeMB}MB${qInfo}`);
+ 
     onProgress(i, total);
-    // Give browser a breath every 3 pages
     if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
   }
+ 
   URL.revokeObjectURL(url);
   return blobs;
 }
