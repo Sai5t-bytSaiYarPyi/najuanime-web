@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="my">
 <head>
@@ -5,10 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NaJu Manhwa Admin</title>
   <meta name="robots" content="noindex">
+
+  <!-- PDF.js -->
   <script src="/admin/js/pdf.js"></script>
   <link rel="stylesheet" href="/css/tailwind.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/fonts.css">
+
   <style>
     *{font-family:'Outfit',sans-serif;box-sizing:border-box}
     :root{
@@ -20,12 +24,19 @@
     }
     body{background:var(--bg);color:var(--text);min-height:100vh}
     ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
-    input,textarea,select{background:var(--bg3);border:1px solid var(--border);color:white;border-radius:10px;padding:10px 14px;width:100%;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;box-sizing:border-box}
+
+    input,textarea,select{
+      background:var(--bg3);border:1px solid var(--border);color:white;
+      border-radius:10px;padding:10px 14px;width:100%;
+      font-family:'Outfit',sans-serif;font-size:14px;outline:none;
+      transition:border-color .2s;box-sizing:border-box
+    }
     input:focus,textarea:focus,select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(168,85,247,.1)}
     input::placeholder,textarea::placeholder{color:var(--muted)}
     input[readonly]{opacity:.6;cursor:not-allowed}
     select option{background:var(--bg3)}
     textarea{resize:vertical;min-height:80px}
+
     .btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:none;font-family:'Outfit',sans-serif}
     .btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:var(--blue-dark)}
     .btn-purple{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.25)}.btn-purple:hover{background:rgba(168,85,247,.25)}
@@ -33,38 +44,62 @@
     .btn-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}.btn-red:hover{background:rgba(239,68,68,.2)}
     .btn-gray{background:var(--bg3);color:#94a3b8;border:1px solid var(--border)}.btn-gray:hover{background:#263248;color:white}
     .btn-yellow{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}.btn-yellow:hover{background:rgba(251,191,36,.2)}
-    .btn-orange{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.2)}.btn-orange:hover{background:rgba(251,146,60,.2)}
     .btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
     .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
     .label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+
+    /* ── Pill badges ── */
     .pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
     .pill-purple{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#c084fc}
     .pill-green{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:#4ade80}
     .pill-blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa}
     .pill-red{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171}
     .pill-yellow{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:#fbbf24}
+
+    /* ── Progress ── */
     .progress-bg{height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
     .progress-fill{height:100%;border-radius:99px;transition:width .25s;background:linear-gradient(90deg,#7e22ce,#a855f7,#c084fc)}
     .progress-fill.green{background:linear-gradient(90deg,#16a34a,#4ade80)}
     .progress-fill.blue{background:linear-gradient(90deg,#1d4ed8,#3b82f6,#60a5fa)}
-    .progress-fill.orange{background:linear-gradient(90deg,#c2410c,#f97316,#fb923c)}
-    .upload-zone{border:2px dashed rgba(255,255,255,.1);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg3)}
+
+    /* ── Upload zone ── */
+    .upload-zone{
+      border:2px dashed rgba(255,255,255,.1);border-radius:14px;padding:28px 20px;
+      text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg3)
+    }
     .upload-zone:hover,.upload-zone.drag{border-color:var(--purple);background:rgba(168,85,247,.05)}
     .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-    .mode-btn{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:#94a3b8;transition:all .15s;font-family:'Outfit',sans-serif}
+
+    /* ── Mode tabs ── */
+    .mode-btn{
+      padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;
+      cursor:pointer;border:1px solid var(--border);background:var(--bg3);
+      color:#94a3b8;transition:all .15s;font-family:'Outfit',sans-serif
+    }
     .mode-btn.active{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:#c084fc}
-    .mode-btn.active.orange{background:rgba(251,146,60,.15);border-color:rgba(251,146,60,.4);color:#fb923c}
+
+    /* ── Genre tags ── */
     .genre-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;min-height:44px;cursor:text;transition:border-color .2s}
     .genre-wrap:focus-within{border-color:var(--purple)}
     .gtag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
     .gtag .rm{cursor:pointer;opacity:.6;font-size:13px;line-height:1}.gtag .rm:hover{opacity:1;color:#f87171}
     .genre-text{background:none;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;min-width:100px;flex:1;padding:2px 4px}
     .genre-text::placeholder{color:var(--muted)}
-    .log-wrap{max-height:180px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:2px}
+
+    /* ── Log console ── */
+    .log-wrap{max-height:200px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:2px}
     .log-line{font-size:11px;padding:2px 6px;border-radius:4px;font-family:monospace;white-space:pre-wrap;word-break:break-all}
-    .log-ok{color:#4ade80}.log-err{color:#f87171}.log-info{color:#60a5fa}.log-dim{color:#475569}
+    .log-ok  {color:#4ade80}
+    .log-err {color:#f87171}
+    .log-info{color:#60a5fa}
+    .log-dim {color:#475569}
+
+    /* ── Step box ── */
     .step-box{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
     .step-label{font-size:11px;font-weight:700;color:#60a5fa;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+    /* ── Skeleton ── */
     .skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -72,20 +107,7 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     .fade-in{animation:fadeIn .3s ease both}
 
-    /* ── Bulk Queue Table ── */
-    .queue-table{width:100%;border-collapse:collapse}
-    .queue-table th{font-size:11px;font-weight:700;color:var(--muted);text-align:left;padding:6px 10px;border-bottom:1px solid var(--border)}
-    .queue-table td{padding:6px 10px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
-    .queue-table tr:last-child td{border-bottom:none}
-    .queue-row.done td{opacity:.5}
-    .queue-row.active td{background:rgba(168,85,247,.05)}
-    .queue-row.error td{background:rgba(248,113,113,.05)}
-    .ch-input-small{width:70px;padding:5px 8px;font-size:12px;border-radius:7px}
-    .status-icon{font-size:14px;width:20px;text-align:center}
-
-    /* ── Overall bulk progress ── */
-    .bulk-overall{background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:12px;padding:14px;margin-bottom:14px}
-
+    /* ── Responsive ── */
     @media(max-width:640px){
       .card{padding:14px}
       .btn{padding:8px 12px;font-size:12px}
@@ -95,25 +117,32 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══════════════════ LOGIN ══════════════════ -->
 <div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
   <div class="card" style="max-width:360px;width:100%">
     <div style="text-align:center;margin-bottom:22px">
-      <div style="font-size:26px;font-weight:900;margin-bottom:6px"><span style="color:var(--blue)">NaJu</span><span style="color:white">Anime</span></div>
+      <div style="font-size:26px;font-weight:900;margin-bottom:6px">
+        <span style="color:var(--blue)">NaJu</span><span style="color:white">Anime</span>
+      </div>
       <div style="color:#c084fc;font-size:14px;font-weight:700">📚 Manhwa Admin Panel</div>
     </div>
     <label class="label">Admin Password</label>
     <input type="password" id="tokenInput" placeholder="Password ထည့်ပါ..." style="margin-bottom:14px">
-    <button class="btn btn-purple" style="width:100%;justify-content:center;padding:12px" onclick="login()">ဝင်ရောက်မည်</button>
+    <button class="btn btn-purple" style="width:100%;justify-content:center;padding:12px" onclick="login()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+      ဝင်ရောက်မည်
+    </button>
     <p id="loginErr" style="color:#f87171;font-size:12px;margin-top:10px;text-align:center;display:none">❌ Password မှားနေသည်</p>
     <div style="margin-top:14px;text-align:center">
-      <a href="/admin/" style="color:var(--muted);font-size:12px;text-decoration:none">← Anime Admin သို့</a>
+      <a href="/admin/" style="color:var(--muted);font-size:12px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color=''">← Anime Admin သို့</a>
     </div>
   </div>
 </div>
 
-<!-- MAIN PANEL -->
+<!-- ══════════════════ MAIN PANEL ══════════════════ -->
 <div id="panel" style="display:none">
+
+  <!-- Header -->
   <header style="background:rgba(15,17,23,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px">
     <div style="font-size:17px;font-weight:900">
       <span style="color:var(--blue)">NaJu</span><span style="color:white">Anime</span>
@@ -131,11 +160,11 @@
   </header>
 
   <div style="max-width:920px;margin:0 auto;padding:24px 16px">
+
     <!-- Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap">
       <button class="btn" id="tab-list"     onclick="showTab('list')"     style="background:var(--purple);color:white">📚 Manhwa List</button>
       <button class="btn btn-gray" id="tab-upload"   onclick="showTab('upload')">📤 Chapter Upload</button>
-      <button class="btn btn-gray" id="tab-bulk"     onclick="showTab('bulk')">📦 Bulk Upload (PDF ၃၀+)</button>
       <button class="btn btn-gray" id="tab-chapters" onclick="showTab('chapters')">📋 Chapter Manager</button>
     </div>
 
@@ -146,32 +175,40 @@
         <button class="btn btn-purple" onclick="openAddManhwa()">➕ Manhwa အသစ်ထည့်</button>
       </div>
       <div id="manhwaList" style="display:flex;flex-direction:column;gap:10px">
+        <!-- Skeleton -->
         <div class="skeleton" style="height:76px"></div>
         <div class="skeleton" style="height:76px"></div>
       </div>
     </div>
 
-    <!-- ══ SINGLE UPLOAD TAB ══ -->
+    <!-- ══ CHAPTER UPLOAD TAB ══ -->
     <div id="tab-upload-content" style="display:none">
       <div class="card">
         <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:18px;display:flex;align-items:center;gap:8px">
-          📤 Chapter Upload (တစ်ခုချင်း)
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          Chapter Upload
         </h2>
+
+        <!-- Step 1 -->
         <div class="step-box">
-          <div class="step-label"><span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">1</span>Manhwa & Chapter Info</div>
+          <div class="step-label">
+            <span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">1</span>
+            Manhwa & Chapter Info
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="two-col">
             <div>
               <label class="label">Manhwa ရွေးပါ</label>
-              <select id="uploadManhwaId" onchange="updateFolderPath()"><option value="">— Manhwa ရွေးပါ —</option></select>
+              <select id="uploadManhwaId" onchange="updateFolderPath()">
+                <option value="">— Manhwa ရွေးပါ —</option>
+              </select>
             </div>
             <div>
-              <label class="label">Chapter နံပါတ် (0 ကနေ စရ)</label>
-              <!-- FIX: min="0" -->
+              <label class="label">Chapter နံပါတ်</label>
               <input type="number" id="uploadChNum" placeholder="0" min="0" oninput="updateFolderPath()">
             </div>
             <div>
               <label class="label">Chapter Title <span style="color:#475569;font-weight:400">(ချန်လှပ်လို့ရ)</span></label>
-              <input type="text" id="uploadChTitle" placeholder="Chapter 0: Prologue">
+              <input type="text" id="uploadChTitle" placeholder="Chapter 1: ၀တ္ထုပထမ">
             </div>
             <div>
               <label class="label">R2 Folder Path <span style="color:#475569;font-weight:400">(Auto)</span></label>
@@ -179,18 +216,26 @@
             </div>
           </div>
         </div>
+
+        <!-- Step 2 -->
         <div class="step-box">
-          <div class="step-label"><span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">2</span>ဖိုင်ပုံစံ ရွေးပါ</div>
+          <div class="step-label">
+            <span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">2</span>
+            ဖိုင်ပုံစံ ရွေးပါ
+          </div>
           <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
             <button class="mode-btn active" id="mode-pdf" onclick="setMode('pdf')">📄 PDF Auto-convert</button>
             <button class="mode-btn" id="mode-img" onclick="setMode('img')">🖼️ WebP/Image ဖိုင်တွေ</button>
           </div>
+
+          <!-- PDF Mode -->
           <div id="pdf-mode-ui">
             <div class="upload-zone" id="pdfZone" ondragover="onDrag(event,'pdfZone')" ondragleave="onDragLeave('pdfZone')" ondrop="onDropPdf(event)">
               <input type="file" id="pdfFileInput" accept=".pdf" onchange="onPdfSelect(event)">
               <div id="pdfPlaceholder">
                 <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 10px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <p style="font-size:13px;color:var(--muted)">PDF ဖိုင် ဆွဲချပါ သို့မဟုတ် နှိပ်ပြီး ရွေးပါ</p>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:4px">PDF ဖိုင် ဆွဲချပါ သို့မဟုတ် နှိပ်ပြီး ရွေးပါ</p>
+                <p style="font-size:11px;color:#334155">PDF pages → WebP images အဖြစ် browser ထဲတွင် convert ပြီး R2 သို့ upload မည်</p>
               </div>
               <div id="pdfSelected" style="display:none">
                 <div style="font-size:32px;margin-bottom:8px">📄</div>
@@ -198,46 +243,67 @@
                 <p id="pdfPageInfo" style="font-size:12px;color:var(--muted)"></p>
               </div>
             </div>
+            <!-- Render options -->
             <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;align-items:center">
               <div style="display:flex;align-items:center;gap:8px">
                 <label class="label" style="margin:0;white-space:nowrap">Render width:</label>
                 <select id="renderWidth" style="width:auto;padding:7px 12px">
-                  <option value="800">800px</option>
-                  <option value="1000">1000px</option>
-                  <option value="1200" selected>1200px ✓</option>
-                  <option value="1500">1500px</option>
+                  <option value="800">800px (Small)</option>
+                  <option value="1000">1000px (Medium)</option>
+                  <option value="1200" selected>1200px (High) ✓</option>
+                  <option value="1500">1500px (Ultra)</option>
                 </select>
               </div>
               <div style="display:flex;align-items:center;gap:8px">
                 <label class="label" style="margin:0;white-space:nowrap">WebP quality:</label>
                 <select id="webpQuality" style="width:auto;padding:7px 12px">
-                  <option value="0.75">75%</option>
-                  <option value="0.85" selected>85% ✓</option>
-                  <option value="0.92">92%</option>
+                  <option value="0.75">75% (Smaller)</option>
+                  <option value="0.85" selected>85% (Balanced) ✓</option>
+                  <option value="0.92">92% (Higher)</option>
                 </select>
               </div>
             </div>
           </div>
+
+          <!-- Image Mode -->
           <div id="img-mode-ui" style="display:none">
             <div class="upload-zone" id="imgZone" ondragover="onDrag(event,'imgZone')" ondragleave="onDragLeave('imgZone')" ondrop="onDropImg(event)">
               <input type="file" id="imgFilesInput" accept="image/*" multiple onchange="onImgSelect(event)">
               <div id="imgPlaceholder">
-                <p style="font-size:13px;color:var(--muted)">ပုံဖိုင်တွေ ဆွဲချပါ သို့မဟုတ် ရွေးပါ (Multiple OK)</p>
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 10px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:4px">ပုံဖိုင်တွေ ဆွဲချပါ သို့မဟုတ် ရွေးပါ (Multiple OK)</p>
+                <p style="font-size:11px;color:#334155">WebP / PNG / JPG — ဖိုင်နာမည် alphabetical order အတိုင်း sort မည်</p>
               </div>
               <div id="imgSelected" style="display:none">
+                <div style="font-size:32px;margin-bottom:8px">🖼️</div>
                 <p id="imgFileCount" style="font-size:13px;font-weight:700;color:#c084fc;margin-bottom:8px"></p>
                 <div id="imgThumbs" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center"></div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Step 3 -->
         <div class="step-box" style="margin-bottom:0">
-          <div class="step-label"><span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">3</span>Upload</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-            <button class="btn btn-purple" id="startBtn" onclick="startUpload()">📤 Upload စတင်မည်</button>
-            <button class="btn btn-red" id="cancelBtn" onclick="cancelUpload()" style="display:none">✕ Cancel</button>
+          <div class="step-label">
+            <span style="background:rgba(59,130,246,.2);color:#60a5fa;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">3</span>
+            Upload
           </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+            <button class="btn btn-purple" id="startBtn" onclick="startUpload()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              Upload စတင်မည်
+            </button>
+            <button class="btn btn-red" id="cancelBtn" onclick="cancelUpload()" style="display:none">
+              ✕ Cancel
+            </button>
+          </div>
+
+          <!-- Progress Area -->
           <div id="progressArea" style="display:none">
+
+            <!-- Convert progress -->
             <div id="convertWrap" style="display:none;margin-bottom:12px">
               <div style="display:flex;justify-content:space-between;margin-bottom:5px">
                 <span style="font-size:12px;font-weight:700;color:#c084fc" id="convertLabel">Converting...</span>
@@ -245,6 +311,8 @@
               </div>
               <div class="progress-bg"><div class="progress-fill" id="convertBar" style="width:0%"></div></div>
             </div>
+
+            <!-- Upload progress -->
             <div style="margin-bottom:10px">
               <div style="display:flex;justify-content:space-between;margin-bottom:5px">
                 <span style="font-size:12px;font-weight:700;color:#60a5fa" id="uploadLabel">Uploading...</span>
@@ -252,147 +320,18 @@
               </div>
               <div class="progress-bg"><div class="progress-fill blue" id="uploadBar" style="width:0%"></div></div>
             </div>
+
+            <!-- Log console -->
             <div class="log-wrap" id="uploadLog"></div>
           </div>
+
+          <!-- Done banner -->
           <div id="doneBanner" style="display:none;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:16px" class="fade-in">
             <div style="font-size:15px;font-weight:700;color:#4ade80;margin-bottom:6px">✅ Upload ပြီးပါပြီ!</div>
             <div id="doneSummary" style="font-size:12px;color:#94a3b8;margin-bottom:12px;font-family:monospace"></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-green" onclick="resetUploadForm()">📤 နောက် Chapter ထပ်တင်</button>
-              <button class="btn btn-orange" onclick="showTab('bulk')">📦 Bulk Upload သွားမည်</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ BULK UPLOAD TAB ══ -->
-    <div id="tab-bulk-content" style="display:none">
-      <div class="card">
-        <h2 style="font-size:16px;font-weight:700;color:#fb923c;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-          📦 Bulk PDF Upload — Chapter ၃၀+ တစ်ခါတည်း
-        </h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7">
-          PDF ဖိုင်တွေ အကုန်လုံး တစ်ခါတည်း select လုပ်ပါ။ ဖိုင်နာမည်ကနေ Chapter နံပါတ် auto-detect လုပ်မည်။<br>
-          <span style="color:#fbbf24">⚡ Sequential processing — တစ်ကားပြီးမှ နောက်တစ်ကား (Memory safe)</span>
-        </p>
-
-        <!-- Step 1: Manhwa select -->
-        <div class="step-box">
-          <div class="step-label"><span style="background:rgba(251,146,60,.2);color:#fb923c;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">1</span>Manhwa ရွေးပါ</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="two-col">
-            <div>
-              <label class="label">Manhwa</label>
-              <select id="bulkManhwaId"><option value="">— Manhwa ရွေးပါ —</option></select>
-            </div>
-            <div>
-              <label class="label">Render Width</label>
-              <select id="bulkRenderWidth" style="">
-                <option value="800">800px (Small/Fast)</option>
-                <option value="1000">1000px (Medium)</option>
-                <option value="1200" selected>1200px (High) ✓</option>
-                <option value="1500">1500px (Ultra/Slow)</option>
-              </select>
-            </div>
-            <div>
-              <label class="label">WebP Quality</label>
-              <select id="bulkWebpQuality">
-                <option value="0.75">75% (Smaller file)</option>
-                <option value="0.85" selected>85% (Balanced) ✓</option>
-                <option value="0.92">92% (Higher quality)</option>
-              </select>
-            </div>
-            <div>
-              <label class="label">Chapter နံပါတ် format</label>
-              <select id="bulkChFormat">
-                <option value="auto">Auto-detect (filename ကနေ)</option>
-                <option value="sequential">Sequential (0,1,2,3...)</option>
-                <option value="sequential1">Sequential (1,2,3...)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 2: File select -->
-        <div class="step-box">
-          <div class="step-label"><span style="background:rgba(251,146,60,.2);color:#fb923c;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">2</span>PDF ဖိုင်တွေ ရွေးပါ (Multiple Select)</div>
-          <div class="upload-zone" id="bulkZone" ondragover="onDrag(event,'bulkZone')" ondragleave="onDragLeave('bulkZone')" ondrop="onDropBulk(event)">
-            <input type="file" id="bulkFileInput" accept=".pdf" multiple onchange="onBulkSelect(event)">
-            <div id="bulkPlaceholder">
-              <div style="font-size:40px;margin-bottom:10px">📄📄📄</div>
-              <p style="font-size:14px;font-weight:700;color:#c084fc;margin-bottom:6px">PDF ဖိုင်တွေ အကုန် ဒီမှာ ဆွဲချပါ</p>
-              <p style="font-size:12px;color:var(--muted)">Ctrl+A နဲ့ folder ထဲက အကုန် select လုပ်ပြီး ဆွဲချနိုင်သည်</p>
-            </div>
-            <div id="bulkSelected" style="display:none">
-              <div style="font-size:32px;margin-bottom:8px">📚</div>
-              <p id="bulkFileCount" style="font-size:14px;font-weight:700;color:#fb923c;margin-bottom:4px"></p>
-              <p style="font-size:12px;color:var(--muted)">↓ အောက်မှာ Chapter List စစ်ဆေးပါ</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 3: Preview & Edit queue -->
-        <div class="step-box" id="bulkQueueBox" style="display:none">
-          <div class="step-label"><span style="background:rgba(251,146,60,.2);color:#fb923c;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">3</span>Chapter List စစ်ဆေး / ပြင်ဆင်</div>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Chapter နံပါတ် မှားနေရင် တိုက်ရိုက် ပြင်နိုင်သည်</p>
-          <div style="overflow-x:auto">
-            <table class="queue-table" id="bulkQueueTable">
-              <thead>
-                <tr>
-                  <th style="width:30px">#</th>
-                  <th>ဖိုင်နာမည်</th>
-                  <th style="width:90px">Chapter</th>
-                  <th>Title (ချန်ရ)</th>
-                  <th style="width:60px">Status</th>
-                </tr>
-              </thead>
-              <tbody id="bulkQueueBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Step 4: Start -->
-        <div class="step-box" style="margin-bottom:0" id="bulkStartBox" style="display:none">
-          <div class="step-label"><span style="background:rgba(251,146,60,.2);color:#fb923c;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px">4</span>Bulk Upload စတင်</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-            <button class="btn" id="bulkStartBtn" onclick="startBulkUpload()" style="background:linear-gradient(135deg,#c2410c,#f97316);color:white;display:none">
-              ⚡ Bulk Upload စတင် (<span id="bulkTotalCount">0</span> chapters)
-            </button>
-            <button class="btn btn-red" id="bulkCancelBtn" onclick="cancelBulkUpload()" style="display:none">✕ Cancel</button>
-          </div>
-
-          <!-- Overall progress -->
-          <div id="bulkOverallArea" style="display:none">
-            <div class="bulk-overall">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <span style="font-size:13px;font-weight:700;color:#fb923c">Overall Progress</span>
-                <span style="font-size:13px;font-weight:700;color:white"><span id="bulkDoneCount">0</span> / <span id="bulkTotalCount2">0</span> chapters</span>
-              </div>
-              <div class="progress-bg" style="height:12px;margin-bottom:8px"><div class="progress-fill orange" id="bulkOverallBar" style="width:0%"></div></div>
-              <div style="font-size:12px;color:#94a3b8" id="bulkCurrentLabel">—</div>
-            </div>
-            <!-- Current chapter progress -->
-            <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:12px;margin-bottom:10px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                <span style="font-size:12px;font-weight:700;color:#60a5fa" id="bulkConvLabel">Converting...</span>
-                <span style="font-size:12px;color:var(--muted)" id="bulkConvPct">0%</span>
-              </div>
-              <div class="progress-bg" style="margin-bottom:8px"><div class="progress-fill" id="bulkConvBar" style="width:0%"></div></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                <span style="font-size:12px;font-weight:700;color:#60a5fa" id="bulkUpLabel">Uploading...</span>
-                <span style="font-size:12px;color:var(--muted)" id="bulkUpPct">0%</span>
-              </div>
-              <div class="progress-bg"><div class="progress-fill blue" id="bulkUpBar" style="width:0%"></div></div>
-            </div>
-            <div class="log-wrap" id="bulkLog"></div>
-          </div>
-
-          <!-- Done -->
-          <div id="bulkDoneBanner" style="display:none" class="fade-in">
-            <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:16px">
-              <div style="font-size:16px;font-weight:700;color:#4ade80;margin-bottom:6px">🎉 Bulk Upload ပြီးပါပြီ!</div>
-              <div id="bulkDoneSummary" style="font-size:12px;color:#94a3b8;margin-bottom:12px;font-family:monospace"></div>
-              <button class="btn btn-green" onclick="resetBulkForm()">📦 နောက် Manhwa ထပ်လုပ်မည်</button>
+              <button class="btn btn-green" onclick="resetUploadForm()">📤 နောက် Chapter ထပ်တင်မည်</button>
+              <button class="btn btn-gray" onclick="showTab('chapters')">📋 Chapter List ကြည့်မည်</button>
             </div>
           </div>
         </div>
@@ -404,19 +343,26 @@
       <div class="card">
         <h2 style="font-size:16px;font-weight:700;color:#c084fc;margin-bottom:16px">📋 Chapter Manager</h2>
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <select id="chManhwaId" onchange="loadChapters()" style="flex:1;max-width:320px"><option value="">— Manhwa ရွေးပါ —</option></select>
-          <button class="btn btn-gray" onclick="loadChapters()">Refresh</button>
+          <select id="chManhwaId" onchange="loadChapters()" style="flex:1;max-width:320px">
+            <option value="">— Manhwa ရွေးပါ —</option>
+          </select>
+          <button class="btn btn-gray" onclick="loadChapters()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Refresh
+          </button>
         </div>
         <div id="chapterListWrap">
-          <div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">Manhwa တစ်ခု ရွေးပါ</div>
+          <div style="color:var(--muted);font-size:13px;text-align:center;padding:40px 20px">
+            Manhwa တစ်ခု ရွေးပါ
+          </div>
         </div>
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /container -->
+</div><!-- /panel -->
 
-<!-- ADD/EDIT MODAL -->
+<!-- ══════════════════ ADD/EDIT MODAL ══════════════════ -->
 <div id="manhwaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;padding:20px;overflow-y:auto">
   <div style="max-width:660px;margin:40px auto" class="fade-in">
     <div class="card">
@@ -424,37 +370,70 @@
         <h2 id="modalHeading" style="font-size:16px;font-weight:700;color:#c084fc;flex:1">Manhwa ထည့်မည်</h2>
         <button class="btn btn-gray" onclick="closeModal()" style="padding:6px 12px">✕</button>
       </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" class="two-col">
-        <div><label class="label">ID (slug)</label><input type="text" id="m-id" placeholder="solo-leveling"></div>
-        <div><label class="label">Status</label>
+        <!-- ID -->
+        <div>
+          <label class="label">ID <span style="color:#475569;font-weight:400">(slug, lowercase, hyphen)</span></label>
+          <input type="text" id="m-id" placeholder="solo-leveling">
+        </div>
+        <!-- Status -->
+        <div>
+          <label class="label">Status</label>
           <select id="m-status">
             <option value="ongoing">🟢 Ongoing</option>
             <option value="completed">✅ Completed</option>
             <option value="hiatus">⏸ Hiatus</option>
           </select>
         </div>
-        <div style="grid-column:span 2"><label class="label">Title (မြန်မာ)</label><input type="text" id="m-title" placeholder="Solo Leveling"></div>
-        <div style="grid-column:span 2"><label class="label">Title (English)</label><input type="text" id="m-titleEN"></div>
-        <div><label class="label">Author</label><input type="text" id="m-author"></div>
-        <div><label class="label">Cover URL</label><input type="text" id="m-cover"></div>
+        <!-- Title -->
         <div style="grid-column:span 2">
-          <label class="label">Cover Upload → R2</label>
+          <label class="label">Title (မြန်မာ)</label>
+          <input type="text" id="m-title" placeholder="Solo Leveling">
+        </div>
+        <!-- Title EN -->
+        <div style="grid-column:span 2">
+          <label class="label">Title (English / Alt)</label>
+          <input type="text" id="m-titleEN" placeholder="Solo Leveling">
+        </div>
+        <!-- Author -->
+        <div>
+          <label class="label">Author</label>
+          <input type="text" id="m-author" placeholder="Chugong">
+        </div>
+        <!-- Cover URL -->
+        <div>
+          <label class="label">Cover Image URL</label>
+          <input type="text" id="m-cover" placeholder="https://images.najuanime.com/...">
+        </div>
+        <!-- Cover upload -->
+        <div style="grid-column:span 2">
+          <label class="label">Cover Upload → R2 <span style="color:#475569;font-weight:400">(ရွေးလိုက်ရင် auto-upload)</span></label>
           <div style="display:flex;gap:8px;align-items:center">
             <input type="file" id="m-cover-file" accept="image/*" onchange="uploadCoverFile(event)" style="flex:1;padding:7px">
             <span id="coverUploadStatus" style="font-size:12px;display:none;flex-shrink:0"></span>
           </div>
         </div>
+        <!-- Genres -->
         <div style="grid-column:span 2">
-          <label class="label">Genres</label>
+          <label class="label">Genres <span style="color:#475569;font-weight:400">(Enter = ထည့်)</span></label>
           <div class="genre-wrap" id="genreWrap" onclick="document.getElementById('genreText').focus()">
             <input type="text" id="genreText" class="genre-text" placeholder="Genre ထည့်ပါ...">
           </div>
           <input type="hidden" id="m-genres">
         </div>
-        <div style="grid-column:span 2"><label class="label">Description</label><textarea id="m-desc" style="min-height:100px"></textarea></div>
+        <!-- Description -->
+        <div style="grid-column:span 2">
+          <label class="label">Description</label>
+          <textarea id="m-desc" style="min-height:100px" placeholder="ဇာတ်လမ်းအကျဉ်းချုပ်..."></textarea>
+        </div>
       </div>
+
       <div style="display:flex;gap:10px;margin-top:18px">
-        <button class="btn btn-purple" onclick="saveManhwa()">💾 သိမ်းမည်</button>
+        <button class="btn btn-purple" onclick="saveManhwa()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          သိမ်းမည်
+        </button>
         <button class="btn btn-gray" onclick="closeModal()">မလုပ်တော့ပါ</button>
       </div>
       <p id="modalMsg" style="font-size:13px;margin-top:10px;display:none"></p>
@@ -462,57 +441,45 @@
   </div>
 </div>
 
+<!-- Toast -->
 <div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);padding:9px 18px;border-radius:99px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)"></div>
 
+<!-- ══════════════════ JAVASCRIPT ══════════════════ -->
 <script>
+// ─────────────────── CONFIG ────────────────────────────
 const WORKER_URL = 'https://api.najuanime.com';
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/admin/js/pdf.worker.js';
 
+// PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  '/admin/js/pdf.worker.js';
+
+// ─────────────────── STATE ─────────────────────────────
 let TOKEN       = '';
 let allManhwa   = [];
-let editingId   = '';
-let uploadMode  = 'pdf';
+let editingId   = '';       // '' = add mode, else = edit id
+let uploadMode  = 'pdf';    // 'pdf' | 'img'
 let pdfFile     = null;
-let imgFileList = [];
+let imgFileList = [];       // sorted array of File
 let cancelFlag  = false;
 
-// ── Bulk state ────────────────────────────────────────
-let bulkQueue    = [];   // [{ file, chNum, title, status }]
-let bulkRunning  = false;
-let bulkCancel   = false;
-
+// ─────────────────── HELPERS ───────────────────────────
 const pad = (n, d) => String(n).padStart(d, '0');
 
-// ── Chapter number auto-detect from filename ──────────
-function detectChapterNum(filename) {
-  const name = filename.replace(/\.pdf$/i, '');
-  // Try patterns: ch0, ch1, chapter0, chapter1, _0_, _1_, 0, 1 etc.
-  const patterns = [
-    /(?:chapter|ch|ep|episode)[_\s\-\.]*(\d+)/i,
-    /[_\s\-\.](\d+)[_\s\-\.]?(?:end)?$/i,
-    /^(\d+)$/,
-    /(\d+)$/,
-  ];
-  for (const pat of patterns) {
-    const m = name.match(pat);
-    if (m) return parseInt(m[1], 10);
-  }
-  return null;
-}
-
-// ── Toast ──────────────────────────────────────────────
 function toast(msg, type = 'ok') {
-  const t  = document.getElementById('toast');
-  const bg = { ok:'background:#1a2e1a;border:1px solid rgba(74,222,128,.3);color:#4ade80', err:'background:#2e1a1a;border:1px solid rgba(248,113,113,.3);color:#f87171', info:'background:#1a1f2e;border:1px solid rgba(59,130,246,.3);color:#60a5fa' }[type] || '';
+  const t = document.getElementById('toast');
+  const bg = {
+    ok:   'background:#1a2e1a;border:1px solid rgba(74,222,128,.3);color:#4ade80',
+    err:  'background:#2e1a1a;border:1px solid rgba(248,113,113,.3);color:#f87171',
+    info: 'background:#1a1f2e;border:1px solid rgba(59,130,246,.3);color:#60a5fa',
+  }[type] || '';
   t.textContent = msg;
   t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(0);padding:9px 18px;border-radius:99px;font-size:13px;font-weight:700;z-index:999;opacity:1;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);${bg}`;
   clearTimeout(t._to);
   t._to = setTimeout(() => { t.style.opacity = '0'; }, 2800);
 }
 
-function addLog(id, type, msg) {
-  const el  = document.getElementById(id);
-  if (!el) return;
+function addLog(type, msg) {
+  const el = document.getElementById('uploadLog');
   const div = document.createElement('div');
   div.className = `log-line log-${type}`;
   div.textContent = msg;
@@ -520,40 +487,61 @@ function addLog(id, type, msg) {
   el.scrollTop = el.scrollHeight;
 }
 
-// ── Auth ──────────────────────────────────────────────
+// ─────────────────── AUTH ──────────────────────────────
 function login() {
   const t = document.getElementById('tokenInput').value.trim();
   if (!t) return;
   TOKEN = t;
   verifyLogin();
 }
+
 async function verifyLogin() {
   try {
-    const r = await fetch(`${WORKER_URL}/admin/migrate`, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body: JSON.stringify({animeList:null}) });
-    if (r.status === 401) { document.getElementById('loginErr').style.display='block'; TOKEN=''; return; }
+    const r = await fetch(`${WORKER_URL}/admin/migrate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+      body: JSON.stringify({ animeList: null }),
+    });
+    if (r.status === 401) {
+      document.getElementById('loginErr').style.display = 'block';
+      TOKEN = '';
+      return;
+    }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('panel').style.display = 'block';
     initGenreInput();
     loadManhwa();
-  } catch { document.getElementById('loginErr').style.display = 'block'; }
+  } catch(e) {
+    document.getElementById('loginErr').style.display = 'block';
+  }
 }
-function logout() { TOKEN=''; document.getElementById('loginScreen').style.display='flex'; document.getElementById('panel').style.display='none'; }
-document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key==='Enter') login(); });
 
-// ── Tabs ──────────────────────────────────────────────
+function logout() {
+  TOKEN = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('panel').style.display = 'none';
+}
+
+document.getElementById('tokenInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+// ─────────────────── TABS ──────────────────────────────
 function showTab(t) {
-  ['list','upload','bulk','chapters'].forEach(n => {
-    document.getElementById(`tab-${n}-content`).style.display = n===t ? 'block' : 'none';
+  ['list', 'upload', 'chapters'].forEach(n => {
+    document.getElementById(`tab-${n}-content`).style.display = n === t ? 'block' : 'none';
     const btn = document.getElementById(`tab-${n}`);
-    btn.style.background = n===t ? (n==='bulk'?'linear-gradient(135deg,#c2410c,#f97316)':'var(--purple)') : 'var(--bg3)';
-    btn.style.color = n===t ? 'white' : '#94a3b8';
-    btn.style.border = n===t ? 'none' : '1px solid var(--border)';
+    const isActive = n === t;
+    btn.style.background = isActive ? 'var(--purple)' : 'var(--bg3)';
+    btn.style.color = isActive ? 'white' : '#94a3b8';
+    btn.style.border = isActive ? 'none' : '1px solid var(--border)';
   });
 }
 
-// ── Load Manhwa ───────────────────────────────────────
+// ─────────────────── LOAD MANHWA ───────────────────────
 async function loadManhwa() {
-  document.getElementById('manhwaList').innerHTML = '<div class="skeleton" style="height:76px"></div><div class="skeleton" style="height:76px;margin-top:10px"></div>';
+  document.getElementById('manhwaList').innerHTML =
+    '<div class="skeleton" style="height:76px"></div><div class="skeleton" style="height:76px;margin-top:10px"></div>';
   try {
     const r = await fetch(`${WORKER_URL}/manhwa`);
     allManhwa = await r.json();
@@ -561,32 +549,51 @@ async function loadManhwa() {
     syncSelects();
     filterManhwa();
   } catch(e) {
-    document.getElementById('manhwaList').innerHTML = `<p style="color:#f87171">${e.message}</p>`;
+    document.getElementById('manhwaList').innerHTML = `<p style="color:#f87171;font-size:13px">${e.message}</p>`;
   }
 }
+
 function syncSelects() {
   const opts = allManhwa.map(m => `<option value="${m.id}">${m.title}</option>`).join('');
-  ['uploadManhwaId','chManhwaId','bulkManhwaId'].forEach(id => {
+  ['uploadManhwaId', 'chManhwaId'].forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
     const cur = el.value;
     el.innerHTML = `<option value="">— Manhwa ရွေးပါ —</option>` + opts;
     if (cur) el.value = cur;
   });
 }
+
 function filterManhwa() {
-  const q = (document.getElementById('manhwaSearch')?.value||'').toLowerCase();
-  renderManhwaList(q ? allManhwa.filter(m=>m.title.toLowerCase().includes(q)||(m.titleEN||'').toLowerCase().includes(q)) : allManhwa);
+  const q = (document.getElementById('manhwaSearch')?.value || '').toLowerCase();
+  const list = q
+    ? allManhwa.filter(m => m.title.toLowerCase().includes(q) || (m.titleEN || '').toLowerCase().includes(q))
+    : allManhwa;
+  renderManhwaList(list);
 }
+
 function renderManhwaList(list) {
   const el = document.getElementById('manhwaList');
-  if (!list.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">မတွေ့ပါ</div>'; return; }
-  const stMeta = { ongoing:{label:'Ongoing',color:'#4ade80',bg:'rgba(74,222,128,.12)',border:'rgba(74,222,128,.25)'}, completed:{label:'Completed',color:'#60a5fa',bg:'rgba(59,130,246,.12)',border:'rgba(59,130,246,.25)'}, hiatus:{label:'Hiatus',color:'#fb923c',bg:'rgba(251,146,60,.12)',border:'rgba(251,146,60,.25)'} };
+  if (!list.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">မတွေ့ပါ</div>';
+    return;
+  }
+
+  const stMeta = {
+    ongoing:   { label: 'Ongoing',   color: '#4ade80', bg: 'rgba(74,222,128,.12)',  border: 'rgba(74,222,128,.25)'  },
+    completed: { label: 'Completed', color: '#60a5fa', bg: 'rgba(59,130,246,.12)',  border: 'rgba(59,130,246,.25)'  },
+    hiatus:    { label: 'Hiatus',    color: '#fb923c', bg: 'rgba(251,146,60,.12)',   border: 'rgba(251,146,60,.25)'  },
+  };
+
   el.innerHTML = list.map(m => {
-    const st = stMeta[m.status] || {label:m.status||'',color:'#94a3b8',bg:'rgba(100,116,139,.1)',border:'rgba(100,116,139,.2)'};
-    const genrePills = (m.genres||[]).slice(0,4).map(g=>`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#c084fc">${g}</span>`).join('');
+    const st = stMeta[m.status] || { label: m.status || '', color: '#94a3b8', bg: 'rgba(100,116,139,.1)', border: 'rgba(100,116,139,.2)' };
+    const genrePills = (m.genres || []).slice(0, 4).map(g =>
+      `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#c084fc">${g}</span>`
+    ).join('');
+
     return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px">
-      ${m.cover?`<img src="${m.cover}" style="width:38px;height:54px;object-fit:cover;border-radius:7px;flex-shrink:0" onerror="this.outerHTML='<div style=width:38px;height:54px;background:var(--bg3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0>📖</div>'">`:`<div style="width:38px;height:54px;background:var(--bg3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📖</div>`}
+      ${m.cover
+        ? `<img src="${m.cover}" style="width:38px;height:54px;object-fit:cover;border-radius:7px;flex-shrink:0;background:var(--bg3)" onerror="this.outerHTML='<div style=width:38px;height:54px;background:var(--bg3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0>📖</div>'">`
+        : `<div style="width:38px;height:54px;background:var(--bg3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📖</div>`}
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
           <span style="font-weight:700;font-size:14px">${m.title}</span>
@@ -594,493 +601,545 @@ function renderManhwaList(list) {
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
           <span style="font-size:11px;color:#475569;font-family:monospace">${m.id}</span>
-          ${m.totalChapters?`<span class="pill pill-purple">${m.totalChapters} ch</span>`:''}
+          ${m.totalChapters ? `<span class="pill pill-purple">${m.totalChapters} ch</span>` : ''}
+          ${m.updatedAt ? `<span style="font-size:11px;color:#334155">${m.updatedAt}</span>` : ''}
         </div>
-        ${genrePills?`<div style="display:flex;gap:4px;flex-wrap:wrap">${genrePills}</div>`:''}
+        ${genrePills ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${genrePills}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button class="btn btn-gray" style="padding:6px 10px;font-size:11px" onclick="openEditManhwa('${m.id}')">✏️ ပြင်</button>
-        <button class="btn btn-red"  style="padding:6px 10px;font-size:11px" onclick="deleteManhwa('${m.id}','${m.title.replace(/'/g,"\\'")}')">🗑️ ဖျက်</button>
-        <button class="btn btn-orange" style="padding:6px 10px;font-size:11px" onclick="jumpToBulk('${m.id}')">📦 Bulk</button>
+        <button class="btn btn-gray"   style="padding:6px 10px;font-size:11px" onclick="openEditManhwa('${m.id}')">✏️ ပြင်</button>
+        <button class="btn btn-red"    style="padding:6px 10px;font-size:11px" onclick="deleteManhwa('${m.id}','${m.title.replace(/'/g,"\\'")}')">🗑️ ဖျက်</button>
+        <button class="btn btn-purple" style="padding:6px 10px;font-size:11px" onclick="jumpToUpload('${m.id}')">📤 Upload</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── Genre Input ───────────────────────────────────────
+// ─────────────────── GENRE INPUT ───────────────────────
 function initGenreInput() {
-  const wrap=document.getElementById('genreWrap'),textIn=document.getElementById('genreText'),hidden=document.getElementById('m-genres');
-  const getTags=()=>hidden.value?hidden.value.split(',').map(s=>s.trim()).filter(Boolean):[];
-  const setTags=arr=>{hidden.value=arr.join(',');renderTags()};
-  function renderTags(){wrap.querySelectorAll('.gtag').forEach(el=>el.remove());getTags().forEach(tag=>{const span=document.createElement('span');span.className='gtag';span.innerHTML=`${tag}<span class="rm">×</span>`;span.querySelector('.rm').onclick=e=>{e.stopPropagation();setTags(getTags().filter(t=>t!==tag))};wrap.insertBefore(span,textIn)})}
-  function addTag(val){const tags=val.split(',').map(s=>s.trim()).filter(Boolean);setTags([...new Set([...getTags(),...tags])]);textIn.value=''}
-  textIn.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===',')&&textIn.value.trim()){e.preventDefault();addTag(textIn.value)}if(e.key==='Backspace'&&!textIn.value){const t=getTags();if(t.length)setTags(t.slice(0,-1))}});
-  textIn.addEventListener('blur',()=>{if(textIn.value.trim())addTag(textIn.value)});
-  window._genreSet=setTags;
+  const wrap   = document.getElementById('genreWrap');
+  const textIn = document.getElementById('genreText');
+  const hidden = document.getElementById('m-genres');
+
+  const getTags = () => hidden.value ? hidden.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const setTags = arr => { hidden.value = arr.join(','); renderTags(); };
+
+  function renderTags() {
+    wrap.querySelectorAll('.gtag').forEach(el => el.remove());
+    getTags().forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'gtag';
+      span.innerHTML = `${tag}<span class="rm">×</span>`;
+      span.querySelector('.rm').onclick = e => { e.stopPropagation(); setTags(getTags().filter(t => t !== tag)); };
+      wrap.insertBefore(span, textIn);
+    });
+  }
+  function addTag(val) {
+    const tags = val.split(',').map(s => s.trim()).filter(Boolean);
+    setTags([...new Set([...getTags(), ...tags])]);
+    textIn.value = '';
+  }
+  textIn.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ',') && textIn.value.trim()) { e.preventDefault(); addTag(textIn.value); }
+    if (e.key === 'Backspace' && !textIn.value) { const t = getTags(); if (t.length) setTags(t.slice(0, -1)); }
+  });
+  textIn.addEventListener('blur', () => { if (textIn.value.trim()) addTag(textIn.value); });
+
+  window._genreSet = setTags;  // expose for fill-form usage
 }
 
-// ── Manhwa CRUD ───────────────────────────────────────
+// ─────────────────── MANHWA CRUD ───────────────────────
 function openAddManhwa() {
-  editingId='';document.getElementById('modalHeading').textContent='Manhwa အသစ်ထည့်မည်';
-  document.getElementById('m-id').disabled=false;
-  ['m-id','m-title','m-titleEN','m-author','m-cover','m-desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('m-status').value='ongoing';document.getElementById('modalMsg').style.display='none';
-  document.getElementById('coverUploadStatus').style.display='none';
-  if(window._genreSet)window._genreSet([]);
-  document.getElementById('manhwaModal').style.display='block';
+  editingId = '';
+  document.getElementById('modalHeading').textContent = 'Manhwa အသစ်ထည့်မည်';
+  document.getElementById('m-id').disabled = false;
+  ['m-id','m-title','m-titleEN','m-author','m-cover','m-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('m-status').value = 'ongoing';
+  document.getElementById('modalMsg').style.display = 'none';
+  document.getElementById('coverUploadStatus').style.display = 'none';
+  if (window._genreSet) window._genreSet([]);
+  document.getElementById('manhwaModal').style.display = 'block';
 }
+
 function openEditManhwa(id) {
-  const m=allManhwa.find(x=>x.id===id);if(!m)return;
-  editingId=id;document.getElementById('modalHeading').textContent='Manhwa ပြင်မည်';
-  document.getElementById('m-id').value=m.id;document.getElementById('m-id').disabled=true;
-  document.getElementById('m-title').value=m.title||'';document.getElementById('m-titleEN').value=m.titleEN||'';
-  document.getElementById('m-author').value=m.author||'';document.getElementById('m-cover').value=m.cover||'';
-  document.getElementById('m-status').value=m.status||'ongoing';document.getElementById('m-desc').value=m.description||'';
-  document.getElementById('modalMsg').style.display='none';document.getElementById('coverUploadStatus').style.display='none';
-  if(window._genreSet)window._genreSet(m.genres||[]);
-  document.getElementById('manhwaModal').style.display='block';
-}
-function closeModal(){document.getElementById('manhwaModal').style.display='none'}
-async function saveManhwa(){
-  const id=document.getElementById('m-id').value.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
-  const title=document.getElementById('m-title').value.trim();
-  if(!id||!title){showModalMsg('ID နဲ့ Title ထည့်ပါ','err');return}
-  const payload={id,title,titleEN:document.getElementById('m-titleEN').value.trim(),author:document.getElementById('m-author').value.trim(),cover:document.getElementById('m-cover').value.trim(),status:document.getElementById('m-status').value,description:document.getElementById('m-desc').value.trim(),genres:document.getElementById('m-genres').value.split(',').map(s=>s.trim()).filter(Boolean)};
-  try{
-    const url=editingId?`${WORKER_URL}/admin/manhwa/${encodeURIComponent(editingId)}`:`${WORKER_URL}/admin/manhwa`;
-    const r=await fetch(url,{method:editingId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify(payload)});
-    const d=await r.json();
-    if(d.success){showModalMsg('✓ သိမ်းပြီးပါပြီ','ok');loadManhwa();setTimeout(closeModal,1000)}
-    else showModalMsg('❌ '+(d.error||'Error'),'err');
-  }catch(e){showModalMsg('❌ '+e.message,'err')}
-}
-async function deleteManhwa(id,title){
-  if(!confirm(`"${title}" ကို ဖျက်မည်လား?`))return;
-  const r=await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}});
-  const d=await r.json();
-  if(d.success){toast('✓ ဖျက်ပြီးပါပြီ','ok');loadManhwa()}else toast('❌ '+d.error,'err');
-}
-function showModalMsg(txt,type){const el=document.getElementById('modalMsg');el.textContent=txt;el.style.color=type==='ok'?'#4ade80':'#f87171';el.style.display='block';if(type==='ok')setTimeout(()=>el.style.display='none',2000)}
-
-// ── Cover Upload ──────────────────────────────────────
-async function uploadCoverFile(event){
-  const file=event.target.files[0];if(!file)return;
-  const st=document.getElementById('coverUploadStatus');st.style.display='block';st.style.color='#60a5fa';st.textContent='⏳ Upload...';
-  const idVal=document.getElementById('m-id').value.trim()||Date.now();
-  const ext=file.name.split('.').pop()||'jpg';const fd=new FormData();
-  fd.append('file',file);fd.append('filename',`manhwa-covers/${idVal}.${ext}`);
-  try{
-    const r=await fetch(`${WORKER_URL}/admin/upload`,{method:'POST',headers:{'Authorization':'Bearer '+TOKEN},body:fd});
-    const d=await r.json();
-    if(d.success){document.getElementById('m-cover').value=d.url;st.style.color='#4ade80';st.textContent='✓ Upload ပြီး'}
-    else{st.style.color='#f87171';st.textContent='❌ '+d.error}
-  }catch(e){st.style.color='#f87171';st.textContent='❌ '+e.message}
+  const m = allManhwa.find(x => x.id === id);
+  if (!m) return;
+  editingId = id;
+  document.getElementById('modalHeading').textContent = 'Manhwa ပြင်မည်';
+  document.getElementById('m-id').value = m.id;
+  document.getElementById('m-id').disabled = true;
+  document.getElementById('m-title').value   = m.title   || '';
+  document.getElementById('m-titleEN').value = m.titleEN || '';
+  document.getElementById('m-author').value  = m.author  || '';
+  document.getElementById('m-cover').value   = m.cover   || '';
+  document.getElementById('m-status').value  = m.status  || 'ongoing';
+  document.getElementById('m-desc').value    = m.description || '';
+  document.getElementById('modalMsg').style.display = 'none';
+  document.getElementById('coverUploadStatus').style.display = 'none';
+  if (window._genreSet) window._genreSet(m.genres || []);
+  document.getElementById('manhwaModal').style.display = 'block';
 }
 
-// ── PDF Convert (shared) ──────────────────────────────
-async function convertPdfToWebP(file, width, quality, onProgress) {
-  const url  = URL.createObjectURL(file);
-  const pdf  = await pdfjsLib.getDocument({ url, cMapPacked: true }).promise;
-  const total = pdf.numPages;
-  const blobs = [];
+function closeModal() { document.getElementById('manhwaModal').style.display = 'none'; }
+
+async function saveManhwa() {
+  const id = document.getElementById('m-id').value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+  const title = document.getElementById('m-title').value.trim();
+  if (!id || !title) { showModalMsg('ID နဲ့ Title ထည့်ပါ', 'err'); return; }
+
+  const payload = {
+    id, title,
+    titleEN:     document.getElementById('m-titleEN').value.trim(),
+    author:      document.getElementById('m-author').value.trim(),
+    cover:       document.getElementById('m-cover').value.trim(),
+    status:      document.getElementById('m-status').value,
+    description: document.getElementById('m-desc').value.trim(),
+    genres:      document.getElementById('m-genres').value.split(',').map(s => s.trim()).filter(Boolean),
+  };
+
+  try {
+    let r;
+    if (editingId) {
+      r = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(editingId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      r = await fetch(`${WORKER_URL}/admin/manhwa`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+        body: JSON.stringify(payload),
+      });
+    }
+    const d = await r.json();
+    if (d.success) {
+      showModalMsg('✓ သိမ်းပြီးပါပြီ', 'ok');
+      loadManhwa();
+      setTimeout(closeModal, 1000);
+    } else {
+      showModalMsg('❌ ' + (d.error || 'Error'), 'err');
+    }
+  } catch(e) {
+    showModalMsg('❌ ' + e.message, 'err');
+  }
+}
+
+async function deleteManhwa(id, title) {
+  if (!confirm(`"${title}" ကို ဖျက်မည်လား?\n(KV data ဖျက်မည်။ R2 images တွေကို manually ဖျက်ပါ)`)) return;
+  const r = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(id)}`, {
+    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN },
+  });
+  const d = await r.json();
+  if (d.success) { toast('✓ ဖျက်ပြီးပါပြီ', 'ok'); loadManhwa(); }
+  else toast('❌ ' + d.error, 'err');
+}
+
+function showModalMsg(txt, type) {
+  const el = document.getElementById('modalMsg');
+  el.textContent = txt;
+  el.style.color = type === 'ok' ? '#4ade80' : '#f87171';
+  el.style.display = 'block';
+  if (type === 'ok') setTimeout(() => el.style.display = 'none', 2000);
+}
+
+// ─────────────────── COVER UPLOAD ──────────────────────
+async function uploadCoverFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const st = document.getElementById('coverUploadStatus');
+  st.style.display = 'block'; st.style.color = '#60a5fa'; st.textContent = '⏳ Upload...';
+
+  const idVal = document.getElementById('m-id').value.trim() || Date.now();
+  const ext   = file.name.split('.').pop() || 'jpg';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('filename', `manhwa-covers/${idVal}.${ext}`);
+
+  try {
+    const r = await fetch(`${WORKER_URL}/admin/upload`, {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN }, body: fd,
+    });
+    const d = await r.json();
+    if (d.success) {
+      document.getElementById('m-cover').value = d.url;
+      st.style.color = '#4ade80'; st.textContent = '✓ Upload ပြီး';
+    } else {
+      st.style.color = '#f87171'; st.textContent = '❌ ' + d.error;
+    }
+  } catch(e) {
+    st.style.color = '#f87171'; st.textContent = '❌ ' + e.message;
+  }
+}
+
+// ─────────────────── UPLOAD MODE ───────────────────────
+function setMode(m) {
+  uploadMode = m;
+  document.getElementById('mode-pdf').classList.toggle('active', m === 'pdf');
+  document.getElementById('mode-img').classList.toggle('active', m === 'img');
+  document.getElementById('pdf-mode-ui').style.display = m === 'pdf' ? 'block' : 'none';
+  document.getElementById('img-mode-ui').style.display = m === 'img' ? 'block' : 'none';
+}
+
+function updateFolderPath() {
+  const id = document.getElementById('uploadManhwaId').value;
+  const ch = document.getElementById('uploadChNum').value;
+  document.getElementById('uploadFolderPath').value = (id && ch) ? `manhwa/${id}/ch${ch}` : '';
+}
+
+function jumpToUpload(id) {
+  showTab('upload');
+  document.getElementById('uploadManhwaId').value = id;
+  updateFolderPath();
+  document.getElementById('uploadChNum').focus();
+}
+
+// ─────────────────── DRAG & DROP ───────────────────────
+function onDrag(e, zoneId)    { e.preventDefault(); document.getElementById(zoneId)?.classList.add('drag'); }
+function onDragLeave(zoneId)  { document.getElementById(zoneId)?.classList.remove('drag'); }
+
+function onDropPdf(e) {
+  e.preventDefault();
+  document.getElementById('pdfZone').classList.remove('drag');
+  const f = e.dataTransfer?.files[0];
+  if (f?.type === 'application/pdf') setPdfFile(f);
+}
+
+function onPdfSelect(e) { const f = e.target.files[0]; if (f) setPdfFile(f); }
+
+async function setPdfFile(file) {
+  pdfFile = file;
+  document.getElementById('pdfPlaceholder').style.display = 'none';
+  document.getElementById('pdfSelected').style.display    = 'block';
+  document.getElementById('pdfFileName').textContent      = file.name;
+  document.getElementById('pdfPageInfo').textContent      = '⏳ page count စစ်နေသည်...';
+  try {
+    const url = URL.createObjectURL(file);
+    const pdf = await pdfjsLib.getDocument({ url }).promise;
+    document.getElementById('pdfPageInfo').textContent = `📄 ${pdf.numPages} pages (${(file.size/1024/1024).toFixed(1)} MB)`;
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    document.getElementById('pdfPageInfo').textContent = '⚠️ PDF ဖတ်မရပါ';
+  }
+}
+
+function onDropImg(e) {
+  e.preventDefault();
+  document.getElementById('imgZone').classList.remove('drag');
+  const files = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith('image/'));
+  if (files.length) setImgFiles(files);
+}
+
+function onImgSelect(e) { const files = [...e.target.files]; if (files.length) setImgFiles(files); }
+
+function setImgFiles(files) {
+  imgFileList = [...files].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  document.getElementById('imgPlaceholder').style.display = 'none';
+  document.getElementById('imgSelected').style.display    = 'block';
+  document.getElementById('imgFileCount').textContent     = `🖼️ ${imgFileList.length} ပုံ ရွေးထားသည်`;
+
+  const thumbs = document.getElementById('imgThumbs');
+  thumbs.innerHTML = '';
+  imgFileList.slice(0, 10).forEach(f => {
+    const img = document.createElement('img');
+    img.style.cssText = 'width:44px;height:54px;object-fit:cover;border-radius:5px;border:1px solid rgba(255,255,255,.08)';
+    const url = URL.createObjectURL(f);
+    img.src = url;
+    img.onload = () => URL.revokeObjectURL(url);
+    thumbs.appendChild(img);
+  });
+  if (imgFileList.length > 10) {
+    const more = document.createElement('div');
+    more.style.cssText = 'width:44px;height:54px;background:var(--bg2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--border)';
+    more.textContent = `+${imgFileList.length - 10}`;
+    thumbs.appendChild(more);
+  }
+}
+
+// ─────────────────── PDF CONVERT ───────────────────────
+async function convertPdfToWebP(file, onProgress) {
+  const url     = URL.createObjectURL(file);
+  const pdf     = await pdfjsLib.getDocument({ url, cMapPacked: true }).promise;
+  const total   = pdf.numPages;
+  const width   = parseInt(document.getElementById('renderWidth').value)  || 1200;
+  const quality = parseFloat(document.getElementById('webpQuality').value) || 0.85;
+  const blobs   = [];
+
   for (let i = 1; i <= total; i++) {
-    if (cancelFlag || bulkCancel) break;
+    if (cancelFlag) break;
     const page = await pdf.getPage(i);
     const vp0  = page.getViewport({ scale: 1 });
     const sc   = width / vp0.width;
     const vp   = page.getViewport({ scale: sc });
-    const canvas = document.createElement('canvas');
-    canvas.width  = Math.round(vp.width);
-    canvas.height = Math.round(vp.height);
+
+    const canvas    = document.createElement('canvas');
+    canvas.width    = Math.round(vp.width);
+    canvas.height   = Math.round(vp.height);
     await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
     const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', quality));
     blobs.push(blob);
     onProgress(i, total);
+    // Give browser a breath every 3 pages
     if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
   }
   URL.revokeObjectURL(url);
   return blobs;
 }
 
+// ─────────────────── UPLOAD BLOBS ──────────────────────
 async function uploadBlobs(blobsOrFiles, folder, onProgress) {
-  const BATCH = 3;
-  const results = [];
-  let uploaded = 0;
+  const results  = [];
+  const BATCH    = 3;   // 3 concurrent uploads
+  let   uploaded = 0;
+
   for (let i = 0; i < blobsOrFiles.length; i += BATCH) {
-    if (cancelFlag || bulkCancel) break;
+    if (cancelFlag) break;
     const batch = blobsOrFiles.slice(i, i + BATCH);
-    const res = await Promise.all(batch.map(async (item, j) => {
-      const pageNum = i + j + 1;
+
+    const batchRes = await Promise.all(batch.map(async (item, j) => {
+      const pageNum  = i + j + 1;
       const filename = `${folder}/${pad(pageNum, 3)}.webp`;
+
+      // Wrap File or Blob into FormData
       const fd = new FormData();
-      const asFile = item instanceof File ? item : new File([item], `${pad(pageNum,3)}.webp`, {type:'image/webp'});
-      fd.append('file', asFile, `${pad(pageNum,3)}.webp`);
+      const asFile = item instanceof File
+        ? item
+        : new File([item], `${pad(pageNum, 3)}.webp`, { type: 'image/webp' });
+      fd.append('file', asFile, `${pad(pageNum, 3)}.webp`);
       fd.append('filename', filename);
+
       try {
-        const r = await fetch(`${WORKER_URL}/admin/upload`, { method:'POST', headers:{'Authorization':'Bearer '+TOKEN}, body: fd });
+        const r = await fetch(`${WORKER_URL}/admin/upload`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
+          body: fd,
+        });
         const d = await r.json();
+        if (d.success) addLog('ok',   `↑ ${filename}`);
+        else           addLog('err',  `❌ ${filename}: ${d.error}`);
         return d;
-      } catch(e) { return { success: false, error: e.message }; }
+      } catch(e) {
+        addLog('err', `❌ ${filename}: ${e.message}`);
+        return { success: false };
+      }
     }));
-    results.push(...res);
+
+    results.push(...batchRes);
     uploaded += batch.length;
     onProgress(uploaded, blobsOrFiles.length);
   }
   return results;
 }
 
-// ── Single Upload ─────────────────────────────────────
-function setMode(m){uploadMode=m;document.getElementById('mode-pdf').classList.toggle('active',m==='pdf');document.getElementById('mode-img').classList.toggle('active',m==='img');document.getElementById('pdf-mode-ui').style.display=m==='pdf'?'block':'none';document.getElementById('img-mode-ui').style.display=m==='img'?'block':'none'}
-function updateFolderPath(){const id=document.getElementById('uploadManhwaId').value,ch=document.getElementById('uploadChNum').value;document.getElementById('uploadFolderPath').value=(id&&ch!=='')?`manhwa/${id}/ch${ch}`:''}
-function onDrag(e,zoneId){e.preventDefault();document.getElementById(zoneId)?.classList.add('drag')}
-function onDragLeave(zoneId){document.getElementById(zoneId)?.classList.remove('drag')}
-function onDropPdf(e){e.preventDefault();document.getElementById('pdfZone').classList.remove('drag');const f=e.dataTransfer?.files[0];if(f?.type==='application/pdf')setPdfFile(f)}
-function onPdfSelect(e){const f=e.target.files[0];if(f)setPdfFile(f)}
-async function setPdfFile(file){
-  pdfFile=file;document.getElementById('pdfPlaceholder').style.display='none';document.getElementById('pdfSelected').style.display='block';
-  document.getElementById('pdfFileName').textContent=file.name;document.getElementById('pdfPageInfo').textContent='⏳ pages စစ်နေသည်...';
-  try{const url=URL.createObjectURL(file);const pdf=await pdfjsLib.getDocument({url}).promise;document.getElementById('pdfPageInfo').textContent=`📄 ${pdf.numPages} pages (${(file.size/1024/1024).toFixed(1)} MB)`;URL.revokeObjectURL(url)}
-  catch{document.getElementById('pdfPageInfo').textContent='⚠️ PDF ဖတ်မရပါ'}
-}
-function onDropImg(e){e.preventDefault();document.getElementById('imgZone').classList.remove('drag');const files=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/'));if(files.length)setImgFiles(files)}
-function onImgSelect(e){const files=[...e.target.files];if(files.length)setImgFiles(files)}
-function setImgFiles(files){
-  imgFileList=[...files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
-  document.getElementById('imgPlaceholder').style.display='none';document.getElementById('imgSelected').style.display='block';
-  document.getElementById('imgFileCount').textContent=`🖼️ ${imgFileList.length} ပုံ ရွေးထားသည်`;
-  const thumbs=document.getElementById('imgThumbs');thumbs.innerHTML='';
-  imgFileList.slice(0,8).forEach(f=>{const img=document.createElement('img');img.style.cssText='width:44px;height:54px;object-fit:cover;border-radius:5px;border:1px solid rgba(255,255,255,.08)';const url=URL.createObjectURL(f);img.src=url;img.onload=()=>URL.revokeObjectURL(url);thumbs.appendChild(img)});
-}
-
+// ─────────────────── MAIN UPLOAD FLOW ──────────────────
 async function startUpload() {
   const manhwaId = document.getElementById('uploadManhwaId').value;
-  const chVal    = document.getElementById('uploadChNum').value;
-  const chNum    = parseInt(chVal);
+  const chNum = document.getElementById('uploadChNum').value;
+  const chNumInt = parseInt(chNum);
   const chTitle  = document.getElementById('uploadChTitle').value.trim();
   const folder   = document.getElementById('uploadFolderPath').value;
+
+  // Validation
   if (!manhwaId) { toast('Manhwa ရွေးပါ', 'err'); return; }
-  // FIX: ch=0 allow
-  if (chVal === '' || isNaN(chNum) || chNum < 0) { toast('Chapter နံပါတ် ထည့်ပါ (0 ကနေ ရ)', 'err'); return; }
-  if (uploadMode === 'pdf' && !pdfFile)          { toast('PDF ဖိုင် ရွေးပါ', 'err'); return; }
-  if (uploadMode === 'img' && !imgFileList.length){ toast('ပုံဖိုင်တွေ ရွေးပါ', 'err'); return; }
+  if (chNum == null || isNaN(chNum) || chNum < 0) { toast('Chapter နံပါတ် ထည့်ပါ', 'err'); return; }
+  if (uploadMode === 'pdf' && !pdfFile)         { toast('PDF ဖိုင် ရွေးပါ', 'err'); return; }
+  if (uploadMode === 'img' && !imgFileList.length) { toast('ပုံဖိုင်တွေ ရွေးပါ', 'err'); return; }
 
   cancelFlag = false;
-  document.getElementById('startBtn').disabled = true;
+  document.getElementById('startBtn').disabled    = true;
   document.getElementById('cancelBtn').style.display = 'inline-flex';
   document.getElementById('progressArea').style.display = 'block';
-  document.getElementById('doneBanner').style.display = 'none';
-  document.getElementById('uploadLog').innerHTML = '';
+  document.getElementById('doneBanner').style.display   = 'none';
+  document.getElementById('uploadLog').innerHTML         = '';
 
-  const width   = parseInt(document.getElementById('renderWidth').value) || 1200;
-  const quality = parseFloat(document.getElementById('webpQuality').value) || 0.85;
   let sourceBlobs = [];
 
   try {
+    // ── STEP A: Convert PDF ──────────────────────────
     if (uploadMode === 'pdf') {
       document.getElementById('convertWrap').style.display = 'block';
-      addLog('uploadLog','info',`📄 PDF converting...`);
-      sourceBlobs = await convertPdfToWebP(pdfFile, width, quality, (done, total) => {
-        const pct = Math.round(done/total*100);
-        document.getElementById('convertLabel').textContent=`Converting ${done}/${total}`;
-        document.getElementById('convertPct').textContent=pct+'%';
-        document.getElementById('convertBar').style.width=pct+'%';
+      addLog('info', `📄 PDF "${pdfFile.name}" converting...`);
+
+      sourceBlobs = await convertPdfToWebP(pdfFile, (done, total) => {
+        const pct = Math.round(done / total * 100);
+        document.getElementById('convertLabel').textContent = `Converting ${done}/${total} pages...`;
+        document.getElementById('convertPct').textContent  = pct + '%';
+        document.getElementById('convertBar').style.width  = pct + '%';
+        if (cancelFlag) throw new Error('Cancelled by user');
       });
-      if (cancelFlag) { addLog('uploadLog','err','❌ Cancelled'); return; }
-      addLog('uploadLog','ok',`✅ ${sourceBlobs.length} pages converted`);
+
+      if (cancelFlag) { addLog('err', '❌ Cancelled'); return; }
+      addLog('ok', `✅ ${sourceBlobs.length} pages converted to WebP`);
+
     } else {
+      // Image mode
       sourceBlobs = imgFileList;
+      addLog('info', `🖼️ ${sourceBlobs.length} images ready to upload`);
     }
 
-    addLog('uploadLog','info',`📤 Uploading to ${folder}/`);
-    await uploadBlobs(sourceBlobs, folder, (done, total) => {
-      const pct=Math.round(done/total*100);
-      document.getElementById('uploadLabel').textContent=`Uploading ${done}/${total}`;
-      document.getElementById('uploadPct').textContent=pct+'%';
-      document.getElementById('uploadBar').style.width=pct+'%';
+    // ── STEP B: Upload to R2 ─────────────────────────
+    addLog('info', `📤 Uploading to R2: ${folder}/`);
+
+    const results = await uploadBlobs(sourceBlobs, folder, (done, total) => {
+      const pct = Math.round(done / total * 100);
+      document.getElementById('uploadLabel').textContent = `Uploading ${done}/${total} images...`;
+      document.getElementById('uploadPct').textContent  = pct + '%';
+      document.getElementById('uploadBar').style.width  = pct + '%';
     });
 
-    // Register chapter
-    addLog('uploadLog','info','📝 Register chapter...');
+    if (cancelFlag) { addLog('err', '❌ Upload cancelled'); return; }
+
+    const failed = results.filter(r => !r.success).length;
+    const ok     = results.length - failed;
+    addLog(failed > 0 ? 'err' : 'ok', `Upload: ✅ ${ok} success${failed > 0 ? ` / ❌ ${failed} fail` : ''}`);
+
+    // ── STEP C: Register Chapter Metadata ────────────
+    addLog('info', '📝 Chapter metadata register မည်...');
+    const pageCount = sourceBlobs.length;
     const regR = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter`, {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-      body: JSON.stringify({ ch: chNum, title: chTitle, pageCount: sourceBlobs.length, folder })
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+      body:    JSON.stringify({ ch: chNum, title: chTitle, pageCount, folder }),
     });
     const regD = await regR.json();
     if (regD.success) {
-      addLog('uploadLog','ok',`✅ Chapter ${chNum} registered! ${sourceBlobs.length} pages`);
-      const mName = (allManhwa.find(m=>m.id===manhwaId)?.title)||manhwaId;
-      document.getElementById('doneBanner').style.display='block';
-      document.getElementById('doneSummary').textContent=`${mName} | Ch.${chNum}${chTitle?' — '+chTitle:''} | ${sourceBlobs.length} pages`;
-      loadManhwa();
-      toast('✅ Upload ပြီးပါပြီ!','ok');
+      addLog('ok', `✅ Chapter ${chNum} registered! ${pageCount} pages | folder: ${folder}`);
     } else {
-      addLog('uploadLog','err','❌ Register error: '+regD.error);
+      addLog('err', `❌ Register error: ${regD.error}`);
     }
+
+    // ── DONE ─────────────────────────────────────────
+    const mName = (allManhwa.find(m => m.id === manhwaId)?.title) || manhwaId;
+    document.getElementById('doneBanner').style.display = 'block';
+    document.getElementById('doneSummary').textContent  =
+      `${mName} | Chapter ${chNum}${chTitle ? ` — ${chTitle}` : ''} | ${pageCount} pages | ${folder}`;
+
+    loadManhwa();
+    toast('✅ Upload ပြီးပါပြီ!', 'ok');
+
   } catch(e) {
-    addLog('uploadLog','err','❌ '+e.message);
+    addLog('err', '❌ Error: ' + e.message);
+    toast('❌ ' + e.message, 'err');
   }
-  document.getElementById('startBtn').disabled = false;
+
+  // Always re-enable buttons
+  document.getElementById('startBtn').disabled       = false;
   document.getElementById('cancelBtn').style.display = 'none';
 }
-function cancelUpload(){cancelFlag=true;addLog('uploadLog','err','⚠️ Cancelling...')}
-function resetUploadForm(){
-  pdfFile=null;imgFileList=[];cancelFlag=false;
-  ['progressArea','doneBanner','convertWrap'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('convertBar').style.width='0%';document.getElementById('uploadBar').style.width='0%';
-  document.getElementById('uploadLog').innerHTML='';document.getElementById('uploadChNum').value='';
-  document.getElementById('uploadChTitle').value='';document.getElementById('uploadFolderPath').value='';
-  document.getElementById('startBtn').disabled=false;document.getElementById('cancelBtn').style.display='none';
-  document.getElementById('pdfPlaceholder').style.display='block';document.getElementById('pdfSelected').style.display='none';
-  document.getElementById('pdfFileInput').value='';
-  document.getElementById('imgPlaceholder').style.display='block';document.getElementById('imgSelected').style.display='none';
-  document.getElementById('imgFilesInput').value='';document.getElementById('imgThumbs').innerHTML='';
+
+function cancelUpload() {
+  cancelFlag = true;
+  addLog('err', '⚠️ Cancel request sent...');
 }
 
-// ════════════════════════════════════════════════════
-// ── BULK UPLOAD ──────────────────────────────────────
-// ════════════════════════════════════════════════════
+function resetUploadForm() {
+  pdfFile = null;
+  imgFileList = [];
+  cancelFlag  = false;
 
-function onDropBulk(e) {
-  e.preventDefault();
-  document.getElementById('bulkZone').classList.remove('drag');
-  const files = [...(e.dataTransfer?.files||[])].filter(f=>f.type==='application/pdf');
-  if (files.length) setBulkFiles(files);
+  document.getElementById('progressArea').style.display   = 'none';
+  document.getElementById('doneBanner').style.display     = 'none';
+  document.getElementById('convertWrap').style.display    = 'none';
+  document.getElementById('convertBar').style.width       = '0%';
+  document.getElementById('uploadBar').style.width        = '0%';
+  document.getElementById('uploadLog').innerHTML          = '';
+  document.getElementById('uploadChNum').value            = '';
+  document.getElementById('uploadChTitle').value          = '';
+  document.getElementById('uploadFolderPath').value       = '';
+  document.getElementById('startBtn').disabled            = false;
+  document.getElementById('cancelBtn').style.display      = 'none';
+
+  // Reset PDF UI
+  document.getElementById('pdfPlaceholder').style.display = 'block';
+  document.getElementById('pdfSelected').style.display    = 'none';
+  document.getElementById('pdfFileInput').value           = '';
+
+  // Reset img UI
+  document.getElementById('imgPlaceholder').style.display = 'block';
+  document.getElementById('imgSelected').style.display    = 'none';
+  document.getElementById('imgFilesInput').value          = '';
+  document.getElementById('imgThumbs').innerHTML          = '';
 }
 
-function onBulkSelect(e) {
-  const files = [...e.target.files];
-  if (files.length) setBulkFiles(files);
-}
-
-function setBulkFiles(files) {
-  // Sort by filename
-  const sorted = [...files].sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
-  const format = document.getElementById('bulkChFormat').value;
-
-  bulkQueue = sorted.map((file, i) => {
-    let chNum;
-    if (format === 'sequential') chNum = i;
-    else if (format === 'sequential1') chNum = i + 1;
-    else {
-      chNum = detectChapterNum(file.name);
-      if (chNum === null) chNum = i + 1; // fallback
-    }
-    return { file, chNum, title: '', status: 'pending' };
-  });
-
-  document.getElementById('bulkPlaceholder').style.display = 'none';
-  document.getElementById('bulkSelected').style.display = 'block';
-  document.getElementById('bulkFileCount').textContent = `📚 ${files.length} PDF ဖိုင် ရွေးထားသည်`;
-  document.getElementById('bulkQueueBox').style.display = 'block';
-  document.getElementById('bulkStartBox').style.display = 'block';
-
-  renderBulkQueue();
-  document.getElementById('bulkStartBtn').style.display = 'inline-flex';
-  document.getElementById('bulkTotalCount').textContent = bulkQueue.length;
-}
-
-function renderBulkQueue() {
-  const tbody = document.getElementById('bulkQueueBody');
-  tbody.innerHTML = bulkQueue.map((item, i) => `
-    <tr class="queue-row" id="qrow-${i}">
-      <td style="color:var(--muted)">${i+1}</td>
-      <td style="color:#94a3b8;font-family:monospace;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.file.name}">${item.file.name}</td>
-      <td>
-        <input type="number" class="ch-input-small" value="${item.chNum}" min="0"
-          onchange="bulkQueue[${i}].chNum = parseInt(this.value)"
-          style="background:var(--bg3);border:1px solid var(--border);color:#c084fc;border-radius:7px;padding:4px 8px;font-size:12px;width:70px;outline:none">
-      </td>
-      <td><input type="text" value="${item.title}" placeholder="Optional title..."
-        onchange="bulkQueue[${i}].title = this.value"
-        style="background:transparent;border:none;border-bottom:1px solid var(--border);color:#94a3b8;font-size:12px;padding:2px 4px;outline:none;width:100%"></td>
-      <td class="status-icon" id="qstatus-${i}">⏳</td>
-    </tr>`).join('');
-}
-
-function jumpToBulk(id) {
-  showTab('bulk');
-  document.getElementById('bulkManhwaId').value = id;
-}
-
-async function startBulkUpload() {
-  const manhwaId = document.getElementById('bulkManhwaId').value;
-  if (!manhwaId) { toast('Manhwa ရွေးပါ', 'err'); return; }
-  if (!bulkQueue.length) { toast('PDF ဖိုင်တွေ ရွေးပါ', 'err'); return; }
-
-  // Check for duplicate chapter numbers
-  const chNums = bulkQueue.map(q => q.chNum);
-  const dupes  = chNums.filter((n,i) => chNums.indexOf(n) !== i);
-  if (dupes.length) {
-    toast(`Chapter နံပါတ် ထပ်နေသည်: ${[...new Set(dupes)].join(', ')}`, 'err');
-    return;
-  }
-
-  bulkCancel  = false;
-  bulkRunning = true;
-  const width   = parseInt(document.getElementById('bulkRenderWidth').value) || 1200;
-  const quality = parseFloat(document.getElementById('bulkWebpQuality').value) || 0.85;
-  const total   = bulkQueue.length;
-
-  document.getElementById('bulkStartBtn').disabled = true;
-  document.getElementById('bulkCancelBtn').style.display = 'inline-flex';
-  document.getElementById('bulkOverallArea').style.display = 'block';
-  document.getElementById('bulkDoneBanner').style.display  = 'none';
-  document.getElementById('bulkLog').innerHTML = '';
-  document.getElementById('bulkTotalCount2').textContent = total;
-
-  let doneCount = 0, errorCount = 0;
-
-  for (let i = 0; i < bulkQueue.length; i++) {
-    if (bulkCancel) { addLog('bulkLog','err','⚠️ Cancelled by user'); break; }
-
-    const item   = bulkQueue[i];
-    const chNum  = item.chNum;
-    const folder = `manhwa/${manhwaId}/ch${chNum}`;
-
-    // Update row UI
-    document.getElementById(`qrow-${i}`)?.classList.add('active');
-    document.getElementById(`qstatus-${i}`).textContent = '🔄';
-
-    // Overall label
-    document.getElementById('bulkCurrentLabel').textContent = `Processing: ${item.file.name} (Ch.${chNum})`;
-    document.getElementById('bulkDoneCount').textContent = doneCount;
-
-    // Reset current chapter bars
-    document.getElementById('bulkConvBar').style.width = '0%';
-    document.getElementById('bulkConvPct').textContent = '0%';
-    document.getElementById('bulkUpBar').style.width = '0%';
-    document.getElementById('bulkUpPct').textContent = '0%';
-
-    addLog('bulkLog','info',`\n── Ch.${chNum} | ${item.file.name} ──`);
-
-    try {
-      // Convert PDF → WebP
-      document.getElementById('bulkConvLabel').textContent = `Ch.${chNum} Converting...`;
-      const blobs = await convertPdfToWebP(item.file, width, quality, (done, t) => {
-        const pct = Math.round(done/t*100);
-        document.getElementById('bulkConvBar').style.width = pct+'%';
-        document.getElementById('bulkConvPct').textContent = pct+'%';
-        document.getElementById('bulkConvLabel').textContent = `Ch.${chNum} Converting ${done}/${t}`;
-      });
-
-      if (bulkCancel) break;
-      addLog('bulkLog','ok',`✅ Convert ပြီး: ${blobs.length} pages`);
-
-      // Upload to R2
-      document.getElementById('bulkUpLabel').textContent = `Ch.${chNum} Uploading...`;
-      await uploadBlobs(blobs, folder, (done, t) => {
-        const pct = Math.round(done/t*100);
-        document.getElementById('bulkUpBar').style.width = pct+'%';
-        document.getElementById('bulkUpPct').textContent = pct+'%';
-        document.getElementById('bulkUpLabel').textContent = `Ch.${chNum} Uploading ${done}/${t}`;
-      });
-
-      if (bulkCancel) break;
-      addLog('bulkLog','ok',`✅ Upload ပြီး: ${folder}/`);
-
-      // Register chapter metadata
-      const regR = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter`, {
-        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
-        body: JSON.stringify({ ch: chNum, title: item.title||'', pageCount: blobs.length, folder })
-      });
-      const regD = await regR.json();
-      if (regD.success) {
-        addLog('bulkLog','ok',`✅ Ch.${chNum} registered!`);
-        document.getElementById(`qstatus-${i}`).textContent = '✅';
-        document.getElementById(`qrow-${i}`)?.classList.remove('active');
-        document.getElementById(`qrow-${i}`)?.classList.add('done');
-        item.status = 'done';
-        doneCount++;
-      } else {
-        throw new Error(regD.error || 'Register failed');
-      }
-
-    } catch(e) {
-      addLog('bulkLog','err',`❌ Ch.${chNum} error: ${e.message}`);
-      document.getElementById(`qstatus-${i}`).textContent = '❌';
-      document.getElementById(`qrow-${i}`)?.classList.remove('active');
-      document.getElementById(`qrow-${i}`)?.classList.add('error');
-      item.status = 'error';
-      errorCount++;
-    }
-
-    // Update overall bar
-    const overallPct = Math.round(((doneCount+errorCount) / total) * 100);
-    document.getElementById('bulkOverallBar').style.width = overallPct+'%';
-    document.getElementById('bulkDoneCount').textContent = doneCount;
-
-    // Small pause between chapters (let browser breathe)
-    await new Promise(r => setTimeout(r, 200));
-  }
-
-  // Done
-  bulkRunning = false;
-  document.getElementById('bulkStartBtn').disabled = false;
-  document.getElementById('bulkCancelBtn').style.display = 'none';
-  document.getElementById('bulkCurrentLabel').textContent = bulkCancel ? '⚠️ Cancelled' : '✅ ပြီးပါပြီ!';
-  document.getElementById('bulkOverallBar').style.background = errorCount > 0 ? 'linear-gradient(90deg,#c2410c,#f97316)' : 'linear-gradient(90deg,#16a34a,#4ade80)';
-
-  const mName = (allManhwa.find(m=>m.id===manhwaId)?.title)||manhwaId;
-  document.getElementById('bulkDoneBanner').style.display = 'block';
-  document.getElementById('bulkDoneSummary').textContent =
-    `${mName} | ✅ ${doneCount} chapters success${errorCount > 0 ? ` | ❌ ${errorCount} failed` : ''} | Total: ${total}`;
-
-  loadManhwa();
-  toast(errorCount > 0 ? `⚠️ ${doneCount}/${total} chapters ပြီး (${errorCount} error)` : `🎉 ${doneCount} chapters အကုန် upload ပြီး!`, errorCount > 0 ? 'info' : 'ok');
-}
-
-function cancelBulkUpload() {
-  bulkCancel = true;
-  addLog('bulkLog','err','⚠️ Cancel request sent...');
-}
-
-function resetBulkForm() {
-  bulkQueue = [];
-  bulkCancel = false;
-  document.getElementById('bulkFileInput').value = '';
-  document.getElementById('bulkPlaceholder').style.display = 'block';
-  document.getElementById('bulkSelected').style.display = 'none';
-  document.getElementById('bulkQueueBox').style.display = 'none';
-  document.getElementById('bulkStartBox').style.display = 'none';
-  document.getElementById('bulkOverallArea').style.display = 'none';
-  document.getElementById('bulkDoneBanner').style.display = 'none';
-  document.getElementById('bulkStartBtn').style.display = 'none';
-  document.getElementById('bulkStartBtn').disabled = false;
-  document.getElementById('bulkLog').innerHTML = '';
-  document.getElementById('bulkOverallBar').style.width = '0%';
-}
-
-// ── Chapter Manager ───────────────────────────────────
+// ─────────────────── CHAPTER MANAGER ───────────────────
 async function loadChapters() {
   const id = document.getElementById('chManhwaId').value;
   const el = document.getElementById('chapterListWrap');
-  if (!id) { el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">Manhwa တစ်ခု ရွေးပါ</div>'; return; }
-  el.innerHTML='<div class="skeleton" style="height:56px"></div><div class="skeleton" style="height:56px;margin-top:8px"></div>';
+  if (!id) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">Manhwa တစ်ခု ရွေးပါ</div>'; return; }
+  el.innerHTML = '<div class="skeleton" style="height:56px"></div><div class="skeleton" style="height:56px;margin-top:8px"></div>';
+
   try {
-    const r = await fetch(`${WORKER_URL}/manhwa/${encodeURIComponent(id)}`);
-    const d = await r.json();
-    const chapters = (d.chapters||[]).slice().reverse();
-    if (!chapters.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">Chapter မရှိသေးပါ</div>'; return; }
-    el.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Chapter ${chapters.length} ခု</div>
+    const r  = await fetch(`${WORKER_URL}/manhwa/${encodeURIComponent(id)}`);
+    const d  = await r.json();
+    const chapters = (d.chapters || []).slice().reverse(); // newest first
+
+    if (!chapters.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px">Chapter မရှိသေးပါ</div>';
+      return;
+    }
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+  <div style="font-size:12px;color:var(--muted)">Chapter ${chapters.length} ခု</div>
+  <button class="btn btn-red" style="padding:6px 12px;font-size:12px"
+    onclick="deleteAllChapters('${id}')">
+    🗑️ Chapter အကုန်ဖျက်
+  </button>
+</div>
       <div style="display:flex;flex-direction:column;gap:6px">
-        ${chapters.map(ch=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-          <span style="font-size:18px;font-weight:900;color:#c084fc;width:38px;text-align:center;flex-shrink:0">${ch.ch}</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#e2e8f0">${ch.title||`Chapter ${ch.ch}`}</div>
-            <div style="font-size:10px;color:#475569;margin-top:2px;font-family:monospace">🖼 ${ch.pageCount} pages | 📁 ${ch.folder||'—'} | ${ch.uploadedAt||'—'}</div>
-          </div>
-          <button class="btn btn-red" style="padding:5px 9px;font-size:11px" onclick="deleteChapter('${id}',${ch.ch})">🗑️</button>
-        </div>`).join('')}
+        ${chapters.map(ch => `
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:18px;font-weight:900;color:#c084fc;width:38px;text-align:center;flex-shrink:0">${ch.ch}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ch.title || `Chapter ${ch.ch}`}</div>
+              <div style="font-size:10px;color:#475569;margin-top:2px;font-family:monospace">🖼 ${ch.pageCount} pages &nbsp;|&nbsp; 📁 ${ch.folder || '—'} &nbsp;|&nbsp; ${ch.uploadedAt || '—'}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <a href="/manhwa/${id}/${ch.ch}/" target="_blank" class="btn btn-gray" style="padding:5px 9px;font-size:11px;text-decoration:none" title="ကြည့်မည်">👁️</a>
+              <button class="btn btn-red" style="padding:5px 9px;font-size:11px" onclick="deleteChapter('${id}',${ch.ch})">🗑️</button>
+            </div>
+          </div>`).join('')}
       </div>`;
-  } catch(e) { el.innerHTML=`<p style="color:#f87171;font-size:13px">${e.message}</p>`; }
+  } catch(e) {
+    el.innerHTML = `<p style="color:#f87171;font-size:13px">${e.message}</p>`;
+  }
 }
 
 async function deleteChapter(manhwaId, ch) {
-  if (!confirm(`Chapter ${ch} ကို ဖျက်မည်လား?`)) return;
-  const r = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter/${ch}`, { method:'DELETE', headers:{'Authorization':'Bearer '+TOKEN} });
+  if (!confirm(`Chapter ${ch} ကို ဖျက်မည်လား?\n(R2 images တွေကို manually ဖျက်ပါ)`)) return;
+  const r = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter/${ch}`, {
+    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN },
+  });
   const d = await r.json();
-  if (d.success) { toast('✓ ဖျက်ပြီး','ok'); loadChapters(); loadManhwa(); }
-  else toast('❌ '+d.error,'err');
+  if (d.success) { toast('✓ ဖျက်ပြီးပါပြီ', 'ok'); loadChapters(); loadManhwa(); }
+  else toast('❌ ' + d.error, 'err');
+}
+async function deleteAllChapters(manhwaId) {
+  const manhwa = allManhwa.find(m => m.id === manhwaId);
+  const name   = manhwa?.title || manhwaId;
+  const count  = manhwa?.totalChapters || 0;
+
+  if (!confirm(`"${name}" ရဲ့ Chapter ${count} ခုနဲ့ R2 ပုံဖိုင်အကုန် ဖျက်မည်။\n⚠️ ပြန်မရနိုင်ပါ။ ဆက်လုပ်မည်လား?`)) return;
+
+  toast('⏳ Deleting...', 'info');
+
+  try {
+    const r = await fetch(
+      `${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapters`,
+      { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } }
+    );
+    const d = await r.json();
+    if (d.success) {
+      toast(`✓ Chapter ${d.deletedChapters} ခု + R2 ပုံ ${d.r2Deleted} ဖျက်ပြီး${d.r2Failed ? ` (❌ ${d.r2Failed} failed)` : ''}`, 'ok');
+      loadChapters();
+      loadManhwa();
+    } else {
+      toast('❌ ' + (d.error || 'Error'), 'err');
+    }
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  }
 }
 </script>
 </body>
