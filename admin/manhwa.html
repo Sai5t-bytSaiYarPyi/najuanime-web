@@ -1107,14 +1107,31 @@ async function loadChapters() {
 }
 
 async function deleteChapter(manhwaId, ch) {
-  if (!confirm(`Chapter ${ch} ကို ဖျက်မည်လား?\n(R2 images တွေကို manually ဖျက်ပါ)`)) return;
-  const r = await fetch(`${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter/${ch}`, {
-    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN },
-  });
-  const d = await r.json();
-  if (d.success) { toast('✓ ဖျက်ပြီးပါပြီ', 'ok'); loadChapters(); loadManhwa(); }
-  else toast('❌ ' + d.error, 'err');
+  if (!confirm(`Chapter ${ch} ကို ဖျက်မည်လား?\n⚠️ R2 images ကျန်နိုင်သည်`)) return;
+
+  const callBtn = document.querySelector(`[onclick="deleteChapter('${manhwaId}',${ch})"]`);
+  if (callBtn) { callBtn.disabled = true; callBtn.textContent = '...'; }
+
+  try {
+    const r = await fetch(
+      `${WORKER_URL}/admin/manhwa/${encodeURIComponent(manhwaId)}/chapter/${ch}`,
+      { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } }
+    );
+    const d = await r.json();
+    if (d.success) {
+      toast(`✓ Chapter ${ch} ဖျက်ပြီးပါပြီ (${d.deleted} ဖျက်ခဲ့)`, 'ok');
+      await loadChapters();
+      loadManhwa();
+    } else {
+      toast('❌ ' + (d.error || 'ဖျက်မရပါ'), 'err');
+      if (callBtn) { callBtn.disabled = false; callBtn.textContent = '🗑️'; }
+    }
+  } catch(e) {
+    toast('❌ Network error: ' + e.message, 'err');
+    if (callBtn) { callBtn.disabled = false; callBtn.textContent = '🗑️'; }
+  }
 }
+
 async function deleteAllChapters(manhwaId) {
   const manhwa = allManhwa.find(m => m.id === manhwaId);
   const name   = manhwa?.title || manhwaId;
