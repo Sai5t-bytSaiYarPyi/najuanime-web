@@ -121,6 +121,37 @@
       .ch-title{font-size:12px}
       .continue-btn,.start-btn{font-size:14px;padding:12px 18px}
     }
+
+    /* ── Detail Page Myanmar Title ── */
+#manhwaTitleMM {
+  font-size: 15px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Mobile Layout Fixes ── */
+@media(max-width:640px){
+  .hero-content { padding: 16px 0 0; }
+  /* ပုံနဲ့ စာသားကြားက ဟနေတဲ့ နေရာကို ကျဉ်းလိုက်ပြီး စာတွေ နေရာပိုရအောင် လုပ်ထားတယ် */
+  .hero-content > div:first-child { gap: 14px !important; } 
+  .cover-img { 
+    width: 105px; 
+    height: 150px; 
+    border-radius: 10px; 
+    border-width: 1px; /* ဘောင်ကို နည်းနည်းပါးလိုက်တယ် */
+  }
+  #manhwaTitle { font-size: 20px !important; line-height: 1.25 !important; }
+  #manhwaTitleMM { font-size: 13px !important; margin-top: 2px !important; }
+  #manhwaAuthor { font-size: 11px !important; line-height: 1.4 !important; }
+  #genreRow { gap: 4px !important; }
+  .genre-pill { font-size: 9.5px !important; padding: 2px 7px !important; }
+  .stat-chip { font-size: 11px !important; }
+}
+
+/* Mobile Nav Free Badge (List page က css အတိုင်းပါပဲ) */
+.nav-text-wrap { position: relative; display: inline-block; }
+.mobile-free-badge { position: absolute; top: -6px; right: -28px; background: linear-gradient(135deg, #f43f5e, #fb923c); color: white; font-size: 7px; font-weight: 900; padding: 1px 4px; border-radius: 4px; }
   </style>
 </head>
 <body class="min-h-screen pb-20 md:pb-0">
@@ -170,19 +201,22 @@
   <div class="hero-wrap" id="heroWrap">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-content max-w-4xl mx-auto px-4">
-      <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:nowrap">
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:nowrap">
         <img id="coverImg" class="cover-img" src="" alt="">
-        <div style="flex:1;min-width:0;padding-bottom:20px;display:flex;flex-direction:column;gap:10px">
+        <div style="flex:1;min-width:0;padding-bottom:10px;display:flex;flex-direction:column;gap:8px">
           <!-- Status -->
           <div style="display:flex;align-items:center;gap:6px" id="statusRow"></div>
           <!-- Title -->
-          <h1 id="manhwaTitle" style="font-size:24px;font-weight:900;color:white;line-height:1.2;letter-spacing:-.01em"></h1>
+          <div>
+            <h1 id="manhwaTitle" style="font-size:26px;font-weight:900;color:white;line-height:1.2;letter-spacing:-.01em"></h1>
+            <h2 id="manhwaTitleMM" style="display:none"></h2> <!-- မြန်မာခေါင်းစဉ်ပြဖို့ နေရာ -->
+          </div>
           <!-- Author -->
-          <p id="manhwaAuthor" style="font-size:13px;color:#64748b;font-weight:600;display:none"></p>
+          <p id="manhwaAuthor" style="font-size:12px;color:#94a3b8;font-weight:600;display:none;line-height:1.5"></p>
           <!-- Genres -->
-          <div id="genreRow" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+          <div id="genreRow" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px"></div>
           <!-- Stats -->
-          <div id="statsRow" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+          <div id="statsRow" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:2px"></div>
         </div>
       </div>
 
@@ -443,12 +477,22 @@ async function load() {
     // Title
     document.getElementById('manhwaTitle').textContent = manhwaData.title;
 
+    if (manhwaData.titleMM) {
+    const titleMMEl = document.getElementById('manhwaTitleMM');
+    titleMMEl.textContent = manhwaData.titleMM;
+    titleMMEl.style.display = 'block';
+   }
+
     // Author
-    if (manhwaData.author) {
-      const authEl = document.getElementById('manhwaAuthor');
-      authEl.textContent = `✍️ ${manhwaData.author}`;
-      authEl.style.display = 'block';
-    }
+if (manhwaData.author || manhwaData.scanlation) {
+  const authEl = document.getElementById('manhwaAuthor');
+  let authText = '';
+  if (manhwaData.scanlation) authText += `✍️ Scanlation by: ${manhwaData.scanlation}`;
+  if (manhwaData.author) authText += authText ? ` / Creators: ${manhwaData.author}` : `✍️ Creators: ${manhwaData.author}`;
+  
+  authEl.textContent = authText;
+  authEl.style.display = 'block';
+}
 
     // Genres
     const genreRow = document.getElementById('genreRow');
