@@ -532,29 +532,23 @@ function renderPages(chapter) {
     skel.className = 'page-skeleton';
     pageDiv.appendChild(skel);
 
-    // Canvas element တည်ဆောက်ခြင်း
-    const canvas = document.createElement('canvas');
-    canvas.className = 'page-img';
-    canvas.style.display = 'none'; // ပုံမပေါ်ခင် ဖျောက်ထားမယ်
+    // Canvas အစား img tag ကို ပြန်သုံးမည်
+    const img = document.createElement('img');
+    img.className = 'page-img';
     
     // ပုံခိုးမရအောင် Right Click, Drag, Select အကုန်ပိတ်
-    canvas.oncontextmenu = () => false;
-    canvas.style.pointerEvents = 'none';
-    canvas.style.userSelect = 'none';
+    img.oncontextmenu = () => false;      // Right click ပိတ်
+    img.ondragstart = () => false;        // ဖိဆွဲတာ ပိတ်
+    img.style.pointerEvents = 'none';     // Click နှိပ်လို့မရအောင် ပိတ် (Long press download မရအောင်)
+    img.style.userSelect = 'none';        // Select မှတ်တာ ပိတ်
+    img.style.WebkitUserSelect = 'none';  // Mobile တွေအတွက်ပါ ပိတ်
+    img.style.WebkitTouchCallout = 'none';// iOS မှာ ဖိထားရင် Download ကျတာ ပိတ်
 
-    // ပုံကို နောက်ကွယ်ကနေ Load လုပ်ပြီး Canvas ပေါ်ဆွဲတင်မယ်
-    const img = new Image();
-    img.crossOrigin = "Anonymous"; // R2 ကနေ ယူဖို့ လိုအပ်သည်
+    // ပုံ URL ထည့်ခြင်း
     img.src = imgUrl(chapter.folder, i);
 
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0); // Canvas ပေါ် ပုံဆွဲချမည်
-
       skel.remove();
-      canvas.style.display = 'block';
       pageDiv.classList.add('loaded');
       loadedCount++;
       updateLoadProgress();
@@ -574,7 +568,7 @@ function renderPages(chapter) {
     badge.className = 'page-num-badge';
     badge.textContent = `${i} / ${totalPages}`;
     
-    pageDiv.appendChild(canvas);
+    pageDiv.appendChild(img);
     pageDiv.appendChild(badge);
     wrap.appendChild(pageDiv);
   }
