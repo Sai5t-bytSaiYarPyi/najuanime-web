@@ -386,20 +386,25 @@
             <option value="hiatus">⏸ Hiatus</option>
           </select>
         </div>
-        <!-- Title -->
+<!-- Title (Main / English) -->
         <div style="grid-column:span 2">
-          <label class="label">Title (မြန်မာ)</label>
-          <input type="text" id="m-title" placeholder="Solo Leveling">
+          <label class="label">Title (Main / English)</label>
+          <input type="text" id="m-title" placeholder="Vincent the Great">
         </div>
-        <!-- Title EN -->
+        <!-- Title (Myanmar) -->
         <div style="grid-column:span 2">
-          <label class="label">Title (English / Alt)</label>
-          <input type="text" id="m-titleEN" placeholder="Solo Leveling">
+          <label class="label">Title (မြန်မာ) <span style="color:#475569;font-weight:400">(ချန်လှပ်လို့ရ)</span></label>
+          <input type="text" id="m-titleMM" placeholder="ဗင်းဆင့်">
         </div>
         <!-- Author -->
         <div>
-          <label class="label">Author</label>
-          <input type="text" id="m-author" placeholder="Chugong">
+          <label class="label">Author / Creators</label>
+          <input type="text" id="m-author" placeholder="Pilwon & Houjae">
+        </div>
+        <!-- Scanlation -->
+        <div>
+          <label class="label">Scanlation Team <span style="color:#475569;font-weight:400">(ချန်လှပ်လို့ရ)</span></label>
+          <input type="text" id="m-scanlation" placeholder="NaJu">
         </div>
         <!-- Cover URL -->
         <div>
@@ -597,6 +602,7 @@ function renderManhwaList(list) {
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
           <span style="font-weight:700;font-size:14px">${m.title}</span>
+          ${m.titleMM ? `<span style="font-size:12px;color:#94a3b8;margin-right:4px">${m.titleMM}</span>` : ''}
           <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;color:${st.color};background:${st.bg};border:1px solid ${st.border}">${st.label}</span>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px">
@@ -653,7 +659,8 @@ function openAddManhwa() {
   editingId = '';
   document.getElementById('modalHeading').textContent = 'Manhwa အသစ်ထည့်မည်';
   document.getElementById('m-id').disabled = false;
-  ['m-id','m-title','m-titleEN','m-author','m-cover','m-desc'].forEach(id => document.getElementById(id).value = '');
+  // titleMM နဲ့ scanlation အသစ်ထည့်ထားတယ်
+  ['m-id','m-title','m-titleMM','m-author','m-scanlation','m-cover','m-desc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('m-status').value = 'ongoing';
   document.getElementById('modalMsg').style.display = 'none';
   document.getElementById('coverUploadStatus').style.display = 'none';
@@ -669,8 +676,9 @@ function openEditManhwa(id) {
   document.getElementById('m-id').value = m.id;
   document.getElementById('m-id').disabled = true;
   document.getElementById('m-title').value   = m.title   || '';
-  document.getElementById('m-titleEN').value = m.titleEN || '';
+  document.getElementById('m-titleMM').value = m.titleMM || ''; // မြန်မာခေါင်းစဉ်
   document.getElementById('m-author').value  = m.author  || '';
+  document.getElementById('m-scanlation').value = m.scanlation || ''; // Scanlation
   document.getElementById('m-cover').value   = m.cover   || '';
   document.getElementById('m-status').value  = m.status  || 'ongoing';
   document.getElementById('m-desc').value    = m.description || '';
@@ -687,10 +695,11 @@ async function saveManhwa() {
   const title = document.getElementById('m-title').value.trim();
   if (!id || !title) { showModalMsg('ID နဲ့ Title ထည့်ပါ', 'err'); return; }
 
-  const payload = {
+const payload = {
     id, title,
-    titleEN:     document.getElementById('m-titleEN').value.trim(),
+    titleMM:     document.getElementById('m-titleMM').value.trim(),
     author:      document.getElementById('m-author').value.trim(),
+    scanlation:  document.getElementById('m-scanlation').value.trim(),
     cover:       document.getElementById('m-cover').value.trim(),
     status:      document.getElementById('m-status').value,
     description: document.getElementById('m-desc').value.trim(),
