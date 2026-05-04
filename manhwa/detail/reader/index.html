@@ -509,11 +509,11 @@ function buildNav(chapters) {
   }
 }
 
-// ── Render pages ──────────────────────────────────────
+// ── Render pages (Anti-Inspect Canvas Method) ──
 function renderPages(chapter) {
-  const wrap     = document.getElementById('pagesWrap');
-  totalPages     = chapter.pageCount || 0;
-  loadedCount    = 0;
+  const wrap = document.getElementById('pagesWrap');
+  totalPages = chapter.pageCount || 0;
+  loadedCount = 0;
 
   if (!totalPages) {
     wrap.innerHTML = `<div style="text-align:center;padding:80px 20px;color:#64748b">
@@ -523,31 +523,43 @@ function renderPages(chapter) {
     return;
   }
 
-  // Generate image elements
   for (let i = 1; i <= totalPages; i++) {
     const pageDiv = document.createElement('div');
     pageDiv.className = 'page-wrap';
     pageDiv.id = `pg-${i}`;
 
-    // Skeleton placeholder (shown until image loads)
     const skel = document.createElement('div');
     skel.className = 'page-skeleton';
     pageDiv.appendChild(skel);
 
-    // Actual image
-    const img = document.createElement('img');
-    img.className = 'page-img';
-    img.loading   = 'lazy'; // browser-native lazy load
-    img.decoding  = 'async';
-    img.alt       = `Page ${i}`;
-    img.src       = imgUrl(chapter.folder, i);
+    // Canvas element တည်ဆောက်ခြင်း
+    const canvas = document.createElement('canvas');
+    canvas.className = 'page-img';
+    canvas.style.display = 'none'; // ပုံမပေါ်ခင် ဖျောက်ထားမယ်
+    
+    // ပုံခိုးမရအောင် Right Click, Drag, Select အကုန်ပိတ်
+    canvas.oncontextmenu = () => false;
+    canvas.style.pointerEvents = 'none';
+    canvas.style.userSelect = 'none';
+
+    // ပုံကို နောက်ကွယ်ကနေ Load လုပ်ပြီး Canvas ပေါ်ဆွဲတင်မယ်
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // R2 ကနေ ယူဖို့ လိုအပ်သည်
+    img.src = imgUrl(chapter.folder, i);
 
     img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0); // Canvas ပေါ် ပုံဆွဲချမည်
+
       skel.remove();
+      canvas.style.display = 'block';
       pageDiv.classList.add('loaded');
       loadedCount++;
       updateLoadProgress();
     };
+
     img.onerror = () => {
       skel.remove();
       pageDiv.classList.add('loaded');
@@ -558,13 +570,12 @@ function renderPages(chapter) {
       loadedCount++;
     };
 
-    // Page number badge
     const badge = document.createElement('div');
     badge.className = 'page-num-badge';
     badge.textContent = `${i} / ${totalPages}`;
-    pageDiv.appendChild(img);
+    
+    pageDiv.appendChild(canvas);
     pageDiv.appendChild(badge);
-
     wrap.appendChild(pageDiv);
   }
 }
@@ -653,6 +664,35 @@ window.addEventListener('scroll', handleScroll, { passive: true });
 
 // ── Init ──────────────────────────────────────────────
 load();
+
+// ── Anti-Scraping / Security Measures ──
+
+// 1. Right Click ပိတ်မယ်
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 2. Keyboard Shortcuts ပိတ်မယ် (F12, Ctrl+U, Ctrl+S, Ctrl+Shift+I/C/J)
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' || 
+    (e.ctrlKey && e.key === 'u') || 
+    (e.ctrlKey && e.key === 's') || 
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J'))
+  ) {
+    e.preventDefault();
+  }
+});
+
+// 3. DevTools ထောင်ချောက် (Inspect ဖွင့်ထားရင် Browser လေးသွားအောင်/ရပ်သွားအောင် လုပ်တာပါ)
+setInterval(function() {
+  const before = new Date().getTime();
+  debugger; // Inspect ဖွင့်ထားရင် ဒီနေရာမှာ လာရပ်နေပါလိမ့်မယ်
+  const after = new Date().getTime();
+  if (after - before > 100) {
+    // Inspect ဖွင့်ထားတယ်လို့ ယူဆပြီး page ကို ရှင်းပစ်လို့ရတယ် (ချန်လှပ်ထားလို့ရပါတယ်)
+    // document.body.innerHTML = "ခိုးမကူးပါနဲ့ဗျာ!";
+  }
+}, 1000);
+
 </script>
 </body>
 </html>
